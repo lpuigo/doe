@@ -62,6 +62,7 @@ func genWorksite(t *testing.T) Worksite {
 func TestMakeWorksite(t *testing.T) {
 	ws := genWorksite(t)
 
+	t.Logf("File : %s\n", ws.FileName())
 	jm := json.NewEncoder(os.Stdout)
 	jm.SetIndent("", "\t")
 	jm.Encode(ws)

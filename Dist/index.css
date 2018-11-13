@@ -1,0 +1,365 @@
+html, body {
+    /*font-family: Ubuntu, Calibri, sans-serif;*/
+    font-family: Calibri, sans-serif;
+    font-size: 14px;
+    height: 100%;
+    margin:0;
+    padding: 0;
+}
+
+p {
+    margin : 8px 0;
+}
+
+pre {
+    margin: 4px 0;
+}
+.lp_block {
+    padding: 8px 16px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.lp_block.tip {
+    background-color: #ecf8ff;
+    border-left: 5px solid #50bfff;
+}
+
+.lp_block.warning {
+    background-color: #fff6f7;
+    border-left: 5px solid #fe6c6f;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+/*.el-table .cell {*/
+
+/*}*/
+
+/*.el-table--scrollable-y .el-table__body-wrapper {*/
+/*height: calc(100vh - 120px);*/
+/*}*/
+/*
+    === Menu Header style ===
+ */
+.novagile {
+    background: #4abbbd;
+    color: white;
+}
+.header-menu-container {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header-menu-container .content {
+    margin: 0px 5px;
+}
+/*
+    === Message Box style ===
+ */
+.message {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.3em;
+}
+
+/*
+    === Project Table style ===
+ */
+.icon--right {
+    margin-left: .3em
+}
+
+.icon--left {
+    margin-right: .3em
+}
+
+.link {
+    cursor: pointer;
+    opacity: .7;
+    transition: opacity .2s ease;
+}
+
+.link:hover {
+    opacity: 1!important;
+}
+
+.novagile-light {
+    background: #a1e6e6;
+    color: #66696f;
+}
+.el-table--mini td, .el-table--mini th {
+    padding: 1px 0px;
+    font-size: 1em;
+}
+.el-table td, .el-table th {
+    padding: 1px 0px;
+    font-size: 1em;
+}
+.el-table .cell {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.3em;
+    padding-top: .3em;
+    padding-bottom: .3em;
+}
+.el-table .project-row-done {
+    background: #f8f8f8;
+    color: #adadad;
+}
+.el-table .project-row-outline {
+    background: #fef8e7;
+}
+.el-table .project-row-monitoring {
+    background: rgba(237, 252, 237, 0.59);
+}
+
+.low-risk {
+    color: #f29b00;
+}
+
+.high-risk {
+    color: #ff3200;
+}
+
+/* Workload Columns */
+.small-font {
+    font-size: 0.75em;
+    line-height: 0.9em;
+}
+
+.el-progress-bar__outer {
+    background-color: #cccccc;
+}
+
+.el-progress-bar__inner {
+    background-color: #51a825;
+}
+
+.progress-bar {
+    line-height: 1em;
+}
+.progress-bar.over-spent {
+    color: #DB2828;
+}
+
+.progress-bar.over-spent .el-progress-bar__inner {
+    background-color: #DB2828;
+}
+
+/*
+    === Edit Project Modal style ===
+ */
+.el-dialog__header {
+    background: #4abbbd;
+    color: white;
+    border-bottom: 1px solid #e1e4eb
+}
+
+.el-dialog__body {
+    padding: 5px 15px;
+}
+
+.form-row {
+    /*margin: 5px 5px;*/
+    padding: 8px 0;
+}
+
+.el-dialog__footer {
+    border-top: 1px solid #e1e4eb
+}
+
+.fluid-select {
+    display: block;
+}
+
+.fluid-input {
+    width: 100%;
+}
+
+.form-textarea .el-textarea__inner {
+    font-family: inherit;
+    line-height: 1.2em;
+}
+
+.el-dropdown-menu.el-popper {
+    max-height: 33vh;
+    overflow: auto;
+}
+
+/*
+    === Jira Stat Modal style ===
+ */
+.custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /*font-size: 14px;*/
+    padding-right: 8px;
+}
+.custom-tree-node .custom-node-name {
+    /*flex: 0 1 20%;*/
+}
+.custom-tree-node .custom-hours-row {
+    width: 55vw;
+}
+.custom-hours-row.reduce {
+    width: 45vw;
+}
+.custom-hours-row .hours-table {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1.3em;
+}
+.hours-table .hours-cell {
+    flex: 1 1 0;
+    text-align: center;
+    margin: 0px 1px;
+    padding: 3px;
+}
+.hours-table .hours-cell {
+    flex: 1 1 0;
+    text-align: center;
+    margin: 0px 1px;
+    padding: 3px;
+}
+
+.hours-cell.right {
+    text-align: right;
+}
+
+.hours-cell.large {
+    flex: 4 1 0;
+}
+
+/*
+    === Workload Schedule Modal style ===
+ */
+.workload-schedule {
+    height: 65vh;
+}
+
+.workload-schedule .el-aside {
+    width: 30%;
+    overflow: auto;
+}
+/*
+    === TimeLine Modal style ===
+ */
+.timeline {
+    height: 70vh;
+}
+
+.timeline .el-table .cell {
+    line-height: 1.3em;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.timeline .project-line {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    align-content: center;
+    width: 100%;
+    height: 16px;
+    margin: 0px 0px;
+    background: linear-gradient(to right, #ffffff 0%,#ffffff 49.95%, #e0e0e0 49.96%,#e0e0e0 50.04%,#ffffff 50.05%,#ffffff 100%)
+}
+
+.project-line .item {
+    flex:0 1 auto;
+    align-self: auto;
+    height: 100%;
+    /*text-align: center;*/
+    background-color: #DB2828;
+}
+
+
+.item.first {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+.item.last {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+
+.item.study {
+    height: 50%;
+    background-color: #9fe3e3;
+}
+.item.study.lead {
+    background-color: #f0e8a5;
+}
+.item.study.monitor {
+    background-color: #c0e6bc;
+}
+.item.study.done {
+    background-color: #e3e3e3;
+}
+
+
+.item.real {
+    background-color: #4abbbd;
+}
+.item.real.lead {
+    background-color: #ded159;
+}
+.item.real.monitor {
+    background-color: #9ecc99;
+}
+.item.real.done {
+    background-color: #bdbdbd;
+}
+
+
+.item.service {
+    background-color: #9fe3e3;
+}
+.item.service.lead {
+    background-color: #f0e8a5;
+}
+.item.service.monitor {
+    background-color: #c0e6bc;
+}
+.item.service.done {
+    background-color: #e3e3e3;
+}
+
+
+.item.pilot {
+    height: 50%;
+    background-color: #9fe3e3;
+}
+.item.pilot.lead {
+    background-color: #f0e8a5;
+}
+.item.pilot.monitor {
+    background-color: #c0e6bc;
+}
+.item.pilot.done {
+    background-color: #e3e3e3;
+}
