@@ -17,13 +17,13 @@ func addError(w http.ResponseWriter, errmsg string, code int) string {
 	return res
 }
 
-func GetPtf(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func GetWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.LogRequest("GetPtf")
+	logmsg := logger.LogRequest("GetWorkSites")
 	defer logger.LogService(time.Now(), &logmsg)
 
 	w.Header().Set("Content-Type", "application/json")
-	//mgr.GetPrjPtf(w)
+	mgr.GetWorkSites(w)
 	logmsg += logger.LogResponse(http.StatusOK)
 }
 

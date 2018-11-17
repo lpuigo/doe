@@ -71,8 +71,7 @@ func main() {
 	router := mux.NewRouter()
 	// Manager Routes
 	//TODO Remove
-	_ = withManager
-	router.HandleFunc("/ptf", withManager(route.GetPtf)).Methods("GET")
+	router.HandleFunc("/ptf", withManager(route.GetWorkSites)).Methods("GET")
 	router.HandleFunc("/ptf", withManager(route.CreatePrj)).Methods("POST")
 
 	// Static Files serving
