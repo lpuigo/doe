@@ -39,8 +39,9 @@ func NewTestRecord(text string, val int) *TestRecord {
 	return tr
 }
 
-func genTestPersister(t *testing.T, numrec int) (*Persister, map[int]int) {
-	trp := NewPersister(persistDir, 10*time.Millisecond)
+func genTestPersister(t *testing.T, numrec int, delay time.Duration) (*Persister, map[int]int) {
+	trp := NewPersister(persistDir)
+	trp.SetPersistDelay(delay)
 
 	if err := trp.CheckDirectory(); err != nil {
 		t.Fatal("checkDirectory return unexpected:", err)
@@ -81,7 +82,7 @@ func cleanTest(t *testing.T) {
 func TestNewPersister(t *testing.T) {
 	cleanTest(t)
 	numrec := 100
-	trp, index := genTestPersister(t, numrec)
+	trp, index := genTestPersister(t, numrec, 10*time.Millisecond)
 
 	if len(trp.records) != numrec {
 		t.Errorf("Persister records has unexpected length (expected %d): %d", numrec, len(trp.records))
@@ -101,7 +102,7 @@ func TestNewPersister(t *testing.T) {
 		}
 	}
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if len(trp.dirtyIds) != 0 {
 		t.Errorf("Persister dirtyIds has unexpected length (expected 0): %d", len(trp.records))
 	}
@@ -110,7 +111,7 @@ func TestNewPersister(t *testing.T) {
 func TestPersister_GetFilesList(t *testing.T) {
 	cleanTest(t)
 	numrec := 10
-	trp, index := genTestPersister(t, numrec)
+	trp, index := genTestPersister(t, numrec, 10*time.Millisecond)
 	time.Sleep(100 * time.Millisecond)
 	files, err := trp.GetFilesList()
 	if err != nil {

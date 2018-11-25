@@ -13,6 +13,10 @@ type Record struct {
 	marshall func(w io.Writer) error
 }
 
+func (r Record) Id() int {
+	return r.id
+}
+
 func (r *Record) SetId(id int) {
 	r.id = id
 }
@@ -34,6 +38,11 @@ func (r *Record) Persist(path string) error {
 	}
 	r.dirty = false
 	return nil
+}
+
+func (r Record) Remove(path string) error {
+	file := filepath.Join(path, fmt.Sprintf("%06d.json", r.id))
+	return os.Remove(file)
 }
 
 func NewRecord(marshall func(w io.Writer) error) *Record {
