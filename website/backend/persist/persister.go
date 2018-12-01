@@ -28,7 +28,7 @@ type Persister struct {
 	records   map[int]Recorder
 	nextId    int
 
-	mut          sync.RWMutex
+	mut          sync.Mutex
 	dirtyIds     []int
 	persistTimer *time.Timer
 }
@@ -119,20 +119,21 @@ func (p *Persister) markDirty(r Recorder) {
 }
 
 // Remove removes the given recorder from the persister (pertaining persisted file is deleted)
-func (p *Persister) Remove(r Recorder) {
+func (p *Persister) Remove(r Recorder) error {
 	id := r.Id()
 	if _, ok := p.records[id]; !ok {
-		panic("persister does not contains given record")
+		return fmt.Errorf("persister does not contains given record")
 	}
 	p.mut.Lock()
 	defer p.mut.Unlock()
 	go func(dr Recorder) {
 		err := dr.Remove(p.directory)
 		if err != nil {
-			log.Errorf("error removing record ID %d: %v\n", id, err)
+			log.Errorf("error removing record Id %d: %v\n", id, err)
 		}
 	}(r)
 	delete(p.records, id)
+	return nil
 }
 
 // PersistAll immediatly persist all contained recorder(persistance delay is ignored)

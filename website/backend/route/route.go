@@ -23,7 +23,11 @@ func GetWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer logger.LogService(time.Now(), &logmsg)
 
 	w.Header().Set("Content-Type", "application/json")
-	mgr.GetWorkSites(w)
+	err := mgr.GetWorkSites(w)
+	if err != nil {
+		logmsg += addError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	logmsg += logger.LogResponse(http.StatusOK)
 }
 

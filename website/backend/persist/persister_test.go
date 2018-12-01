@@ -39,6 +39,23 @@ func NewTestRecord(text string, val int) *TestRecord {
 	return tr
 }
 
+func NewTestRecordFromFile(file string) (tr *TestRecord, err error) {
+	tr = NewTestRecord("empty", -1)
+	err = tr.SetIdFromFile(file)
+	if err != nil {
+		tr = nil
+		return
+	}
+	f, err := os.Open(file)
+	if err != nil {
+		tr = nil
+		return
+	}
+	defer f.Close()
+	err = json.NewDecoder(f).Decode(tr)
+	return
+}
+
 func genTestPersister(t *testing.T, numrec int, delay time.Duration) (*Persister, map[int]int) {
 	trp := NewPersister(persistDir)
 	trp.SetPersistDelay(delay)
@@ -50,7 +67,7 @@ func genTestPersister(t *testing.T, numrec int, delay time.Duration) (*Persister
 	res := make(chan struct{ id, val int }, numrec)
 	for i := 1; i <= numrec; i++ {
 		go func(n int) {
-			id := trp.Add(NewTestRecord(fmt.Sprintf("record %d", n), n))
+			id := trp.Add(NewTestRecord(fmt.Sprintf("record number %d", n), n))
 			res <- struct{ id, val int }{id: id, val: n}
 		}(i)
 	}
@@ -122,14 +139,52 @@ func TestPersister_GetFilesList(t *testing.T) {
 	}
 	var id int
 	format := filepath.Join(persistDir, "%d.json")
-	for _, f := range files {
-		_, err := fmt.Sscanf(f, format, &id)
+	for _, file := range files {
+		_, err := fmt.Sscanf(file, format, &id)
 		if err != nil {
 			t.Fatal("sscanf returns", err)
+		}
+		tr := getRecordFromFile(t, file)
+		if tr.Value != index[id] {
+			t.Errorf("file '%s' has unexpected value %d (expected %d)\n", filepath.Base(file), tr.Value, index[id])
 		}
 		delete(index, id)
 	}
 	if len(index) != 0 {
 		t.Errorf("some id were not found: %v", index)
+	}
+}
+
+func getRecordFromFile(t *testing.T, file string) TestRecord {
+	var tr TestRecord
+	f, err := os.Open(file)
+	if err != nil {
+		t.Fatal("could not open file:", err)
+	}
+	defer f.Close()
+	err = json.NewDecoder(f).Decode(&tr)
+	if err != nil {
+		t.Fatalf("could not decode '%s': %v", filepath.Base(file), err)
+	}
+	return tr
+}
+
+func TestPersister_LoadRecordFromFileList(t *testing.T) {
+	cleanTest(t)
+	numrec := 10
+	trp, index := genTestPersister(t, numrec, 10*time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
+	files, err := trp.GetFilesList()
+	if err != nil {
+		t.Fatal("GetFilesList returns unexpected error:", err)
+	}
+	for _, file := range files {
+		rt, err := NewTestRecordFromFile(file)
+		if err != nil {
+			t.Fatalf("could not load TestRecord from file '%s': %v\n", filepath.Base(file), err)
+		}
+		if rt.Value != index[rt.id] {
+			t.Errorf("record has unexpected value %d (%d expected)", rt.Value, index[rt.id])
+		}
 	}
 }

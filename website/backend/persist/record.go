@@ -48,3 +48,8 @@ func (r Record) Remove(path string) error {
 func NewRecord(marshall func(w io.Writer) error) *Record {
 	return &Record{marshall: marshall}
 }
+
+func (r *Record) SetIdFromFile(file string) error {
+	_, err := fmt.Sscanf(filepath.Base(file), "%d.json", &r.id)
+	return err
+}
