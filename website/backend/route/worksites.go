@@ -25,6 +25,31 @@ func GetWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg += logger.LogResponse(http.StatusOK)
 }
 
+func GetWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.LogRequest("GetWorkSite")
+	defer logger.LogService(time.Now(), &logmsg)
+
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	wsrid, err := strconv.Atoi(vars["wsid"])
+	if err != nil {
+		logmsg += addError(w, "mis-formatted WorkSite id '"+vars["wsid"]+"'", http.StatusBadRequest)
+		return
+	}
+	wsr := mgr.Worksites.GetById(wsrid)
+	if wsr == nil {
+		logmsg += addError(w, fmt.Sprintf("workSite with id %d does not exist", wsrid), http.StatusNotFound)
+		return
+	}
+	err = wsr.Marshall(w)
+	if err != nil {
+		logmsg += addError(w, "could not marshall WorkSite. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg += logger.LogResponseInfo(fmt.Sprintf("workSite Id %d returned", wsr.Id), http.StatusOK)
+}
+
 func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.LogRequest("CreateWorkSite")
@@ -50,11 +75,15 @@ func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg += logger.LogResponseInfo(fmt.Sprintf("New WorkSite Id %d added", wsr.Id), http.StatusCreated)
 }
 
-func UpdateWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func UpdateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.LogRequest("UpdateWorkSites")
+	logmsg := logger.LogRequest("UpdateWorkSite")
 	defer logger.LogService(time.Now(), &logmsg)
 
+	if r.Body == nil {
+		logmsg += addError(w, "request WorkSite missing", http.StatusBadRequest)
+		return
+	}
 	vars := mux.Vars(r)
 	wsrid, err := strconv.Atoi(vars["wsid"])
 	if err != nil {
@@ -83,9 +112,9 @@ func UpdateWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg += logger.LogResponseInfo(fmt.Sprintf("WorkSite with id %d updated", wsrid), http.StatusOK)
 }
 
-func DeleteWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func DeleteWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.LogRequest("DeleteWorkSites")
+	logmsg := logger.LogRequest("DeleteWorkSite")
 	defer logger.LogService(time.Now(), &logmsg)
 
 	vars := mux.Vars(r)
