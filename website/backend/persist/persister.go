@@ -58,6 +58,14 @@ func (p Persister) CheckDirectory() error {
 	return nil
 }
 
+// HasId returns true if persister contains a record with given id, false otherwise
+func (p Persister) HasId(id int) bool {
+	if _, ok := p.records[id]; ok {
+		return true
+	}
+	return false
+}
+
 // GetFilesList returns all the record files contained in persister directory (User class is responsible to Load the record)
 func (p Persister) GetFilesList() (list []string, err error) {
 	err = filepath.Walk(p.directory, func(path string, info os.FileInfo, err error) error {
@@ -76,7 +84,7 @@ func (p Persister) GetFilesList() (list []string, err error) {
 	return
 }
 
-// Add adds the given Record to the Persister, triggers Persit mechanism and returns its (new) id
+// Add adds the given Record to the Persister, assigns it a new id, triggers Persit mechanism and returns its (new) id
 func (p *Persister) Add(r Recorder) int {
 	p.mut.Lock()
 	defer p.mut.Unlock()

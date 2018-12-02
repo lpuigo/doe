@@ -10,7 +10,7 @@ import (
 )
 
 type WorkSitesPersister struct {
-	*sync.RWMutex
+	sync.RWMutex
 	persister *persist.Persister
 
 	workSites []*WorkSiteRecord
