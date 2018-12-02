@@ -2,6 +2,7 @@ package model
 
 type Order struct {
 	Ref      string
+	Comment  string
 	Troncons []Troncon
 }
 

@@ -8,6 +8,7 @@ type Troncon struct {
 	NeedSignature bool
 	InstallDate   string
 	MeasureDate   string
+	Comment       string
 }
 
 func MakeTroncon(ref string, pb PT, nbRacco, nbFiber int, needsign bool) Troncon {

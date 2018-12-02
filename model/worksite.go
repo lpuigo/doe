@@ -5,6 +5,7 @@ type Worksite struct {
 	OrderDate string
 	Pmz       PT
 	Pa        PT
+	Comment   string
 	Orders    []Order
 }
 
