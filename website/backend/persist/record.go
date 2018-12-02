@@ -53,3 +53,7 @@ func (r *Record) SetIdFromFile(file string) error {
 	_, err := fmt.Sscanf(filepath.Base(file), "%d.json", &r.id)
 	return err
 }
+
+func (r Record) Marshall(w io.Writer) error {
+	return r.marshall(w)
+}

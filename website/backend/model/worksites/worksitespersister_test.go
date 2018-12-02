@@ -14,14 +14,16 @@ const (
 	numWS   = 10
 )
 
-func genWorksite(ref string) *model.Worksite {
+func genWorksite(ref string) *WorkSiteRecord {
+	wsr := NewWorkSiteRecord()
 	ws := model.MakeWorksite(
 		ref,
 		"2018-11-30",
 		model.MakePT("PMZ-"+ref, "PT-007605", "02, Rue Kléber, CROIX"),
 		model.MakePT("PA-"+ref, "PT-008020", "02, Rue Jean Jaurès, CROIX"),
 	)
-	return &ws
+	wsr.Worksite = &ws
+	return wsr
 }
 
 func cleanTest(t *testing.T) {

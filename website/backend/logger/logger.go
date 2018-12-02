@@ -30,9 +30,13 @@ func LogResponse(resp int) string {
 }
 
 func LogInfo(info string) string {
-	return `request="` + info + `"`
+	return ` info="` + info + `"`
+}
+
+func LogResponseInfo(info string, resp int) string {
+	return LogResponse(resp) + LogInfo(info)
 }
 
 func LogService(t time.Time, msg *string) {
-	log.Printf("%s service_time=%.3fms)\n", *msg, float64(time.Since(t).Nanoseconds())/1000000)
+	log.Printf("%s service_time=%.3fms\n", *msg, float64(time.Since(t).Nanoseconds())/1000000)
 }

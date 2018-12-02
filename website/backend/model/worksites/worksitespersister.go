@@ -63,18 +63,30 @@ func (wsp WorkSitesPersister) GetAll(keep func(ws *model.Worksite) bool) []*Work
 	return ws
 }
 
-// Add adds the given WorkSite to the WorkSitesPersister and return its (new) WorkSiteRecord
-func (wsp *WorkSitesPersister) Add(ws *model.Worksite) *WorkSiteRecord {
+// Add adds the given WorkSiteRecord to the WorkSitesPersister and return its (new) WorkSiteRecord
+func (wsp *WorkSitesPersister) Add(wsr *WorkSiteRecord) *WorkSiteRecord {
 	wsp.Lock()
 	defer wsp.Unlock()
 
 	// give the record its new ID
-	wsr := NewWorkSiteRecord()
-	wsr.Worksite = ws
 	wsp.persister.Add(wsr)
 	wsr.Id = wsr.GetId()
 	wsp.workSites = append(wsp.workSites, wsr)
 	return wsr
+}
+
+// Update updates the given WorkSiteRecord
+func (wsp *WorkSitesPersister) Update(uwsr *WorkSiteRecord) error {
+	wsp.RLock()
+	defer wsp.RUnlock()
+
+	owsr := wsp.GetById(uwsr.Id)
+	if owsr == nil {
+		return fmt.Errorf("id not found")
+	}
+	owsr.Worksite = uwsr.Worksite
+	wsp.persister.MarkDirty(owsr)
+	return nil
 }
 
 // Remove removes the given WorkSiteRecord from the WorkSitesPersister (pertaining file is deleted)
@@ -101,4 +113,14 @@ func (wsp WorkSitesPersister) findIndex(wsr *WorkSiteRecord) int {
 		}
 	}
 	return -1
+}
+
+// GetById returns the WorkSiteRecord with given Id (or nil if Id not found)
+func (wsp WorkSitesPersister) GetById(id int) *WorkSiteRecord {
+	for _, wsr := range wsp.workSites {
+		if wsr.Id == id {
+			return wsr
+		}
+	}
+	return nil
 }

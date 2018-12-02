@@ -3,6 +3,7 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/lpuig/ewin/doe/model"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	"io"
 )
@@ -26,5 +27,5 @@ func NewManager(worsitesDir string) (*Manager, error) {
 }
 
 func (m Manager) GetWorkSites(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetAll())
+	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
 }

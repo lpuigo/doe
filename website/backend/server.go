@@ -70,9 +70,10 @@ func main() {
 
 	router := mux.NewRouter()
 	// Manager Routes
-	//TODO Remove
-	router.HandleFunc("/ptf", withManager(route.GetWorkSites)).Methods("GET")
-	router.HandleFunc("/ptf", withManager(route.CreatePrj)).Methods("POST")
+	router.HandleFunc("/api/worksites", withManager(route.GetWorkSites)).Methods("GET")
+	router.HandleFunc("/api/worksites", withManager(route.CreateWorkSite)).Methods("POST")
+	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withManager(route.UpdateWorkSites)).Methods("PUT")
+	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withManager(route.DeleteWorkSites)).Methods("DELETE")
 
 	// Static Files serving
 	router.PathPrefix(conf.AssetsRoot).Handler(http.StripPrefix(conf.AssetsRoot, http.FileServer(http.Dir(conf.AssetsDir))))
