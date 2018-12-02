@@ -72,6 +72,7 @@ func (wsp *WorkSitesPersister) Add(ws *model.Worksite) *WorkSiteRecord {
 	wsr := NewWorkSiteRecord()
 	wsr.Worksite = ws
 	wsp.persister.Add(wsr)
+	wsr.Id = wsr.GetId()
 	wsp.workSites = append(wsp.workSites, wsr)
 	return wsr
 }
@@ -95,7 +96,7 @@ func (wsp *WorkSitesPersister) Remove(wsr *WorkSiteRecord) error {
 
 func (wsp WorkSitesPersister) findIndex(wsr *WorkSiteRecord) int {
 	for i, rec := range wsp.workSites {
-		if rec.Id() == wsr.Id() {
+		if rec.GetId() == wsr.GetId() {
 			return i
 		}
 	}

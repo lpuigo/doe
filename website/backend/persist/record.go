@@ -13,7 +13,7 @@ type Record struct {
 	marshall func(w io.Writer) error
 }
 
-func (r Record) Id() int {
+func (r Record) GetId() int {
 	return r.id
 }
 

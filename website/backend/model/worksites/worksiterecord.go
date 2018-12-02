@@ -25,11 +25,6 @@ func NewWorkSiteRecord() *WorkSiteRecord {
 // NewWorkSiteRecordFromFile returns a WorkSiteRecord populated from the given file
 func NewWorkSiteRecordFromFile(file string) (wsr *WorkSiteRecord, err error) {
 	wsr = NewWorkSiteRecord()
-	err = wsr.SetIdFromFile(file)
-	if err != nil {
-		wsr = nil
-		return
-	}
 	f, err := os.Open(file)
 	if err != nil {
 		wsr = nil
@@ -37,5 +32,10 @@ func NewWorkSiteRecordFromFile(file string) (wsr *WorkSiteRecord, err error) {
 	}
 	defer f.Close()
 	err = json.NewDecoder(f).Decode(wsr)
+	if err != nil {
+		wsr = nil
+		return
+	}
+	wsr.SetId(wsr.Id)
 	return
 }

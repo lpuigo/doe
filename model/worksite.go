@@ -1,6 +1,7 @@
 package model
 
 type Worksite struct {
+	Id        int
 	Ref       string
 	OrderDate string
 	Pmz       PT

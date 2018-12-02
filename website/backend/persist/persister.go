@@ -10,7 +10,7 @@ import (
 )
 
 type Recorder interface {
-	Id() int
+	GetId() int
 	SetId(id int)
 	Dirty()
 	Persist(path string) error
@@ -99,14 +99,14 @@ func (p *Persister) Add(r Recorder) int {
 
 // Load adds the given Record to the Persister
 func (p *Persister) Load(r Recorder) {
-	if _, ok := p.records[r.Id()]; ok {
-		panic(fmt.Sprintf("persister already contains given record with Id %d", r.Id()))
+	if _, ok := p.records[r.GetId()]; ok {
+		panic(fmt.Sprintf("persister already contains given record with GetId %d", r.GetId()))
 	}
 	p.mut.Lock()
 	defer p.mut.Unlock()
-	p.records[r.Id()] = r
-	if p.nextId <= r.Id() {
-		p.nextId = r.Id() + 1
+	p.records[r.GetId()] = r
+	if p.nextId <= r.GetId() {
+		p.nextId = r.GetId() + 1
 	}
 }
 
@@ -118,17 +118,17 @@ func (p *Persister) MarkDirty(r Recorder) {
 }
 
 func (p *Persister) markDirty(r Recorder) {
-	if _, ok := p.records[r.Id()]; !ok {
+	if _, ok := p.records[r.GetId()]; !ok {
 		panic("persister does not contains given record")
 	}
 	r.Dirty()
-	p.dirtyIds = append(p.dirtyIds, r.Id())
+	p.dirtyIds = append(p.dirtyIds, r.GetId())
 	p.triggerPersist()
 }
 
 // Remove removes the given recorder from the persister (pertaining persisted file is deleted)
 func (p *Persister) Remove(r Recorder) error {
-	id := r.Id()
+	id := r.GetId()
 	if _, ok := p.records[id]; !ok {
 		return fmt.Errorf("persister does not contains given record")
 	}
@@ -137,7 +137,7 @@ func (p *Persister) Remove(r Recorder) error {
 	go func(dr Recorder) {
 		err := dr.Remove(p.directory)
 		if err != nil {
-			log.Errorf("error removing record Id %d: %v\n", id, err)
+			log.Errorf("error removing record GetId %d: %v\n", id, err)
 		}
 	}(r)
 	delete(p.records, id)
@@ -160,7 +160,7 @@ func (p *Persister) PersistAll(r Recorder) {
 		go func(pr Recorder) {
 			err := r.Persist(p.directory)
 			if err != nil {
-				log.Errorf("error persisting record ID %d: %v\n", r.Id(), err)
+				log.Errorf("error persisting record ID %d: %v\n", r.GetId(), err)
 			}
 			_ = <-token
 		}(r)
@@ -202,7 +202,7 @@ func (p *Persister) persist() {
 		go func(pr Recorder) {
 			err := pr.Persist(p.directory)
 			if err != nil {
-				log.Errorf("error persisting record ID %d: %v\n", pr.Id(), err)
+				log.Errorf("error persisting record ID %d: %v\n", pr.GetId(), err)
 			}
 			_ = <-token
 		}(r)

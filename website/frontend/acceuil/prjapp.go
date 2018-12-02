@@ -60,7 +60,7 @@ func NewMainPageModel() *MainPageModel {
 //
 //func (m *MainPageModel) ProcessEditedProject(p *fm.Project) {
 //	m.EditedProject = p
-//	if p.Id >= 0 {
+//	if p.GetId >= 0 {
 //		go m.callUpdatePrj(p)
 //	} else {
 //		go m.callCreatePrj(p)
@@ -69,7 +69,7 @@ func NewMainPageModel() *MainPageModel {
 //
 //func (m *MainPageModel) ProcessDeleteProject(p *fm.Project) {
 //	m.EditedProject = p
-//	if m.EditedProject.Id >= 0 {
+//	if m.EditedProject.GetId >= 0 {
 //		go m.callDeletePrj(m.EditedProject)
 //	}
 //}
@@ -130,7 +130,7 @@ func NewMainPageModel() *MainPageModel {
 //}
 //
 //func (m *MainPageModel) callUpdatePrj(uprj *fm.Project) {
-//	req := xhr.NewRequest("PUT", "/ptf/"+strconv.Itoa(uprj.Id))
+//	req := xhr.NewRequest("PUT", "/ptf/"+strconv.Itoa(uprj.GetId))
 //	req.Timeout = tools.TimeOut
 //	req.ResponseType = xhr.JSON
 //	err := req.Send(json.Stringify(uprj))
@@ -167,7 +167,7 @@ func NewMainPageModel() *MainPageModel {
 //}
 //
 //func (m *MainPageModel) callDeletePrj(dprj *fm.Project) {
-//	req := xhr.NewRequest("DELETE", "/ptf/"+strconv.Itoa(dprj.Id))
+//	req := xhr.NewRequest("DELETE", "/ptf/"+strconv.Itoa(dprj.GetId))
 //	req.Timeout = tools.TimeOut
 //	req.ResponseType = xhr.JSON
 //	err := req.Send(nil)
@@ -187,7 +187,7 @@ func NewMainPageModel() *MainPageModel {
 //
 //func (m *MainPageModel) deletePrj(dprj *fm.Project) {
 //	for i, p := range m.Projects {
-//		if p.Id == dprj.Id {
+//		if p.GetId == dprj.GetId {
 //			m.EditedProject = nil
 //			m.Projects = append(m.Projects[:i], m.Projects[i+1:]...)
 //			break

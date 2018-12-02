@@ -66,8 +66,8 @@ func TestNewWorkSitesPersist_Empty(t *testing.T) {
 		t.Fatalf("WorkSites array has unexpected length %d (expected %d)", len(wsp.workSites), numWS)
 	}
 
-	if wsr.Id() != numWS-1 {
-		t.Fatalf("last added WorkSitesRecord has unexpected id %d (expected %d)", wsr.Id(), numWS-1)
+	if wsr.GetId() != numWS-1 {
+		t.Fatalf("last added WorkSitesRecord has unexpected id %d (expected %d)", wsr.GetId(), numWS-1)
 	}
 
 	var id int
@@ -107,8 +107,8 @@ func TestWorkSitesPersister_LoadDirectory(t *testing.T) {
 	}
 	for i, wsr := range wslist {
 		id := getId(t, wsr)
-		if id != wsr.Id()+1 {
-			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected Id %d (expected %d)", i, wsr.Ref, id, wsr.Id()+1)
+		if id != wsr.GetId()+1 {
+			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected GetId %d (expected %d)", i, wsr.Ref, id, wsr.GetId()+1)
 		}
 	}
 }
@@ -140,8 +140,8 @@ func TestWorkSitesPersister_Remove(t *testing.T) {
 
 	for i, wsr := range wslist {
 		id := getId(t, wsr)
-		if id != wsr.Id()+1 {
-			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected Id %d (expected %d)", i, wsr.Ref, id, wsr.Id()+1)
+		if id != wsr.GetId()+1 {
+			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected GetId %d (expected %d)", i, wsr.Ref, id, wsr.GetId()+1)
 		}
 	}
 }
@@ -166,8 +166,8 @@ func TestWorkSitesPersister_Add(t *testing.T) {
 
 	for i, wsr := range wslist {
 		id := getId(t, wsr)
-		if id != wsr.Id()+1 {
-			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected Id %d (expected %d)", i, wsr.Ref, id, wsr.Id()+1)
+		if id != wsr.GetId()+1 {
+			t.Fatalf("WorkSiteRecord (Pos %d) Ref '%s' has unexpected GetId %d (expected %d)", i, wsr.Ref, id, wsr.GetId()+1)
 		}
 	}
 }

@@ -50,5 +50,5 @@ func CreatePrj(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	//json.NewEncoder(w).Encode(fm.CloneBEProject(ptfPrj, hasStat))
-	logmsg += logger.LogInfo(fmt.Sprintf("New project Id %d added (%d)", 10, http.StatusCreated))
+	logmsg += logger.LogInfo(fmt.Sprintf("New project GetId %d added (%d)", 10, http.StatusCreated))
 }
