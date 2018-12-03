@@ -30,7 +30,9 @@
             </el-header>
 
             <el-main style="height:100%; padding: 0px 10px;">
-                el-main
+
+                    <pre v-for="ws in Worksites">{{ws}}</pre>
+
             </el-main>
             <!--<el-footer>Footer</el-footer>-->
         </el-container>
@@ -38,10 +40,10 @@
 </body>
 
 
-<script src="/Assets/vue/2.5.16/vue.min.js"></script>
+<script src="/Assets/vue/2.5.17/vue.js"></script>
 <!--<script src="/Assets/vue/2.5.16/vue.js"></script>-->
-<script src="/Assets/element-ui/2.3.7/lib/index.js"></script>
-<script src="/Assets/element-ui/2.3.7/lib/umd/locale/en.js"></script>
+<script src="/Assets/element-ui/2.4.11/lib/index.js"></script>
+<script src="/Assets/element-ui/2.4.11/lib/umd/locale/en.js"></script>
 <script>
     ELEMENT.locale(ELEMENT.lang.en)
 </script>

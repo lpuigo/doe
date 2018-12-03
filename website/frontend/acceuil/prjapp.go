@@ -3,7 +3,11 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/prjptf/src/client/tools"
+	fm "github.com/lpuig/ewin/doe/website/frontend/frontmodel"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/goel/message"
+	"honnef.co/go/js/xhr"
+	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -15,11 +19,10 @@ func main() {
 		hvue.El("#app"),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
-		//hvue.Mounted(func(vm *hvue.VM) {
-		//	mpm := &MainPageModel{Object: vm.Object}
-		//	mpm.auditer = auditrules.NewAuditer().AddAuditRules()
-		//	mpm.GetPtf()
-		//}),
+		hvue.Mounted(func(vm *hvue.VM) {
+			mpm := &MainPageModel{Object: vm.Object}
+			mpm.GetWorkSites()
+		}),
 	)
 	js.Global.Get("Vue").Call("use", "ELEMENT.lang.en")
 
@@ -31,20 +34,23 @@ type MainPageModel struct {
 	*js.Object
 
 	VM *hvue.VM `js:"VM"`
+
+	Worksites []*fm.Worksite `js:"Worksites"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
+	mpm.Worksites = []*fm.Worksite{}
 	return mpm
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-//func (m *MainPageModel) GetPtf() {
-//	go m.callGetPtf()
-//}
-//
+func (m *MainPageModel) GetWorkSites() {
+	go m.callGetWorkSites()
+}
+
 //func (m *MainPageModel) EditProject(p *fm.Project) {
 //	m.EditedProject = p
 //	m.VM.Refs("ProjectEdit").Call("Show", p)
@@ -103,32 +109,30 @@ func NewMainPageModel() *MainPageModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-//func (m *MainPageModel) callGetPtf() {
-//	req := xhr.NewRequest("GET", "/ptf")
-//	req.Timeout = tools.LongTimeOut
-//	req.ResponseType = xhr.JSON
-//	//m.DispPrj = false
-//	err := req.Send(nil)
-//	if err != nil {
-//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-//		return
-//	}
-//	if req.Status != 200 {
-//		message.SetDuration(tools.WarningMsgDuration)
-//		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status), true)
-//		return
-//	}
-//	prjs := []*fm.Project{}
-//	req.Response.Call("forEach", func(item *js.Object) {
-//		p := fm.ProjectFromJS(item)
-//		p.SetAuditResult(m.auditer.Audit(p))
-//		prjs = append(prjs, p)
-//	})
-//	m.Projects = prjs
-//	//m.DispPrj = true
-//	//js.Global.Set("resp", m.Resp)
-//}
-//
+func (m *MainPageModel) callGetWorkSites() {
+	req := xhr.NewRequest("GET", "/api/worksites")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.SetDuration(tools.WarningMsgDuration)
+		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status), true)
+		return
+	}
+	worksites := []*fm.Worksite{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		ws := fm.WorksiteFromJS(item)
+		//p.SetAuditResult(m.auditer.Audit(p))
+		worksites = append(worksites, ws)
+	})
+	m.Worksites = worksites
+}
+
 //func (m *MainPageModel) callUpdatePrj(uprj *fm.Project) {
 //	req := xhr.NewRequest("PUT", "/ptf/"+strconv.Itoa(uprj.GetId))
 //	req.Timeout = tools.TimeOut
