@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitesummary"
 	fm "github.com/lpuig/ewin/doe/website/frontend/frontmodel"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/goel/message"
@@ -17,6 +18,7 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#app"),
+		hvue.Component("worksite-summary", worksitesummary.ComponentOptions()...),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {

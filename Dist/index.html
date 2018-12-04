@@ -36,7 +36,7 @@
                 </el-aside>
                 <el-main style="height:100%; padding: 0px 10px;">
                     <div style="height:100%;">
-                        <pre  v-for="ws in Worksites">{{ws}}</pre>
+                        <worksite-summary  v-for="ws in Worksites" :worksite=ws></worksite-summary>
                     </div>
                 </el-main>
             </el-container>

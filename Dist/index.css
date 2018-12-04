@@ -60,8 +60,8 @@ pre {
 /*.el-table--scrollable-y .el-table__body-wrapper {*/
 /*height: calc(100vh - 120px);*/
 /*}*/
-/*
-    === Menu Header style ===
+/* =====================================================================================================================
+   === Menu Header style
  */
 .ewin {
     background: #2e4e8a;
@@ -87,14 +87,64 @@ pre {
 .header-menu-container .content {
     margin: 0px 5px;
 }
-/*
-    === Message Box style ===
+
+/* =====================================================================================================================
+   === Message Box style
  */
 .message {
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.3em;
 }
+
+/* ====================================================================================================================
+   === Worksite Summary
+ */
+.wssum {
+    margin: 10px 0px;
+}
+
+.el-card__header {
+    padding: 3px 10px;
+}
+
+.el-card__body {
+    padding: 3px 10px;
+}
+
+.text {
+    font-size: 1em;
+}
+
+.text .smaller {
+    font-size: 0.80em;
+    color: #777777;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+
+.spread {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pt {
+    width: 45%;
+    margin: 5px;
+    border: 1px solid #ebeef5;
+    padding: 5px;
+    border-radius: 5px;
+    flex: 1 1 none;
+}
+
+.box-card {
+    width: 480px;
+}
+
 
 /*
     === Project Table style ===
