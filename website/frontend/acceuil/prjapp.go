@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitesummary"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/frontmodel"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/goel/message"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
 	"strconv"
 )
@@ -18,7 +18,7 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#app"),
-		hvue.Component("worksite-summary", worksitesummary.ComponentOptions()...),
+		hvue.Component("worksite-table", worksitetable.ComponentOptions()...),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -37,12 +37,15 @@ type MainPageModel struct {
 
 	VM *hvue.VM `js:"VM"`
 
-	Worksites []*fm.Worksite `js:"Worksites"`
+	Worksites      []*fm.Worksite `js:"worksites"`
+	Filter         string         `js:"filter"`
+	EditedWorksite *fm.Worksite   `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.Worksites = []*fm.Worksite{}
+	mpm.Filter = ""
 	return mpm
 }
 
@@ -53,11 +56,13 @@ func (m *MainPageModel) GetWorkSites() {
 	go m.callGetWorkSites()
 }
 
-//func (m *MainPageModel) EditProject(p *fm.Project) {
-//	m.EditedProject = p
-//	m.VM.Refs("ProjectEdit").Call("Show", p)
-//}
-//
+func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
+	m.EditedWorksite = ws
+	//m.VM.Refs("WorksiteEdit").Call("Show", ws)
+	message.SetDuration(tools.WarningMsgDuration)
+	message.InfoStr(m.VM, "Selected Worksite : "+ws.Ref, false)
+}
+
 //func (m *MainPageModel) CreateNewProject() {
 //	p := fm.NewProject()
 //	p.Status = business.DefaultStatus()

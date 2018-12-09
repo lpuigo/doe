@@ -3,6 +3,8 @@ package frontmodel
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"strconv"
 )
 
 type Troncon struct {
@@ -46,4 +48,19 @@ func (tr *Troncon) Copy(otr *Troncon) {
 	tr.InstallDate = otr.InstallDate
 	tr.MeasureDate = otr.MeasureDate
 	tr.Comment = otr.Comment
+}
+
+func (tr *Troncon) SearchInString() string {
+	res := ""
+
+	res += "T_Ref:" + tr.Ref + "\n"
+	res += "T_Pb:" + tr.Pb.SearchInString()
+	res += "T_NbRacco:" + strconv.Itoa(tr.NbRacco) + "\n"
+	res += "T_NbFiber:" + strconv.Itoa(tr.NbFiber) + "\n"
+	res += "T_NeedSignature:" + strconv.FormatBool(tr.NeedSignature) + "\n"
+	res += "T_InstallDate:" + date.DateString(tr.InstallDate) + "\n"
+	res += "T_MeasureDate:" + date.DateString(tr.MeasureDate) + "\n"
+	res += "T_Comment:" + tr.Comment + "\n"
+
+	return res
 }

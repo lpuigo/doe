@@ -20,7 +20,7 @@
                     </div>
                     <div>
                         <el-input
-                                placeholder="Filter"
+                                placeholder="filter"
                                 prefix-icon="el-icon-search"
                                 size="mini"
                                 clearable>
@@ -35,9 +35,16 @@
                     </div>
                 </el-aside>
                 <el-main style="height:100%; padding: 0px 10px;">
+                    <worksite-table
+                            :worksites="worksites"
+                            :filter="filter"
+                            @selected_worksite="EditWorksite"
+                    ></worksite-table>
+<!--
                     <div style="height:100%;">
-                        <worksite-summary  v-for="ws in Worksites" :worksite=ws></worksite-summary>
+                        <worksite-summary  v-for="ws in worksites" :worksite=ws></worksite-summary>
                     </div>
+-->
                 </el-main>
             </el-container>
 

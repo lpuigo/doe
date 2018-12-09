@@ -1,6 +1,9 @@
 package date
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 const TimeJSLayout string = "2006-01-02"
 
@@ -41,4 +44,12 @@ func MinMax(date ...string) (min, max string) {
 func TodayAfter(d int) string {
 	t := time.Now().Truncate(24 * time.Hour).Add(time.Duration(d*24) * time.Hour)
 	return t.Format(TimeJSLayout)
+}
+
+func DateString(v string) string {
+	if strings.Contains(v, "-") {
+		d := strings.Split(v, "-")
+		return d[2] + "/" + d[1] + "/" + d[0]
+	}
+	return "-"
 }

@@ -4,6 +4,8 @@ type Worksite struct {
 	Id        int
 	Ref       string
 	OrderDate string
+	City      string
+	Status    string
 	Pmz       PT
 	Pa        PT
 	Comment   string

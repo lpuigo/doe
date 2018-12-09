@@ -32,3 +32,11 @@ func (pt *PT) Copy(opt *PT) {
 	pt.RefPt = opt.RefPt
 	pt.Address = opt.Address
 }
+
+func (pt *PT) SearchInString() string {
+	res := ""
+	res += "Pt_Ref:" + pt.Ref + "\n"
+	res += "Pt_RefPt:" + pt.RefPt + "\n"
+	res += "Pt_Address:" + pt.Address + "\n"
+	return res
+}
