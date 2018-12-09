@@ -147,7 +147,7 @@ pre {
 
 
 /*
-    === Project Table style ===
+    === Worksite Table style ===
  */
 .icon--right {
     margin-left: .3em
@@ -186,15 +186,15 @@ pre {
     padding-top: .3em;
     padding-bottom: .3em;
 }
-.el-table .project-row-done {
+.el-table .worksite-row-done {
     background: #f8f8f8;
     color: #adadad;
 }
-.el-table .project-row-outline {
-    background: #fef8e7;
+.el-table .worksite-row-rework {
+    background: #fff1db;
 }
-.el-table .project-row-monitoring {
-    background: rgba(237, 252, 237, 0.59);
+.el-table .worksite-row-new {
+    background: #ffffff;
 }
 
 .low-risk {

@@ -3,7 +3,9 @@ package worksitetable
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	fm "github.com/lpuig/ewin/doe/website/frontend/frontmodel"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable/worksitedetail"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -23,7 +25,8 @@ func Register() {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		//hvue.Component("project-progress-bar", wl_progress_bar.ComponentOptions()...),
+		hvue.Component("worksite-info", worksiteinfo.ComponentOptions()...),
+		hvue.Component("worksite-detail", worksitedetail.ComponentOptions()...),
 		hvue.Props("worksites", "filter"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteTableModel(vm)
@@ -73,35 +76,36 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Event Related Methods
 
-func (wtm *WorksiteTableModel) SelectRow(vm *hvue.VM, prj *fm.Worksite, event *js.Object) {
-	vm.Emit("selected_worksite", prj)
+func (wtm *WorksiteTableModel) SelectRow(vm *hvue.VM, ws *fm.Worksite, event *js.Object) {
+	vm.Emit("selected_worksite", ws)
 }
 
-func (wtm *WorksiteTableModel) SetSelectedWorksite(nw *fm.Worksite) {
-	if nw.Object == nil { // this can happen when Worksites props gets updated
+func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
+	if nws.Object == nil { // this can happen when Worksites props gets updated
 		return
 	}
-	wtm.SelectedWorksite = nw
-	wtm.VM.Emit("update:selected_worksite", nw)
+	wtm.SelectedWorksite = nws
+	wtm.VM.Emit("update:selected_worksite", nws)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Formatting Related Methods
 
 func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
-	//ws := &fm.Worksite{Object: rowInfo.Get("row")}
+	ws := &fm.Worksite{Object: rowInfo.Get("row")}
 	var res string = ""
-	// TODO Add Worksite Status
-	//switch ws.Status {
-	//case "6 - Done", "0 - Lost":
-	//	res = "worksite-row-done"
-	//case "5 - Monitoring":
-	//	res = "worksite-row-monitoring"
-	//case "1 - Candidate", "2 - Outlining":
-	//	res = "worksite-row-outline"
-	//default:
-	//	res = ""
-	//}
+	switch ws.Status {
+	case "Done":
+		res = "worksite-row-done"
+	//case "InProgress":
+	//	res = "worksite-row-inprogress"
+	case "Rework":
+		res = "worksite-row-rework"
+	case "New":
+		res = "worksite-row-new"
+	default:
+		res = ""
+	}
 	return res
 }
 
@@ -140,6 +144,14 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 			fa = "<Vide>"
 		}
 		res = append(res, elements.NewValText(a, fa+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
+
+func (wtm *WorksiteTableModel) FilteredStatusValue() []string {
+	res := []string{
+		"InProgress",
+		"New",
 	}
 	return res
 }

@@ -1,4 +1,4 @@
-package frontmodel
+package model
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -51,9 +51,7 @@ func (tr *Troncon) Copy(otr *Troncon) {
 }
 
 func (tr *Troncon) SearchInString() string {
-	res := ""
-
-	res += "T_Ref:" + tr.Ref + "\n"
+	res := "T_Ref:" + tr.Ref + "\n"
 	res += "T_Pb:" + tr.Pb.SearchInString()
 	res += "T_NbRacco:" + strconv.Itoa(tr.NbRacco) + "\n"
 	res += "T_NbFiber:" + strconv.Itoa(tr.NbFiber) + "\n"

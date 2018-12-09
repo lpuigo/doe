@@ -1,4 +1,4 @@
-package frontmodel
+package model
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -37,8 +37,7 @@ func (o *Order) Copy(oo *Order) {
 }
 
 func (o *Order) SearchInString() string {
-	res := ""
-	res += "O_Ref" + o.Ref + "\n"
+	res := "O_Ref" + o.Ref + "\n"
 	res += "O_Comment" + o.Comment + "\n"
 
 	for _, t := range o.Troncons {

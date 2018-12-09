@@ -1,4 +1,4 @@
-package frontmodel
+package model
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -34,8 +34,7 @@ func (pt *PT) Copy(opt *PT) {
 }
 
 func (pt *PT) SearchInString() string {
-	res := ""
-	res += "Pt_Ref:" + pt.Ref + "\n"
+	res := "Pt_Ref:" + pt.Ref + "\n"
 	res += "Pt_RefPt:" + pt.RefPt + "\n"
 	res += "Pt_Address:" + pt.Address + "\n"
 	return res

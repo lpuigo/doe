@@ -1,8 +1,9 @@
-package frontmodel
+package model
 
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"strings"
 )
 
@@ -84,19 +85,28 @@ func (ws *Worksite) Contains(str string) bool {
 }
 
 func (ws *Worksite) SearchInString() string {
-	res := ""
 	//res += "Id:" Skipped on purpose
-	res += "Ref:" + ws.Ref + "\n"
-	res += "OrderDate:" + ws.Ref + "\n"
+	res := "Ref:" + ws.Ref + "\n"
+	res += "OrderDate:" + date.DateString(ws.OrderDate) + "\n"
 	res += "City:" + ws.City + "\n"
 	res += "Status:" + ws.Status + "\n"
-	res += "Pmz:" + ws.Ref + "\n"
-	res += "Pa:" + ws.Ref + "\n"
+	res += "Pmz:" + ws.Pmz.SearchInString()
+	res += "Pa:" + ws.Pa.SearchInString()
 	res += "Comment:" + ws.Ref + "\n"
-	res += "Orders:" + ws.Ref + "\n"
 
-	for _, v := range ws.Orders {
-		res += v.SearchInString()
+	for _, o := range ws.Orders {
+		res += o.SearchInString()
 	}
 	return res
+}
+
+func (ws *Worksite) GetInfo() (nbCommand, nbTroncon, nbRacco int) {
+	nbCommand = len(ws.Orders)
+	for _, o := range ws.Orders {
+		nbTroncon += len(o.Troncons)
+		for _, t := range o.Troncons {
+			nbRacco += t.NbRacco
+		}
+	}
+	return
 }
