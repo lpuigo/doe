@@ -3,12 +3,12 @@ html, body {
     font-family: Calibri, sans-serif;
     font-size: 14px;
     height: 100%;
-    margin:0;
+    margin: 0;
     padding: 0;
 }
 
 p {
-    margin : 8px 0;
+    margin: 8px 0;
 }
 
 pre {
@@ -53,6 +53,7 @@ pre {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
 /*.el-table .cell {*/
 
 /*}*/
@@ -146,7 +147,7 @@ pre {
 }
 
 
-/*
+/* ====================================================================================================================
     === Worksite Table style ===
  */
 .icon--right {
@@ -164,21 +165,24 @@ pre {
 }
 
 .link:hover {
-    opacity: 1!important;
+    opacity: 1 !important;
 }
 
 .novagile-light {
     background: #a1e6e6;
     color: #66696f;
 }
+
 .el-table--mini td, .el-table--mini th {
     padding: 1px 0px;
     font-size: 1em;
 }
+
 .el-table td, .el-table th {
     padding: 1px 0px;
     font-size: 1em;
 }
+
 .el-table .cell {
     white-space: pre-wrap;
     word-break: break-word;
@@ -186,13 +190,16 @@ pre {
     padding-top: .3em;
     padding-bottom: .3em;
 }
+
 .el-table .worksite-row-done {
     background: #f8f8f8;
     color: #adadad;
 }
+
 .el-table .worksite-row-rework {
     background: #fff1db;
 }
+
 .el-table .worksite-row-new {
     background: #ffffff;
 }
@@ -222,6 +229,7 @@ pre {
 .progress-bar {
     line-height: 1em;
 }
+
 .progress-bar.over-spent {
     color: #DB2828;
 }
@@ -270,6 +278,22 @@ pre {
     overflow: auto;
 }
 
+/* ====================================================================================================================
+    === Worksite Table Detail style ===
+ */
+.el-table__expanded-cell[class*=cell] {
+    padding: 10px 20px;
+}
+
+.worksite-detail .el-row {
+    margin-bottom: 8px;
+}
+
+.worksite-detail .el-row:last-child {
+    margin-bottom: 0;
+}
+
+
 /*
     === Jira Stat Modal style ===
  */
@@ -281,27 +305,33 @@ pre {
     /*font-size: 14px;*/
     padding-right: 8px;
 }
+
 .custom-tree-node .custom-node-name {
     /*flex: 0 1 20%;*/
 }
+
 .custom-tree-node .custom-hours-row {
     width: 55vw;
 }
+
 .custom-hours-row.reduce {
     width: 45vw;
 }
+
 .custom-hours-row .hours-table {
     display: flex;
     align-items: center;
     justify-content: space-between;
     line-height: 1.3em;
 }
+
 .hours-table .hours-cell {
     flex: 1 1 0;
     text-align: center;
     margin: 0px 1px;
     padding: 3px;
 }
+
 .hours-table .hours-cell {
     flex: 1 1 0;
     text-align: center;
@@ -328,6 +358,7 @@ pre {
     width: 30%;
     overflow: auto;
 }
+
 /*
     === TimeLine Modal style ===
  */
@@ -350,11 +381,11 @@ pre {
     width: 100%;
     height: 16px;
     margin: 0px 0px;
-    background: linear-gradient(to right, #ffffff 0%,#ffffff 49.95%, #e0e0e0 49.96%,#e0e0e0 50.04%,#ffffff 50.05%,#ffffff 100%)
+    background: linear-gradient(to right, #ffffff 0%, #ffffff 49.95%, #e0e0e0 49.96%, #e0e0e0 50.04%, #ffffff 50.05%, #ffffff 100%)
 }
 
 .project-line .item {
-    flex:0 1 auto;
+    flex: 0 1 auto;
     align-self: auto;
     height: 100%;
     /*text-align: center;*/
@@ -366,6 +397,7 @@ pre {
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 }
+
 .item.last {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
@@ -376,12 +408,15 @@ pre {
     height: 50%;
     background-color: #9fe3e3;
 }
+
 .item.study.lead {
     background-color: #f0e8a5;
 }
+
 .item.study.monitor {
     background-color: #c0e6bc;
 }
+
 .item.study.done {
     background-color: #e3e3e3;
 }
@@ -390,12 +425,15 @@ pre {
 .item.real {
     background-color: #4abbbd;
 }
+
 .item.real.lead {
     background-color: #ded159;
 }
+
 .item.real.monitor {
     background-color: #9ecc99;
 }
+
 .item.real.done {
     background-color: #bdbdbd;
 }
@@ -404,12 +442,15 @@ pre {
 .item.service {
     background-color: #9fe3e3;
 }
+
 .item.service.lead {
     background-color: #f0e8a5;
 }
+
 .item.service.monitor {
     background-color: #c0e6bc;
 }
+
 .item.service.done {
     background-color: #e3e3e3;
 }
@@ -419,12 +460,15 @@ pre {
     height: 50%;
     background-color: #9fe3e3;
 }
+
 .item.pilot.lead {
     background-color: #f0e8a5;
 }
+
 .item.pilot.monitor {
     background-color: #c0e6bc;
 }
+
 .item.pilot.done {
     background-color: #e3e3e3;
 }
