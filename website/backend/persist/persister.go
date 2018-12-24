@@ -2,7 +2,7 @@ package persist
 
 import (
 	"fmt"
-	"gopkg.in/src-d/go-vitess.v1/vt/log"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -137,7 +137,7 @@ func (p *Persister) Remove(r Recorder) error {
 	go func(dr Recorder) {
 		err := dr.Remove(p.directory)
 		if err != nil {
-			log.Errorf("error removing record GetId %d: %v\n", id, err)
+			log.Printf("error removing record GetId %d: %v\n", id, err)
 		}
 	}(r)
 	delete(p.records, id)
@@ -160,7 +160,7 @@ func (p *Persister) PersistAll(r Recorder) {
 		go func(pr Recorder) {
 			err := r.Persist(p.directory)
 			if err != nil {
-				log.Errorf("error persisting record ID %d: %v\n", r.GetId(), err)
+				log.Printf("error persisting record ID %d: %v\n", r.GetId(), err)
 			}
 			_ = <-token
 		}(r)
@@ -202,7 +202,7 @@ func (p *Persister) persist() {
 		go func(pr Recorder) {
 			err := pr.Persist(p.directory)
 			if err != nil {
-				log.Errorf("error persisting record ID %d: %v\n", pr.GetId(), err)
+				log.Printf("error persisting record ID %d: %v\n", pr.GetId(), err)
 			}
 			_ = <-token
 		}(r)
