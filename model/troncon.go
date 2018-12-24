@@ -6,6 +6,7 @@ type Troncon struct {
 	NbRacco       int
 	NbFiber       int
 	NeedSignature bool
+	Signed        bool
 	InstallDate   string
 	MeasureDate   string
 	Comment       string

@@ -36,17 +36,17 @@ const template string = `
             Attributes about TR 
         -->
         <el-row :gutter="10" type="flex" align="middle">
-            <el-col :span="8">
+            <el-col :span="6">
                 <el-input placeholder="TR-99-9999" :readonly="readonly" clearable size="mini"
                           v-model="value.Ref"
                 ></el-input>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="3">
                 <el-input-number v-model="value.NbRacco" :min="0" :max="value.NbFiber" :readonly="readonly" size="mini" label="Nb Racco" controls-position="right" style="width: 100%">
                     <template slot="prepend">Nb El</template>
                 </el-input-number>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="3">
                 <el-input-number v-model="value.NbFiber" :min="6" :step="6" :readonly="readonly" size="mini" label="Nb Fibre" controls-position="right" style="width: 100%">
                     <template slot="prepend">Nb Fibre</template>
                 </el-input-number>
@@ -67,8 +67,16 @@ const template string = `
                                 value-format="yyyy-MM-dd"
                                 :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                                 :clearable="false"
+								:disabled="!value.InstallDate"
                 ></el-date-picker>
             </el-col>
+			<el-col v-if="value.NeedSignature" :span="4">
+				<el-switch v-model="value.Signed"
+						   active-color="#51a825"
+						   active-text="Signature obtenue"
+						   inactive-color="#bcbcbc"
+				></el-switch>
+			</el-col>
         </el-row>
 		<el-row :gutter="10">
 			<el-col :span="24">

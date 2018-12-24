@@ -15,6 +15,7 @@ type Troncon struct {
 	NbRacco       int    `js:"NbRacco"`
 	NbFiber       int    `js:"NbFiber"`
 	NeedSignature bool   `js:"NeedSignature"`
+	Signed        bool   `js:"Signed"`
 	InstallDate   string `js:"InstallDate"`
 	MeasureDate   string `js:"MeasureDate"`
 	Comment       string `js:"Comment"`
@@ -27,6 +28,7 @@ func NewTroncon() *Troncon {
 	tr.NbRacco = 0
 	tr.NbFiber = 0
 	tr.NeedSignature = false
+	tr.Signed = false
 	tr.InstallDate = ""
 	tr.MeasureDate = ""
 	tr.Comment = ""
@@ -45,6 +47,7 @@ func (tr *Troncon) Copy(otr *Troncon) {
 	tr.NbRacco = otr.NbRacco
 	tr.NbFiber = otr.NbFiber
 	tr.NeedSignature = otr.NeedSignature
+	tr.Signed = otr.Signed
 	tr.InstallDate = otr.InstallDate
 	tr.MeasureDate = otr.MeasureDate
 	tr.Comment = otr.Comment
@@ -56,6 +59,7 @@ func (tr *Troncon) SearchInString() string {
 	res += "T_NbRacco:" + strconv.Itoa(tr.NbRacco) + "\n"
 	res += "T_NbFiber:" + strconv.Itoa(tr.NbFiber) + "\n"
 	res += "T_NeedSignature:" + strconv.FormatBool(tr.NeedSignature) + "\n"
+	res += "T_Signed:" + strconv.FormatBool(tr.Signed) + "\n"
 	res += "T_InstallDate:" + date.DateString(tr.InstallDate) + "\n"
 	res += "T_MeasureDate:" + date.DateString(tr.MeasureDate) + "\n"
 	res += "T_Comment:" + tr.Comment + "\n"
