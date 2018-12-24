@@ -1,6 +1,7 @@
 package worksitedetail
 
-const template string = `<div class="worksite-detail">
+const template string = `
+<div class="worksite-detail">
     <el-row :gutter="10">
         <el-col :span="6">
             <el-input v-if="readonly" placeholder="Statut" :readonly="true" clearable size="mini"
@@ -42,54 +43,13 @@ const template string = `<div class="worksite-detail">
         </el-col>
     </el-row>
     <!-- 
-        Attributes about PMZ 
+        Attributes about PMZ & PA
     -->
-    <el-row :gutter="10" type="flex" align="middle">
-        <el-col :span="1">
-            <span><strong>PMZ:</strong></span>
-        </el-col>
-        <el-col :span="4">
-            <el-input placeholder="PMZ-99999" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pmz.Ref"
-            ></el-input>
-        </el-col>
-        <el-col :span="4">
-            <el-input placeholder="PT-009999" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pmz.RefPt"
-            ></el-input>
-        </el-col>
-        <el-col :span="15">
-            <el-input placeholder="Adresse PMZ" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pmz.Address"
-            >
-            </el-input>
-        </el-col>
-    </el-row>
+	<pt-edit title="PMZ" v-model="worksite.Pmz" :readonly="readonly"></pt-edit>
+	<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
+	<hr>
     <!-- 
-        Attributes about PA 
-    -->
-    <el-row :gutter="10" type="flex" align="middle">
-        <el-col :span="1">
-            <span><strong>PA:</strong></span>
-        </el-col>
-        <el-col :span="4">
-            <el-input placeholder="PA-99999" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pa.Ref"
-            ></el-input>
-        </el-col>
-        <el-col :span="4">
-            <el-input placeholder="PT-009999" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pa.RefPt"
-            ></el-input>
-        </el-col>
-        <el-col :span="15">
-            <el-input placeholder="Adresse PMZ" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Pa.Address"
-            ></el-input>
-        </el-col>
-    </el-row>
-    <!-- 
-        Attributes about Orders 
+        Attributes about Orders
     -->
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="2">
@@ -210,5 +170,5 @@ const template string = `<div class="worksite-detail">
             </el-row>
         </el-col>
     </el-row>
- </div>
+</div>
 `

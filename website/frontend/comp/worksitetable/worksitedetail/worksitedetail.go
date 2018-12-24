@@ -3,6 +3,7 @@ package worksitedetail
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
@@ -18,6 +19,7 @@ func Register() {
 
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
+		hvue.Component("pt-edit", ptedit.ComponentOptions()...),
 		hvue.Template(template),
 		hvue.Props("worksite", "readonly"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
