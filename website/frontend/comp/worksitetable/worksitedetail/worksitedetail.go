@@ -52,3 +52,9 @@ func NewWorksiteDetailModel(vm *hvue.VM) *WorksiteDetailModel {
 	wdm.ReadOnly = false
 	return wdm
 }
+
+func (wdm *WorksiteDetailModel) DeleteOrder(vm *hvue.VM, i int) {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	wdm.Worksite.DeleteOrder(i)
+
+}

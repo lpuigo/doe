@@ -110,3 +110,14 @@ func (ws *Worksite) GetInfo() (nbCommand, nbTroncon, nbRacco int) {
 	}
 	return
 }
+
+func (ws *Worksite) DeleteOrder(i int) {
+	orders := []*Order{}
+	for j, o := range ws.Orders {
+		if i == j {
+			continue
+		}
+		orders = append(orders, o)
+	}
+	ws.Orders = orders
+}
