@@ -56,5 +56,9 @@ func NewWorksiteDetailModel(vm *hvue.VM) *WorksiteDetailModel {
 func (wdm *WorksiteDetailModel) DeleteOrder(vm *hvue.VM, i int) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.DeleteOrder(i)
+}
 
+func (wdm *WorksiteDetailModel) AddOrder(vm *hvue.VM) {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	wdm.Worksite.AddOrder()
 }

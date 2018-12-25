@@ -30,7 +30,11 @@ const template string = `
 	 -->
 	<el-row :gutter="10" type="flex" align="middle">
 		<el-col :span="2">
-			<el-button type="primary" plain icon="fas fa-share-alt icon--left" size="mini" style="width: 100%">Ajouter</el-button>
+			<el-button type="primary" 
+					   plain icon="fas fa-share-alt icon--left" 
+					   size="mini" style="width: 100%"
+					   @click="AddTroncon()"
+			>Ajouter</el-button>
 		</el-col>
 		<el-col :span="2">
 			<span>Tronçons:</span>
@@ -82,4 +86,9 @@ func NewOrderEditModel(vm *hvue.VM) *OrderEditModel {
 	oem.Order = nil
 	oem.Readonly = false
 	return oem
+}
+
+func (oem *OrderEditModel) AddTroncon(vm *hvue.VM) {
+	oem = &OrderEditModel{Object: vm.Object}
+	oem.Order.AddTroncon()
 }

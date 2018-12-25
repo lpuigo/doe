@@ -61,3 +61,8 @@ func (o *Order) DeleteTroncon(i int) {
 	}
 	o.Troncons = nts
 }
+
+func (o *Order) AddTroncon() {
+	troncon := NewTroncon()
+	o.Troncons = append(o.Troncons, troncon)
+}

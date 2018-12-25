@@ -53,7 +53,11 @@ const template string = `
     -->
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="2">
-            <el-button type="primary" plain icon="fas fa-sitemap icon--left" size="mini" style="width: 100%">Ajouter</el-button>
+            <el-button type="primary" 
+					   plain icon="fas fa-sitemap icon--left" 
+					   size="mini" style="width: 100%"
+					   @click="AddOrder()"
+			>Ajouter</el-button>
         </el-col>
         <el-col :span="2">
             <span>Commandes:</span>

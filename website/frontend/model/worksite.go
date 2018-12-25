@@ -121,3 +121,9 @@ func (ws *Worksite) DeleteOrder(i int) {
 	}
 	ws.Orders = orders
 }
+
+func (ws *Worksite) AddOrder() {
+	order := NewOrder()
+	order.AddTroncon()
+	ws.Orders = append(ws.Orders, order)
+}
