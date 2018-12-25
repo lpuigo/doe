@@ -46,3 +46,18 @@ func (o *Order) SearchInString() string {
 
 	return res
 }
+
+func (o *Order) DeleteTroncon(i int) {
+	// Not working with GopherJS
+	//copy(o.Troncons[i:], o.Troncons[i+1:])
+	//o.Troncons[len(o.Troncons)-1] = nil // or the zero value of T
+	//o.Troncons = o.Troncons[:len(o.Troncons)-1]
+	nts := []*Troncon{}
+	for j, t := range o.Troncons {
+		if i == j {
+			continue
+		}
+		nts = append(nts, t)
+	}
+	o.Troncons = nts
+}
