@@ -49,3 +49,17 @@ func ErrorStr(vm *hvue.VM, msg string, close bool) {
 	messageString(vm, "error", msg, close)
 	duration = pdur
 }
+
+func ErrorMsgStr(vm *hvue.VM, msg string, o *js.Object, close bool) {
+	msg += ErrorMsgFromJS(o).Error
+	ErrorStr(vm, msg, close)
+}
+
+type ErrorMsg struct {
+	*js.Object
+	Error string `js:"Error"`
+}
+
+func ErrorMsgFromJS(o *js.Object) *ErrorMsg {
+	return &ErrorMsg{Object: o}
+}

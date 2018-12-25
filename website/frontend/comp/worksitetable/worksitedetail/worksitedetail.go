@@ -62,3 +62,8 @@ func (wdm *WorksiteDetailModel) AddOrder(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.AddOrder()
 }
+
+func (wdm *WorksiteDetailModel) Save(vm *hvue.VM) {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	vm.Emit("save_worksite", wdm.Worksite)
+}

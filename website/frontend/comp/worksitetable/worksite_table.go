@@ -88,6 +88,11 @@ func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
 	wtm.VM.Emit("update:selected_worksite", nws)
 }
 
+func (wtm *WorksiteTableModel) SaveWorksite(vm *hvue.VM, uws *fm.Worksite) {
+	print("WorksiteTableModel emit save_worksite for ", uws.Id, uws.Ref)
+	vm.Emit("save_worksite", uws)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Formatting Related Methods
 

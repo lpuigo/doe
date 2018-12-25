@@ -25,8 +25,8 @@ func NewTroncon() *Troncon {
 	tr := &Troncon{Object: tools.O()}
 	tr.Ref = ""
 	tr.Pb = NewPT()
-	tr.NbRacco = 0
-	tr.NbFiber = 0
+	tr.NbRacco = 1
+	tr.NbFiber = 6
 	tr.NeedSignature = false
 	tr.Signed = false
 	tr.InstallDate = ""

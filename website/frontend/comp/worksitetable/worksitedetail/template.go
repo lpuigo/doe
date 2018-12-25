@@ -45,16 +45,33 @@ const template string = `
     <!-- 
         Attributes about PMZ & PA
     -->
-	<pt-edit title="PMZ" v-model="worksite.Pmz" :readonly="readonly"></pt-edit>
-	<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
+	<el-row :gutter="10">
+		<el-col :span="4">
+			<el-button type="success" plain 
+					   icon="far fa-save icon--left"
+					   size="mini" style="width: 100%"
+					   :disabled="worksite.Orders.length<=1"
+					   @click="Save()"
+			>Enregistrer</el-button>
+		</el-col>
+		<el-col :span="20">
+			<pt-edit title="PMZ" v-model="worksite.Pmz" :readonly="readonly"></pt-edit>
+		</el-col>
+	</el-row>
+	<el-row :gutter="10">
+		<el-col :span="4"></el-col>
+		<el-col :span="20">
+			<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
+		</el-col>
+	</el-row>
 	<hr>
     <!-- 
         Attributes about Orders
     -->
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="2">
-            <el-button type="primary" 
-					   plain icon="fas fa-sitemap icon--left" 
+            <el-button type="primary" plain
+					   icon="fas fa-sitemap icon--left" 
 					   size="mini" style="width: 100%"
 					   @click="AddOrder()"
 			>Ajouter</el-button>
@@ -65,9 +82,10 @@ const template string = `
     </el-row>
     <el-row v-for="(order, index) in worksite.Orders" :key="index" :gutter="10">
         <el-col :span="2">
-            <el-button type="danger" 
-					   plain icon="fas fa-sitemap icon--left" 
+            <el-button type="danger" plain
+					   icon="fas fa-sitemap icon--left" 
 					   size="mini" style="width: 100%"
+					   :disabled="worksite.Orders.length<=1"
 					   @click="DeleteOrder(index)"
 			>Supprimer</el-button>
         </el-col>

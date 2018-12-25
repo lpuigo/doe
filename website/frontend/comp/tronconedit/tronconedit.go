@@ -16,6 +16,7 @@ const template string = `
 					   plain icon="fas fa-share-alt icon--left"
 					   size="mini"
 					   style="width: 100%"
+					   :disabled="value.Troncons.length<=1"
 					   @click="DeleteTroncon(index)"
 			>Supprimer</el-button>
 		</el-col>

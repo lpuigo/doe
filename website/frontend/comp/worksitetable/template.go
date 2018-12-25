@@ -17,6 +17,7 @@ const (
             <worksite-detail
                     :worksite="props.row"
                     :readonly="false"
+					@save_worksite="SaveWorksite"
             ></worksite-detail>
         </template>
     </el-table-column>
