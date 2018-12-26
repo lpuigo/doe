@@ -19,19 +19,21 @@ type Worksite struct {
 	Pa        *PT      `js:"Pa"`
 	Comment   string   `js:"Comment"`
 	Orders    []*Order `js:"Orders"`
+	Dirty     bool     `js:"Dirty"`
 }
 
 func NewWorkSite() *Worksite {
 	ws := &Worksite{Object: tools.O()}
-	ws.Id = 0
+	ws.Id = -1
 	ws.Ref = ""
 	ws.OrderDate = ""
 	ws.City = ""
-	ws.Status = ""
+	ws.Status = "New"
 	ws.Pmz = NewPT()
 	ws.Pa = NewPT()
 	ws.Comment = ""
 	ws.Orders = []*Order{}
+	ws.Dirty = true
 
 	return ws
 }
@@ -56,9 +58,10 @@ func (ws *Worksite) Copy(ows *Worksite) {
 	ws.Pmz = ows.Pmz.Clone()
 	ws.Pa = ows.Pa.Clone()
 	ws.Comment = ows.Comment
-	ws.Orders = make([]*Order, len(ows.Orders))
-	for i, o := range ows.Orders {
-		ws.Orders[i] = o.Clone()
+	ws.Dirty = false // ows.Dirty
+	ws.Orders = []*Order{}
+	for _, o := range ows.Orders {
+		ws.Orders = append(ws.Orders, o.Clone())
 	}
 }
 
@@ -92,7 +95,7 @@ func (ws *Worksite) SearchInString() string {
 	res += "Status:" + ws.Status + "\n"
 	res += "Pmz:" + ws.Pmz.SearchInString()
 	res += "Pa:" + ws.Pa.SearchInString()
-	res += "Comment:" + ws.Ref + "\n"
+	res += "Comment:" + ws.Comment + "\n"
 
 	for _, o := range ws.Orders {
 		res += o.SearchInString()

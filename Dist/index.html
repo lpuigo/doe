@@ -13,19 +13,13 @@
     <div id="app" style="height: 100%;">
 
         <el-container style="height: 100%;border: 1px solid #eee">
-            <el-header class="ewin">
+            <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
                     <div class="header-menu-container">
                         <h2 class="content">EWIN Services</h2>
                     </div>
                     <div>
-                        <el-input
-                                placeholder="filtre"
-                                prefix-icon="el-icon-search"
-                                v-model="filter"
-                                size="mini"
-                                clearable>
-                        </el-input>
+
                     </div>
                 </div>
             </el-header>
@@ -35,10 +29,9 @@
                         Aside
                     </div>
                 </el-aside>
-                <el-main style="height:100%; padding: 0px 10px;">
+                <el-main style="height:100%; padding: 0px 0px;">
                     <worksite-table
                             :worksites="worksites"
-                            :filter="filter"
                             @selected_worksite="EditWorksite"
                             @save_worksite="ProcessEditedWorkSite"
                     ></worksite-table>
@@ -56,7 +49,7 @@
 </body>
 
 
-<script src="/Assets/vue/2.5.17/vue.js"></script>
+<script src="/Assets/vue/2.5.17/vue.min.js"></script>
 <!--<script src="/Assets/vue/2.5.16/vue.js"></script>-->
 <script src="/Assets/element-ui/2.4.11/lib/index.js"></script>
 <script src="/Assets/element-ui/2.4.11/lib/umd/locale/fr.js"></script>

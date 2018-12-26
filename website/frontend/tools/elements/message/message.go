@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	duration int    = 3000
+	duration int    = 2000
 	msgclass string = "message"
 )
 
@@ -24,35 +24,35 @@ func messageString(vm *hvue.VM, msgtype, msg string, close bool) {
 	})
 }
 
-func InfoStr(vm *hvue.VM, msg string, close bool) {
+func InfoStr(vm *hvue.VM, msg string, closeButton bool) {
 	pdur := duration
-	if close {
+	if closeButton {
 		duration = 0
 	}
-	messageString(vm, "info", msg, close)
+	messageString(vm, "info", msg, closeButton)
 	duration = pdur
 }
 
-func SuccesStr(vm *hvue.VM, msg string, close bool) {
-	messageString(vm, "success", msg, close)
+func SuccesStr(vm *hvue.VM, msg string) {
+	messageString(vm, "success", msg, false)
 }
 
-func WarningStr(vm *hvue.VM, msg string, close bool) {
-	messageString(vm, "warning", msg, close)
+func WarningStr(vm *hvue.VM, msg string) {
+	messageString(vm, "warning", msg, false)
 }
 
-func ErrorStr(vm *hvue.VM, msg string, close bool) {
+func ErrorStr(vm *hvue.VM, msg string, closeButton bool) {
 	pdur := duration
-	if close {
+	if closeButton {
 		duration = 0
 	}
-	messageString(vm, "error", msg, close)
+	messageString(vm, "error", msg, closeButton)
 	duration = pdur
 }
 
-func ErrorMsgStr(vm *hvue.VM, msg string, o *js.Object, close bool) {
+func ErrorMsgStr(vm *hvue.VM, msg string, o *js.Object, closeButton bool) {
 	msg += ErrorMsgFromJS(o).Error
-	ErrorStr(vm, msg, close)
+	ErrorStr(vm, msg, closeButton)
 }
 
 type ErrorMsg struct {

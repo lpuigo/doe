@@ -27,7 +27,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.Template(template),
 		hvue.Component("worksite-info", worksiteinfo.ComponentOptions()...),
 		hvue.Component("worksite-detail", worksitedetail.ComponentOptions()...),
-		hvue.Props("worksites", "filter"),
+		hvue.Props("worksites"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteTableModel(vm)
 		}),
@@ -76,21 +76,36 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Event Related Methods
 
-func (wtm *WorksiteTableModel) SelectRow(vm *hvue.VM, ws *fm.Worksite, event *js.Object) {
-	vm.Emit("selected_worksite", ws)
-}
-
-func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
-	if nws.Object == nil { // this can happen when Worksites props gets updated
-		return
-	}
-	wtm.SelectedWorksite = nws
-	wtm.VM.Emit("update:selected_worksite", nws)
-}
+//func (wtm *WorksiteTableModel) SelectRow(vm *hvue.VM, ws *fm.Worksite, event *js.Object) {
+//	vm.Emit("selected_worksite", ws)
+//}
+//
+//func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
+//	if nws.Object == nil { // this can happen when Worksites props gets updated
+//		return
+//	}
+//	wtm.SelectedWorksite = nws
+//	wtm.VM.Emit("update:selected_worksite", nws)
+//}
 
 func (wtm *WorksiteTableModel) SaveWorksite(vm *hvue.VM, uws *fm.Worksite) {
-	print("WorksiteTableModel emit save_worksite for ", uws.Id, uws.Ref)
 	vm.Emit("save_worksite", uws)
+}
+
+func (wtm *WorksiteTableModel) ExpandRow(vm *hvue.VM, ws *fm.Worksite, others *js.Object) {
+	if ws.Dirty {
+		print("Worksite is Dirty")
+	}
+	print("Others :", others)
+}
+
+func (wtm *WorksiteTableModel) AddWorksite(vm *hvue.VM) {
+	wtm = &WorksiteTableModel{Object: vm.Object}
+	print("Add New Worksite number", len(wtm.Worksites))
+	ws := fm.NewWorkSite()
+	ws.AddOrder()
+	wtm.Worksites = append(wtm.Worksites, ws)
+	print("Table now has", len(wtm.Worksites), "sites")
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +114,9 @@ func (wtm *WorksiteTableModel) SaveWorksite(vm *hvue.VM, uws *fm.Worksite) {
 func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
 	ws := &fm.Worksite{Object: rowInfo.Get("row")}
 	var res string = ""
+	if ws.Dirty {
+		return "worksite-row-need-save"
+	}
 	switch ws.Status {
 	case "Done":
 		res = "worksite-row-done"

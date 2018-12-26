@@ -27,6 +27,17 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteDetailModel(vm)
 		}),
+		hvue.Computed("HasChanged", func(vm *hvue.VM) interface{} {
+			wdm := &WorksiteDetailModel{Object: vm.Object}
+			if wdm.ReferenceWorksite.Object == nil {
+				wdm.ReferenceWorksite = wdm.Worksite.Clone()
+				return wdm.Worksite.Dirty
+			}
+			s1 := wdm.Worksite.SearchInString()
+			s2 := wdm.ReferenceWorksite.SearchInString()
+			wdm.Worksite.Dirty = s1 != s2
+			return wdm.Worksite.Dirty
+		}),
 		hvue.MethodsOf(&WorksiteDetailModel{}),
 	}
 }
@@ -37,9 +48,9 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteDetailModel struct {
 	*js.Object
 
-	Worksite       *fm.Worksite `js:"worksite"`
-	EditedWorksite *fm.Worksite `js:"editedWorksite"`
-	ReadOnly       bool         `js:"readonly"`
+	Worksite          *fm.Worksite `js:"worksite"`
+	ReferenceWorksite *fm.Worksite `js:"refWorksite"`
+	ReadOnly          bool         `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -48,7 +59,7 @@ func NewWorksiteDetailModel(vm *hvue.VM) *WorksiteDetailModel {
 	wdm := &WorksiteDetailModel{Object: tools.O()}
 	wdm.VM = vm
 	wdm.Worksite = nil
-	wdm.EditedWorksite = nil
+	wdm.ReferenceWorksite = nil
 	wdm.ReadOnly = false
 	return wdm
 }
@@ -66,4 +77,9 @@ func (wdm *WorksiteDetailModel) AddOrder(vm *hvue.VM) {
 func (wdm *WorksiteDetailModel) Save(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	vm.Emit("save_worksite", wdm.Worksite)
+}
+
+func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	wdm.Worksite.Copy(wdm.ReferenceWorksite)
 }

@@ -27,7 +27,7 @@ func main() {
 			mpm.GetWorkSites()
 		}),
 	)
-	js.Global.Get("Vue").Call("use", "ELEMENT.lang.en")
+	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
 
 	// TODO to remove after debug
 	js.Global.Set("mpm", mpm)
@@ -38,15 +38,13 @@ type MainPageModel struct {
 
 	VM *hvue.VM `js:"VM"`
 
-	Worksites      []*fm.Worksite `js:"worksites"`
-	Filter         string         `js:"filter"`
-	EditedWorksite *fm.Worksite   `js:"editedWorksite"`
+	Worksites []*fm.Worksite `js:"worksites"`
+	//ReferenceWorksite *fm.Worksite   `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.Worksites = []*fm.Worksite{}
-	mpm.Filter = ""
 	return mpm
 }
 
@@ -58,7 +56,7 @@ func (m *MainPageModel) GetWorkSites() {
 }
 
 func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
-	m.EditedWorksite = ws
+	//m.ReferenceWorksite = ws
 	//m.VM.Refs("WorksiteEdit").Call("Show", ws)
 	message.SetDuration(tools.WarningMsgDuration)
 	message.InfoStr(m.VM, "Selected Worksite : "+ws.Ref, false)
@@ -129,7 +127,7 @@ func (m *MainPageModel) callGetWorkSites() {
 	}
 	if req.Status != tools.HttpOK {
 		message.SetDuration(tools.WarningMsgDuration)
-		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status), true)
+		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status))
 		return
 	}
 	worksites := []*fm.Worksite{}
@@ -151,8 +149,8 @@ func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status == 200 {
-		nws := fm.WorksiteFromJS(req.Response)
-		uws.Copy(nws)
+		uws.Dirty = false
+		message.SuccesStr(m.VM, "Chantier sauvegardé")
 	} else {
 		message.SetDuration(tools.WarningMsgDuration)
 		msg := "Something went wrong!\n"
@@ -171,13 +169,14 @@ func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status == 201 {
+		uws.Dirty = false
 		uws.Copy(fm.WorksiteFromJS(req.Response))
+		message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
 	} else {
 		message.SetDuration(tools.WarningMsgDuration)
 		msg := "Something went wrong!\n"
-		msg += req.Response.String()
 		msg += "Server returned code " + strconv.Itoa(req.Status) + "\n"
-		message.ErrorStr(m.VM, msg, true)
+		message.ErrorMsgStr(m.VM, msg, req.Response, true)
 	}
 }
 

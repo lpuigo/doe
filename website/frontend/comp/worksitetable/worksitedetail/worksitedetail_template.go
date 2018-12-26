@@ -47,10 +47,10 @@ const template string = `
     -->
 	<el-row :gutter="10">
 		<el-col :span="4">
-			<el-button type="success" plain 
+			<el-button type="success"  
 					   icon="far fa-save icon--left"
 					   size="mini" style="width: 100%"
-					   :disabled="worksite.Orders.length<=1"
+					   :disabled="!HasChanged"
 					   @click="Save()"
 			>Enregistrer</el-button>
 		</el-col>
@@ -59,12 +59,18 @@ const template string = `
 		</el-col>
 	</el-row>
 	<el-row :gutter="10">
-		<el-col :span="4"></el-col>
+		<el-col :span="4">
+			<el-button type="info"
+					   icon="fas fa-undo-alt icon--left"
+					   size="mini" style="width: 100%"
+					   :disabled="!HasChanged"
+					   @click="Undo()"
+			>Annuler</el-button>
+		</el-col>
 		<el-col :span="20">
 			<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
 		</el-col>
 	</el-row>
-	<hr>
     <!-- 
         Attributes about Orders
     -->
@@ -80,21 +86,24 @@ const template string = `
             <span>Commandes:</span>
         </el-col>
     </el-row>
-    <el-row v-for="(order, index) in worksite.Orders" :key="index" :gutter="10">
-        <el-col :span="2">
-            <el-button type="danger" plain
-					   icon="fas fa-sitemap icon--left" 
-					   size="mini" style="width: 100%"
-					   :disabled="worksite.Orders.length<=1"
-					   @click="DeleteOrder(index)"
-			>Supprimer</el-button>
-        </el-col>
-        <el-col :span="22">
-            <!-- 
-                Attributes about each Order 
-            -->
-			<order-edit v-model="order" :readonly="readonly"></order-edit>
-        </el-col>
-    </el-row>
+	<div v-for="(order, index) in worksite.Orders" :key="index">
+		<hr>
+		<el-row :gutter="10">
+			<el-col :span="2">
+				<el-button type="danger" plain
+						   icon="fas fa-sitemap icon--left"
+						   size="mini" style="width: 100%"
+						   :disabled="worksite.Orders.length<=1"
+						   @click="DeleteOrder(index)"
+				>Supprimer</el-button>
+			</el-col>
+			<el-col :span="22">
+				<!-- 
+					Attributes about each Order 
+				-->
+				<order-edit v-model="order" :readonly="readonly"></order-edit>
+			</el-col>
+		</el-row>
+	</div>
 </div>
 `

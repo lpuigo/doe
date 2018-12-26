@@ -30,9 +30,9 @@ func (o *Order) Clone() *Order {
 func (o *Order) Copy(oo *Order) {
 	o.Ref = oo.Ref
 	o.Comment = oo.Comment
-	o.Troncons = make([]*Troncon, len(oo.Troncons))
-	for i, tr := range oo.Troncons {
-		o.Troncons[i] = tr.Clone()
+	o.Troncons = []*Troncon{}
+	for _, tr := range oo.Troncons {
+		o.Troncons = append(o.Troncons, tr.Clone())
 	}
 }
 

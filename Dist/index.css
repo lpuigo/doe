@@ -191,6 +191,11 @@ pre {
     padding-bottom: .3em;
 }
 
+.el-table .worksite-row-need-save {
+    background: #f8f8f8;
+    color: #ffbf80;
+}
+
 .el-table .worksite-row-done {
     background: #f8f8f8;
     color: #adadad;
