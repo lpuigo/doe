@@ -13,12 +13,14 @@ type Worksite struct {
 	Id        int      `js:"Id"`
 	Ref       string   `js:"Ref"`
 	OrderDate string   `js:"OrderDate"`
+	DoeDate   string   `js:"DoeDate"`
 	City      string   `js:"City"`
 	Status    string   `js:"Status"`
 	Pmz       *PT      `js:"Pmz"`
 	Pa        *PT      `js:"Pa"`
 	Comment   string   `js:"Comment"`
 	Orders    []*Order `js:"Orders"`
+	Rework    *Rework  `js:"Rework"`
 	Dirty     bool     `js:"Dirty"`
 }
 
@@ -27,12 +29,14 @@ func NewWorkSite() *Worksite {
 	ws.Id = -1
 	ws.Ref = ""
 	ws.OrderDate = ""
+	ws.DoeDate = ""
 	ws.City = ""
 	ws.Status = "New"
 	ws.Pmz = NewPT()
 	ws.Pa = NewPT()
 	ws.Comment = ""
 	ws.Orders = []*Order{}
+	ws.Rework = nil
 	ws.Dirty = true
 
 	return ws
@@ -41,6 +45,10 @@ func NewWorkSite() *Worksite {
 func WorksiteFromJS(o *js.Object) *Worksite {
 	ws := &Worksite{Object: o}
 	return ws
+}
+
+func (ws *Worksite) HasRework() bool {
+	return ws.Rework != nil && ws.Rework.Object != nil
 }
 
 func (ws *Worksite) Clone() *Worksite {
@@ -58,6 +66,9 @@ func (ws *Worksite) Copy(ows *Worksite) {
 	ws.Pmz = ows.Pmz.Clone()
 	ws.Pa = ows.Pa.Clone()
 	ws.Comment = ows.Comment
+	if ows.HasRework() {
+		ws.Rework = ows.Rework.Clone()
+	}
 	ws.Dirty = false // ows.Dirty
 	ws.Orders = []*Order{}
 	for _, o := range ows.Orders {
@@ -100,6 +111,10 @@ func (ws *Worksite) SearchInString() string {
 	for _, o := range ws.Orders {
 		res += o.SearchInString()
 	}
+	if ws.HasRework() {
+		res += ws.Rework.SearchInString()
+	}
+
 	return res
 }
 
@@ -129,4 +144,8 @@ func (ws *Worksite) AddOrder() {
 	order := NewOrder()
 	order.AddTroncon()
 	ws.Orders = append(ws.Orders, order)
+}
+
+func (ws *Worksite) AddRework() {
+	ws.Rework = NewRework()
 }
