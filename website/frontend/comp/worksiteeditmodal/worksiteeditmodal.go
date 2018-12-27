@@ -98,11 +98,15 @@ func (wemm *WorksiteEditModalModel) Show(ws *fm.Worksite) {
 	wemm.Visible = true
 }
 
-func (wemm *WorksiteEditModalModel) Hide() {
+func (wemm *WorksiteEditModalModel) HideWithControl() {
 	if wemm.HasChanged() {
-		message.ConfirmWarning(wemm.VM, "Supprimer les changements ?")
+		message.ConfirmWarning(wemm.VM, "OK pour perdre les changements effectués ?", wemm.Hide)
 		return
 	}
+	wemm.Hide()
+}
+
+func (wemm *WorksiteEditModalModel) Hide() {
 	wemm.Visible = false
 	wemm.ShowConfirmDelete = false
 }

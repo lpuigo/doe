@@ -4,13 +4,13 @@ const template string = `
 <el-dialog 
 		:visible.sync="visible" 
 		width="90%"
-		:before-close="Hide"
+		:before-close="HideWithControl"
 >
 	<!-- 
 		Modal Title
 	-->
     <span slot="title">
-		<el-row :gutter="10" type="flex" align="center">
+		<el-row :gutter="10" type="flex" align="middle">
 			<el-col :span="10">
 				<h2 v-if="current_worksite" style="margin: 0 0">
 					<i class="far fa-edit icon--left"></i>Edition du chantier: <span style="color: #ccebff">{{current_worksite.City}} - {{current_worksite.Ref}}</span>

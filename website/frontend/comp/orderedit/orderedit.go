@@ -28,6 +28,7 @@ const template string = `
 	<!-- 
 		 Attributes about Order.Troncons 
 	 -->
+	<troncon-edit v-model="value" :readonly="readonly"></troncon-edit>
 	<el-row :gutter="10" type="flex" align="middle">
 		<el-col :span="2">
 			<el-button type="primary" 
@@ -36,11 +37,7 @@ const template string = `
 					   @click="AddTroncon()"
 			>Ajouter</el-button>
 		</el-col>
-		<el-col :span="2">
-			<span>Tronçons:</span>
-		</el-col>
 	</el-row>
-	<troncon-edit v-model="value" :readonly="readonly"></troncon-edit>
 </div>`
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

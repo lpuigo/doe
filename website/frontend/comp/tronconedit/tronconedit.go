@@ -10,7 +10,7 @@ import (
 
 const template string = `
 <div>
-	<div v-for="(tr, index) in value.Troncons" :key="tr.Ref" >
+	<div v-for="(tr, index) in value.Troncons" :key="index" >
 		<hr>		
 		<el-row :gutter="10">
 			<el-col :span="2">
@@ -24,50 +24,77 @@ const template string = `
 			</el-col>
 			<el-col :span="22">
 				<!-- 
-					Attributes about PB 
-				-->
-				<el-row :gutter="10" type="flex" align="middle">
-					<el-col :span="20">
-						<pt-edit title="PB" v-model="tr.Pb" :readonly="readonly"></pt-edit>
-					</el-col>
-					<el-col :span="4">
-						<el-switch v-model="tr.NeedSignature"
-								   active-color="#ff3200"
-								   active-text="Signature demandée"
-								   inactive-color="#bcbcbc">
-						</el-switch>
-					</el-col>
-				</el-row>
-				<!-- 
 					Attributes about TR 
 				-->
 				<el-row :gutter="10" type="flex" align="middle">
-					<el-col :span="6">
+					<el-col :span="12">
 						<el-tooltip content="Référence" placement="top" effect="light">
-							<el-input placeholder="TR-99-9999" :readonly="readonly" clearable size="mini"
-								  	  v-model="tr.Ref"
+							<el-input v-model="tr.Ref" placeholder="TR-99-9999" 
+									  :readonly="readonly" 
+									  clearable size="mini"
 							></el-input>
 						</el-tooltip>
 					</el-col>
-					<el-col :span="3">
+					<el-col :span="4">
+						<el-switch 
+								   active-color="#db2828"
+								   active-text="Bloquage"
+								   inactive-color="#bcbcbc"
+						></el-switch>
+					</el-col>
+					<el-col :span="4">
+						<el-switch v-model="tr.NeedSignature"
+								   active-color="#db2828"
+								   active-text="Signature demandée"
+								   inactive-color="#bcbcbc"
+						></el-switch>
+					</el-col>
+					<el-col :span="4">
+						<el-switch v-if="tr.NeedSignature"
+								   v-model="tr.Signed"
+								   active-color="#51a825"
+								   active-text="Signature obtenue"
+								   inactive-color="#bcbcbc"
+						></el-switch>
+					</el-col>
+				</el-row>
+				<!-- 
+					Attributes about PB 
+				-->
+				<el-row :gutter="10" type="flex" align="middle">
+					<el-col :span="16">
+						<pt-edit title="PB" v-model="tr.Pb" :readonly="readonly"></pt-edit>
+					</el-col>
+					<el-col :span="4">
 						<el-tooltip content="Nb. EL raccordable" placement="top" effect="light">
-							<el-input-number 
-									v-model="tr.NbRacco" 
-									:min="0" :max="tr.NbFiber" 
-									:readonly="readonly" 
+							<el-input-number
+									v-model="tr.NbRacco"
+									:min="0" :max="tr.NbFiber"
+									:readonly="readonly"
 									size="mini"	controls-position="right" style="width: 100%"
-							></el-input-number>							
+							></el-input-number>
 						</el-tooltip>
 					</el-col>
-					<el-col :span="3">
+					<el-col :span="4">
 						<el-tooltip content="Nb. Fibre" placement="top" effect="light">
-							<el-input-number v-model="tr.NbFiber" 
-											 :min="6" :step="6" 
-											 :readonly="readonly" 
+							<el-input-number v-model="tr.NbFiber"
+											 :min="6" :step="6"
+											 :readonly="readonly"
 											 size="mini" controls-position="right" style="width: 100%">
 								<template slot="prepend">Nb Fibre</template>
 							</el-input-number>
 						</el-tooltip>
+					</el-col>
+				</el-row>
+
+				<!-- 
+					Comment Attributes
+				-->	
+				<el-row :gutter="10">
+					<el-col :span="16">
+						<el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
+								  v-model="tr.Comment"
+						></el-input>
 					</el-col>
 					<el-col :span="4">
 						<el-tooltip content="Date Pose PB" placement="top" effect="light">
@@ -91,24 +118,6 @@ const template string = `
 											:disabled="!tr.InstallDate"
 							></el-date-picker>
 						</el-tooltip>
-					</el-col>
-					<el-col :span="4">
-						<el-switch v-if="tr.NeedSignature" 
-								   v-model="tr.Signed"
-								   active-color="#51a825"
-								   active-text="Signature obtenue"
-								   inactive-color="#bcbcbc"
-						></el-switch>
-					</el-col>
-				</el-row>
-				<!-- 
-					Comment Attributes
-				-->	
-				<el-row :gutter="10">
-					<el-col :span="24">
-						<el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
-								  v-model="tr.Comment"
-						></el-input>
 					</el-col>
 				</el-row>
 			</el-col>

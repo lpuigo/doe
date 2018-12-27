@@ -5,19 +5,23 @@ import (
 	"github.com/huckridgesw/hvue"
 )
 
-func confirmString(vm *hvue.VM, msg, msgtype string) {
+func confirmString(vm *hvue.VM, msg, msgtype string, confirm func()) {
 	vm.Call("$confirm", msg, js.M{
 		"confirmButtonText": "OK",
-		"cancelButtonText":  "Abandon",
+		"cancelButtonText":  "Retour",
 		"type":              msgtype,
-		"callback":          confirmCallBack,
+		"callback":          confirmCallBack(confirm),
 	})
 }
 
-func ConfirmWarning(vm *hvue.VM, msg string) {
-	confirmString(vm, msg, "warning")
+func ConfirmWarning(vm *hvue.VM, msg string, confirm func()) {
+	confirmString(vm, msg, "warning", confirm)
 }
 
-func confirmCallBack(action string) {
-	print("confirmCallBack", action)
+func confirmCallBack(confirm func()) func(string) {
+	return func(action string) {
+		if action == "confirm" {
+			confirm()
+		}
+	}
 }
