@@ -61,6 +61,7 @@ func (ws *Worksite) Copy(ows *Worksite) {
 	ws.Id = ows.Id
 	ws.Ref = ows.Ref
 	ws.OrderDate = ows.OrderDate
+	ws.DoeDate = ows.DoeDate
 	ws.City = ows.City
 	ws.Status = ows.Status
 	ws.Pmz = ows.Pmz.Clone()
@@ -102,6 +103,7 @@ func (ws *Worksite) SearchInString() string {
 	//res += "Id:" Skipped on purpose
 	res := "Ref:" + ws.Ref + "\n"
 	res += "OrderDate:" + date.DateString(ws.OrderDate) + "\n"
+	res += "DoeDate:" + date.DateString(ws.DoeDate) + "\n"
 	res += "City:" + ws.City + "\n"
 	res += "Status:" + ws.Status + "\n"
 	res += "Pmz:" + ws.Pmz.SearchInString()
