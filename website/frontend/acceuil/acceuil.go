@@ -59,7 +59,7 @@ func (m *MainPageModel) GetWorkSites() {
 }
 
 func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
-	print("current_worksite", ws.Object)
+	print("current_worksite", ws)
 	m.EditedWorksite = ws
 	m.VM.Refs("WorksiteEditModal").Call("Show", ws)
 }

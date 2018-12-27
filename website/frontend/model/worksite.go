@@ -48,7 +48,17 @@ func WorksiteFromJS(o *js.Object) *Worksite {
 }
 
 func (ws *Worksite) HasRework() bool {
-	return ws.Rework != nil && ws.Rework.Object != nil
+	if ws.Rework == nil {
+		return false
+	}
+	if ws.Rework.Object == nil {
+		return false
+	}
+	if ws.Rework.Object == js.Undefined {
+		return false
+	}
+	return true
+	//return ws.Rework != nil && ws.Rework.Object != nil && ws.Rework.Object != js.Undefined
 }
 
 func (ws *Worksite) Clone() *Worksite {
