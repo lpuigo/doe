@@ -25,7 +25,7 @@ const template string = `
 	<!-- 
 		Modal Body
 	-->
-	<div style="max-height: 60vh;overflow-x: hidden;overflow-y: auto;padding-right: 8px;">
+	<div style="max-height: 60vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
 		<worksite-detail
 				:worksite="current_worksite"
 				:readonly="false"

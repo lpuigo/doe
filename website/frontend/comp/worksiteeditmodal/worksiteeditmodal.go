@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 )
 
 type WorksiteEditModalModel struct {
@@ -67,10 +68,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("hasChanged", func(vm *hvue.VM) interface{} {
 			m := &WorksiteEditModalModel{Object: vm.Object}
-			if m.EditedWorksite.Object == nil {
-				return true
-			}
-			return m.CurrentWorksite.SearchInString() != m.EditedWorksite.SearchInString()
+			return m.HasChanged()
 		}),
 		hvue.Computed("hasWarning", func(vm *hvue.VM) interface{} {
 			//m := &WorksiteEditModalModel{Object: vm.Object}
@@ -85,6 +83,13 @@ func ComponentOptions() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
+func (wemm *WorksiteEditModalModel) HasChanged() bool {
+	if wemm.EditedWorksite.Object == nil {
+		return true
+	}
+	return wemm.CurrentWorksite.SearchInString() != wemm.EditedWorksite.SearchInString()
+}
+
 func (wemm *WorksiteEditModalModel) Show(ws *fm.Worksite) {
 	wemm.EditedWorksite = ws
 	wemm.CurrentWorksite = ws.Clone()
@@ -94,6 +99,10 @@ func (wemm *WorksiteEditModalModel) Show(ws *fm.Worksite) {
 }
 
 func (wemm *WorksiteEditModalModel) Hide() {
+	if wemm.HasChanged() {
+		message.ConfirmWarning(wemm.VM, "Supprimer les changements ?")
+		return
+	}
 	wemm.Visible = false
 	wemm.ShowConfirmDelete = false
 }
