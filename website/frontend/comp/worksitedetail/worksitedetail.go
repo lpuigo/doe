@@ -18,10 +18,14 @@ func Register() {
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("worksite-detail", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		hvue.Component("pt-edit", ptedit.ComponentOptions()...),
-		hvue.Component("order-edit", orderedit.ComponentOptions()...),
+		ptedit.RegisterComponent(),
+		orderedit.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("worksite", "readonly"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

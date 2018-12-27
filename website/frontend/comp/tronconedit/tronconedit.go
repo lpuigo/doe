@@ -126,9 +126,13 @@ func Register() {
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("troncon-edit", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		hvue.Component("pt-edit", ptedit.ComponentOptions()...),
+		ptedit.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("readonly", "value"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

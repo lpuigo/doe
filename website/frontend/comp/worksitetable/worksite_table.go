@@ -3,8 +3,8 @@ package worksitetable
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitedetail"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable/worksitedetail"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
@@ -22,11 +22,15 @@ func Register() {
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("worksite-table", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
+		worksiteinfo.RegisterComponent(),
+		worksitedetail.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Component("worksite-info", worksiteinfo.ComponentOptions()...),
-		hvue.Component("worksite-detail", worksitedetail.ComponentOptions()...),
 		hvue.Props("worksites"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteTableModel(vm)
@@ -57,9 +61,8 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteTableModel struct {
 	*js.Object
 
-	SelectedWorksite *fm.Worksite   `js:"selected_worksite"`
-	Worksites        []*fm.Worksite `js:"worksites"`
-	Filter           string         `js:"filter"`
+	Worksites []*fm.Worksite `js:"worksites"`
+	Filter    string         `js:"filter"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -67,7 +70,6 @@ type WorksiteTableModel struct {
 func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 	wtm := &WorksiteTableModel{Object: tools.O()}
 	wtm.Worksites = nil
-	wtm.SelectedWorksite = nil
 	wtm.Filter = ""
 	wtm.VM = vm
 	return wtm
@@ -80,13 +82,13 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 //	vm.Emit("selected_worksite", ws)
 //}
 //
-//func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
-//	if nws.Object == nil { // this can happen when Worksites props gets updated
-//		return
-//	}
-//	wtm.SelectedWorksite = nws
-//	wtm.VM.Emit("update:selected_worksite", nws)
-//}
+func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
+	print("WorksiteTableModel.SetSelectedWorksite", nws.Object)
+	if nws.Object == nil { // this can happen when Worksites props gets updated
+		return
+	}
+	wtm.VM.Emit("selected_worksite", nws)
+}
 
 func (wtm *WorksiteTableModel) SaveWorksite(vm *hvue.VM, uws *fm.Worksite) {
 	vm.Emit("save_worksite", uws)

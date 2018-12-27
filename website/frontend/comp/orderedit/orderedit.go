@@ -47,14 +47,18 @@ const template string = `
 // Comp Registration
 
 func Register() {
-	hvue.NewComponent("troncon-edit",
+	hvue.NewComponent("order-edit",
 		ComponentOptions()...,
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("order-edit", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		hvue.Component("troncon-edit", tronconedit.ComponentOptions()...),
+		tronconedit.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("readonly", "value"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

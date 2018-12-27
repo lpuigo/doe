@@ -12,14 +12,19 @@
 <body>
     <div id="app" style="height: 100%;">
 
+        <!-- -->
+        <worksite-edit-modal
+                ref="WorksiteEditModal"
+                :edited_worksite.sync="editedWorksite"
+                @update:edited_worksite="ProcessEditedWorksite"
+                @delete:edited_worksite="ProcessDeleteWorksite"
+        ></worksite-edit-modal>
+        <!-- -->
         <el-container style="height: 100%;border: 1px solid #eee">
             <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
                     <div class="header-menu-container">
                         <h2 class="content">EWIN Services</h2>
-                    </div>
-                    <div>
-
                     </div>
                 </div>
             </el-header>
@@ -33,7 +38,6 @@
                     <worksite-table
                             :worksites="worksites"
                             @selected_worksite="EditWorksite"
-                            @save_worksite="ProcessEditedWorkSite"
                     ></worksite-table>
 <!--
                     <div style="height:100%;">

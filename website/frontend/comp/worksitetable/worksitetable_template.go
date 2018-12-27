@@ -28,19 +28,10 @@ const (
 				:data="filteredWorksites"
 				:row-class-name="TableRowClassName"
 				:default-sort = "{prop: 'Status', order: 'descending'}"
-				@expand-change="ExpandRow"
 				height="100%"
 				:border=true
+				@row-dblclick="SetSelectedWorksite"
 		>
-			<el-table-column type="expand">
-				<template slot-scope="props">
-					<worksite-detail
-							:worksite="props.row"
-							:readonly="false"
-							@save_worksite="SaveWorksite"
-					></worksite-detail>
-				</template>
-			</el-table-column>
 			<el-table-column
 					label="Statut" prop="Status" sortable :sort-by="['Status', 'Ref']"
 					width="100px" :resizable=true :show-overflow-tooltip=true

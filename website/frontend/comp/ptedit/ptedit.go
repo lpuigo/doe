@@ -40,6 +40,10 @@ func Register() {
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("pt-edit", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),

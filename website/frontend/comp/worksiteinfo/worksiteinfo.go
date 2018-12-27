@@ -24,6 +24,10 @@ func Register() {
 	)
 }
 
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("worksite-info", ComponentOptions()...)
+}
+
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),

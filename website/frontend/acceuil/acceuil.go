@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -19,7 +20,8 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#app"),
-		hvue.Component("worksite-table", worksitetable.ComponentOptions()...),
+		worksiteeditmodal.RegisterComponent(),
+		worksitetable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -38,13 +40,14 @@ type MainPageModel struct {
 
 	VM *hvue.VM `js:"VM"`
 
-	Worksites []*fm.Worksite `js:"worksites"`
-	//ReferenceWorksite *fm.Worksite   `js:"editedWorksite"`
+	Worksites      []*fm.Worksite `js:"worksites"`
+	EditedWorksite *fm.Worksite   `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.Worksites = []*fm.Worksite{}
+	mpm.EditedWorksite = nil
 	return mpm
 }
 
@@ -56,10 +59,11 @@ func (m *MainPageModel) GetWorkSites() {
 }
 
 func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
-	//m.ReferenceWorksite = ws
-	//m.VM.Refs("WorksiteEdit").Call("Show", ws)
-	message.SetDuration(tools.WarningMsgDuration)
-	message.InfoStr(m.VM, "Selected Worksite : "+ws.Ref, false)
+	print("current_worksite", ws.Object)
+	m.EditedWorksite = ws
+	m.VM.Refs("WorksiteEditModal").Call("Show", ws)
+	//message.SetDuration(tools.WarningMsgDuration)
+	//message.InfoStr(m.VM, "Selected Worksite : "+ws.Ref, false)
 }
 
 //func (m *MainPageModel) CreateNewProject() {
@@ -70,7 +74,7 @@ func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
 //	m.EditProject(p)
 //}
 //
-func (m *MainPageModel) ProcessEditedWorkSite(uws *fm.Worksite) {
+func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
 	print("ProcessEditedWorkSite on", uws.Id, uws.Ref)
 	if uws.Id >= 0 {
 		go m.callUpdateWorksite(uws)
@@ -79,15 +83,15 @@ func (m *MainPageModel) ProcessEditedWorkSite(uws *fm.Worksite) {
 	}
 }
 
-//func (m *MainPageModel) ProcessDeleteProject(p *fm.Project) {
-//	m.EditedProject = p
-//	if m.EditedProject.GetId >= 0 {
-//		go m.callDeletePrj(m.EditedProject)
-//	}
-//}
-//
+func (m *MainPageModel) ProcessDeleteWorksite(uws *fm.Worksite) {
+	m.EditedWorksite = uws
+	if m.EditedWorksite.Id >= 0 {
+		go m.callDeleteWorksite(m.EditedWorksite)
+	}
+}
+
 //func (m *MainPageModel) ShowProjectStat(p *fm.Project) {
-//	m.EditedProject = p
+//	m.EditedWorksite = p
 //	m.VM.Refs("ProjectStat").Call("Show", p)
 //}
 //
@@ -115,6 +119,13 @@ func (m *MainPageModel) ProcessEditedWorkSite(uws *fm.Worksite) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
+func (m *MainPageModel) errorMessage(req *xhr.Request) {
+	message.SetDuration(tools.WarningMsgDuration)
+	msg := "Quelquechose c'est mal passé !\n"
+	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
+	message.ErrorMsgStr(m.VM, msg, req.Response, true)
+}
+
 func (m *MainPageModel) callGetWorkSites() {
 	req := xhr.NewRequest("GET", "/api/worksites")
 	req.Timeout = tools.LongTimeOut
@@ -126,8 +137,7 @@ func (m *MainPageModel) callGetWorkSites() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.SetDuration(tools.WarningMsgDuration)
-		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status))
+		m.errorMessage(req)
 		return
 	}
 	worksites := []*fm.Worksite{}
@@ -152,10 +162,7 @@ func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
 		uws.Dirty = false
 		message.SuccesStr(m.VM, "Chantier sauvegardé")
 	} else {
-		message.SetDuration(tools.WarningMsgDuration)
-		msg := "Something went wrong!\n"
-		msg += "Server returned code " + strconv.Itoa(req.Status) + "\n"
-		message.ErrorMsgStr(m.VM, msg, req.Response, true)
+		m.errorMessage(req)
 	}
 }
 
@@ -171,40 +178,37 @@ func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
 	if req.Status == 201 {
 		uws.Dirty = false
 		uws.Copy(fm.WorksiteFromJS(req.Response))
+		message.SetDuration(tools.SuccessMsgDuration)
 		message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
 	} else {
-		message.SetDuration(tools.WarningMsgDuration)
-		msg := "Something went wrong!\n"
-		msg += "Server returned code " + strconv.Itoa(req.Status) + "\n"
-		message.ErrorMsgStr(m.VM, msg, req.Response, true)
+		m.errorMessage(req)
 	}
 }
 
-//func (m *MainPageModel) callDeletePrj(dprj *fm.Project) {
-//	req := xhr.NewRequest("DELETE", "/ptf/"+strconv.Itoa(dprj.GetId))
-//	req.Timeout = tools.TimeOut
-//	req.ResponseType = xhr.JSON
-//	err := req.Send(nil)
-//	if err != nil {
-//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-//		return
-//	}
-//	if req.Status == 200 {
-//		m.deletePrj(dprj)
-//		message.SetDuration(tools.SuccessMsgDuration)
-//		message.SuccesStr(m.VM, "Project deleted !", true)
-//	} else {
-//		message.SetDuration(tools.WarningMsgDuration)
-//		message.WarningStr(m.VM, "Something went wrong!\nServer returned code "+strconv.Itoa(req.Status), true)
-//	}
-//}
-//
-//func (m *MainPageModel) deletePrj(dprj *fm.Project) {
-//	for i, p := range m.Projects {
-//		if p.GetId == dprj.GetId {
-//			m.EditedProject = nil
-//			m.Projects = append(m.Projects[:i], m.Projects[i+1:]...)
-//			break
-//		}
-//	}
-//}
+func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
+	req := xhr.NewRequest("DELETE", "/api/worksites/"+strconv.Itoa(dws.Id))
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status == 200 {
+		m.deletePrj(dws)
+		message.SetDuration(tools.SuccessMsgDuration)
+		message.SuccesStr(m.VM, "Chantier supprimé !")
+	} else {
+		m.errorMessage(req)
+	}
+}
+
+func (m *MainPageModel) deletePrj(dws *fm.Worksite) {
+	for i, ws := range m.Worksites {
+		if ws.Id == dws.Id {
+			m.EditedWorksite = nil
+			m.Worksites = append(m.Worksites[:i], m.Worksites[i+1:]...)
+			break
+		}
+	}
+}
