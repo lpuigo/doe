@@ -29,9 +29,10 @@ const template string = `
 				<el-row :gutter="10" type="flex" align="middle">
 					<el-col :span="12">
 						<el-tooltip content="Référence" placement="top" effect="light">
-							<el-input v-model="tr.Ref" placeholder="TR-99-9999" 
+							<el-input v-model.trim="tr.Ref" placeholder="TR-99-9999" 
 									  :readonly="readonly" 
 									  clearable size="mini"
+									  @input="Change"
 							></el-input>
 						</el-tooltip>
 					</el-col>
@@ -93,7 +94,7 @@ const template string = `
 				<el-row :gutter="10">
 					<el-col :span="16">
 						<el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
-								  v-model="tr.Comment"
+								  v-model.trim="tr.Comment"
 						></el-input>
 					</el-col>
 					<el-col :span="4">
@@ -181,4 +182,8 @@ func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 func (tem *TronconEditModel) DeleteTroncon(vm *hvue.VM, i int) {
 	tem = &TronconEditModel{Object: vm.Object}
 	tem.Order.DeleteTroncon(i)
+}
+
+func (tem *TronconEditModel) Change(value string) {
+	print("TronconEditModel.Change", value)
 }

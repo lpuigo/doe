@@ -60,6 +60,10 @@ const template string = `
 					<div slot="content">Dupliquer ce chantier</div>
 					<el-button :disabled="isNewWorksite" type="info" plain size="mini" icon="far fa-clone" @click="Duplicate"></el-button>
 				</el-tooltip>
+				<el-tooltip effect="light" :open-delay="500">
+					<div slot="content">Annuler les changements</div>
+					<el-button :disabled="!hasChanged" type="info" plain size="mini" icon="fas fa-undo-alt" @click="UndoChange"></el-button>
+				</el-tooltip>
 				<el-button @click="Hide" size="mini">Fermer</el-button>
 				<el-button :type="hasWarning" plain size="mini" :disabled="!hasChanged" @click="ConfirmChange">
 					<span v-if="!isNewWorksite">Enregistrer</span>

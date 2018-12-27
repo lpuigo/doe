@@ -120,6 +120,10 @@ func (wemm *WorksiteEditModalModel) ConfirmChange() {
 	wemm.Hide()
 }
 
+func (wemm *WorksiteEditModalModel) UndoChange() {
+	wemm.CurrentWorksite.Copy(wemm.EditedWorksite)
+}
+
 func (wemm *WorksiteEditModalModel) DeleteWorksite() {
 	wemm.VM.Emit("delete:edited_worksite", wemm.EditedWorksite)
 	wemm.Hide()
