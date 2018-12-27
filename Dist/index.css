@@ -74,6 +74,11 @@ pre {
     color: white;
 }
 
+.ewin_xlight {
+    background: #73b6e6;
+    color: white;
+}
+
 .aside-menu-container {
     padding: 5px;
 }
@@ -98,54 +103,6 @@ pre {
     line-height: 1.3em;
 }
 
-/* ====================================================================================================================
-   === Worksite Summary
- */
-.wssum {
-    margin: 10px 0px;
-}
-
-.el-card__header {
-    padding: 3px 10px;
-}
-
-.el-card__body {
-    padding: 3px 10px;
-}
-
-.text {
-    font-size: 1em;
-}
-
-.text .smaller {
-    font-size: 0.80em;
-    color: #777777;
-}
-
-.item {
-    margin-bottom: 18px;
-}
-
-
-.spread {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.pt {
-    width: 45%;
-    margin: 5px;
-    border: 1px solid #ebeef5;
-    padding: 5px;
-    border-radius: 5px;
-    flex: 1 1 none;
-}
-
-.box-card {
-    width: 480px;
-}
-
 
 /* ====================================================================================================================
     === Worksite Table style ===
@@ -166,11 +123,6 @@ pre {
 
 .link:hover {
     opacity: 1 !important;
-}
-
-.novagile-light {
-    background: #a1e6e6;
-    color: #66696f;
 }
 
 .el-table--mini td, .el-table--mini th {
@@ -243,11 +195,11 @@ pre {
     background-color: #DB2828;
 }
 
-/*
-    === Edit Worksite Modal style ===
+/*  ====================================================================================================================
+    === Edit Worksite Modal style
  */
 .el-dialog__header {
-    background: #4abbbd;
+    background: #66a0cc;
     color: white;
     border-bottom: 1px solid #e1e4eb
 }

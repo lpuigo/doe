@@ -59,7 +59,7 @@ const (
 					align="center"	:formatter="FormatDate"
 			></el-table-column>
 			<el-table-column
-					label="Nb Cmd" sortable
+					label="Nb Cmd"
 					width="120px" :resizable=true :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
@@ -70,7 +70,7 @@ const (
 			</el-table-column>
 			<el-table-column
 					label="Commentaire" prop="Comment"
-					min-width="120px" :resizable=true :show-overflow-tooltip=true
+					min-width="120px" :resizable=true
 			></el-table-column>
 		</el-table>		
 	</el-main>

@@ -102,12 +102,7 @@ func (wtm *WorksiteTableModel) ExpandRow(vm *hvue.VM, ws *fm.Worksite, others *j
 }
 
 func (wtm *WorksiteTableModel) AddWorksite(vm *hvue.VM) {
-	wtm = &WorksiteTableModel{Object: vm.Object}
-	print("Add New Worksite number", len(wtm.Worksites))
-	ws := fm.NewWorkSite()
-	ws.AddOrder()
-	wtm.Worksites = append(wtm.Worksites, ws)
-	print("Table now has", len(wtm.Worksites), "sites")
+	vm.Emit("new_worksite")
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

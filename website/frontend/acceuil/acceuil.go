@@ -62,18 +62,14 @@ func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
 	print("current_worksite", ws.Object)
 	m.EditedWorksite = ws
 	m.VM.Refs("WorksiteEditModal").Call("Show", ws)
-	//message.SetDuration(tools.WarningMsgDuration)
-	//message.InfoStr(m.VM, "Selected Worksite : "+ws.Ref, false)
 }
 
-//func (m *MainPageModel) CreateNewProject() {
-//	p := fm.NewProject()
-//	p.Status = business.DefaultStatus()
-//	p.Type = business.DefaultType()
-//	p.Risk = business.DefaultRisk()
-//	m.EditProject(p)
-//}
-//
+func (m *MainPageModel) CreateNewWorksite() {
+	ws := fm.NewWorkSite()
+	ws.AddOrder()
+	m.EditWorksite(ws)
+}
+
 func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
 	print("ProcessEditedWorkSite on", uws.Id, uws.Ref)
 	if uws.Id >= 0 {
@@ -89,32 +85,6 @@ func (m *MainPageModel) ProcessDeleteWorksite(uws *fm.Worksite) {
 		go m.callDeleteWorksite(m.EditedWorksite)
 	}
 }
-
-//func (m *MainPageModel) ShowProjectStat(p *fm.Project) {
-//	m.EditedWorksite = p
-//	m.VM.Refs("ProjectStat").Call("Show", p)
-//}
-//
-//func (m *MainPageModel) ShowProjectAudit(p *fm.Project) {
-//	infos := "Audit for " + p.Client + " - " + p.Name + ":\n"
-//	for _, a := range p.Audits {
-//		infos += a.Priority + " " + a.Title + "\n"
-//	}
-//	message.SetDuration(tools.WarningMsgDuration)
-//	message.InfoStr(m.VM, infos, false)
-//}
-//
-//func (m *MainPageModel) ShowJiraStat() {
-//	m.VM.Refs("JiraStat").Call("Show")
-//}
-//
-//func (m *MainPageModel) ShowWorkloadSchedule() {
-//	m.VM.Refs("WorkloadSchedule").Call("Show")
-//}
-//
-//func (m *MainPageModel) ShowTimeLine() {
-//	m.VM.Refs("TimeLine").Call("Show", timeline_modal.NewInfos(m.Projects))
-//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
@@ -158,12 +128,13 @@ func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status == 200 {
-		uws.Dirty = false
-		message.SuccesStr(m.VM, "Chantier sauvegardé")
-	} else {
+	if req.Status != 200 {
 		m.errorMessage(req)
+		return
 	}
+	uws.Dirty = false
+	message.SuccesStr(m.VM, "Chantier sauvegardé")
+
 }
 
 func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
@@ -175,14 +146,14 @@ func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status == 201 {
-		uws.Dirty = false
-		uws.Copy(fm.WorksiteFromJS(req.Response))
-		message.SetDuration(tools.SuccessMsgDuration)
-		message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
-	} else {
+	if req.Status != 201 {
 		m.errorMessage(req)
 	}
+	uws.Dirty = false
+	uws.Copy(fm.WorksiteFromJS(req.Response))
+	m.Worksites = append(m.Worksites, uws)
+	message.SetDuration(tools.SuccessMsgDuration)
+	message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
 }
 
 func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
@@ -194,13 +165,12 @@ func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status == 200 {
-		m.deletePrj(dws)
-		message.SetDuration(tools.SuccessMsgDuration)
-		message.SuccesStr(m.VM, "Chantier supprimé !")
-	} else {
+	if req.Status != 200 {
 		m.errorMessage(req)
 	}
+	m.deletePrj(dws)
+	message.SetDuration(tools.SuccessMsgDuration)
+	message.SuccesStr(m.VM, "Chantier supprimé !")
 }
 
 func (m *MainPageModel) deletePrj(dws *fm.Worksite) {

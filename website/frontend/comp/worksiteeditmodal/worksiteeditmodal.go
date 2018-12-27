@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitedetail"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
@@ -52,6 +53,7 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksitedetail.RegisterComponent(),
+		worksiteinfo.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("edited_worksite"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

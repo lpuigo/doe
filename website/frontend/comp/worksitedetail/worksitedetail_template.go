@@ -15,16 +15,17 @@ const template string = `
                 <el-option label="A Reprendre" value="Rework"></el-option>
             </el-select>
         </el-col>
-        <el-col :span="6">
+		<el-col :span="6">
+			<el-input placeholder="Ville" :readonly="readonly" clearable size="mini"
+					  v-model="worksite.City"
+			></el-input>
+		</el-col>        
+		<el-col :span="6">
             <el-input placeholder="PA-99999-XXXX" :readonly="readonly" clearable size="mini"
                       v-model="worksite.Ref"
             ></el-input>
         </el-col>
-        <el-col :span="6">
-            <el-input placeholder="Ville" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.City"
-            ></el-input>
-        </el-col>
+
         <el-col :span="6">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
                             style="width: 100%" type="date"
@@ -46,28 +47,12 @@ const template string = `
         Attributes about PMZ & PA
     -->
 	<el-row :gutter="10">
-		<el-col :span="4">
-			<el-button type="success"  
-					   icon="far fa-save icon--left"
-					   size="mini" style="width: 100%"
-					   :disabled="!HasChanged"
-					   @click="Save()"
-			>Enregistrer</el-button>
-		</el-col>
-		<el-col :span="20">
+		<el-col :offset="2" :span="22">
 			<pt-edit title="PMZ" v-model="worksite.Pmz" :readonly="readonly"></pt-edit>
 		</el-col>
 	</el-row>
 	<el-row :gutter="10">
-		<el-col :span="4">
-			<el-button type="info"
-					   icon="fas fa-undo-alt icon--left"
-					   size="mini" style="width: 100%"
-					   :disabled="!HasChanged"
-					   @click="Undo()"
-			>Annuler</el-button>
-		</el-col>
-		<el-col :span="20">
+		<el-col :offset="2" :span="22">
 			<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
 		</el-col>
 	</el-row>
