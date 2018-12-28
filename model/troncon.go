@@ -5,6 +5,7 @@ type Troncon struct {
 	Pb            PT
 	NbRacco       int
 	NbFiber       int
+	Blockage      bool
 	NeedSignature bool
 	Signed        bool
 	InstallDate   string

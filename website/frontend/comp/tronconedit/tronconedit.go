@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"strings"
 )
 
 const template string = `
@@ -32,15 +33,16 @@ const template string = `
 							<el-input v-model.trim="tr.Ref" placeholder="TR-99-9999" 
 									  :readonly="readonly" 
 									  clearable size="mini"
-									  @input="Change"
+									  @input="CheckRef(tr)"
 							></el-input>
 						</el-tooltip>
 					</el-col>
 					<el-col :span="4">
-						<el-switch 
+						<el-switch v-model="tr.Blockage"
 								   active-color="#db2828"
 								   active-text="Bloquage"
 								   inactive-color="#bcbcbc"
+								   :disabled="tr.NeedSignature && !tr.Signed"
 						></el-switch>
 					</el-col>
 					<el-col :span="4">
@@ -48,6 +50,7 @@ const template string = `
 								   active-color="#db2828"
 								   active-text="Signature demandée"
 								   inactive-color="#bcbcbc"
+								   @input="CheckSignature(tr)"
 						></el-switch>
 					</el-col>
 					<el-col :span="4">
@@ -56,6 +59,7 @@ const template string = `
 								   active-color="#51a825"
 								   active-text="Signature obtenue"
 								   inactive-color="#bcbcbc"
+								   @input="CheckSignature(tr)"
 						></el-switch>
 					</el-col>
 				</el-row>
@@ -184,6 +188,16 @@ func (tem *TronconEditModel) DeleteTroncon(vm *hvue.VM, i int) {
 	tem.Order.DeleteTroncon(i)
 }
 
-func (tem *TronconEditModel) Change(value string) {
-	print("TronconEditModel.Change", value)
+func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
+	if !strings.HasPrefix(tr.Ref, "TR-") {
+		tr.Ref = "TR-" + tr.Ref
+	}
+}
+
+func (tem *TronconEditModel) CheckSignature(tr *fm.Troncon) {
+	if tr.NeedSignature {
+		tr.Blockage = !tr.Signed
+		return
+	}
+	tr.Signed = false
 }

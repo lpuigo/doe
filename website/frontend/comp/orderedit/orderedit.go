@@ -29,6 +29,7 @@ const template string = `
 		 Attributes about Order.Troncons 
 	 -->
 	<troncon-edit v-model="value" :readonly="readonly"></troncon-edit>
+	<hr>
 	<el-row :gutter="10" type="flex" align="middle">
 		<el-col :span="2">
 			<el-button type="primary" 
