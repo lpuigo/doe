@@ -18,8 +18,9 @@ const template string = `
             </el-input>
         </el-col>
         <el-col :span="4">
-            <el-input placeholder="PA-99999-XXXX" :readonly="readonly" clearable size="mini"
+            <el-input placeholder="PA-99999-XXXX" 
                       v-model="worksite.Ref"
+                      :readonly="readonly" clearable size="mini"
             >
                 <template slot="prepend">Chantier:</template>
             </el-input>
@@ -27,16 +28,13 @@ const template string = `
         <el-col :span="4" style="text-align: right">
             <el-row type="flex" align="middle">
                 <span style="margin-right: 5px">Etat:</span>
-                <el-input v-if="readonly" placeholder="Statut" :readonly="true" clearable size="mini"
-                          v-model="worksite.Ref"
-                ></el-input>
-                <el-select v-else placeholder="Statut" size="mini" style="width: 100%"
-                           v-model="worksite.Status">
-                    <el-option label="Nouveau" value="New"></el-option>
-                    <el-option label="En cours" value="InProgress"></el-option>
-                    <el-option label="DOE à faire" value="DOE"></el-option>
-                    <el-option label="Terminé" value="Done"></el-option>
-                    <el-option label="A Reprendre" value="Rework"></el-option>
+                <el-select placeholder="Statut"
+                           v-model="worksite.Status"
+                           :disabled="readonly" size="mini" style="width: 100%"
+                >
+                    <el-option v-for="(vt, vtn) in WorksiteStatusValTexts()" :key="vt.value" 
+                               :label="vt.text" :value="vt.value"
+                    ></el-option>
                 </el-select>
             </el-row>
         </el-col>

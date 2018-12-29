@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,4 +98,12 @@ func (wdm *WorksiteDetailModel) Save(vm *hvue.VM) {
 func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.Copy(wdm.ReferenceWorksite)
+}
+
+func (wdm *WorksiteDetailModel) WorksiteStatusValTexts() []*elements.ValText {
+	res := []*elements.ValText{}
+	for _, v := range []string{"New", "InProgress", "DOE", "Done", "Rework"} {
+		res = append(res, elements.NewValText(v, fm.WorksiteStatusLabel(v)))
+	}
+	return res
 }

@@ -12,7 +12,9 @@ const template string = `
 <div> 
     <i class="fas fa-sitemap icon--left"></i><span>{{NbCommand}}&nbsp;</span>
     <i class="fas fa-share-alt icon--left"></i><span>{{NbTroncon}}&nbsp;</span>
-    <i class="fas fa-grip-vertical icon--left"></i><span>{{NbLogement}}</span>
+    <i class="fas fa-grip-vertical icon--left"></i>
+	<span v-if="NbAvailLogement != NbLogement">{{NbAvailLogement}} / {{NbLogement}}</span>
+	<span v-else>{{NbLogement}}</span>
 </div>`
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,9 +40,10 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.MethodsOf(&WorksiteInfoModel{}),
 		hvue.Computed("NbCommand", func(vm *hvue.VM) interface{} {
 			wim := &WorksiteInfoModel{Object: vm.Object}
-			nbCommand, nbTroncon, nbLogement := wim.Worksite.GetInfo()
+			nbCommand, nbTroncon, nbAvailLogement, nbLogement := wim.Worksite.GetInfo()
 			wim.NbTroncon = nbTroncon
 			wim.NbLogement = nbLogement
+			wim.NbAvailLogement = nbAvailLogement
 			return nbCommand
 		}),
 		hvue.Filter("DateFormat", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
@@ -55,9 +58,10 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteInfoModel struct {
 	*js.Object
 
-	Worksite   *fm.Worksite `js:"worksite"`
-	NbTroncon  int          `js:"NbTroncon"`
-	NbLogement int          `js:"NbLogement"`
+	Worksite        *fm.Worksite `js:"worksite"`
+	NbTroncon       int          `js:"NbTroncon"`
+	NbLogement      int          `js:"NbLogement"`
+	NbAvailLogement int          `js:"NbAvailLogement"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -68,5 +72,6 @@ func NewWorksiteInfoModel(vm *hvue.VM) *WorksiteInfoModel {
 	wim.Worksite = nil
 	wim.NbTroncon = 0
 	wim.NbLogement = 0
+	wim.NbAvailLogement = 0
 	return wim
 }

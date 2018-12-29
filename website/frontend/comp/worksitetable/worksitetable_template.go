@@ -32,15 +32,17 @@ const (
 				:border=true
 				@row-dblclick="SetSelectedWorksite"
 		>
+            <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
 			<el-table-column
-					label="Statut" prop="Status" sortable :sort-by="['Status', 'Client', 'City', 'Ref']"
+					label="Statut" prop="Status" :formatter="FormatStatus"
+                    sortable :sort-method="SortStatus"
 					width="100px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Status')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
 			></el-table-column>
 			<el-table-column
-					label="Ville" prop="Client" sortable :sort-by="['Client', 'City', 'Ref']"
+					label="Client" prop="Client" sortable :sort-by="['Client', 'City', 'Ref']"
 					width="140px" :resizable=true :show-overflow-tooltip=true
-					:filters="FilterList('City')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
+					:filters="FilterList('Client')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 			<el-table-column
 					label="Ville" prop="City" sortable :sort-by="['City', 'Ref']"
@@ -52,10 +54,10 @@ const (
 					width="140px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
-				<i v-if="scope.row.Dirty"
-				   class="far fa-save icon--left link"
-				   @click="SaveWorksite(scope.row)"
-				></i><span>{{scope.row.Ref}}</span>
+                    <i v-if="scope.row.Dirty"
+                       class="far fa-save icon--left link"
+                       @click="SaveWorksite(scope.row)"
+                    ></i><span>{{scope.row.Ref}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -65,12 +67,10 @@ const (
 			></el-table-column>
 			<el-table-column
 					label="Nb Cmd"
-					width="120px" :resizable=true :show-overflow-tooltip=true
+					width="150px" :resizable=true :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
-					<worksite-info
-							:worksite="scope.row"
-					></worksite-info>
+					<worksite-info :worksite="scope.row"></worksite-info>
 				</template>
 			</el-table-column>
 			<el-table-column

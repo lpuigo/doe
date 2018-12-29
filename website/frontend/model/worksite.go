@@ -134,12 +134,15 @@ func (ws *Worksite) SearchInString() string {
 	return res
 }
 
-func (ws *Worksite) GetInfo() (nbCommand, nbTroncon, nbRacco int) {
+func (ws *Worksite) GetInfo() (nbCommand, nbTroncon, nbAvailRacco, nbRacco int) {
 	nbCommand = len(ws.Orders)
 	for _, o := range ws.Orders {
 		nbTroncon += len(o.Troncons)
 		for _, t := range o.Troncons {
 			nbRacco += t.NbRacco
+			if !t.Blockage {
+				nbAvailRacco += t.NbRacco
+			}
 		}
 	}
 	return
@@ -173,4 +176,21 @@ func (ws *Worksite) OrdersCompleted() bool {
 		}
 	}
 	return true
+}
+
+func WorksiteStatusLabel(value string) string {
+	switch value {
+	case "New":
+		return "Nouveau"
+	case "InProgress":
+		return "En cours"
+	case "DOE":
+		return "DOE à faire"
+	case "Done":
+		return "Terminé"
+	case "Rework":
+		return "A Reprendre"
+	default:
+		return "<" + value + ">"
+	}
 }

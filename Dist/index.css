@@ -155,8 +155,12 @@ pre {
     color: #adadad;
 }
 
+.el-table .worksite-row-doe {
+    background: #caebc7;
+}
+
 .el-table .worksite-row-rework {
-    background: #fff1db;
+    background: #ffebcc;
 }
 
 .el-table .worksite-row-new {

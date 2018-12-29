@@ -117,8 +117,8 @@ func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
 	switch ws.Status {
 	case "Done":
 		res = "worksite-row-done"
-	//case "InProgress":
-	//	res = "worksite-row-inprogress"
+	case "DOE":
+		res = "worksite-row-doe"
 	case "Rework":
 		res = "worksite-row-rework"
 	case "New":
@@ -137,6 +137,22 @@ func (wtm *WorksiteTableModel) FormatDate(r, c *js.Object, d string) string {
 	return date.DateString(d)
 }
 
+func (wtm *WorksiteTableModel) FormatStatus(r, c *js.Object, d string) string {
+	return fm.WorksiteStatusLabel(d)
+}
+
+func (wtm *WorksiteTableModel) SortStatus(a, b *fm.Worksite) int {
+	la := fm.WorksiteStatusLabel(a.Status)
+	lb := fm.WorksiteStatusLabel(b.Status)
+	if la < lb {
+		return -1
+	}
+	if la == lb {
+		return 0
+	}
+	return 1
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Column Filtering Related Methods
 
@@ -149,6 +165,17 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 	wtm = &WorksiteTableModel{Object: vm.Object}
 	count := map[string]int{}
 	attribs := []string{}
+
+	var translate func(string) string
+	switch prop {
+	case "Status":
+		translate = func(val string) string {
+			return fm.WorksiteStatusLabel(val)
+		}
+	default:
+		translate = func(val string) string { return val }
+	}
+
 	for _, ws := range wtm.Worksites {
 		attrib := ws.Object.Get(prop).String()
 		if _, exist := count[attrib]; !exist {
@@ -161,17 +188,22 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 	for _, a := range attribs {
 		fa := a
 		if fa == "" {
-			fa = "<Vide>"
+			fa = "Vide"
 		}
-		res = append(res, elements.NewValText(a, fa+" ("+strconv.Itoa(count[a])+")"))
+		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
 	}
 	return res
 }
 
 func (wtm *WorksiteTableModel) FilteredStatusValue() []string {
 	res := []string{
+		"DOE",
 		"InProgress",
 		"New",
+		"Rework",
+		//fm.WorksiteStatusLabel("DOE"),
+		//fm.WorksiteStatusLabel("InProgress"),
+		//fm.WorksiteStatusLabel("New"),
 	}
 	return res
 }
