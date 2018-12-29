@@ -21,12 +21,9 @@ const template string = `
                          clearable size="mini"  style="width: 100%"
 
         ></el-autocomplete>
-        
+
         <!--@input="CheckRef(tr)"-->
-        
-        <!--<el-input :placeholder="refPH" :readonly="readonly" clearable size="mini"-->
-                  <!--v-model="value.Ref"-->
-        <!--&gt;</el-input>-->
+
     </el-col>
     <el-col :span="6">
         <el-autocomplete v-model="value.RefPt"
@@ -34,11 +31,7 @@ const template string = `
                          placeholder="PT-009999"
                          :readonly="readonly"
                          clearable size="mini"  style="width: 100%"
-
         ></el-autocomplete>
-        <!--<el-input placeholder="PT-009999" :readonly="readonly" clearable size="mini"-->
-                  <!--v-model="value.RefPt"-->
-        <!--&gt;</el-input>-->
     </el-col>
     <el-col :span="11">
         <el-input :placeholder="addressPH" :readonly="readonly" clearable size="mini"
