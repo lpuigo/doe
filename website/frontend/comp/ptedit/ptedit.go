@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 )
 
 const template string = `
@@ -12,17 +13,34 @@ const template string = `
     <el-col :span="1">
         <span><strong>{{title}}:</strong></span>
     </el-col>
-    <el-col :span="4">
-        <el-input :placeholder="refPH" :readonly="readonly" clearable size="mini"
-                  v-model="value.Ref"
-        ></el-input>
+    <el-col :span="6">
+        <el-autocomplete v-model="value.Ref"
+                         :fetch-suggestions="RefSearchRef"
+                         :placeholder="refPH"
+                         :readonly="readonly"
+                         clearable size="mini"  style="width: 100%"
+
+        ></el-autocomplete>
+        
+        <!--@input="CheckRef(tr)"-->
+        
+        <!--<el-input :placeholder="refPH" :readonly="readonly" clearable size="mini"-->
+                  <!--v-model="value.Ref"-->
+        <!--&gt;</el-input>-->
     </el-col>
-    <el-col :span="4">
-        <el-input placeholder="PT-009999" :readonly="readonly" clearable size="mini"
-                  v-model="value.RefPt"
-        ></el-input>
+    <el-col :span="6">
+        <el-autocomplete v-model="value.RefPt"
+                         :fetch-suggestions="RefSearchRefPt"
+                         placeholder="PT-009999"
+                         :readonly="readonly"
+                         clearable size="mini"  style="width: 100%"
+
+        ></el-autocomplete>
+        <!--<el-input placeholder="PT-009999" :readonly="readonly" clearable size="mini"-->
+                  <!--v-model="value.RefPt"-->
+        <!--&gt;</el-input>-->
     </el-col>
-    <el-col :span="15">
+    <el-col :span="11">
         <el-input :placeholder="addressPH" :readonly="readonly" clearable size="mini"
                   v-model="value.Address"
         >
@@ -47,7 +65,14 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("title", "readonly", "value"),
+		//hvue.Props("title", "readonly", "value"),
+		hvue.PropObj("title", hvue.Types(hvue.PString)),
+		hvue.PropObj("readonly", hvue.Types(hvue.PBoolean)),
+		hvue.PropObj("value", hvue.Types(hvue.PObject)),
+		hvue.PropObj("info",
+			hvue.Types(hvue.PObject),
+			hvue.Default(js.M{"PB": "", "PT": ""}),
+		),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPtEditModel(vm)
 		}),
@@ -55,10 +80,10 @@ func ComponentOptions() []hvue.ComponentOption {
 			pem := &PtEditModel{Object: vm.Object}
 			return pem.Title + "-99999"
 		}),
-		hvue.Computed("refptPH", func(vm *hvue.VM) interface{} {
-			pem := &PtEditModel{Object: vm.Object}
-			return pem.Title + "-0099999"
-		}),
+		//hvue.Computed("refptPH", func(vm *hvue.VM) interface{} {
+		//	pem := &PtEditModel{Object: vm.Object}
+		//	return pem.Title + "-0099999"
+		//}),
 		hvue.Computed("addressPH", func(vm *hvue.VM) interface{} {
 			pem := &PtEditModel{Object: vm.Object}
 			return "Adresse " + pem.Title
@@ -87,4 +112,32 @@ func NewPtEditModel(vm *hvue.VM) *PtEditModel {
 	pem.Readonly = false
 	pem.Title = "PT"
 	return pem
+}
+
+func (pem *PtEditModel) RefSearchRef(vm *hvue.VM, query string, callback *js.Object) {
+	pem = &PtEditModel{Object: vm.Object}
+	suffix := pem.Object.Get("info").Get("PB").String()
+	res := []*autocomplete.Result{}
+	// check if default value found
+	if suffix == "" {
+		res = append(res, autocomplete.NewResult(pem.Title+"-99999"))
+		callback.Invoke(res)
+		return
+	}
+	res = autocomplete.GenResults(pem.Title+"-", suffix, 4)
+	callback.Invoke(res)
+}
+
+func (pem *PtEditModel) RefSearchRefPt(vm *hvue.VM, query string, callback *js.Object) {
+	pem = &PtEditModel{Object: vm.Object}
+	suffix := pem.Object.Get("info").Get("PT").String()
+	res := []*autocomplete.Result{}
+	// check if default value found
+	if suffix == "" {
+		res = append(res, autocomplete.NewResult("PT-009999"))
+		callback.Invoke(res)
+		return
+	}
+	res = autocomplete.GenResults("PT-", suffix, 4)
+	callback.Invoke(res)
 }

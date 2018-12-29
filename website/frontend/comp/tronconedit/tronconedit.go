@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"strings"
 )
 
@@ -28,13 +29,14 @@ const template string = `
 					Attributes about TR 
 				-->
 				<el-row :gutter="10" type="flex" align="middle">
-					<el-col :span="12">
+                    <el-col :span="12">
 						<el-tooltip content="Référence" placement="top" effect="light">
-							<el-input v-model.trim="tr.Ref" placeholder="TR-99-9999" 
-									  :readonly="readonly" 
-									  clearable size="mini"
-									  @input="CheckRef(tr)"
-							></el-input>
+                            <el-autocomplete v-model="tr.Ref"
+                                             :fetch-suggestions="RefSearch"
+                                             placeholder="TR-99-9999"
+                                             clearable size="mini"  style="width: 100%"
+                                             @input="CheckRef(tr)"
+                            ></el-autocomplete>
 						</el-tooltip>
 					</el-col>
 					<el-col :span="4">
@@ -68,7 +70,7 @@ const template string = `
 				-->
 				<el-row :gutter="10" type="flex" align="middle">
 					<el-col :span="16">
-						<pt-edit title="PB" v-model="tr.Pb" :readonly="readonly"></pt-edit>
+						<pt-edit title="PB" v-model="tr.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
 					</el-col>
 					<el-col :span="4">
 						<el-tooltip content="Nb. EL raccordable" placement="top" effect="light">
@@ -200,4 +202,47 @@ func (tem *TronconEditModel) CheckSignature(tr *fm.Troncon) {
 		return
 	}
 	tr.Signed = false
+	tr.Blockage = false
+}
+
+func (tem *TronconEditModel) RefSearch(vm *hvue.VM, query string, callback *js.Object) {
+	tem = &TronconEditModel{Object: vm.Object}
+	troncons := tem.Order.Troncons
+	// if no previous troncon.ref return default choice list
+	res := []*autocomplete.Result{}
+	if len(troncons) == 1 {
+		res = append(res, autocomplete.NewResult("TR-00-0000"))
+		callback.Invoke(res)
+		return
+	}
+	// retrieve last troncon.Ref
+	lastref := troncons[len(troncons)-2].Ref
+	if lastref == "" || !strings.HasPrefix(lastref, "TR-") {
+		res = append(res, autocomplete.NewResult("TR-00-0000"))
+		callback.Invoke(res)
+		return
+	}
+	refchunck := strings.Split(lastref, "-")
+	res = autocomplete.GenResults(strings.Join(refchunck[:2], "-")+"-", refchunck[2], 4)
+	callback.Invoke(res)
+}
+
+func (tem *TronconEditModel) LastPBinfo(vm *hvue.VM) js.M {
+	tem = &TronconEditModel{Object: vm.Object}
+	pbRef := ""
+	ptRef := ""
+	troncons := tem.Order.Troncons
+	// if no previous troncon return default choice list
+	if len(troncons) == 1 {
+		return js.M{"PB": pbRef, "PT": ptRef}
+	}
+	// retrieve last troncon.PB
+	lastPb := troncons[len(troncons)-2].Pb
+	if lastPb.Ref != "" && strings.HasPrefix(lastPb.Ref, "PB-") {
+		pbRef = strings.TrimPrefix(lastPb.Ref, "PB-")
+	}
+	if lastPb.RefPt != "" && strings.HasPrefix(lastPb.RefPt, "PT-") {
+		ptRef = strings.TrimPrefix(lastPb.RefPt, "PT-")
+	}
+	return js.M{"PB": pbRef, "PT": ptRef}
 }
