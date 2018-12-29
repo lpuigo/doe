@@ -2,6 +2,7 @@ package model
 
 type Worksite struct {
 	Id        int
+	Client    string
 	Ref       string
 	OrderDate string
 	DoeDate   string

@@ -33,9 +33,14 @@ const (
 				@row-dblclick="SetSelectedWorksite"
 		>
 			<el-table-column
-					label="Statut" prop="Status" sortable :sort-by="['Status', 'Ref']"
+					label="Statut" prop="Status" sortable :sort-by="['Status', 'Client', 'City', 'Ref']"
 					width="100px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Status')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+			></el-table-column>
+			<el-table-column
+					label="Ville" prop="Client" sortable :sort-by="['Client', 'City', 'Ref']"
+					width="140px" :resizable=true :show-overflow-tooltip=true
+					:filters="FilterList('City')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 			<el-table-column
 					label="Ville" prop="City" sortable :sort-by="['City', 'Ref']"

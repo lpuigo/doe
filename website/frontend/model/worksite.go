@@ -11,6 +11,7 @@ type Worksite struct {
 	*js.Object
 
 	Id        int      `js:"Id"`
+	Client    string   `js:"Client"`
 	Ref       string   `js:"Ref"`
 	OrderDate string   `js:"OrderDate"`
 	DoeDate   string   `js:"DoeDate"`
@@ -27,6 +28,7 @@ type Worksite struct {
 func NewWorkSite() *Worksite {
 	ws := &Worksite{Object: tools.O()}
 	ws.Id = -1
+	ws.Client = ""
 	ws.Ref = ""
 	ws.OrderDate = ""
 	ws.DoeDate = ""
@@ -69,6 +71,7 @@ func (ws *Worksite) Clone() *Worksite {
 
 func (ws *Worksite) Copy(ows *Worksite) {
 	ws.Id = ows.Id
+	ws.Client = ows.Client
 	ws.Ref = ows.Ref
 	ws.OrderDate = ows.OrderDate
 	ws.DoeDate = ows.DoeDate
@@ -111,7 +114,8 @@ func (ws *Worksite) Contains(str string) bool {
 
 func (ws *Worksite) SearchInString() string {
 	//res += "Id:" Skipped on purpose
-	res := "Ref:" + ws.Ref + "\n"
+	res := "Client:" + ws.Client + "\n"
+	res += "Ref:" + ws.Ref + "\n"
 	res += "OrderDate:" + date.DateString(ws.OrderDate) + "\n"
 	res += "DoeDate:" + date.DateString(ws.DoeDate) + "\n"
 	res += "City:" + ws.City + "\n"
@@ -160,4 +164,13 @@ func (ws *Worksite) AddOrder() {
 
 func (ws *Worksite) AddRework() {
 	ws.Rework = NewRework()
+}
+
+func (ws *Worksite) OrdersCompleted() bool {
+	for _, o := range ws.Orders {
+		if !o.IsCompleted() {
+			return false
+		}
+	}
+	return true
 }

@@ -1,38 +1,62 @@
-package worksitedetail
+package worksiteedit
 
 const template string = `
 <div class="worksite-detail">
-    <el-row :gutter="10">
-        <el-col :span="6">
-            <el-input v-if="readonly" placeholder="Statut" :readonly="true" clearable size="mini"
-                      v-model="worksite.Ref"
-            ></el-input>            
-            <el-select v-else placeholder="Statut" size="mini" style="width: 100%"
-                       v-model="worksite.Status">
-                <el-option label="Nouveau" value="New"></el-option>
-                <el-option label="En cours" value="InProgress"></el-option>
-                <el-option label="Terminé" value="Done"></el-option>
-                <el-option label="A Reprendre" value="Rework"></el-option>
-            </el-select>
+    <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="3">
+            <el-input placeholder="Client" :readonly="readonly" clearable size="mini"
+                      v-model="worksite.Client"
+            >
+                <template slot="prepend">Client:</template>
+            </el-input>
         </el-col>
-		<el-col :span="6">
-			<el-input placeholder="Ville" :readonly="readonly" clearable size="mini"
-					  v-model="worksite.City"
-			></el-input>
-		</el-col>        
-		<el-col :span="6">
+        <el-col :span="4">
+            <el-input placeholder="Ville" :readonly="readonly" clearable size="mini"
+                      v-model="worksite.City"
+            >
+                <template slot="prepend">Ville:</template>
+            </el-input>
+        </el-col>
+        <el-col :span="4">
             <el-input placeholder="PA-99999-XXXX" :readonly="readonly" clearable size="mini"
                       v-model="worksite.Ref"
-            ></el-input>
+            >
+                <template slot="prepend">Chantier:</template>
+            </el-input>
         </el-col>
-
-        <el-col :span="6">
+        <el-col :span="4" style="text-align: right">
+            <el-row type="flex" align="middle">
+                <span style="margin-right: 5px">Etat:</span>
+                <el-input v-if="readonly" placeholder="Statut" :readonly="true" clearable size="mini"
+                          v-model="worksite.Ref"
+                ></el-input>
+                <el-select v-else placeholder="Statut" size="mini" style="width: 100%"
+                           v-model="worksite.Status">
+                    <el-option label="Nouveau" value="New"></el-option>
+                    <el-option label="En cours" value="InProgress"></el-option>
+                    <el-option label="DOE à faire" value="DOE"></el-option>
+                    <el-option label="Terminé" value="Done"></el-option>
+                    <el-option label="A Reprendre" value="Rework"></el-option>
+                </el-select>
+            </el-row>
+        </el-col>
+        <el-col :span="3">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
                             style="width: 100%" type="date"
                             v-model="worksite.OrderDate"
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
+            ></el-date-picker>
+        </el-col>
+        <el-col :span="3">
+            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Envoi DOE" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="worksite.DoeDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+                            :disabled="!IsReadyForDoe"
             ></el-date-picker>
         </el-col>
     </el-row>

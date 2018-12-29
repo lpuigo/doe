@@ -66,3 +66,12 @@ func (o *Order) AddTroncon() {
 	troncon := NewTroncon()
 	o.Troncons = append(o.Troncons, troncon)
 }
+
+func (o *Order) IsCompleted() bool {
+	for _, t := range o.Troncons {
+		if !t.IsCompleted() {
+			return false
+		}
+	}
+	return true
+}

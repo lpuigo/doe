@@ -1,4 +1,4 @@
-package worksitedetail
+package worksiteedit
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -13,13 +13,13 @@ import (
 // Comp Registration
 
 func Register() {
-	hvue.NewComponent("worksite-detail",
+	hvue.NewComponent("worksite-edit",
 		ComponentOptions()...,
 	)
 }
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("worksite-detail", ComponentOptions()...)
+	return hvue.Component("worksite-edit", ComponentOptions()...)
 }
 
 func ComponentOptions() []hvue.ComponentOption {
@@ -41,6 +41,17 @@ func ComponentOptions() []hvue.ComponentOption {
 			s2 := wdm.ReferenceWorksite.SearchInString()
 			wdm.Worksite.Dirty = s1 != s2
 			return wdm.Worksite.Dirty
+		}),
+		hvue.Computed("IsReadyForDoe", func(vm *hvue.VM) interface{} {
+			wdm := &WorksiteDetailModel{Object: vm.Object}
+			if wdm.Worksite.OrdersCompleted() {
+				wdm.Worksite.Status = "DOE"
+				return true
+			}
+			if wdm.Worksite.Status == "DOE" {
+				wdm.Worksite.Status = "InProgress"
+			}
+			return false
 		}),
 		hvue.MethodsOf(&WorksiteDetailModel{}),
 	}

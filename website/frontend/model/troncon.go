@@ -70,3 +70,13 @@ func (tr *Troncon) SearchInString() string {
 
 	return res
 }
+
+func (tr *Troncon) IsCompleted() bool {
+	if tr.Blockage {
+		return true
+	}
+	if tr.InstallDate != "" && tr.MeasureDate != "" {
+		return true
+	}
+	return false
+}
