@@ -67,12 +67,15 @@ func (p Persister) HasId(id int) bool {
 }
 
 // GetFilesList returns all the record files contained in persister directory (User class is responsible to Load the record)
-func (p Persister) GetFilesList() (list []string, err error) {
+func (p Persister) GetFilesList(skipdir string) (list []string, err error) {
 	err = filepath.Walk(p.directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil
+			return err
 		}
 		if info.IsDir() {
+			if info.Name() == skipdir {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		list = append(list, path)

@@ -26,7 +26,7 @@ func (r *Record) Dirty() {
 }
 
 func (r *Record) Persist(path string) error {
-	file := filepath.Join(path, fmt.Sprintf("%06d.json", r.id))
+	file := r.GetFilePath(path)
 	f, err := os.Create(file)
 	defer f.Close()
 	if err != nil {
@@ -41,8 +41,21 @@ func (r *Record) Persist(path string) error {
 }
 
 func (r Record) Remove(path string) error {
-	file := filepath.Join(path, fmt.Sprintf("%06d.json", r.id))
-	return os.Remove(file)
+	dpath := filepath.Join(path, "deleted")
+	if _, err := os.Stat(dpath); os.IsNotExist(err) {
+		os.Mkdir(dpath, os.ModePerm)
+	}
+	file := r.GetFilePath(path)
+	dfile := r.GetFilePath(dpath)
+	return os.Rename(file, dfile)
+}
+
+func (r Record) GetFilePath(path string) string {
+	return filepath.Join(path, r.GetFileName())
+}
+
+func (r Record) GetFileName() string {
+	return fmt.Sprintf("%06d.json", r.id)
 }
 
 func NewRecord(marshall func(w io.Writer) error) *Record {

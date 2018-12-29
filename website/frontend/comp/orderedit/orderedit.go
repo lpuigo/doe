@@ -15,9 +15,12 @@ const template string = `
 	 -->
 	<el-row :gutter="10">
 		<el-col :span="5">
-			<el-input placeholder="F99999jjmmaa" :readonly="readonly" clearable size="mini"
-					  v-model="value.Ref"
-			></el-input>
+			<el-input placeholder="F99999jjmmaa"
+                      v-model="value.Ref"
+                      :readonly="readonly" clearable size="mini"
+			>
+                <template slot="prepend">Commande:</template>
+            </el-input>
 		</el-col>
 		<el-col :span="19">
 			<el-input placeholder="Commentaire sur la commande" :readonly="readonly" clearable size="mini" type="textarea" autosize

@@ -103,7 +103,9 @@ pre {
     line-height: 1.3em;
 }
 
-
+.el-input-group__append, .el-input-group__prepend {
+    padding: 0 5px
+}
 /* ====================================================================================================================
     === Worksite Table style ===
  */

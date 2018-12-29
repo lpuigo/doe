@@ -10,17 +10,19 @@ import (
 
 const template string = `
 <el-row :gutter="10" type="flex" align="middle">
-    <el-col :span="1">
-        <span><strong>{{title}}:</strong></span>
-    </el-col>
-    <el-col :span="6">
+    <!--<el-col :span="1">-->
+        <!--<span><strong>{{title}}:</strong></span>-->
+    <!--</el-col>-->
+    <el-col :span="7">
         <el-autocomplete v-model="value.Ref"
                          :fetch-suggestions="RefSearchRef"
                          :placeholder="refPH"
                          :readonly="readonly"
                          clearable size="mini"  style="width: 100%"
 
-        ></el-autocomplete>
+        >
+            <template slot="prepend">{{title}}:</template>
+        </el-autocomplete>
 
         <!--@input="CheckRef(tr)"-->
 

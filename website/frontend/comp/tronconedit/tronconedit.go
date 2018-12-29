@@ -36,7 +36,9 @@ const template string = `
                                              placeholder="TR-99-9999"
                                              clearable size="mini"  style="width: 100%"
                                              @input="CheckRef(tr)"
-                            ></el-autocomplete>
+                            >
+                                <template slot="prepend">Tronçon:</template>
+                            </el-autocomplete>
 						</el-tooltip>
 					</el-col>
 					<el-col :span="4">
@@ -87,7 +89,10 @@ const template string = `
 							<el-input-number v-model="tr.NbFiber"
 											 :min="6" :step="6"
 											 :readonly="readonly"
-											 size="mini" controls-position="right" style="width: 100%">
+											 size="mini" controls-position="right" style="width: 100%"
+                                             @input="CheckFiber(tr)"
+                            >
+                                            
 								<template slot="prepend">Nb Fibre</template>
 							</el-input-number>
 						</el-tooltip>
@@ -193,6 +198,12 @@ func (tem *TronconEditModel) DeleteTroncon(vm *hvue.VM, i int) {
 func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
 	if !strings.HasPrefix(tr.Ref, "TR-") {
 		tr.Ref = "TR-" + tr.Ref
+	}
+}
+
+func (tem *TronconEditModel) CheckFiber(tr *fm.Troncon) {
+	if tr.NbFiber < tr.NbRacco {
+		tr.NbRacco = tr.NbFiber
 	}
 }
 

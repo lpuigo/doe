@@ -33,7 +33,7 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 	wsp.Lock()
 	defer wsp.Unlock()
 
-	files, err := wsp.persister.GetFilesList()
+	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from persister: %v", err)
 	}
