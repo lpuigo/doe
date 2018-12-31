@@ -13,11 +13,10 @@ type ErrorMsg struct {
 
 type MgrHandlerFunc func(*mgr.Manager, http.ResponseWriter, *http.Request)
 
-func addError(w http.ResponseWriter, errmsg string, code int) string {
-	res := logger.LogResponse(code)
-	res += logger.LogInfo(errmsg)
+func addError(w http.ResponseWriter, r *logger.Record, errmsg string, code int) {
+	r.Response = code
+	r.Error = errmsg
 	em := ErrorMsg{Error: errmsg}
 	sem, _ := json.Marshal(em)
 	http.Error(w, string(sem), code)
-	return res
 }

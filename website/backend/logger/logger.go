@@ -21,22 +21,79 @@ func StartLog(logfile string) *os.File {
 	return f
 }
 
-func LogRequest(req string) string {
-	return `request="` + req + `"`
+type Record struct {
+	t        time.Time
+	source   string
+	Request  string
+	Response int
+	Info     string
+	Error    string
 }
 
-func LogResponse(resp int) string {
-	return " response=" + strconv.Itoa(resp)
+func Entry(source string) *Record {
+	return &Record{source: source}
 }
 
-func LogInfo(info string) string {
-	return ` info="` + info + `"`
+func TimedEntry(source string) *Record {
+	e := Entry(source)
+	e.t = time.Now()
+	return e
 }
 
-func LogResponseInfo(info string, resp int) string {
-	return LogResponse(resp) + LogInfo(info)
+func (e *Record) getMsg() string {
+	msg := ""
+	if e.source != "" {
+		msg += e.source
+	}
+	if e.Request != "" {
+		msg += ` request="` + e.Request + `"`
+	}
+	if e.Response != 0 {
+		msg += ` response=` + strconv.Itoa(e.Response)
+	}
+	if e.Info != "" {
+		msg += ` info="` + e.Info + `"`
+	}
+	if e.Error != "" {
+		msg += ` error="` + e.Error + `"`
+	}
+	if !e.t.IsZero() {
+		msg += " service_time=" + strconv.FormatFloat(float64(time.Since(e.t).Nanoseconds())/1000000, 'f', 3, 64) + "ms"
+	}
+	return msg
 }
 
-func LogService(t time.Time, msg *string) {
-	log.Printf("%s service_time=%.3fms\n", *msg, float64(time.Since(t).Nanoseconds())/1000000)
+func (e *Record) Log() {
+	log.Println(e.getMsg())
+}
+
+func (e *Record) LogInfo(info string) {
+	e.Info = info
+	e.Log()
+}
+
+func (e *Record) Fatal(info string) {
+	e.Info = info
+	log.Fatal(e.getMsg())
+}
+
+func (e *Record) FatalErr(err error) {
+	e.Info = err.Error()
+	log.Fatal(e.getMsg())
+}
+
+func (e *Record) AddTime() *Record {
+	e.t = time.Now()
+	return e
+}
+
+func (e *Record) AddRequest(req string) *Record {
+	e.Request = req
+	return e
+}
+
+func (e *Record) AddInfoResponse(inf string, code int) *Record {
+	e.Info = inf
+	e.Response = code
+	return e
 }

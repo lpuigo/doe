@@ -6,6 +6,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"strings"
 )
 
 const template string = `
@@ -14,12 +15,13 @@ const template string = `
         <!--<span><strong>{{title}}:</strong></span>-->
     <!--</el-col>-->
     <el-col :span="7">
-        <el-autocomplete v-model="value.Ref"
+        <el-autocomplete v-model.trim="value.Ref"
                          :fetch-suggestions="RefSearchRef"
                          :placeholder="refPH"
                          :readonly="readonly"
                          clearable size="mini"  style="width: 100%"
-
+                         pattern="[0-9]{6}"
+                         @input="CheckRef(value)"
         >
             <template slot="prepend">{{title}}:</template>
         </el-autocomplete>
@@ -28,16 +30,17 @@ const template string = `
 
     </el-col>
     <el-col :span="6">
-        <el-autocomplete v-model="value.RefPt"
+        <el-autocomplete v-model.trim="value.RefPt"
                          :fetch-suggestions="RefSearchRefPt"
                          placeholder="PT-009999"
                          :readonly="readonly"
                          clearable size="mini"  style="width: 100%"
+                         @input="CheckRefPt(value)"
         ></el-autocomplete>
     </el-col>
     <el-col :span="11">
         <el-input :placeholder="addressPH" :readonly="readonly" clearable size="mini"
-                  v-model="value.Address"
+                  v-model.trim="value.Address"
         >
         </el-input>
     </el-col>
@@ -60,7 +63,6 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		//hvue.Props("title", "readonly", "value"),
 		hvue.PropObj("title", hvue.Types(hvue.PString)),
 		hvue.PropObj("readonly", hvue.Types(hvue.PBoolean)),
 		hvue.PropObj("value", hvue.Types(hvue.PObject)),
@@ -109,13 +111,45 @@ func NewPtEditModel(vm *hvue.VM) *PtEditModel {
 	return pem
 }
 
+func (pem *PtEditModel) CheckRef(vm *hvue.VM, pt *fm.PT) {
+	pem = &PtEditModel{Object: vm.Object}
+	prefix := pem.Title + "-"
+	if pt.Ref == "" {
+		pt.Ref = pem.Title + "-"
+		return
+	}
+	if !strings.HasPrefix(pt.Ref, prefix) {
+		if pt.Ref >= "0" && pt.Ref <= "999999999" {
+			pt.Ref = pem.Title + "-" + pt.Ref
+		}
+	}
+	val := strings.TrimPrefix(pt.Ref, prefix)
+	if val == "" {
+		return
+	}
+	print("val", val)
+	va := string(val[len(val)-1])
+	if va >= "0" && va <= "9" {
+		return
+	}
+	pt.Ref = pem.Title + "-" + val[:len(val)-1]
+	print("remove2", va, "=>", pt.Ref)
+}
+
+func (pem *PtEditModel) CheckRefPt(vm *hvue.VM, pt *fm.PT) {
+	if !strings.HasPrefix(pt.RefPt, "PT-") {
+		if pt.RefPt >= "0" && pt.RefPt <= "999999999" {
+			pt.RefPt = "PT-" + pt.RefPt
+		}
+	}
+}
+
 func (pem *PtEditModel) RefSearchRef(vm *hvue.VM, query string, callback *js.Object) {
 	pem = &PtEditModel{Object: vm.Object}
 	suffix := pem.Object.Get("info").Get("PB").String()
 	res := []*autocomplete.Result{}
 	// check if default value found
 	if suffix == "" {
-		res = append(res, autocomplete.NewResult(pem.Title+"-99999"))
 		callback.Invoke(res)
 		return
 	}
@@ -129,7 +163,6 @@ func (pem *PtEditModel) RefSearchRefPt(vm *hvue.VM, query string, callback *js.O
 	res := []*autocomplete.Result{}
 	// check if default value found
 	if suffix == "" {
-		res = append(res, autocomplete.NewResult("PT-009999"))
 		callback.Invoke(res)
 		return
 	}

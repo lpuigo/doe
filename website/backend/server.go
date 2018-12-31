@@ -7,7 +7,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/route"
-	"log"
 	"net/http"
 	"os/exec"
 )
@@ -54,13 +53,13 @@ func main() {
 	defer logFile.Close()
 
 	if err := config.SetFromFile(ConfigFile, conf); err != nil {
-		log.Fatal(err)
+		logger.Entry("Server").FatalErr(err)
 	}
-	log.Println("Server Started =============================================================================")
+	logger.Entry("Server").LogInfo("===== STARTED ======")
 
 	mgr, err := manager.NewManager(conf.WorksitesDir)
 	if err != nil {
-		log.Fatal(err)
+		logger.Entry("Server").FatalErr(err)
 	}
 	withManager := func(hf route.MgrHandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -84,8 +83,8 @@ func main() {
 	//gzipedrouter := router
 
 	LaunchPageInBrowser(conf)
-	log.Print("Listening on ", ServicePort)
-	log.Fatal(http.ListenAndServe(ServicePort, gzipedrouter))
+	logger.Entry("Server").LogInfo("listening on " + conf.ServicePort)
+	logger.Entry("Server").FatalErr(http.ListenAndServe(conf.ServicePort, gzipedrouter))
 }
 
 func LaunchPageInBrowser(c *Conf) error {
