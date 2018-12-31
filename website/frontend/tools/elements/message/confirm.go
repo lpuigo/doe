@@ -8,7 +8,7 @@ import (
 func confirmString(vm *hvue.VM, msg, msgtype string, confirm func()) {
 	vm.Call("$confirm", msg, js.M{
 		"confirmButtonText": "OK",
-		"cancelButtonText":  "Retour",
+		"cancelButtonText":  "Non",
 		"type":              msgtype,
 		"callback":          confirmCallBack(confirm),
 	})

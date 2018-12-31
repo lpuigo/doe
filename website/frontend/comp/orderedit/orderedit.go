@@ -31,7 +31,23 @@ const template string = `
 	<!-- 
 		 Attributes about Order.Troncons 
 	 -->
-	<troncon-edit v-model="value" :readonly="readonly"></troncon-edit>
+    <div v-for="(tr, index) in value.Troncons" :key="index" >
+        <hr>
+        <el-row :gutter="10">
+            <el-col :span="2">
+                <el-button type="danger"
+                           plain icon="fas fa-share-alt icon--left"
+                           size="mini"
+                           style="width: 100%"
+                           :disabled="value.Troncons.length<=1"
+                           @click="DeleteTroncon(index)"
+                >Supprimer</el-button>
+            </el-col>
+            <el-col :span="22">
+                <troncon-edit v-model="tr" :previous="PreviousTroncon(index)" :readonly="readonly"></troncon-edit>
+            </el-col>
+        </el-row>
+    </div>
 	<hr>
 	<el-row :gutter="10" type="flex" align="middle">
 		<el-col :span="2">
@@ -96,4 +112,17 @@ func NewOrderEditModel(vm *hvue.VM) *OrderEditModel {
 func (oem *OrderEditModel) AddTroncon(vm *hvue.VM) {
 	oem = &OrderEditModel{Object: vm.Object}
 	oem.Order.AddTroncon()
+}
+
+func (oem *OrderEditModel) DeleteTroncon(vm *hvue.VM, i int) {
+	oem = &OrderEditModel{Object: vm.Object}
+	oem.Order.DeleteTroncon(i)
+}
+
+func (oem *OrderEditModel) PreviousTroncon(vm *hvue.VM, i int) *fm.Troncon {
+	oem = &OrderEditModel{Object: vm.Object}
+	if len(oem.Order.Troncons) <= 1 || i == 0 {
+		return nil
+	}
+	return oem.Order.Troncons[i-1]
 }

@@ -49,9 +49,6 @@ func ComponentOptions() []hvue.ComponentOption {
 				wdm.Worksite.Status = "DOE"
 				return true
 			}
-			if wdm.Worksite.Status == "DOE" {
-				wdm.Worksite.Status = "InProgress"
-			}
 			return false
 		}),
 		hvue.MethodsOf(&WorksiteDetailModel{}),

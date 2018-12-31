@@ -12,129 +12,117 @@ import (
 
 const template string = `
 <div>
-	<div v-for="(tr, index) in value.Troncons" :key="index" >
-		<hr>		
-		<el-row :gutter="10">
-			<el-col :span="2">
-				<el-button type="danger"
-						   plain icon="fas fa-share-alt icon--left"
-						   size="mini"
-						   style="width: 100%"
-						   :disabled="value.Troncons.length<=1"
-						   @click="DeleteTroncon(index)"
-				>Supprimer</el-button>
-			</el-col>
-			<el-col :span="22">
-				<!-- 
-					Attributes about TR 
-				-->
-				<el-row :gutter="10" type="flex" align="middle">
-                    <el-col :span="12">
-						<el-tooltip content="Référence" placement="top" effect="light">
-                            <el-autocomplete v-model="tr.Ref"
-                                             :fetch-suggestions="RefSearch"
-                                             placeholder="TR-99-9999"
-                                             clearable size="mini"  style="width: 100%"
-                                             @input="CheckRef(tr)"
-                            >
-                                <template slot="prepend">Tronçon:</template>
-                            </el-autocomplete>
-						</el-tooltip>
-					</el-col>
-					<el-col :span="4">
-						<el-switch v-model="tr.Blockage"
-								   active-color="#db2828"
-								   active-text="Bloquage"
-								   inactive-color="#bcbcbc"
-								   :disabled="tr.NeedSignature && !tr.Signed"
-						></el-switch>
-					</el-col>
-					<el-col :span="4">
-						<el-switch v-model="tr.NeedSignature"
-								   active-color="#db2828"
-								   active-text="Signature demandée"
-								   inactive-color="#bcbcbc"
-								   @input="CheckSignature(tr)"
-						></el-switch>
-					</el-col>
-					<el-col :span="4">
-						<el-switch v-if="tr.NeedSignature"
-								   v-model="tr.Signed"
-								   active-color="#51a825"
-								   active-text="Signature obtenue"
-								   inactive-color="#bcbcbc"
-								   @input="CheckSignature(tr)"
-						></el-switch>
-					</el-col>
-				</el-row>
-				<!-- 
-					Attributes about PB 
-				-->
-				<el-row :gutter="10" type="flex" align="middle">
-					<el-col :span="16">
-						<pt-edit title="PB" v-model="tr.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
-					</el-col>
-					<el-col :span="4">
-						<el-tooltip content="Nb. EL raccordable" placement="top" effect="light">
-							<el-input-number
-									v-model="tr.NbRacco"
-									:min="0" :max="tr.NbFiber"
-									:readonly="readonly"
-									size="mini"	controls-position="right" style="width: 100%"
-							></el-input-number>
-						</el-tooltip>
-					</el-col>
-					<el-col :span="4">
-						<el-tooltip content="Nb. Fibre" placement="top" effect="light">
-							<el-input-number v-model="tr.NbFiber"
-											 :min="6" :step="6"
-											 :readonly="readonly"
-											 size="mini" controls-position="right" style="width: 100%"
-                                             @input="CheckFiber(tr)"
-                            >
-                                            
-								<template slot="prepend">Nb Fibre</template>
-							</el-input-number>
-						</el-tooltip>
-					</el-col>
-				</el-row>
+    <!-- 
+        Attributes about value and PB 
+    -->
+    <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="6">
+            <el-tooltip content="Référence" placement="top" effect="light">
+                <el-autocomplete v-model="value.Ref"
+                                 :fetch-suggestions="RefSearch"
+                                 placeholder="TR-99-9999"
+                                 clearable size="mini" style="width: 100%"
+                                 @input="CheckRef(value)"
+                >
+                    <template slot="prepend">Tronçon:</template>
+                </el-autocomplete>
+            </el-tooltip>
+        </el-col>
+        <el-col :span="3">
+            <el-tag :type="Status" size="medium" style="width: 100%">{{StatusText}}</el-tag>
+        </el-col>
+        <el-col :span="15">
+            <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
+        </el-col>
+    </el-row>
+    <!-- 
+        Attributes Blockage, Size and Dates 
+    -->
+    <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="3">
+            <el-switch v-model="value.Blockage"
+                       active-color="#db2828"
+                       active-text="Bloquage"
+                       inactive-color="#bcbcbc"
+                       :disabled="value.NeedSignature && !value.Signed"
+            ></el-switch>
+        </el-col>
+        <el-col :span="3">
+            <el-switch v-model="value.NeedSignature"
+                       active-color="#db2828"
+                       active-text="Signature demandée"
+                       inactive-color="#bcbcbc"
+                       @input="CheckSignature(value)"
+            ></el-switch>
+        </el-col>
+        <el-col :span="3">
+            <el-switch v-if="value.NeedSignature"
+                       v-model="value.Signed"
+                       active-color="#51a825"
+                       active-text="Signature obtenue"
+                       inactive-color="#bcbcbc"
+                       @input="CheckSignature(value)"
+            ></el-switch>
+        </el-col>
+        <el-col :span="3">
+            <el-tooltip content="Nb. EL raccordable" placement="top" effect="light">
+                <el-input-number
+                        v-model="value.NbRacco"
+                        :min="0" :max="value.NbFiber"
+                        :readonly="readonly"
+                        size="mini"	controls-position="right" style="width: 100%"
+                ></el-input-number>
+            </el-tooltip>
+        </el-col>
+        <el-col :span="3">
+            <el-tooltip content="Nb. Fibre" placement="top" effect="light">
+                <el-input-number v-model="value.NbFiber"
+                                 :min="6" :step="6"
+                                 :readonly="readonly"
+                                 size="mini" controls-position="right" style="width: 100%"
+                                 @input="CheckFiber(value)"
+                >
+                                
+                    <template slot="prepend">Nb Fibre</template>
+                </el-input-number>
+            </el-tooltip>
+        </el-col>
+        <el-col :offset="1" :span="4">
+            <el-tooltip content="Date Pose PB" placement="top" effect="light">
+                <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Installation" size="mini"
+                                style="width: 100%" type="date"
+                                v-model="value.InstallDate"
+                                value-format="yyyy-MM-dd"
+                                :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                :clearable="false"
+                ></el-date-picker>
+            </el-tooltip>
+        </el-col>
+        <el-col :span="4">
+            <el-tooltip content="Date Mesure" placement="top" effect="light">
+                <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Mesure" size="mini"
+                                style="width: 100%" type="date"
+                                v-model="value.MeasureDate"
+                                value-format="yyyy-MM-dd"
+                                :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                :clearable="false"
+                                :disabled="!value.InstallDate"
+                                @change="CheckMeasureDate(value.MeasureDate)"
+                ></el-date-picker>
+            </el-tooltip>
+        </el-col>
+    </el-row>
 
-				<!-- 
-					Comment Attributes
-				-->	
-				<el-row :gutter="10">
-					<el-col :span="16">
-						<el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
-								  v-model.trim="tr.Comment"
-						></el-input>
-					</el-col>
-					<el-col :span="4">
-						<el-tooltip content="Date Pose PB" placement="top" effect="light">
-							<el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Installation" size="mini"
-											style="width: 100%" type="date"
-											v-model="tr.InstallDate"
-											value-format="yyyy-MM-dd"
-											:picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-											:clearable="false"
-							></el-date-picker>
-						</el-tooltip>
-					</el-col>
-					<el-col :span="4">
-						<el-tooltip content="Date Mesure" placement="top" effect="light">
-							<el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Mesure" size="mini"
-											style="width: 100%" type="date"
-											v-model="tr.MeasureDate"
-											value-format="yyyy-MM-dd"
-											:picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-											:clearable="false"
-											:disabled="!tr.InstallDate"
-							></el-date-picker>
-						</el-tooltip>
-					</el-col>
-				</el-row>
-			</el-col>
-		</el-row>
-	</div>
+    <!-- 
+        Comment Attributes
+    -->	
+    <el-row v-if="value.Blockage" :gutter="10">
+        <el-col :span="24">
+            <el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
+                      v-model.trim="value.Comment"
+            ></el-input>
+        </el-col>
+    </el-row>
 </div>
 `
 
@@ -155,14 +143,16 @@ func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ptedit.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("readonly", "value"),
+		hvue.Props("value", "readonly", "previous"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewTronconEditModel(vm)
 		}),
-		//hvue.Computed("refPH", func(vm *hvue.VM) interface{} {
-		//	pem := &TronconEditModel{Object: vm.Object}
-		//	return pem.Title + "-99999"
-		//}),
+		hvue.Computed("Status", func(vm *hvue.VM) interface{} {
+			pem := &TronconEditModel{Object: vm.Object}
+			statusType, statusText := pem.SetStatus()
+			pem.StatusText = statusText
+			return statusType
+		}),
 		hvue.MethodsOf(&TronconEditModel{}),
 	}
 }
@@ -173,8 +163,10 @@ func ComponentOptions() []hvue.ComponentOption {
 type TronconEditModel struct {
 	*js.Object
 
-	Order    *fm.Order `js:"value"`
-	Readonly bool      `js:"readonly"`
+	Troncon     *fm.Troncon `js:"value"`
+	PrevTroncon *fm.Troncon `js:"previous"`
+	Readonly    bool        `js:"readonly"`
+	StatusText  string      `js:"StatusText"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -182,18 +174,14 @@ type TronconEditModel struct {
 func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 	tem := &TronconEditModel{Object: tools.O()}
 	tem.VM = vm
-	tem.Order = nil
+	tem.Troncon = nil
 	tem.Readonly = false
+	tem.StatusText = ""
 	return tem
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Actions
-
-func (tem *TronconEditModel) DeleteTroncon(vm *hvue.VM, i int) {
-	tem = &TronconEditModel{Object: vm.Object}
-	tem.Order.DeleteTroncon(i)
-}
 
 func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
 	if !strings.HasPrefix(tr.Ref, "TR-") {
@@ -218,18 +206,15 @@ func (tem *TronconEditModel) CheckSignature(tr *fm.Troncon) {
 
 func (tem *TronconEditModel) RefSearch(vm *hvue.VM, query string, callback *js.Object) {
 	tem = &TronconEditModel{Object: vm.Object}
-	troncons := tem.Order.Troncons
 	// if no previous troncon.ref return default choice list
 	res := []*autocomplete.Result{}
-	if len(troncons) == 1 {
-		res = append(res, autocomplete.NewResult("TR-00-0000"))
+	if tem.PrevTroncon == nil || tem.PrevTroncon.Object == nil || tem.PrevTroncon.Object == js.Undefined {
 		callback.Invoke(res)
 		return
 	}
-	// retrieve last troncon.Ref
-	lastref := troncons[len(troncons)-2].Ref
+	// retrieve previous troncon.Ref
+	lastref := tem.PrevTroncon.Ref
 	if lastref == "" || !strings.HasPrefix(lastref, "TR-") {
-		res = append(res, autocomplete.NewResult("TR-00-0000"))
 		callback.Invoke(res)
 		return
 	}
@@ -242,13 +227,12 @@ func (tem *TronconEditModel) LastPBinfo(vm *hvue.VM) js.M {
 	tem = &TronconEditModel{Object: vm.Object}
 	pbRef := ""
 	ptRef := ""
-	troncons := tem.Order.Troncons
 	// if no previous troncon return default choice list
-	if len(troncons) == 1 {
+	if tem.PrevTroncon == nil || tem.PrevTroncon.Object == nil || tem.PrevTroncon.Object == js.Undefined {
 		return js.M{"PB": pbRef, "PT": ptRef}
 	}
 	// retrieve last troncon.PB
-	lastPb := troncons[len(troncons)-2].Pb
+	lastPb := tem.PrevTroncon.Pb
 	if lastPb.Ref != "" && strings.HasPrefix(lastPb.Ref, "PB-") {
 		pbRef = strings.TrimPrefix(lastPb.Ref, "PB-")
 	}
@@ -256,4 +240,32 @@ func (tem *TronconEditModel) LastPBinfo(vm *hvue.VM) js.M {
 		ptRef = strings.TrimPrefix(lastPb.RefPt, "PT-")
 	}
 	return js.M{"PB": pbRef, "PT": ptRef}
+}
+
+func (tem *TronconEditModel) SetStatus() (statusType, statusText string) {
+	tr := tem.Troncon
+
+	switch {
+	case tr.Ref == "" || tr.Pb.Ref == "" || tr.Pb.RefPt == "" || tr.Pb.Address == "":
+		return "warning", "A renseigner"
+	case tr.Blockage && tr.Comment == "":
+		return "warning", "Saisir desc. bloquage"
+	case tr.Blockage:
+		return "info", "Bloqué"
+	case tr.MeasureDate != "":
+		return "success", "Terminé"
+	case tr.InstallDate != "":
+		return "", "Mesures à faire"
+	case tr.Ref != "" && tr.Pb.Ref != "" && tr.Pb.RefPt != "" && tr.Pb.Address != "" && !tr.Blockage:
+		return "", "A Réaliser"
+	}
+
+	return "danger", "Erreur"
+}
+
+func (tem *TronconEditModel) CheckMeasureDate(vm *hvue.VM, date string) {
+	tem = &TronconEditModel{Object: vm.Object}
+	if date < tem.Troncon.InstallDate {
+		tem.Troncon.MeasureDate = tem.Troncon.InstallDate
+	}
 }
