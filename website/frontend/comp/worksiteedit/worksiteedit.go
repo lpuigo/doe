@@ -45,6 +45,9 @@ func ComponentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("IsReadyForDoe", func(vm *hvue.VM) interface{} {
 			wdm := &WorksiteDetailModel{Object: vm.Object}
+			if wdm.Worksite.Status == "Done" {
+				return true
+			}
 			if wdm.Worksite.OrdersCompleted() {
 				wdm.Worksite.Status = "DOE"
 				return true
@@ -103,4 +106,13 @@ func (wdm *WorksiteDetailModel) WorksiteStatusValTexts() []*elements.ValText {
 		res = append(res, elements.NewValText(v, fm.WorksiteStatusLabel(v)))
 	}
 	return res
+}
+
+func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	if wdm.Worksite.DoeDate == "" || wdm.Worksite.DoeDate == "null" {
+		wdm.Worksite.Status = "DOE"
+		return
+	}
+	wdm.Worksite.Status = "Done"
 }

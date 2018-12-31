@@ -184,6 +184,10 @@ func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 // Actions
 
 func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
+	if strings.HasPrefix(tr.Ref, "TR") && len(tr.Ref) > 3 {
+		tr.Ref = strings.Replace(tr.Ref, " ", "-", -1)
+		return
+	}
 	if !strings.HasPrefix(tr.Ref, "TR-") {
 		tr.Ref = "TR-" + tr.Ref
 	}
@@ -248,7 +252,7 @@ func (tem *TronconEditModel) SetStatus() (statusType, statusText string) {
 	switch {
 	case tr.Ref == "" || tr.Pb.Ref == "" || tr.Pb.RefPt == "" || tr.Pb.Address == "":
 		return "warning", "A renseigner"
-	case tr.Blockage && tr.Comment == "":
+	case tr.Blockage && !tr.NeedSignature && tr.Comment == "":
 		return "warning", "Saisir desc. bloquage"
 	case tr.Blockage:
 		return "info", "Bloqué"

@@ -55,6 +55,7 @@ const template string = `
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
                             :disabled="!IsReadyForDoe"
+                            @change="CheckDoeDate()"
             ></el-date-picker>
         </el-col>
     </el-row>
