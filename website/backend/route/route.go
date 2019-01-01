@@ -13,7 +13,7 @@ type ErrorMsg struct {
 
 type MgrHandlerFunc func(*mgr.Manager, http.ResponseWriter, *http.Request)
 
-func addError(w http.ResponseWriter, r *logger.Record, errmsg string, code int) {
+func AddError(w http.ResponseWriter, r *logger.Record, errmsg string, code int) {
 	r.Response = code
 	r.Error = errmsg
 	em := ErrorMsg{Error: errmsg}

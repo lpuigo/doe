@@ -12,6 +12,14 @@
 <body>
     <div id="app" style="height: 100%;">
 
+        <!--
+        @update:edited_worksite="ProcessEditedWorksite"
+        @delete:edited_worksite="ProcessDeleteWorksite"
+        -->
+        <user-login-modal
+                ref="UserLoginModal"
+                :user.sync="User"
+        ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
                 ref="WorksiteEditModal"
@@ -25,7 +33,9 @@
                 <div class="header-menu-container">
                     <div class="header-menu-container">
                         <h2 class="content">EWIN Services</h2>
+                        <span>{{LoggedUser}}</span>
                     </div>
+                    <el-button type="primary" @click="UserLogin" size="mini">Login</el-button>
                 </div>
             </el-header>
             <el-container style="height: 100%">

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+    </head>
+        <meta charset="UTF-8">
+        <title>EWIN Login</title>
+        <link rel="stylesheet" href="/Assets/element-ui/2.4.11/lib/theme-chalk/index.css">
+        <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
+        <link rel="stylesheet" href="index.css">
+    <head>
+
+    <body>
+        <div id="login">
+            <el-form :model="loginForm" label-width="120px">
+                <el-form-item label="Login" prop="login">
+                    <el-input v-model="loginForm.login"></el-input>
+                </el-form-item>
+                <el-form-item label="Password" prop="password">
+                    <el-input type="password" v-model="loginForm.password"></el-input>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm2')">Connexion</el-button>
+                    <el-button @click="resetForm('ruleForm2')">Annuler</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </body>
+
+    <script src="/Assets/vue/2.5.17/vue.min.js"></script>
+    <script src="/Assets/element-ui/2.4.11/lib/index.js"></script>
+    <script src="/Assets/element-ui/2.4.11/lib/umd/locale/fr.js"></script>
+    <script>
+        ELEMENT.locale(ELEMENT.lang.fr)
+    </script>
+</html>

@@ -16,6 +16,7 @@ type Conf struct {
 
 	LogFile     string
 	ServicePort string
+	SessionKey  string
 	AssetsDir   string
 	AssetsRoot  string
 	RootDir     string
@@ -29,6 +30,7 @@ const (
 	RootDir    = `./Dist`
 
 	ServicePort = ":8080"
+	SessionKey  = "SECRET_KEY"
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 
@@ -43,6 +45,7 @@ func main() {
 		WorksitesDir:     WorksitesDir,
 		LogFile:          LogFile,
 		ServicePort:      ServicePort,
+		SessionKey:       SessionKey,
 		AssetsDir:        AssetsDir,
 		AssetsRoot:       AssetsRoot,
 		RootDir:          RootDir,
@@ -67,8 +70,29 @@ func main() {
 		}
 	}
 
+	//store := sessions.NewCookieStore([]byte(conf.SessionKey))
+	//withSession := func(hf route.MgrHandlerFunc) http.HandlerFunc {
+	//	return func(w http.ResponseWriter, r *http.Request) {
+	//		// Get a session. Get() always returns a session, even if empty.
+	//		session, err := store.Get(r, "EWin-Session")
+	//		if err != nil {
+	//			logmsg := logger.Entry("Server")
+	//			route.AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+	//			return
+	//		}
+	//		// Set some session values.
+	//		session.Values["user"] = "test"
+	//		// Save it before we write to the response/return from the handler.
+	//		session.Save(r, w)
+	//
+	//		withManager(hf)(w,r)
+	//	}
+	//}
+
 	router := mux.NewRouter()
-	// Manager Routes
+	// session management
+	router.HandleFunc("/api/login", withManager(route.Login)).Methods("POST")
+	// Worsite method
 	router.HandleFunc("/api/worksites", withManager(route.GetWorkSites)).Methods("GET")
 	router.HandleFunc("/api/worksites", withManager(route.CreateWorkSite)).Methods("POST")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withManager(route.GetWorkSite)).Methods("GET")

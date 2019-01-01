@@ -3,10 +3,12 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/cookie"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
@@ -20,6 +22,7 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#app"),
+		userloginmodal.RegisterComponent(),
 		worksiteeditmodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		hvue.DataS(mpm),
@@ -27,6 +30,10 @@ func main() {
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.GetWorkSites()
+		}),
+		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.SessionActive()
 		}),
 	)
 	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
@@ -40,12 +47,15 @@ type MainPageModel struct {
 
 	VM *hvue.VM `js:"VM"`
 
+	User *fm.User `js:"User"`
+
 	Worksites      []*fm.Worksite `js:"worksites"`
 	EditedWorksite *fm.Worksite   `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
+	mpm.User = fm.NewUser()
 	mpm.Worksites = []*fm.Worksite{}
 	mpm.EditedWorksite = nil
 	return mpm
@@ -54,12 +64,23 @@ func NewMainPageModel() *MainPageModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
+func (m *MainPageModel) SessionActive() string {
+	_, exists := cookie.Get("EWin-Session")
+	if !exists {
+		return "not logged"
+	}
+	return "logged as " + m.User.Name
+}
+
+func (m *MainPageModel) UserLogin() {
+	m.VM.Refs("UserLoginModal").Call("Show", m.User)
+}
+
 func (m *MainPageModel) GetWorkSites() {
 	go m.callGetWorkSites()
 }
 
 func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
-	print("current_worksite", ws)
 	m.EditedWorksite = ws
 	m.VM.Refs("WorksiteEditModal").Call("Show", ws)
 }
@@ -71,7 +92,6 @@ func (m *MainPageModel) CreateNewWorksite() {
 }
 
 func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
-	print("ProcessEditedWorkSite on", uws.Id, uws.Ref)
 	if uws.Id >= 0 {
 		go m.callUpdateWorksite(uws)
 	} else {
