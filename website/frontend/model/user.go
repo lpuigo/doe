@@ -18,3 +18,8 @@ func NewUser() *User {
 	user.Pwd = ""
 	return user
 }
+
+func (u *User) Copy(ou *User) {
+	u.Name = ou.Name
+	u.Pwd = ou.Pwd
+}

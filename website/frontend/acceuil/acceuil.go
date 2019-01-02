@@ -29,12 +29,15 @@ func main() {
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
+			mpm.CheckUserSession()
 			mpm.GetWorkSites()
 		}),
 		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
-			print("LoggedUser")
 			mpm := &MainPageModel{Object: vm.Object}
-			return mpm.CheckUserSession()
+			if mpm.User.Name == "" {
+				return "Non connecté"
+			}
+			return mpm.User.Name
 		}),
 	)
 	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
@@ -65,26 +68,25 @@ func NewMainPageModel() *MainPageModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) CheckUserSession() string {
-	print("enter CheckUserSession")
+func (m *MainPageModel) CheckUserSession() {
 	_, sessionExists := cookie.Get("EWin-Session")
 	if !sessionExists {
-		print("CheckUserSession delete USer")
+		print("CheckUserSession delete User")
 		cookie.Delete("User")
-		return "not logged"
+		m.User.Name = ""
+		return
 	}
 	user, userExist := cookie.Get("User")
 	if !userExist {
 		print("CheckUserSession delete Session")
 		cookie.Delete("EWin-Session")
-		return "not logged"
+		m.User.Name = ""
+		return
 	}
-	print("CheckUserSession set User", user)
 	m.User.Name = user
-	return "logged as " + m.User.Name
 }
 
-func (m *MainPageModel) UserLogin() {
+func (m *MainPageModel) ShowUserLogin() {
 	m.VM.Refs("UserLoginModal").Call("Show", m.User)
 }
 

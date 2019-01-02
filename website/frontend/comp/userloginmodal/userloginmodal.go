@@ -37,12 +37,12 @@ const (
 	<!-- 
 		Modal Body
 	-->
-    <el-form id="userForm" :model="user" size="mini" style="margin: 30px">
+    <el-form id="userForm" :model="editedUser" size="mini" style="margin: 30px">
         <el-form-item label="Login" :label-width="labelSize">
-            <el-input v-model="user.Name" autocomplete="off"></el-input>
+            <el-input v-model.trim="editedUser.Name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Mot de Passe" :label-width="labelSize">
-            <el-input type="password" v-model="user.Pwd" autocomplete="off"></el-input>
+            <el-input type="password" v-model.trim="editedUser.Pwd" autocomplete="off"></el-input>
         </el-form-item>
     </el-form>
 
@@ -50,7 +50,7 @@ const (
 		Body Action Bar
 	-->
     <span slot="footer">
-        <el-button size="mini" @click="visible = false">Abandon</el-button>
+        <el-button size="mini" @click="Hide">Abandon</el-button>
         <el-button type="primary" size="mini" @click="Submit">Confirmer</el-button>
     </span>
 </el-dialog>
@@ -63,8 +63,9 @@ type UserLoginModalModel struct {
 	Visible bool     `js:"visible"`
 	VM      *hvue.VM `js:"VM"`
 
-	User      *fm.User `js:"user"`
-	LabelSize string   `js:"labelSize"`
+	User       *fm.User `js:"user"`
+	EditedUser *fm.User `js:"editedUser"`
+	LabelSize  string   `js:"labelSize"`
 }
 
 func NewUserLoginModalModel(vm *hvue.VM) *UserLoginModalModel {
@@ -73,6 +74,7 @@ func NewUserLoginModalModel(vm *hvue.VM) *UserLoginModalModel {
 	ulmm.VM = vm
 
 	ulmm.User = fm.NewUser()
+	ulmm.EditedUser = fm.NewUser()
 	ulmm.LabelSize = "120px"
 
 	return ulmm
@@ -109,6 +111,7 @@ func ComponentOptions() []hvue.ComponentOption {
 
 func (ulmm *UserLoginModalModel) Show(u *fm.User) {
 	ulmm.User = u
+	ulmm.EditedUser.Copy(u)
 	ulmm.Visible = true
 }
 
@@ -126,8 +129,8 @@ func (ulmm *UserLoginModalModel) Submit() {
 
 func (ulmm *UserLoginModalModel) submitLogin() {
 	f := js.Global.Get("FormData").New()
-	f.Call("append", "user", ulmm.User.Name)
-	f.Call("append", "pwd", ulmm.User.Pwd)
+	f.Call("append", "user", ulmm.EditedUser.Name)
+	f.Call("append", "pwd", ulmm.EditedUser.Pwd)
 	print("submitLogin", f)
 	req := xhr.NewRequest("POST", "/api/login")
 	req.Timeout = tools.TimeOut
@@ -145,8 +148,8 @@ func (ulmm *UserLoginModalModel) submitLogin() {
 		return
 	}
 	message.SetDuration(tools.SuccessMsgDuration)
-	message.SuccesStr(ulmm.VM, "User connecté")
-	cookie.Set("User", ulmm.User.Name, nil, "")
-	ulmm.VM.Emit("update:user", ulmm.User)
+	message.SuccesStr(ulmm.VM, "'"+ulmm.EditedUser.Name+"' connecté")
+	cookie.Set("User", ulmm.EditedUser.Name, nil, "")
+	ulmm.VM.Emit("update:user", ulmm.EditedUser)
 	ulmm.Hide()
 }

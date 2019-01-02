@@ -19,7 +19,7 @@
         <user-login-modal
                 ref="UserLoginModal"
                 :user.sync="User"
-                @update:user="LoggedUser"
+                @update:user="CheckUserSession"
         ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
@@ -36,7 +36,7 @@
                         <h2 class="content">EWIN Services</h2>
                         <span>{{LoggedUser}}</span>
                     </el-row>
-                    <el-button type="primary" @click="UserLogin" size="mini">Login</el-button>
+                    <el-button type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
                 </div>
             </el-header>
             <el-container style="height: 100%">
