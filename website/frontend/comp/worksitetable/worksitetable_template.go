@@ -54,10 +54,7 @@ const (
 					width="140px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
-                    <i v-if="scope.row.Dirty"
-                       class="far fa-save icon--left link"
-                       @click="SaveWorksite(scope.row)"
-                    ></i><span>{{scope.row.Ref}}</span>
+                    <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column

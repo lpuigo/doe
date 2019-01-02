@@ -83,7 +83,6 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 //}
 //
 func (wtm *WorksiteTableModel) SetSelectedWorksite(nws *fm.Worksite) {
-	print("WorksiteTableModel.SetSelectedWorksite", nws.Object)
 	if nws.Object == nil { // this can happen when Worksites props gets updated
 		return
 	}
