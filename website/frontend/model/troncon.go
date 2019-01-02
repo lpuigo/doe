@@ -80,3 +80,7 @@ func (tr *Troncon) IsCompleted() bool {
 	}
 	return false
 }
+
+func (tr *Troncon) IsFilledIn() bool {
+	return !tools.Empty(tr.Ref) && tr.Pb.IsFilledIn()
+}

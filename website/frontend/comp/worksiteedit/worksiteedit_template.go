@@ -26,17 +26,18 @@ const template string = `
             </el-input>
         </el-col>
         <el-col :span="4" style="text-align: right">
-            <el-row type="flex" align="middle">
-                <span style="margin-right: 5px">Etat:</span>
-                <el-select placeholder="Statut"
-                           v-model="worksite.Status"
-                           :disabled="readonly" size="mini" style="width: 100%"
-                >
-                    <el-option v-for="(vt, vtn) in WorksiteStatusValTexts()" :key="vt.value" 
-                               :label="vt.text" :value="vt.value"
-                    ></el-option>
-                </el-select>
-            </el-row>
+            <el-tag :type="StatusType" size="medium" style="width: 100%">{{worksite.Status | FormatStatus}}</el-tag>
+            <!--<el-row type="flex" align="middle">-->
+                <!--<span style="margin-right: 5px">Etat:</span>-->
+                <!--<el-select placeholder="Statut"-->
+                           <!--v-model="worksite.Status"-->
+                           <!--:disabled="readonly" size="mini" style="width: 100%"-->
+                <!--&gt;-->
+                    <!--<el-option v-for="(vt, vtn) in WorksiteStatusValTexts()" :key="vt.value" -->
+                               <!--:label="vt.text" :value="vt.value"-->
+                    <!--&gt;</el-option>-->
+                <!--</el-select>-->
+            <!--</el-row>-->
         </el-col>
         <el-col :span="3">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
@@ -54,8 +55,7 @@ const template string = `
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
-                            :disabled="!IsReadyForDoe"
-                            @change="CheckDoeDate()"
+                            :disabled="worksite.Status != 'DOE'"
             ></el-date-picker>
         </el-col>
     </el-row>

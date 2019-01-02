@@ -7,7 +7,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,16 +42,14 @@ func ComponentOptions() []hvue.ComponentOption {
 			wdm.Worksite.Dirty = s1 != s2
 			return wdm.Worksite.Dirty
 		}),
-		hvue.Computed("IsReadyForDoe", func(vm *hvue.VM) interface{} {
+		hvue.Computed("StatusType", func(vm *hvue.VM) interface{} {
 			wdm := &WorksiteDetailModel{Object: vm.Object}
-			if wdm.Worksite.Status == "Done" {
-				return true
-			}
-			if wdm.Worksite.OrdersCompleted() {
-				wdm.Worksite.Status = "DOE"
-				return true
-			}
-			return false
+			wdm.Worksite.Status = wdm.CalcWorksiteStatus()
+			return wdm.WorksiteStatusType()
+		}),
+		hvue.Filter("FormatStatus", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
+			status := value.String()
+			return fm.WorksiteStatusLabel(status)
 		}),
 		hvue.MethodsOf(&WorksiteDetailModel{}),
 	}
@@ -100,12 +97,30 @@ func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 	wdm.Worksite.Copy(wdm.ReferenceWorksite)
 }
 
-func (wdm *WorksiteDetailModel) WorksiteStatusValTexts() []*elements.ValText {
-	res := []*elements.ValText{}
-	for _, v := range []string{"New", "InProgress", "DOE", "Done", "Rework"} {
-		res = append(res, elements.NewValText(v, fm.WorksiteStatusLabel(v)))
+//func (wdm *WorksiteDetailModel) WorksiteStatusValTexts() []*elements.ValText {
+//	res := []*elements.ValText{}
+//	for _, v := range []string{"New", "InProgress", "DOE", "Done", "Rework"} {
+//		res = append(res, elements.NewValText(v, fm.WorksiteStatusLabel(v)))
+//	}
+//	return res
+//}
+
+func (wdm *WorksiteDetailModel) WorksiteStatusType() string {
+	switch wdm.Worksite.Status {
+	case "New":
+		return "info"
+	case "FormInProgress":
+		return "warning"
+	case "InProgress":
+		return "warning"
+	case "DOE":
+		return ""
+	case "Done":
+		return "success"
+	case "Rework":
+		return "danger"
 	}
-	return res
+	return "danger"
 }
 
 func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
@@ -115,4 +130,23 @@ func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
 		return
 	}
 	wdm.Worksite.Status = "Done"
+}
+
+func (wdm *WorksiteDetailModel) CalcWorksiteStatus() string {
+	// New if Worksite base info not completed
+	ws := wdm.Worksite
+	if !ws.IsDefined() {
+		return "New"
+	}
+	if !ws.IsFilledIn() {
+		return "FormInProgress"
+	}
+	if !ws.OrdersCompleted() {
+		ws.DoeDate = ""
+		return "InProgress"
+	}
+	if tools.Empty(ws.DoeDate) {
+		return "DOE"
+	}
+	return "Done"
 }

@@ -178,12 +178,32 @@ func (ws *Worksite) OrdersCompleted() bool {
 	return true
 }
 
+func (ws *Worksite) IsDefined() bool {
+	return !tools.Empty(ws.Client) &&
+		!tools.Empty(ws.City) &&
+		!tools.Empty(ws.Ref) &&
+		!tools.Empty(ws.OrderDate) &&
+		ws.Pmz.IsFilledIn() &&
+		ws.Pa.IsFilledIn()
+}
+
+func (ws *Worksite) IsFilledIn() bool {
+	for _, o := range ws.Orders {
+		if !o.IsFilledIn() {
+			return false
+		}
+	}
+	return true
+}
+
 func WorksiteStatusLabel(value string) string {
 	switch value {
 	case "New":
 		return "Nouveau"
+	case "FormInProgress":
+		return "Saisie en cours"
 	case "InProgress":
-		return "En cours"
+		return "Réal. En cours"
 	case "DOE":
 		return "DOE à faire"
 	case "Done":

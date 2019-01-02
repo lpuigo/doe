@@ -75,3 +75,15 @@ func (o *Order) IsCompleted() bool {
 	}
 	return true
 }
+
+func (o *Order) IsFilledIn() bool {
+	if tools.Empty(o.Ref) {
+		return false
+	}
+	for _, t := range o.Troncons {
+		if !t.IsFilledIn() {
+			return false
+		}
+	}
+	return true
+}

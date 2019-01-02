@@ -39,3 +39,7 @@ func (pt *PT) SearchInString() string {
 	res += "Pt_Address:" + pt.Address + "\n"
 	return res
 }
+
+func (pt *PT) IsFilledIn() bool {
+	return !tools.Empty(pt.Ref) && !tools.Empty(pt.RefPt) && !tools.Empty(pt.Address)
+}
