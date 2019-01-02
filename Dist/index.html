@@ -19,6 +19,7 @@
         <user-login-modal
                 ref="UserLoginModal"
                 :user.sync="User"
+                @update:user="LoggedUser"
         ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
@@ -31,10 +32,10 @@
         <el-container style="height: 100%;border: 1px solid #eee">
             <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
-                    <div class="header-menu-container">
+                    <el-row :gutter="20" type="flex" align="middle">
                         <h2 class="content">EWIN Services</h2>
                         <span>{{LoggedUser}}</span>
-                    </div>
+                    </el-row>
                     <el-button type="primary" @click="UserLogin" size="mini">Login</el-button>
                 </div>
             </el-header>

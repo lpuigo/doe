@@ -5,7 +5,7 @@ const (
 <!--:default-sort = "{prop: 'client', order: 'ascending'}"-->
 <el-container style="height: 100%">
 	<el-header style="height: auto; padding: 5px">
-		<el-row type="flex" :gutter="10" align="center">
+		<el-row type="flex" :gutter="10" align="middle">
 			<el-col :span="20">
 				<el-button type="primary" plain
 						   icon="fas map-marker-alt icon--left"

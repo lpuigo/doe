@@ -3,17 +3,19 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"github.com/lpuig/ewin/doe/model"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	"io"
 )
 
 type Manager struct {
-	Worksites *ws.WorkSitesPersister
+	Worksites    *ws.WorkSitesPersister
+	SessionStore *sessions.CookieStore
 }
 
-func NewManager(worsitesDir string) (*Manager, error) {
-	wsp, err := ws.NewWorkSitesPersist(worsitesDir)
+func NewManager(conf Config) (*Manager, error) {
+	wsp, err := ws.NewWorkSitesPersist(conf.WorksitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create worksites: %s", err.Error())
 	}
@@ -22,6 +24,8 @@ func NewManager(worsitesDir string) (*Manager, error) {
 		return nil, fmt.Errorf("could not populate worksites:%s", err.Error())
 	}
 	m := &Manager{Worksites: wsp}
+
+	m.SessionStore = sessions.NewCookieStore([]byte(conf.SessionKey))
 
 	return m, nil
 }

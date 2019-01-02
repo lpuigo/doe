@@ -17,8 +17,14 @@ func Login(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//TODO Manage Login/pwd and authorization here
 	for key, value := range r.MultipartForm.Value {
 		fmt.Printf("%s = %s\n", key, value)
+	}
+
+	if err := mgr.AddSessionCookie(w, r); err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	logmsg.Response = http.StatusOK
 	logmsg.Info = "user " + r.MultipartForm.Value["user"][0] + " connected"

@@ -32,8 +32,9 @@ func main() {
 			mpm.GetWorkSites()
 		}),
 		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
+			print("LoggedUser")
 			mpm := &MainPageModel{Object: vm.Object}
-			return mpm.SessionActive()
+			return mpm.CheckUserSession()
 		}),
 	)
 	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
@@ -64,11 +65,22 @@ func NewMainPageModel() *MainPageModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) SessionActive() string {
-	_, exists := cookie.Get("EWin-Session")
-	if !exists {
+func (m *MainPageModel) CheckUserSession() string {
+	print("enter CheckUserSession")
+	_, sessionExists := cookie.Get("EWin-Session")
+	if !sessionExists {
+		print("CheckUserSession delete USer")
+		cookie.Delete("User")
 		return "not logged"
 	}
+	user, userExist := cookie.Get("User")
+	if !userExist {
+		print("CheckUserSession delete Session")
+		cookie.Delete("EWin-Session")
+		return "not logged"
+	}
+	print("CheckUserSession set User", user)
+	m.User.Name = user
 	return "logged as " + m.User.Name
 }
 

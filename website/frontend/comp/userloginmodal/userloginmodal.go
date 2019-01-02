@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/cookie"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
 	"strconv"
@@ -119,8 +120,6 @@ func (ulmm *UserLoginModalModel) Hide() {
 // Action Button Methods
 
 func (ulmm *UserLoginModalModel) Submit() {
-	ulmm.VM.Emit("update:user", ulmm.User)
-
 	go ulmm.submitLogin()
 	//ulmm.Hide()
 }
@@ -147,4 +146,7 @@ func (ulmm *UserLoginModalModel) submitLogin() {
 	}
 	message.SetDuration(tools.SuccessMsgDuration)
 	message.SuccesStr(ulmm.VM, "User connecté")
+	cookie.Set("User", ulmm.User.Name, nil, "")
+	ulmm.VM.Emit("update:user", ulmm.User)
+	ulmm.Hide()
 }

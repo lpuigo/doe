@@ -12,11 +12,10 @@ import (
 )
 
 type Conf struct {
-	WorksitesDir string
+	manager.Config
 
 	LogFile     string
 	ServicePort string
-	SessionKey  string
 	AssetsDir   string
 	AssetsRoot  string
 	RootDir     string
@@ -42,10 +41,12 @@ const (
 
 func main() {
 	conf := &Conf{
-		WorksitesDir:     WorksitesDir,
+		Config: manager.Config{
+			WorksitesDir: WorksitesDir,
+			SessionKey:   SessionKey,
+		},
 		LogFile:          LogFile,
 		ServicePort:      ServicePort,
-		SessionKey:       SessionKey,
 		AssetsDir:        AssetsDir,
 		AssetsRoot:       AssetsRoot,
 		RootDir:          RootDir,
@@ -60,7 +61,7 @@ func main() {
 	}
 	logger.Entry("Server").LogInfo("===== STARTED ======")
 
-	mgr, err := manager.NewManager(conf.WorksitesDir)
+	mgr, err := manager.NewManager(conf.Config)
 	if err != nil {
 		logger.Entry("Server").FatalErr(err)
 	}
@@ -69,25 +70,6 @@ func main() {
 			hf(mgr, w, r)
 		}
 	}
-
-	//store := sessions.NewCookieStore([]byte(conf.SessionKey))
-	//withSession := func(hf route.MgrHandlerFunc) http.HandlerFunc {
-	//	return func(w http.ResponseWriter, r *http.Request) {
-	//		// Get a session. Get() always returns a session, even if empty.
-	//		session, err := store.Get(r, "EWin-Session")
-	//		if err != nil {
-	//			logmsg := logger.Entry("Server")
-	//			route.AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-	//			return
-	//		}
-	//		// Set some session values.
-	//		session.Values["user"] = "test"
-	//		// Save it before we write to the response/return from the handler.
-	//		session.Save(r, w)
-	//
-	//		withManager(hf)(w,r)
-	//	}
-	//}
 
 	router := mux.NewRouter()
 	// session management
