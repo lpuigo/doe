@@ -17,7 +17,7 @@ const template string = `
                 <template slot="prepend">Ville:</template>
             </el-input>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
             <el-input placeholder="PA-99999-XXXX" 
                       v-model="worksite.Ref"
                       :readonly="readonly" clearable size="mini"
@@ -25,19 +25,8 @@ const template string = `
                 <template slot="prepend">Chantier:</template>
             </el-input>
         </el-col>
-        <el-col :span="4" style="text-align: right">
-            <el-tag :type="StatusType" size="medium" style="width: 100%">{{worksite.Status | FormatStatus}}</el-tag>
-            <!--<el-row type="flex" align="middle">-->
-                <!--<span style="margin-right: 5px">Etat:</span>-->
-                <!--<el-select placeholder="Statut"-->
-                           <!--v-model="worksite.Status"-->
-                           <!--:disabled="readonly" size="mini" style="width: 100%"-->
-                <!--&gt;-->
-                    <!--<el-option v-for="(vt, vtn) in WorksiteStatusValTexts()" :key="vt.value" -->
-                               <!--:label="vt.text" :value="vt.value"-->
-                    <!--&gt;</el-option>-->
-                <!--</el-select>-->
-            <!--</el-row>-->
+        <el-col :span="3" style="text-align: right">
+            <el-tag :type="StatusType" size="medium" style="width: 100%;text-align: left">{{worksite.Status | FormatStatus}}</el-tag>
         </el-col>
         <el-col :span="3">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
@@ -56,6 +45,26 @@ const template string = `
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
                             :disabled="worksite.Status != 'DOE'"
+            ></el-date-picker>
+        </el-col>
+        <el-col :span="3">
+            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Attachement" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="worksite.AttachmentDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+                            :disabled="worksite.Status != 'Attachment'"
+            ></el-date-picker>
+        </el-col>
+        <el-col :span="3">
+            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Payement" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="worksite.PaymentDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+                            :disabled="worksite.Status != 'Payment'"
             ></el-date-picker>
         </el-col>
     </el-row>

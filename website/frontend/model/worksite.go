@@ -10,19 +10,21 @@ import (
 type Worksite struct {
 	*js.Object
 
-	Id        int      `js:"Id"`
-	Client    string   `js:"Client"`
-	Ref       string   `js:"Ref"`
-	OrderDate string   `js:"OrderDate"`
-	DoeDate   string   `js:"DoeDate"`
-	City      string   `js:"City"`
-	Status    string   `js:"Status"`
-	Pmz       *PT      `js:"Pmz"`
-	Pa        *PT      `js:"Pa"`
-	Comment   string   `js:"Comment"`
-	Orders    []*Order `js:"Orders"`
-	Rework    *Rework  `js:"Rework"`
-	Dirty     bool     `js:"Dirty"`
+	Id             int      `js:"Id"`
+	Client         string   `js:"Client"`
+	Ref            string   `js:"Ref"`
+	OrderDate      string   `js:"OrderDate"`
+	DoeDate        string   `js:"DoeDate"`
+	AttachmentDate string   `js:"AttachmentDate"`
+	PaymentDate    string   `js:"PaymentDate"`
+	City           string   `js:"City"`
+	Status         string   `js:"Status"`
+	Pmz            *PT      `js:"Pmz"`
+	Pa             *PT      `js:"Pa"`
+	Comment        string   `js:"Comment"`
+	Orders         []*Order `js:"Orders"`
+	Rework         *Rework  `js:"Rework"`
+	Dirty          bool     `js:"Dirty"`
 }
 
 func NewWorkSite() *Worksite {
@@ -32,6 +34,8 @@ func NewWorkSite() *Worksite {
 	ws.Ref = ""
 	ws.OrderDate = ""
 	ws.DoeDate = ""
+	ws.AttachmentDate = ""
+	ws.PaymentDate = ""
 	ws.City = ""
 	ws.Status = "New"
 	ws.Pmz = NewPT()
@@ -75,6 +79,8 @@ func (ws *Worksite) Copy(ows *Worksite) {
 	ws.Ref = ows.Ref
 	ws.OrderDate = ows.OrderDate
 	ws.DoeDate = ows.DoeDate
+	ws.AttachmentDate = ows.AttachmentDate
+	ws.PaymentDate = ows.PaymentDate
 	ws.City = ows.City
 	ws.Status = ows.Status
 	ws.Pmz = ows.Pmz.Clone()
@@ -118,6 +124,8 @@ func (ws *Worksite) SearchInString() string {
 	res += "Ref:" + ws.Ref + "\n"
 	res += "OrderDate:" + date.DateString(ws.OrderDate) + "\n"
 	res += "DoeDate:" + date.DateString(ws.DoeDate) + "\n"
+	res += "AttachmentDate:" + date.DateString(ws.AttachmentDate) + "\n"
+	res += "PaymentDate:" + date.DateString(ws.PaymentDate) + "\n"
 	res += "City:" + ws.City + "\n"
 	res += "Status:" + ws.Status + "\n"
 	res += "Pmz:" + ws.Pmz.SearchInString()
@@ -206,6 +214,10 @@ func WorksiteStatusLabel(value string) string {
 		return "Réal. En cours"
 	case "DOE":
 		return "DOE à faire"
+	case "Attachment":
+		return "Attachement attendu"
+	case "Payment":
+		return "Paiement attendu"
 	case "Done":
 		return "Terminé"
 	case "Rework":

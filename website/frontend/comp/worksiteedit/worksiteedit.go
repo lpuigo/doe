@@ -115,6 +115,10 @@ func (wdm *WorksiteDetailModel) WorksiteStatusType() string {
 		return "warning"
 	case "DOE":
 		return ""
+	case "Attachment":
+		return "success"
+	case "Payment":
+		return "success"
 	case "Done":
 		return "success"
 	case "Rework":
@@ -125,7 +129,7 @@ func (wdm *WorksiteDetailModel) WorksiteStatusType() string {
 
 func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
-	if wdm.Worksite.DoeDate == "" || wdm.Worksite.DoeDate == "null" {
+	if tools.Empty(wdm.Worksite.DoeDate) {
 		wdm.Worksite.Status = "DOE"
 		return
 	}
@@ -147,6 +151,12 @@ func (wdm *WorksiteDetailModel) CalcWorksiteStatus() string {
 	}
 	if tools.Empty(ws.DoeDate) {
 		return "DOE"
+	}
+	if tools.Empty(ws.AttachmentDate) {
+		return "Attachment"
+	}
+	if tools.Empty(ws.PaymentDate) {
+		return "Payment"
 	}
 	return "Done"
 }

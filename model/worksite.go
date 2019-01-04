@@ -1,18 +1,20 @@
 package model
 
 type Worksite struct {
-	Id        int
-	Client    string
-	Ref       string
-	OrderDate string
-	DoeDate   string
-	City      string
-	Status    string
-	Pmz       PT
-	Pa        PT
-	Comment   string
-	Orders    []Order
-	Rework    *Rework
+	Id             int
+	Client         string
+	Ref            string
+	OrderDate      string
+	DoeDate        string
+	AttachmentDate string
+	PaymentDate    string
+	City           string
+	Status         string
+	Pmz            PT
+	Pa             PT
+	Comment        string
+	Orders         []Order
+	Rework         *Rework
 }
 
 func MakeWorksite(ref, orderdate string, pmz, pa PT, order ...Order) Worksite {
