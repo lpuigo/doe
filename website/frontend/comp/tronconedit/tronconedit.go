@@ -16,6 +16,9 @@ const template string = `
         Attributes about value and PB 
     -->
     <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="3">
+            <el-tag :type="Status" size="medium" style="width: 100%">{{StatusText}}</el-tag>
+        </el-col>
         <el-col :span="6">
             <el-tooltip content="Référence" placement="top" effect="light">
                 <el-autocomplete v-model="value.Ref"
@@ -27,9 +30,6 @@ const template string = `
                     <template slot="prepend">Tronçon:</template>
                 </el-autocomplete>
             </el-tooltip>
-        </el-col>
-        <el-col :span="3">
-            <el-tag :type="Status" size="medium" style="width: 100%">{{StatusText}}</el-tag>
         </el-col>
         <el-col :span="15">
             <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
@@ -65,7 +65,7 @@ const template string = `
             ></el-switch>
         </el-col>
         <el-col :span="3">
-            <el-tooltip content="Nb. EL raccordable" placement="top" effect="light">
+            <el-tooltip content="Nb. EL raccordable" placement="bottom" effect="light" :open-delay="500">
                 <el-input-number
                         v-model="value.NbRacco"
                         :min="0" :max="value.NbFiber"
@@ -75,7 +75,7 @@ const template string = `
             </el-tooltip>
         </el-col>
         <el-col :span="3">
-            <el-tooltip content="Nb. Fibre" placement="top" effect="light">
+            <el-tooltip content="Nb. Fibre" placement="bottom" effect="light" :open-delay="500">
                 <el-input-number v-model="value.NbFiber"
                                  :min="6" :step="6"
                                  :readonly="readonly"
@@ -88,7 +88,7 @@ const template string = `
             </el-tooltip>
         </el-col>
         <el-col :offset="1" :span="4">
-            <el-tooltip content="Date Pose PB" placement="top" effect="light">
+            <el-tooltip content="Date Pose PB" placement="bottom" effect="light" :open-delay="500">
                 <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Installation" size="mini"
                                 style="width: 100%" type="date"
                                 v-model="value.InstallDate"
@@ -99,7 +99,7 @@ const template string = `
             </el-tooltip>
         </el-col>
         <el-col :span="4">
-            <el-tooltip content="Date Mesure" placement="top" effect="light">
+            <el-tooltip content="Date Mesure" placement="bottom" effect="light" :open-delay="500">
                 <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Mesure" size="mini"
                                 style="width: 100%" type="date"
                                 v-model="value.MeasureDate"
@@ -250,17 +250,17 @@ func (tem *TronconEditModel) SetStatus() (statusType, statusText string) {
 	tr := tem.Troncon
 
 	switch {
-	case tr.Ref == "" || tr.Pb.Ref == "" || tr.Pb.RefPt == "" || tr.Pb.Address == "":
+	case tr.Ref == "" || !tr.Pb.IsFilledIn():
 		return "warning", "A renseigner"
 	case tr.Blockage && !tr.NeedSignature && tr.Comment == "":
 		return "warning", "Saisir desc. bloquage"
 	case tr.Blockage:
 		return "info", "Bloqué"
-	case tr.MeasureDate != "":
+	case !tools.Empty(tr.MeasureDate):
 		return "success", "Terminé"
-	case tr.InstallDate != "":
+	case !tools.Empty(tr.InstallDate):
 		return "", "Mesures à faire"
-	case tr.Ref != "" && tr.Pb.Ref != "" && tr.Pb.RefPt != "" && tr.Pb.Address != "" && !tr.Blockage:
+	case tr.Ref != "" && tr.Pb.IsFilledIn() && !tr.Blockage:
 		return "", "A Réaliser"
 	}
 
@@ -272,4 +272,22 @@ func (tem *TronconEditModel) CheckMeasureDate(vm *hvue.VM, date string) {
 	if date < tem.Troncon.InstallDate {
 		tem.Troncon.MeasureDate = tem.Troncon.InstallDate
 	}
+}
+
+func (tem *TronconEditModel) StatusBgColor() string {
+	switch tem.StatusText {
+	case "A renseigner":
+		return "#e5e0d7"
+	case "Saisir desc. bloquage":
+		return "#e5e0d7"
+	case "Bloqué":
+		return "#e0e0e0"
+	case "Terminé":
+		return "#dbe2d7"
+	case "Mesures à faire":
+		return "#c9d7e5"
+	case "A Réaliser":
+		return "#c9d7e5"
+	}
+	return "#ffffff"
 }

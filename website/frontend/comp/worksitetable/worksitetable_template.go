@@ -29,7 +29,7 @@ const (
 				:row-class-name="TableRowClassName"
 				:default-sort = "{prop: 'Status', order: 'descending'}"
 				height="100%"
-				:border=true
+				:border=true size="mini"
 				@row-dblclick="SetSelectedWorksite"
 		>
             <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
@@ -58,11 +58,6 @@ const (
 				</template>
 			</el-table-column>
 			<el-table-column
-					label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
-					width="120px" :resizable=true :show-overflow-tooltip=true
-					align="center"	:formatter="FormatDate"
-			></el-table-column>
-			<el-table-column
 					label="Nb Cmd"
 					width="150px" :resizable=true :show-overflow-tooltip=true
 			>
@@ -70,6 +65,21 @@ const (
 					<worksite-info :worksite="scope.row"></worksite-info>
 				</template>
 			</el-table-column>
+            <el-table-column
+                    label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
+                    width="110px" :resizable=true :show-overflow-tooltip=true
+                    align="center"	:formatter="FormatDate"
+            ></el-table-column>
+            <el-table-column
+                    label="DOE" prop="DoeDate" sortable :sort-by="['DoeDate', 'Ref']"
+                    width="110px" :resizable=true :show-overflow-tooltip=true
+                    align="center"	:formatter="FormatDate"
+            ></el-table-column>
+            <el-table-column
+                    label="Attachement" prop="AttachmentDate" sortable :sort-by="['AttachmentDate', 'Ref']"
+                    width="110px" :resizable=true :show-overflow-tooltip=true
+                    align="center"	:formatter="FormatDate"
+            ></el-table-column>
 			<el-table-column
 					label="Commentaire" prop="Comment"
 					min-width="120px" :resizable=true

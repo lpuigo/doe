@@ -107,56 +107,59 @@ func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 
 func (wdm *WorksiteDetailModel) WorksiteStatusType() string {
 	switch wdm.Worksite.Status {
-	case "New":
+	case "00 New":
 		return "info"
-	case "FormInProgress":
+	case "10 FormInProgress":
 		return "warning"
-	case "InProgress":
+	case "20 InProgress":
 		return "warning"
-	case "DOE":
+	case "30 DOE":
 		return ""
-	case "Attachment":
+	case "40 Attachment":
 		return "success"
-	case "Payment":
+	case "50 Payment":
 		return "success"
-	case "Done":
+	case "99 Done":
 		return "success"
-	case "Rework":
+	case "80 Rework":
 		return "danger"
 	}
 	return "danger"
 }
 
-func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
-	wdm = &WorksiteDetailModel{Object: vm.Object}
-	if tools.Empty(wdm.Worksite.DoeDate) {
-		wdm.Worksite.Status = "DOE"
-		return
-	}
-	wdm.Worksite.Status = "Done"
-}
+//func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
+//	wdm = &WorksiteDetailModel{Object: vm.Object}
+//	if tools.Empty(wdm.Worksite.DoeDate) {
+//		wdm.Worksite.Status = "30 DOE"
+//		return
+//	}
+//	wdm.Worksite.Status = "99 Done"
+//}
 
 func (wdm *WorksiteDetailModel) CalcWorksiteStatus() string {
 	// New if Worksite base info not completed
 	ws := wdm.Worksite
 	if !ws.IsDefined() {
-		return "New"
+		return "00 New"
 	}
 	if !ws.IsFilledIn() {
-		return "FormInProgress"
+		return "10 FormInProgress"
 	}
 	if !ws.OrdersCompleted() {
 		ws.DoeDate = ""
-		return "InProgress"
+		return "20 InProgress"
+	}
+	if ws.IsBlocked() {
+		return "99 Done"
 	}
 	if tools.Empty(ws.DoeDate) {
-		return "DOE"
+		return "30 DOE"
 	}
 	if tools.Empty(ws.AttachmentDate) {
-		return "Attachment"
+		return "40 Attachment"
 	}
 	if tools.Empty(ws.PaymentDate) {
-		return "Payment"
+		return "50 Payment"
 	}
-	return "Done"
+	return "99 Done"
 }

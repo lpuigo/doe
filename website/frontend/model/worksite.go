@@ -37,7 +37,7 @@ func NewWorkSite() *Worksite {
 	ws.AttachmentDate = ""
 	ws.PaymentDate = ""
 	ws.City = ""
-	ws.Status = "New"
+	ws.Status = "00 New"
 	ws.Pmz = NewPT()
 	ws.Pa = NewPT()
 	ws.Comment = ""
@@ -167,6 +167,30 @@ func (ws *Worksite) DeleteOrder(i int) {
 	ws.Orders = orders
 }
 
+func (ws *Worksite) InstallDates() string {
+	min := "9999-99-99"
+	max := "0000-00-00"
+	for _, o := range ws.Orders {
+		for _, t := range o.Troncons {
+			if t.InstallDate < min {
+				min = t.InstallDate
+			}
+			if t.InstallDate > max {
+				max = t.InstallDate
+			}
+		}
+	}
+	res := ""
+	if min != "9999-99-99" {
+		res += date.DateString(min)
+	}
+	res += " - "
+	if max != "0000-00-00" {
+		res += date.DateString(max)
+	}
+	return res
+}
+
 func (ws *Worksite) AddOrder() {
 	order := NewOrder()
 	order.AddTroncon()
@@ -204,24 +228,29 @@ func (ws *Worksite) IsFilledIn() bool {
 	return true
 }
 
+func (ws *Worksite) IsBlocked() bool {
+	_, _, nbAivailEl, _ := ws.GetInfo()
+	return nbAivailEl == 0
+}
+
 func WorksiteStatusLabel(value string) string {
 	switch value {
-	case "New":
+	case "00 New":
 		return "Nouveau"
-	case "FormInProgress":
+	case "10 FormInProgress":
 		return "Saisie en cours"
-	case "InProgress":
+	case "20 InProgress":
 		return "Réal. En cours"
-	case "DOE":
+	case "30 DOE":
 		return "DOE à faire"
-	case "Attachment":
+	case "40 Attachment":
 		return "Attachement attendu"
-	case "Payment":
+	case "50 Payment":
 		return "Paiement attendu"
-	case "Done":
-		return "Terminé"
-	case "Rework":
+	case "80 Rework":
 		return "A Reprendre"
+	case "99 Done":
+		return "Terminé"
 	default:
 		return "<" + value + ">"
 	}

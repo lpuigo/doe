@@ -44,7 +44,7 @@ const template string = `
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
-                            :disabled="worksite.Status != 'DOE'"
+                            :disabled="worksite.Status < '30 DOE'"
             ></el-date-picker>
         </el-col>
         <el-col :span="3">
@@ -54,7 +54,7 @@ const template string = `
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
-                            :disabled="worksite.Status != 'Attachment'"
+                            :disabled="worksite.Status < '40 Attachment'"
             ></el-date-picker>
         </el-col>
         <el-col :span="3">
@@ -64,7 +64,7 @@ const template string = `
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
-                            :disabled="worksite.Status != 'Payment'"
+                            :disabled="worksite.Status < '50 Payment'"
             ></el-date-picker>
         </el-col>
     </el-row>
