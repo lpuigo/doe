@@ -7,6 +7,17 @@ import (
 	"strings"
 )
 
+const (
+	WsStatusNew            string = "00 New"
+	WsStatusFormInProgress string = "10 FormInProgress"
+	WsStatusInProgress     string = "20 InProgress"
+	WsStatusDOE            string = "30 DOE"
+	WsStatusAttachment     string = "40 Attachment"
+	WsStatusPayment        string = "50 Payment"
+	WsStatusRework         string = "80 Rework"
+	WsStatusDone           string = "99 Done"
+)
+
 type Worksite struct {
 	*js.Object
 
@@ -37,7 +48,7 @@ func NewWorkSite() *Worksite {
 	ws.AttachmentDate = ""
 	ws.PaymentDate = ""
 	ws.City = ""
-	ws.Status = "00 New"
+	ws.Status = WsStatusNew
 	ws.Pmz = NewPT()
 	ws.Pa = NewPT()
 	ws.Comment = ""
@@ -235,21 +246,21 @@ func (ws *Worksite) IsBlocked() bool {
 
 func WorksiteStatusLabel(value string) string {
 	switch value {
-	case "00 New":
+	case WsStatusNew:
 		return "Nouveau"
-	case "10 FormInProgress":
+	case WsStatusFormInProgress:
 		return "Saisie en cours"
-	case "20 InProgress":
+	case WsStatusInProgress:
 		return "Réal. En cours"
-	case "30 DOE":
+	case WsStatusDOE:
 		return "DOE à faire"
-	case "40 Attachment":
+	case WsStatusAttachment:
 		return "Attachement attendu"
-	case "50 Payment":
+	case WsStatusPayment:
 		return "Paiement attendu"
-	case "80 Rework":
+	case WsStatusRework:
 		return "A Reprendre"
-	case "99 Done":
+	case WsStatusDone:
 		return "Terminé"
 	default:
 		return "<" + value + ">"
