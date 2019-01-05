@@ -12,10 +12,13 @@ import (
 
 func GetWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetWorkSites")
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorkSites").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Type", "application/json")
+
+	//TODO Manage User Authorization (control on mgr.CurrentUser)
+
 	err := mgr.GetWorkSites(w)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
@@ -26,7 +29,7 @@ func GetWorkSites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 func GetWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetWorkSite")
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorkSite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -51,7 +54,7 @@ func GetWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("CreateWorkSite")
+	logmsg := logger.TimedEntry("Route").AddRequest("CreateWorkSite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	if r.Body == nil {
@@ -76,7 +79,7 @@ func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 func UpdateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("UpdateWorkSite")
+	logmsg := logger.TimedEntry("Route").AddRequest("UpdateWorkSite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	if r.Body == nil {
@@ -113,7 +116,7 @@ func UpdateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 func DeleteWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("DeleteWorkSite")
+	logmsg := logger.TimedEntry("Route").AddRequest("DeleteWorkSite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	vars := mux.Vars(r)

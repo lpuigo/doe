@@ -6,5 +6,6 @@ const (
 	LongTimeOut        = 30000
 	TimeOut            = 10000
 
-	HttpOK = 200
+	HttpOK      = 200
+	HttpCreated = 201
 )

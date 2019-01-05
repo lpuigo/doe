@@ -1,7 +1,6 @@
 package route
 
 import (
-	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
 	"net/http"
@@ -17,15 +16,35 @@ func Login(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO Manage Login/pwd and authorization here
-	for key, value := range r.MultipartForm.Value {
-		fmt.Printf("%s = %s\n", key, value)
+	getValue := func(key string) (string, bool) {
+		info, found := r.MultipartForm.Value[key]
+		if !found {
+			return "", false
+		}
+		return info[0], true
 	}
 
-	if err := mgr.AddSessionCookie(w, r); err != nil {
+	user, hasUser := getValue("user")
+	pwd, hasPwd := getValue("pwd")
+	if !(hasUser && hasPwd) {
+		AddError(w, logmsg, "user/password info missing", http.StatusBadRequest)
+		return
+	}
+	//TODO Improve Login/pwd and authorization here
+	u := mgr.Users.GetByName(user)
+	if u == nil {
+		AddError(w, logmsg, "user not authorized", http.StatusUnauthorized)
+		return
+	}
+	if u.Password != pwd {
+		AddError(w, logmsg, "user/password not authorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := mgr.SessionStore.AddSessionCookie(u, w, r); err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logmsg.Response = http.StatusOK
-	logmsg.Info = "user " + r.MultipartForm.Value["user"][0] + " connected"
+	logmsg.Info = "user '" + user + "' connected with password '" + pwd + "'"
 }

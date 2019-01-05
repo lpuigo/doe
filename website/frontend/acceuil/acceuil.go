@@ -141,6 +141,7 @@ func (m *MainPageModel) callGetWorkSites() {
 		return
 	}
 	if req.Status != tools.HttpOK {
+		print("callGetWorkSites KO", m.VM)
 		m.errorMessage(req)
 		return
 	}
@@ -162,7 +163,7 @@ func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status != 200 {
+	if req.Status != tools.HttpOK {
 		m.errorMessage(req)
 		return
 	}
@@ -180,7 +181,7 @@ func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status != 201 {
+	if req.Status != tools.HttpCreated {
 		m.errorMessage(req)
 	}
 	uws.Dirty = false
@@ -199,7 +200,7 @@ func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
 		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status != 200 {
+	if req.Status != tools.HttpOK {
 		m.errorMessage(req)
 	}
 	m.deletePrj(dws)

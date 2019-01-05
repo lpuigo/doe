@@ -3,9 +3,9 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/sessions"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	"io"
@@ -14,7 +14,8 @@ import (
 type Manager struct {
 	Worksites    *ws.WorkSitesPersister
 	Users        *users.UsersPersister
-	SessionStore *sessions.CookieStore
+	SessionStore *session.SessionStore
+	CurrentUser  *users.UserRecord
 }
 
 func NewManager(conf ManagerConfig) (*Manager, error) {
@@ -42,11 +43,15 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	m := &Manager{Worksites: wsp, Users: up}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worsites and %d users", wsp.NbWorsites(), up.NbUsers()))
 
-	m.SessionStore = sessions.NewCookieStore([]byte(conf.SessionKey))
+	m.SessionStore = session.NewSessionStore(conf.SessionKey)
 
 	return m, nil
 }
 
 func (m Manager) GetWorkSites(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
+}
+
+func (m Manager) Clone() *Manager {
+	return &m
 }

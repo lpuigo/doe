@@ -4,14 +4,16 @@ import (
 	"net/http"
 )
 
-func (m *Manager) AddSessionCookie(w http.ResponseWriter, r *http.Request) error {
-	// Get a session. Get() always returns a session, even if empty.
-	session, err := m.SessionStore.Get(r, "EWin-Session")
-	if err != nil {
-		return err
+func (m *Manager) CheckSessionUser(r *http.Request) bool {
+	userid := m.SessionStore.CheckUser(r)
+	if userid == -1 {
+		m.CurrentUser = nil
+		return false
 	}
-	// Set some session values.
-	session.Values["user"] = "test"
-	// Save it before we write to the response/return from the handler.
-	return session.Save(r, w)
+	ur := m.Users.GetById(userid)
+	m.CurrentUser = ur
+	if ur == nil {
+		return false
+	}
+	return true
 }

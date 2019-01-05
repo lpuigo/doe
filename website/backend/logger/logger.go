@@ -46,6 +46,9 @@ func (e *Record) getMsg() string {
 	if e.source != "" {
 		msg += e.source
 	}
+	if e.user != "" {
+		msg += ` user="` + e.user + `"`
+	}
 	if e.Request != "" {
 		msg += ` request="` + e.Request + `"`
 	}
@@ -73,13 +76,13 @@ func (e *Record) LogInfo(info string) {
 	e.Log()
 }
 
-func (e *Record) Fatal(info string) {
-	e.Info = info
-	log.Fatal(e.getMsg())
+func (e *Record) LogError(err string) {
+	e.Error = err
+	e.Log()
 }
 
-func (e *Record) FatalErr(err error) {
-	e.Info = err.Error()
+func (e *Record) Fatal(err error) {
+	e.Error = err.Error()
 	log.Fatal(e.getMsg())
 }
 
@@ -90,6 +93,11 @@ func (e *Record) AddTime() *Record {
 
 func (e *Record) AddRequest(req string) *Record {
 	e.Request = req
+	return e
+}
+
+func (e *Record) AddUser(user string) *Record {
+	e.user = user
 	return e
 }
 
