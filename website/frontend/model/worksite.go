@@ -15,6 +15,7 @@ const (
 	WsStatusAttachment     string = "40 Attachment"
 	WsStatusPayment        string = "50 Payment"
 	WsStatusRework         string = "80 Rework"
+	WsStatusBlocked        string = "98 Blocked"
 	WsStatusDone           string = "99 Done"
 )
 
@@ -260,6 +261,8 @@ func WorksiteStatusLabel(value string) string {
 		return "Paiement attendu"
 	case WsStatusRework:
 		return "A Reprendre"
+	case WsStatusBlocked:
+		return "Bloqué"
 	case WsStatusDone:
 		return "Terminé"
 	default:

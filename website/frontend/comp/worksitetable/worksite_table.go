@@ -114,13 +114,21 @@ func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
 		return "worksite-row-need-save"
 	}
 	switch ws.Status {
-	case "Done":
+	case fm.WsStatusDone:
 		res = "worksite-row-done"
-	case "DOE":
-		res = "worksite-row-doe"
-	case "Rework":
+	case fm.WsStatusRework:
 		res = "worksite-row-rework"
-	case "New":
+	case fm.WsStatusPayment:
+		res = "worksite-row-payment"
+	case fm.WsStatusAttachment:
+		res = "worksite-row-attachment"
+	case fm.WsStatusDOE:
+		res = "worksite-row-doe"
+	case fm.WsStatusInProgress:
+		res = "worksite-row-inprogress"
+	case fm.WsStatusFormInProgress:
+		res = "worksite-row-forminprogress"
+	case fm.WsStatusNew:
 		res = "worksite-row-new"
 	default:
 		res = ""
@@ -196,13 +204,13 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 
 func (wtm *WorksiteTableModel) FilteredStatusValue() []string {
 	res := []string{
-		"DOE",
-		"InProgress",
-		"New",
-		"Rework",
-		//fm.WorksiteStatusLabel("DOE"),
-		//fm.WorksiteStatusLabel("InProgress"),
-		//fm.WorksiteStatusLabel("New"),
+		fm.WsStatusNew,
+		fm.WsStatusFormInProgress,
+		fm.WsStatusInProgress,
+		fm.WsStatusDOE,
+		fm.WsStatusAttachment,
+		fm.WsStatusPayment,
+		fm.WsStatusRework,
 	}
 	return res
 }
