@@ -22,7 +22,7 @@ func NewWorkSiteRecord() *WorkSiteRecord {
 	return wsr
 }
 
-// NewWorkSiteRecordFromFile returns a WorkSiteRecord populated from the given file
+// NewWorkSiteRecordFromFile returns a WorkSiteRecord populated from the given reader
 func NewWorkSiteRecordFrom(r io.Reader) (wsr *WorkSiteRecord, err error) {
 	wsr = NewWorkSiteRecord()
 	err = json.NewDecoder(r).Decode(wsr)

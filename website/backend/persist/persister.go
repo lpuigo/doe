@@ -46,7 +46,7 @@ func (p *Persister) SetPersistDelay(persistDelay time.Duration) {
 	p.delay = persistDelay
 }
 
-// CheckDirectory checks if Persister directory exists (if ok, return err is nil)
+// CheckDirectory checks if Persister directory exists and create deleted dir if not exists (returns nil error if ok)
 func (p Persister) CheckDirectory() error {
 	fi, err := os.Stat(p.directory)
 	if err != nil {
@@ -54,6 +54,10 @@ func (p Persister) CheckDirectory() error {
 	}
 	if !fi.IsDir() {
 		return fmt.Errorf("not a proper directory: %s\n", p.directory)
+	}
+	dpath := filepath.Join(p.directory, "deleted")
+	if _, err := os.Stat(dpath); os.IsNotExist(err) {
+		return os.Mkdir(dpath, os.ModePerm)
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package manager
 
-type Config struct {
+type ManagerConfig struct {
 	WorksitesDir string
+	UsersDir     string
 	SessionKey   string
 }

@@ -32,13 +32,15 @@ func cleanTest(t *testing.T) {
 			return nil
 		}
 		if info.IsDir() {
+			if info.Name() == "deleted" {
+				return filepath.SkipDir
+			}
 			return nil
 		}
-		os.Remove(path)
-		return nil
+		return os.Remove(path)
 	})
 	if err != nil {
-		t.Errorf("cleanTest return: %v", err)
+		t.Fatalf("cleanTest return: %v", err)
 	}
 }
 
@@ -132,7 +134,7 @@ func TestWorkSitesPersister_Remove(t *testing.T) {
 		t.Fatalf("WorkSitesPersist.GetAll returns unexpected length %d (expected %d)", len(wslist), numWS/2)
 	}
 	time.Sleep(50 * time.Millisecond)
-	files, err := wsp.persister.GetFilesList()
+	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
 		t.Fatalf("GetFilesList returns : %v", err)
 	}
@@ -158,7 +160,7 @@ func TestWorkSitesPersister_Add(t *testing.T) {
 	}
 
 	time.Sleep(50 * time.Millisecond)
-	files, err := wsp.persister.GetFilesList()
+	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
 		t.Fatalf("GetFilesList returns : %v", err)
 	}

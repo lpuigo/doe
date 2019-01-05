@@ -12,7 +12,7 @@ import (
 )
 
 type Conf struct {
-	manager.Config
+	manager.ManagerConfig
 
 	LogFile     string
 	ServicePort string
@@ -32,6 +32,7 @@ const (
 	SessionKey  = "SECRET_KEY"
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
+	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
 
 	LaunchWebBrowser = true
 
@@ -41,8 +42,9 @@ const (
 
 func main() {
 	conf := &Conf{
-		Config: manager.Config{
+		ManagerConfig: manager.ManagerConfig{
 			WorksitesDir: WorksitesDir,
+			UsersDir:     UsersDir,
 			SessionKey:   SessionKey,
 		},
 		LogFile:          LogFile,
@@ -59,9 +61,9 @@ func main() {
 	if err := config.SetFromFile(ConfigFile, conf); err != nil {
 		logger.Entry("Server").FatalErr(err)
 	}
-	logger.Entry("Server").LogInfo("===== STARTED ======")
+	logger.Entry("Server").LogInfo("============================= SERVER STARTING ==================================")
 
-	mgr, err := manager.NewManager(conf.Config)
+	mgr, err := manager.NewManager(conf.ManagerConfig)
 	if err != nil {
 		logger.Entry("Server").FatalErr(err)
 	}
@@ -90,6 +92,7 @@ func main() {
 
 	LaunchPageInBrowser(conf)
 	logger.Entry("Server").LogInfo("listening on " + conf.ServicePort)
+	logger.Entry("Server").LogInfo("============================== SERVER READY ====================================")
 	logger.Entry("Server").FatalErr(http.ListenAndServe(conf.ServicePort, gzipedrouter))
 }
 

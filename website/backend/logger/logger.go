@@ -24,6 +24,7 @@ func StartLog(logfile string) *os.File {
 type Record struct {
 	t        time.Time
 	source   string
+	user     string
 	Request  string
 	Response int
 	Info     string

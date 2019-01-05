@@ -13,14 +13,17 @@ type Record struct {
 	marshall func(w io.Writer) error
 }
 
+// GetId returns the inner record id
 func (r Record) GetId() int {
 	return r.id
 }
 
+// SetId sets the inner record id
 func (r *Record) SetId(id int) {
 	r.id = id
 }
 
+// Dirty marks the record as dirty (need to be persisted in a file)
 func (r *Record) Dirty() {
 	r.dirty = true
 }
@@ -42,9 +45,6 @@ func (r *Record) Persist(path string) error {
 
 func (r Record) Remove(path string) error {
 	dpath := filepath.Join(path, "deleted")
-	if _, err := os.Stat(dpath); os.IsNotExist(err) {
-		os.Mkdir(dpath, os.ModePerm)
-	}
 	file := r.GetFilePath(path)
 	dfile := r.GetFilePath(dpath)
 	return os.Rename(file, dfile)

@@ -5,16 +5,20 @@ import (
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	"io"
 )
 
 type Manager struct {
 	Worksites    *ws.WorkSitesPersister
+	Users        *users.UsersPersister
 	SessionStore *sessions.CookieStore
 }
 
-func NewManager(conf Config) (*Manager, error) {
+func NewManager(conf ManagerConfig) (*Manager, error) {
+	// Init Worksites persister
 	wsp, err := ws.NewWorkSitesPersist(conf.WorksitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create worksites: %s", err.Error())
@@ -23,7 +27,20 @@ func NewManager(conf Config) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate worksites:%s", err.Error())
 	}
-	m := &Manager{Worksites: wsp}
+
+	// Init Users persister
+	up, err := users.NewUsersPersister(conf.UsersDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create users: %s", err.Error())
+	}
+	err = up.LoadDirectory()
+	if err != nil {
+		return nil, fmt.Errorf("could not populate user:%s", err.Error())
+	}
+
+	// Init manager
+	m := &Manager{Worksites: wsp, Users: up}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worsites and %d users", wsp.NbWorsites(), up.NbUsers()))
 
 	m.SessionStore = sessions.NewCookieStore([]byte(conf.SessionKey))
 

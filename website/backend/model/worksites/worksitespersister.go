@@ -28,6 +28,10 @@ func NewWorkSitesPersist(dir string) (*WorkSitesPersister, error) {
 	return wsp, nil
 }
 
+func (wsp WorkSitesPersister) NbWorsites() int {
+	return len(wsp.workSites)
+}
+
 // LoadDirectory loads all persisted Worksite Records
 func (wsp *WorkSitesPersister) LoadDirectory() error {
 	wsp.Lock()
@@ -89,7 +93,7 @@ func (wsp *WorkSitesPersister) Update(uwsr *WorkSiteRecord) error {
 	return nil
 }
 
-// Remove removes the given WorkSiteRecord from the WorkSitesPersister (pertaining file is deleted)
+// Remove removes the given WorkSiteRecord from the WorkSitesPersister (pertaining file is moved to deleted dir)
 func (wsp *WorkSitesPersister) Remove(wsr *WorkSiteRecord) error {
 	wsp.Lock()
 	defer wsp.Unlock()
