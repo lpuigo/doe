@@ -42,7 +42,23 @@ func (ss *SessionStore) AddSessionCookie(u *users.UserRecord, w http.ResponseWri
 		return err
 	}
 	// Set some session values.
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
 	session.Values[userId] = u.Id
 	// Save it before we write to the response/return from the handler.
+	return session.Save(r, w)
+}
+
+func (ss *SessionStore) RemoveSessionCookie(w http.ResponseWriter, r *http.Request) error {
+	session, err := ss.Get(r, ss.SessionName)
+	if err != nil {
+		return err
+	}
+	session.Options = &sessions.Options{
+		MaxAge: -1,
+	}
 	return session.Save(r, w)
 }

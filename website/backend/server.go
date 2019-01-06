@@ -88,6 +88,7 @@ func main() {
 
 	router := mux.NewRouter()
 	// session management
+	router.HandleFunc("/api/login", withManager(route.GetUser)).Methods("GET")
 	router.HandleFunc("/api/login", withManager(route.Login)).Methods("POST")
 	// Worsite method
 	router.HandleFunc("/api/worksites", withUserManager("GetWorkSites", route.GetWorkSites)).Methods("GET")
