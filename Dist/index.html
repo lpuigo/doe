@@ -19,7 +19,7 @@
         <user-login-modal
                 ref="UserLoginModal"
                 :user.sync="User"
-                @update:user="CheckUserSession"
+                @update:user=""
         ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
@@ -34,9 +34,11 @@
                 <div class="header-menu-container">
                     <el-row :gutter="20" type="flex" align="middle">
                         <h2 class="content">EWIN Services</h2>
-                        <span>{{LoggedUser}}</span>
                     </el-row>
-                    <el-button type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
+                    <el-row :gutter="20" type="flex" align="middle">
+                        <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
+                        <el-button v-else type="primary" @click="UserLogout" size="mini">{{User.Name}} Logout</el-button>
+                    </el-row>
                 </div>
             </el-header>
             <el-container style="height: 100%">

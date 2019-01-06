@@ -8,7 +8,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/cookie"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
@@ -29,7 +28,7 @@ func main() {
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
-			mpm.CheckUserSession()
+			mpm.GetUserSession()
 			mpm.GetWorkSites()
 		}),
 		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
@@ -68,26 +67,34 @@ func NewMainPageModel() *MainPageModel {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) CheckUserSession() {
-	_, sessionExists := cookie.Get("EWin-Session")
-	if !sessionExists {
-		print("CheckUserSession delete User")
-		cookie.Delete("User")
-		m.User.Name = ""
-		return
-	}
-	user, userExist := cookie.Get("User")
-	if !userExist {
-		print("CheckUserSession delete Session")
-		cookie.Delete("EWin-Session")
-		m.User.Name = ""
-		return
-	}
-	m.User.Name = user
+func (m *MainPageModel) GetUserSession() {
+	go m.callGetUser()
 }
 
+//func (m *MainPageModel) CheckUserSession() {
+//	_, sessionExists := cookie.Get("EWin-Session")
+//	if !sessionExists {
+//		print("CheckUserSession delete User")
+//		cookie.Delete("User")
+//		m.User.Name = ""
+//		return
+//	}
+//	user, userExist := cookie.Get("User")
+//	if !userExist {
+//		print("CheckUserSession delete Session")
+//		cookie.Delete("EWin-Session")
+//		m.User.Name = ""
+//		return
+//	}
+//	m.User.Name = user
+//}
+//
 func (m *MainPageModel) ShowUserLogin() {
 	m.VM.Refs("UserLoginModal").Call("Show", m.User)
+}
+
+func (m *MainPageModel) UserLogout() {
+	go m.callLogout()
 }
 
 func (m *MainPageModel) GetWorkSites() {
@@ -130,6 +137,44 @@ func (m *MainPageModel) errorMessage(req *xhr.Request) {
 	message.ErrorMsgStr(m.VM, msg, req.Response, true)
 }
 
+func (m *MainPageModel) callGetUser() {
+	req := xhr.NewRequest("GET", "/api/login")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		m.errorMessage(req)
+		return
+	}
+	m.User.Copy(fm.NewUserFromJS(req.Response))
+	if m.User.Name != "" {
+		m.User.Connected = true
+	}
+}
+
+func (m *MainPageModel) callLogout() {
+	req := xhr.NewRequest("DELETE", "/api/login")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		m.errorMessage(req)
+		return
+	}
+	m.User.Name = ""
+	m.User.Connected = false
+}
+
 func (m *MainPageModel) callGetWorkSites() {
 	req := xhr.NewRequest("GET", "/api/worksites")
 	req.Timeout = tools.LongTimeOut
@@ -141,7 +186,6 @@ func (m *MainPageModel) callGetWorkSites() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		print("callGetWorkSites KO", m.VM)
 		m.errorMessage(req)
 		return
 	}

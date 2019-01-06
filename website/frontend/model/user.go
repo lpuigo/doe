@@ -8,18 +8,24 @@ import (
 type User struct {
 	*js.Object
 
-	Name string `js:"Name"`
-	Pwd  string `js:"Pwd"`
+	Name      string `js:"Name"`
+	Pwd       string `js:"Pwd"`
+	Connected bool   `js:"Connected"`
 }
 
 func NewUser() *User {
 	user := &User{Object: tools.O()}
 	user.Name = ""
 	user.Pwd = ""
+	user.Connected = false
 	return user
+}
+
+func NewUserFromJS(o *js.Object) *User {
+	return &User{Object: o}
 }
 
 func (u *User) Copy(ou *User) {
 	u.Name = ou.Name
-	u.Pwd = ou.Pwd
+	u.Connected = ou.Connected
 }

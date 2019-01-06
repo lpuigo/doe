@@ -58,7 +58,9 @@ func (ss *SessionStore) RemoveSessionCookie(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 	session.Options = &sessions.Options{
-		MaxAge: -1,
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
 	}
 	return session.Save(r, w)
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/cookie"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
 	"strconv"
@@ -37,12 +36,15 @@ const (
 	<!-- 
 		Modal Body
 	-->
-    <el-form id="userForm" :model="editedUser" size="mini" style="margin: 30px">
+    <el-form id="userForm" :model="editedUser" size="mini" style="margin: 30px;height: 15vh">
         <el-form-item label="Login" :label-width="labelSize">
             <el-input v-model.trim="editedUser.Name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Mot de Passe" :label-width="labelSize">
             <el-input type="password" v-model.trim="editedUser.Pwd" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item v-if="Message" :label-width="labelSize">
+            <el-tag type="danger" style="width: 100%">{{Message}}</el-tag>
         </el-form-item>
     </el-form>
 
@@ -66,6 +68,7 @@ type UserLoginModalModel struct {
 	User       *fm.User `js:"user"`
 	EditedUser *fm.User `js:"editedUser"`
 	LabelSize  string   `js:"labelSize"`
+	Message    string   `js:"Message"`
 }
 
 func NewUserLoginModalModel(vm *hvue.VM) *UserLoginModalModel {
@@ -76,6 +79,7 @@ func NewUserLoginModalModel(vm *hvue.VM) *UserLoginModalModel {
 	ulmm.User = fm.NewUser()
 	ulmm.EditedUser = fm.NewUser()
 	ulmm.LabelSize = "120px"
+	ulmm.Message = ""
 
 	return ulmm
 }
@@ -112,6 +116,7 @@ func ComponentOptions() []hvue.ComponentOption {
 func (ulmm *UserLoginModalModel) Show(u *fm.User) {
 	ulmm.User = u
 	ulmm.EditedUser.Copy(u)
+	ulmm.Message = ""
 	ulmm.Visible = true
 }
 
@@ -131,7 +136,6 @@ func (ulmm *UserLoginModalModel) submitLogin() {
 	f := js.Global.Get("FormData").New()
 	f.Call("append", "user", ulmm.EditedUser.Name)
 	f.Call("append", "pwd", ulmm.EditedUser.Pwd)
-	print("submitLogin", f)
 	req := xhr.NewRequest("POST", "/api/login")
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON
@@ -140,16 +144,21 @@ func (ulmm *UserLoginModalModel) submitLogin() {
 		message.ErrorStr(ulmm.VM, "Oups! "+err.Error(), true)
 		return
 	}
-	if req.Status != 200 {
+	if req.Status == tools.HttpUnauthorized {
+		ulmm.Message = message.ErrorMsgFromJS(req.Response).Error
+		return
+	}
+	if req.Status != tools.HttpOK {
 		message.SetDuration(tools.WarningMsgDuration)
-		msg := "Quelquechose c'est mal passé !\n"
+		msg := "Quelque chose c'est mal passé !\n"
 		msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
 		message.ErrorMsgStr(ulmm.VM, msg, req.Response, true)
 		return
 	}
+	ulmm.EditedUser.Connected = true
 	message.SetDuration(tools.SuccessMsgDuration)
 	message.SuccesStr(ulmm.VM, "'"+ulmm.EditedUser.Name+"' connecté")
-	cookie.Set("User", ulmm.EditedUser.Name, nil, "")
+	//cookie.Set("User", ulmm.EditedUser.Name, nil, "")
 	ulmm.VM.Emit("update:user", ulmm.EditedUser)
 	ulmm.Hide()
 }

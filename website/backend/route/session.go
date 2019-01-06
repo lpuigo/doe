@@ -16,6 +16,9 @@ func (au *authentUser) SetFrom(ur *users.UserRecord) {
 	au.Name = ur.Name
 }
 
+// GetUser checks for session cookie, and return pertaining user
+//
+// If user is not authenticated, the session is removed
 func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetUser")
@@ -90,4 +93,18 @@ func Login(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 	logmsg.Response = http.StatusOK
 	logmsg.Info = "logged in"
+}
+
+func Logout(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("Logout").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	err := mgr.SessionStore.RemoveSessionCookie(w, r)
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.Info = "logged out"
+	logmsg.Response = http.StatusOK
 }
