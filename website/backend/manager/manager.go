@@ -48,8 +48,14 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	return m, nil
 }
 
+// GetWorkSites return Arrays of Worksites (JSON in writer)
 func (m Manager) GetWorkSites(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
+}
+
+// GetWorkSites return Arrays of WorksiteInfos (JSON in writer)
+func (m Manager) GetWorksitesInfo(writer io.Writer) error {
+	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(func(ws *model.Worksite) bool { return true }))
 }
 
 func (m Manager) Clone() *Manager {

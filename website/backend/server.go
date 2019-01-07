@@ -92,7 +92,7 @@ func main() {
 	router.HandleFunc("/api/login", withUserManager("Logout", route.Logout)).Methods("DELETE")
 	router.HandleFunc("/api/login", withManager(route.Login)).Methods("POST")
 	// Worsite method
-	router.HandleFunc("/api/worksites", withUserManager("GetWorkSites", route.GetWorkSites)).Methods("GET")
+	router.HandleFunc("/api/worksites", withUserManager("GetWorksitesInfo", route.GetWorksitesInfo)).Methods("GET")
 	router.HandleFunc("/api/worksites", withUserManager("CreateWorkSite", route.CreateWorkSite)).Methods("POST")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("GetWorkSite", route.GetWorkSite)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("UpdateWorkSite", route.UpdateWorkSite)).Methods("PUT")
