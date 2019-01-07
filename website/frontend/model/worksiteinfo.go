@@ -1,6 +1,9 @@
 package model
 
-import "github.com/gopherjs/gopherjs/js"
+import (
+	"github.com/gopherjs/gopherjs/js"
+	"strings"
+)
 
 type WorksiteInfo struct {
 	*js.Object
@@ -33,4 +36,19 @@ func NewBEWorksiteInfo() *WorksiteInfo {
 
 func NewWorksiteInfoFromJs(o *js.Object) *WorksiteInfo {
 	return &WorksiteInfo{Object: o}
+}
+
+func (wsi *WorksiteInfo) TextFiltered(filter string) bool {
+	expected := true
+	if filter == "" {
+		return true
+	}
+	if strings.HasPrefix(filter, `\`) {
+		if len(filter) == 1 {
+			return true
+		}
+		expected = false
+		filter = filter[1:]
+	}
+	return strings.Contains(wsi.Search, filter) == expected
 }

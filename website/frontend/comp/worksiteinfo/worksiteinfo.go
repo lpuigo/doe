@@ -5,10 +5,10 @@ import (
 	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 )
 
-const template string = `
+const (
+	template1 string = `
 <div> 
     <i class="fas fa-sitemap icon--left"></i><span>{{NbCommand}}&nbsp;</span>
     <i class="fas fa-share-alt icon--left"></i><span>{{NbTroncon}}&nbsp;</span>
@@ -17,22 +17,26 @@ const template string = `
 	<span v-else>{{NbLogement}}</span>
 </div>`
 
+	template2 string = `
+<div> 
+    <i class="fas fa-sitemap icon--left"></i><span>{{value.NbOrder}}&nbsp;</span>
+    <i class="fas fa-share-alt icon--left"></i><span>{{value.NbTroncon}}&nbsp;</span>
+    <i class="fas fa-grip-vertical icon--left"></i>
+	<span v-if="value.NbElBlocked > 0">{{value.NbElTotal - value.NbElBlocked}} / {{value.NbElTotal}}</span>
+	<span v-else>{{value.NbElTotal}}</span>
+</div>`
+)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Comp Registration
+// Comp Registration Worksite version
 
-func Register() {
-	hvue.NewComponent("worksite-info",
-		ComponentOptions()...,
-	)
+func RegisterComponentWorksite() hvue.ComponentOption {
+	return hvue.Component("worksite-info", ComponentWorksiteOptions()...)
 }
 
-func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("worksite-info", ComponentOptions()...)
-}
-
-func ComponentOptions() []hvue.ComponentOption {
+func ComponentWorksiteOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		hvue.Template(template),
+		hvue.Template(template1),
 		hvue.Props("worksite"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteInfoModel(vm)
@@ -45,9 +49,6 @@ func ComponentOptions() []hvue.ComponentOption {
 			wim.NbLogement = nbLogement
 			wim.NbAvailLogement = nbAvailLogement
 			return nbCommand
-		}),
-		hvue.Filter("DateFormat", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			return date.DateString(value.String())
 		}),
 	}
 }
@@ -73,5 +74,40 @@ func NewWorksiteInfoModel(vm *hvue.VM) *WorksiteInfoModel {
 	wim.NbTroncon = 0
 	wim.NbLogement = 0
 	wim.NbAvailLogement = 0
+	return wim
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Comp Registration Worksite version
+
+func RegisterComponentWorksiteInfo() hvue.ComponentOption {
+	return hvue.Component("worksiteinfo-info", ComponentWorksiteInfoOptions()...)
+}
+
+func ComponentWorksiteInfoOptions() []hvue.ComponentOption {
+	return []hvue.ComponentOption{
+		hvue.Template(template2),
+		hvue.Props("value"),
+		hvue.DataFunc(func(vm *hvue.VM) interface{} {
+			return NewWorksiteInfoModel(vm)
+		}),
+		hvue.MethodsOf(&WorksiteInfoModel{}),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Comp Model
+
+type WorksiteInfoInfoModel struct {
+	*js.Object
+
+	WorksiteInfo *fm.WorksiteInfo `js:"value"`
+	VM           *hvue.VM         `js:"VM"`
+}
+
+func NewWorksiteInfoInfoModel(vm *hvue.VM) *WorksiteInfoInfoModel {
+	wim := &WorksiteInfoInfoModel{Object: tools.O()}
+	wim.VM = vm
+	wim.WorksiteInfo = nil
 	return wim
 }

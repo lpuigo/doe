@@ -9,7 +9,6 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
 	"strconv"
 )
@@ -29,7 +28,7 @@ func main() {
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.GetUserSession()
-			mpm.GetWorkSites()
+			mpm.GetWorkSiteInfos()
 		}),
 		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -52,15 +51,15 @@ type MainPageModel struct {
 
 	User *fm.User `js:"User"`
 
-	Worksites      []*fm.Worksite `js:"worksites"`
-	EditedWorksite *fm.Worksite   `js:"editedWorksite"`
+	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
+	//EditedWorksite int      `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.User = fm.NewUser()
-	mpm.Worksites = []*fm.Worksite{}
-	mpm.EditedWorksite = nil
+	mpm.WorksiteInfos = []*fm.WorksiteInfo{}
+	//mpm.EditedWorksite = -2
 	return mpm
 }
 
@@ -71,24 +70,6 @@ func (m *MainPageModel) GetUserSession() {
 	go m.callGetUser()
 }
 
-//func (m *MainPageModel) CheckUserSession() {
-//	_, sessionExists := cookie.Get("EWin-Session")
-//	if !sessionExists {
-//		print("CheckUserSession delete User")
-//		cookie.Delete("User")
-//		m.User.Name = ""
-//		return
-//	}
-//	user, userExist := cookie.Get("User")
-//	if !userExist {
-//		print("CheckUserSession delete Session")
-//		cookie.Delete("EWin-Session")
-//		m.User.Name = ""
-//		return
-//	}
-//	m.User.Name = user
-//}
-//
 func (m *MainPageModel) ShowUserLogin() {
 	m.VM.Refs("UserLoginModal").Call("Show", m.User)
 }
@@ -97,35 +78,35 @@ func (m *MainPageModel) UserLogout() {
 	go m.callLogout()
 }
 
-func (m *MainPageModel) GetWorkSites() {
-	go m.callGetWorkSites()
+func (m *MainPageModel) GetWorkSiteInfos() {
+	go m.callGetWorkSiteInfos()
 }
 
-func (m *MainPageModel) EditWorksite(ws *fm.Worksite) {
-	m.EditedWorksite = ws
-	m.VM.Refs("WorksiteEditModal").Call("Show", ws)
+func (m *MainPageModel) EditWorksite(id int) {
+	//m.EditedWorksite = id
+	m.VM.Refs("WorksiteEditModal").Call("Show", id)
 }
 
 func (m *MainPageModel) CreateNewWorksite() {
-	ws := fm.NewWorkSite()
-	ws.AddOrder()
-	m.EditWorksite(ws)
+	m.EditWorksite(-1)
 }
 
-func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
-	if uws.Id >= 0 {
-		go m.callUpdateWorksite(uws)
-	} else {
-		go m.callCreateWorksite(uws)
-	}
-}
+//TODO Move to WorksiteEditModal
+//func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
+//	if uws.Id >= 0 {
+//		go m.callUpdateWorksite(uws)
+//	} else {
+//		go m.callCreateWorksite(uws)
+//	}
+//}
 
-func (m *MainPageModel) ProcessDeleteWorksite(uws *fm.Worksite) {
-	m.EditedWorksite = uws
-	if m.EditedWorksite.Id >= 0 {
-		go m.callDeleteWorksite(m.EditedWorksite)
-	}
-}
+//TODO Move to WorksiteEditModal
+//func (m *MainPageModel) ProcessDeleteWorksite(uws *fm.Worksite) {
+//	//m.EditedWorksite = uws
+//	//if m.EditedWorksite.Id >= 0 {
+//	//	go m.callDeleteWorksite(m.EditedWorksite)
+//	//}
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
@@ -175,7 +156,7 @@ func (m *MainPageModel) callLogout() {
 	m.User.Connected = false
 }
 
-func (m *MainPageModel) callGetWorkSites() {
+func (m *MainPageModel) callGetWorkSiteInfos() {
 	req := xhr.NewRequest("GET", "/api/worksites")
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
@@ -189,75 +170,65 @@ func (m *MainPageModel) callGetWorkSites() {
 		m.errorMessage(req)
 		return
 	}
-	worksites := []*fm.Worksite{}
+	wsis := []*fm.WorksiteInfo{}
 	req.Response.Call("forEach", func(item *js.Object) {
-		ws := fm.WorksiteFromJS(item)
-		//p.SetAuditResult(m.auditer.Audit(p))
-		worksites = append(worksites, ws)
+		ws := fm.NewWorksiteInfoFromJs(item)
+		wsis = append(wsis, ws)
 	})
-	m.Worksites = worksites
+	m.WorksiteInfos = wsis
 }
 
-func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
-	req := xhr.NewRequest("PUT", "/api/worksites/"+strconv.Itoa(uws.Id))
-	req.Timeout = tools.TimeOut
-	req.ResponseType = xhr.JSON
-	err := req.Send(json.Stringify(uws))
-	if err != nil {
-		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-		return
-	}
-	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
-		return
-	}
-	uws.Dirty = false
-	message.SuccesStr(m.VM, "Chantier sauvegardé")
+//TODO Move to WorksiteEditModal
+//func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
+//	req := xhr.NewRequest("PUT", "/api/worksites/"+strconv.Itoa(uws.Id))
+//	req.Timeout = tools.TimeOut
+//	req.ResponseType = xhr.JSON
+//	err := req.Send(json.Stringify(uws))
+//	if err != nil {
+//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+//		return
+//	}
+//	if req.Status != tools.HttpOK {
+//		m.errorMessage(req)
+//		return
+//	}
+//	uws.Dirty = false
+//	message.SuccesStr(m.VM, "Chantier sauvegardé")
+//
+//}
 
-}
+//TODO Move to WorksiteEditModal
+//func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
+//	req := xhr.NewRequest("POST", "/api/worksites")
+//	req.Timeout = tools.TimeOut
+//	req.ResponseType = xhr.JSON
+//	err := req.Send(json.Stringify(uws))
+//	if err != nil {
+//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+//		return
+//	}
+//	if req.Status != tools.HttpCreated {
+//		m.errorMessage(req)
+//	}
+//	uws.Dirty = false
+//	uws.Copy(fm.WorksiteFromJS(req.Response))
+//	message.SetDuration(tools.SuccessMsgDuration)
+//	message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
+//}
 
-func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
-	req := xhr.NewRequest("POST", "/api/worksites")
-	req.Timeout = tools.TimeOut
-	req.ResponseType = xhr.JSON
-	err := req.Send(json.Stringify(uws))
-	if err != nil {
-		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-		return
-	}
-	if req.Status != tools.HttpCreated {
-		m.errorMessage(req)
-	}
-	uws.Dirty = false
-	uws.Copy(fm.WorksiteFromJS(req.Response))
-	m.Worksites = append(m.Worksites, uws)
-	message.SetDuration(tools.SuccessMsgDuration)
-	message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
-}
-
-func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
-	req := xhr.NewRequest("DELETE", "/api/worksites/"+strconv.Itoa(dws.Id))
-	req.Timeout = tools.TimeOut
-	req.ResponseType = xhr.JSON
-	err := req.Send(nil)
-	if err != nil {
-		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-		return
-	}
-	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
-	}
-	m.deletePrj(dws)
-	message.SetDuration(tools.SuccessMsgDuration)
-	message.SuccesStr(m.VM, "Chantier supprimé !")
-}
-
-func (m *MainPageModel) deletePrj(dws *fm.Worksite) {
-	for i, ws := range m.Worksites {
-		if ws.Id == dws.Id {
-			m.EditedWorksite = nil
-			m.Worksites = append(m.Worksites[:i], m.Worksites[i+1:]...)
-			break
-		}
-	}
-}
+//TODO Move to WorksiteEditModal
+//func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
+//	req := xhr.NewRequest("DELETE", "/api/worksites/"+strconv.Itoa(dws.Id))
+//	req.Timeout = tools.TimeOut
+//	req.ResponseType = xhr.JSON
+//	err := req.Send(nil)
+//	if err != nil {
+//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+//		return
+//	}
+//	if req.Status != tools.HttpOK {
+//		m.errorMessage(req)
+//	}
+//	message.SetDuration(tools.SuccessMsgDuration)
+//	message.SuccesStr(m.VM, "Chantier supprimé !")
+//}

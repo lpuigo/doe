@@ -58,12 +58,17 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 	}
 	wsi.Search = searchPt("PMZ", ws.Pmz) + searchPt("PA", ws.Pa)
 	for _, o := range ws.Orders {
+		lf := "\n"
 		wsi.NbOrder += 1
 		wsi.Search += fmt.Sprintf("Order:%s, ", o.Ref)
 		if o.Comment != "" {
-			wsi.Comment += fmt.Sprintf("\n%s: %s", o.Ref, o.Comment)
+			if wsi.Comment == "" {
+				lf = ""
+			}
+			wsi.Comment += fmt.Sprintf("%s%s: %s", lf, o.Ref, o.Comment)
 		}
 		for _, t := range o.Troncons {
+			lf := "\n"
 			wsi.NbTroncon += 1
 			wsi.NbElTotal += t.NbRacco
 			if t.Blockage {
@@ -76,7 +81,10 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 				wsi.NbElMeasured += t.NbRacco
 			}
 			if t.Comment != "" {
-				wsi.Comment += fmt.Sprintf("\n%s (%s): %s", t.Pb.Ref, t.Pb.RefPt, t.Comment)
+				if wsi.Comment == "" {
+					lf = ""
+				}
+				wsi.Comment += fmt.Sprintf("%s%s (%s): %s", lf, t.Pb.Ref, t.Pb.RefPt, t.Comment)
 			}
 			wsi.Search += searchPt("PB", t.Pb)
 		}

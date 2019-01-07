@@ -54,7 +54,7 @@ const (
 					width="140px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
-                    <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
+                    <span @click="SetSelectedWorksite(scope.row.Id)" class="link">{{scope.row.Ref}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -62,7 +62,7 @@ const (
 					width="150px" :resizable=true :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
-					<worksite-info :worksite="scope.row"></worksite-info>
+					<worksiteinfo-info v-model="scope.row"></worksiteinfo-info>
 				</template>
 			</el-table-column>
             <el-table-column
@@ -80,6 +80,20 @@ const (
                     width="110px" :resizable=true :show-overflow-tooltip=true
                     align="center"	:formatter="FormatDate"
             ></el-table-column>
+            <el-table-column
+                    label="Install." width="110px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <worksiteinfo-progress-bar v-model="scope.row"></worksiteinfo-progress-bar>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="Mesures" width="110px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <worksiteinfo-progress-bar v-model="scope.row" :measure="true"></worksiteinfo-progress-bar>
+                </template>
+            </el-table-column>
 			<el-table-column
 					label="Commentaire" prop="Comment"
 					min-width="120px" :resizable=true

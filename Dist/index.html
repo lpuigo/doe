@@ -24,9 +24,6 @@
         <!-- -->
         <worksite-edit-modal
                 ref="WorksiteEditModal"
-                :edited_worksite.sync="editedWorksite"
-                @update:edited_worksite="ProcessEditedWorksite"
-                @delete:edited_worksite="ProcessDeleteWorksite"
         ></worksite-edit-modal>
         <!-- -->
         <el-container style="height: 100%;border: 1px solid #eee">
@@ -49,7 +46,7 @@
                 </el-aside>
                 <el-main style="height:100%; padding: 0px 0px;">
                     <worksite-table
-                            :worksites="worksites"
+                            :worksiteinfos="worksiteInfos"
                             @selected_worksite="EditWorksite"
                             @new_worksite="CreateNewWorksite"
                     ></worksite-table>
