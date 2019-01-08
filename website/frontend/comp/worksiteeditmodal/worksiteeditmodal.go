@@ -102,7 +102,7 @@ func (wemm *WorksiteEditModalModel) Show(id int) {
 	if id < 0 {
 		wemm.EditedWorksite.AddOrder()
 	}
-	wemm.CurrentWorksite = fm.NewWorkSite()
+	wemm.CurrentWorksite = wemm.EditedWorksite.Clone()
 	wemm.ShowConfirmDelete = false
 	if id >= 0 {
 		wemm.Loading = true
