@@ -78,8 +78,8 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Event Related Methods
 
-func (wtm *WorksiteTableModel) SetSelectedWorksite(id int) {
-	wtm.VM.Emit("selected_worksite", id)
+func (wtm *WorksiteTableModel) SetSelectedWorksite(wsi *fm.WorksiteInfo) {
+	wtm.VM.Emit("selected_worksite", wsi.Id)
 }
 
 //func (wtm *WorksiteTableModel) SaveWorksite(vm *hvue.VM, uws *fm.Worksite) {

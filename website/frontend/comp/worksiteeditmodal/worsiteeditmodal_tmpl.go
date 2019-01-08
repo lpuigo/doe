@@ -1,7 +1,7 @@
 package worksiteeditmodal
 
 const template string = `
-<el-dialog 
+<el-dialog
 		:visible.sync="visible" 
 		width="90%"
 		:before-close="HideWithControl"
@@ -25,12 +25,11 @@ const template string = `
 	<!-- 
 		Modal Body
 	-->
-	<div style="max-height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-		<worksite-edit
-				:worksite="current_worksite"
+	<div v-loading="loading" style="min-height: 35vh;max-height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
+		<worksite-edit v-if="!loading"
+                :worksite="current_worksite"
 				:readonly="false"
 		></worksite-edit>
-
 	</div>
 
 	<!-- 
@@ -47,29 +46,29 @@ const template string = `
 				>
 					<p>Supprimer ce chantier ?</p>
 					<div style="text-align: left; margin: 0;">
-						<el-button size="mini" type="text" @click="showconfirmdelete = false">Non</el-button>
-						<el-button size="mini" type="primary" @click="DeleteWorksite">Oui</el-button>
+						<el-button :loading="saving" size="mini" type="text" @click="showconfirmdelete = false">Non</el-button>
+						<el-button :loading="saving" size="mini" type="primary" @click="DeleteWorksite">Oui</el-button>
 					</div>
 				</el-popover>
 
 				<el-tooltip effect="light" :open-delay="500">
 					<div slot="content">Supprimer ce chantier</div>
-					<el-button :disabled="isNewWorksite" type="danger" plain size="mini" icon="far fa-trash-alt" v-popover:confirm_delete_popover></el-button>
+					<el-button :loading="saving" :disabled="isNewWorksite" type="danger" plain size="mini" icon="far fa-trash-alt" v-popover:confirm_delete_popover></el-button>
 				</el-tooltip>
 				
 				<el-tooltip effect="light" :open-delay="500">
 					<div slot="content">Dupliquer ce chantier</div>
-					<el-button :disabled="isNewWorksite" type="info" plain size="mini" icon="far fa-clone" @click="Duplicate"></el-button>
+					<el-button :loading="saving" :disabled="isNewWorksite" type="info" plain size="mini" icon="far fa-clone" @click="Duplicate"></el-button>
 				</el-tooltip>
 				
 				<el-tooltip effect="light" :open-delay="500">
 					<div slot="content">Annuler les changements</div>
-					<el-button :disabled="!hasChanged" type="info" plain size="mini" icon="fas fa-undo-alt" @click="UndoChange"></el-button>
+					<el-button :loading="saving" :disabled="!hasChanged" type="info" plain size="mini" icon="fas fa-undo-alt" @click="UndoChange"></el-button>
 				</el-tooltip>
 				
 				<el-button @click="Hide" size="mini">Fermer</el-button>
 				
-				<el-button :type="hasWarning" plain size="mini" :disabled="!hasChanged" @click="ConfirmChange"
+				<el-button :loading="saving" :type="hasWarning" plain size="mini" :disabled="!hasChanged" @click="ConfirmChange"
 				>Enregistrer</el-button>
 			</el-col>
 		</el-row>

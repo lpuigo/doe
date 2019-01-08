@@ -91,23 +91,6 @@ func (m *MainPageModel) CreateNewWorksite() {
 	m.EditWorksite(-1)
 }
 
-//TODO Move to WorksiteEditModal
-//func (m *MainPageModel) ProcessEditedWorksite(uws *fm.Worksite) {
-//	if uws.Id >= 0 {
-//		go m.callUpdateWorksite(uws)
-//	} else {
-//		go m.callCreateWorksite(uws)
-//	}
-//}
-
-//TODO Move to WorksiteEditModal
-//func (m *MainPageModel) ProcessDeleteWorksite(uws *fm.Worksite) {
-//	//m.EditedWorksite = uws
-//	//if m.EditedWorksite.Id >= 0 {
-//	//	go m.callDeleteWorksite(m.EditedWorksite)
-//	//}
-//}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
@@ -177,58 +160,3 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 	})
 	m.WorksiteInfos = wsis
 }
-
-//TODO Move to WorksiteEditModal
-//func (m *MainPageModel) callUpdateWorksite(uws *fm.Worksite) {
-//	req := xhr.NewRequest("PUT", "/api/worksites/"+strconv.Itoa(uws.Id))
-//	req.Timeout = tools.TimeOut
-//	req.ResponseType = xhr.JSON
-//	err := req.Send(json.Stringify(uws))
-//	if err != nil {
-//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-//		return
-//	}
-//	if req.Status != tools.HttpOK {
-//		m.errorMessage(req)
-//		return
-//	}
-//	uws.Dirty = false
-//	message.SuccesStr(m.VM, "Chantier sauvegardé")
-//
-//}
-
-//TODO Move to WorksiteEditModal
-//func (m *MainPageModel) callCreateWorksite(uws *fm.Worksite) {
-//	req := xhr.NewRequest("POST", "/api/worksites")
-//	req.Timeout = tools.TimeOut
-//	req.ResponseType = xhr.JSON
-//	err := req.Send(json.Stringify(uws))
-//	if err != nil {
-//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-//		return
-//	}
-//	if req.Status != tools.HttpCreated {
-//		m.errorMessage(req)
-//	}
-//	uws.Dirty = false
-//	uws.Copy(fm.WorksiteFromJS(req.Response))
-//	message.SetDuration(tools.SuccessMsgDuration)
-//	message.SuccesStr(m.VM, "Nouveau chantier sauvegardé")
-//}
-
-//TODO Move to WorksiteEditModal
-//func (m *MainPageModel) callDeleteWorksite(dws *fm.Worksite) {
-//	req := xhr.NewRequest("DELETE", "/api/worksites/"+strconv.Itoa(dws.Id))
-//	req.Timeout = tools.TimeOut
-//	req.ResponseType = xhr.JSON
-//	err := req.Send(nil)
-//	if err != nil {
-//		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
-//		return
-//	}
-//	if req.Status != tools.HttpOK {
-//		m.errorMessage(req)
-//	}
-//	message.SetDuration(tools.SuccessMsgDuration)
-//	message.SuccesStr(m.VM, "Chantier supprimé !")
-//}
