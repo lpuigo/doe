@@ -3,9 +3,11 @@ package worksites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 )
@@ -135,11 +137,44 @@ func (wsp WorkSitesPersister) findIndex(wsr *WorkSiteRecord) int {
 }
 
 // GetById returns the WorkSiteRecord with given Id (or nil if Id not found)
-func (wsp WorkSitesPersister) GetById(id int) *WorkSiteRecord {
+func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
+	wsp.RLock()
+	defer wsp.RUnlock()
+
 	for _, wsr := range wsp.workSites {
 		if wsr.Id == id {
 			return wsr
 		}
 	}
 	return nil
+}
+
+// GetStats returns all Stats about all contained WorkSiteRecords such as keep(wsr.Worksite) == true
+func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.WorksiteStats {
+	wsp.RLock()
+	defer wsp.RUnlock()
+
+	nbEls := make(map[string]int)
+	for _, wsr := range wsp.workSites {
+		if keep(wsr.Worksite) {
+			wsr.AddStat(nbEls)
+		}
+	}
+
+	dates := []string{}
+	for date, _ := range nbEls {
+		dates = append(dates, date)
+	}
+	sort.Strings(dates)
+	start := date.DateFrom(dates[0])
+	end := date.Today().GetMonday()
+
+	ws := fm.NewBEWorksiteStats()
+	ws.StartDate = start.String()
+
+	for d := start; !d.After(end); d = d.AddDays(7) {
+		ws.NbEls = append(ws.NbEls, nbEls[d.String()])
+	}
+
+	return ws
 }

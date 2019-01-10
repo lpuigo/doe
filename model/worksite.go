@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 )
 
@@ -87,6 +88,17 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 				wsi.Comment += fmt.Sprintf("%s%s (%s): %s", lf, t.Pb.Ref, t.Pb.RefPt, t.Comment)
 			}
 			wsi.Search += searchPt("PB", t.Pb)
+		}
+	}
+}
+
+// AddStat adds nb of El installed per date (in map[date]nbEl)
+func (ws *Worksite) AddStat(nbels map[string]int) {
+	for _, o := range ws.Orders {
+		for _, t := range o.Troncons {
+			if !t.Blockage && t.InstallDate != "" {
+				nbels[date.GetMonday(t.InstallDate)] += t.NbRacco
+			}
 		}
 	}
 }

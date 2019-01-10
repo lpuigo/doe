@@ -154,3 +154,21 @@ func DeleteWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("WorkSite with id %d deleted", wsrid), http.StatusOK)
 }
+
+func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesStats").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	//TODO Manage User Authorization (control on mgr.CurrentUser)
+
+	err := mgr.GetWorkSitesStats(w)
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.Response = http.StatusOK
+
+}
