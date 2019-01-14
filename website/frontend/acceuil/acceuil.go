@@ -37,6 +37,10 @@ func main() {
 			}
 			return mpm.User.Name
 		}),
+		hvue.Computed("UpdatableWorsiteInfos", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetUpdatableWorsiteInfos()
+		}),
 	)
 	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
 
@@ -51,6 +55,8 @@ type MainPageModel struct {
 
 	User *fm.User `js:"User"`
 
+	ActiveMode string `js:"ActiveMode"`
+
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
 	//EditedWorksite int      `js:"editedWorksite"`
 }
@@ -58,6 +64,7 @@ type MainPageModel struct {
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.User = fm.NewUser()
+	mpm.ActiveMode = "Update"
 	mpm.WorksiteInfos = []*fm.WorksiteInfo{}
 	//mpm.EditedWorksite = -2
 	return mpm
@@ -89,6 +96,16 @@ func (m *MainPageModel) EditWorksite(id int) {
 
 func (m *MainPageModel) CreateNewWorksite() {
 	m.EditWorksite(-1)
+}
+
+func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
+	res := []*fm.WorksiteInfo{}
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteIsUpdatable(wsi.Status) {
+			res = append(res, wsi)
+		}
+	}
+	return res
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

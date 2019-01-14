@@ -33,16 +33,37 @@
                     <el-row :gutter="20" type="flex" align="middle">
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
+                    <el-radio-group v-model="ActiveMode" size="mini">
+                        <el-radio-button label="Create">Création</el-radio-button>
+                        <el-radio-button label="Update">Mise à jour</el-radio-button>
+                    </el-radio-group>
+                    <span></span>
+                    <span></span>
                     <el-row :gutter="20" type="flex" align="middle">
                         <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
                         <el-button v-else type="primary" @click="UserLogout" size="mini">{{User.Name}} Logout</el-button>
                     </el-row>
                 </div>
             </el-header>
+            <el-main style="height:100%; padding: 0px 0px;">
+                <worksite-table
+                        v-if="ActiveMode == 'Create'"
+                        :worksiteinfos="worksiteInfos"
+                        @selected_worksite="EditWorksite"
+                        @new_worksite="CreateNewWorksite"
+                ></worksite-table>
+                <worksite-table
+                        v-if="ActiveMode == 'Update'"
+                        :worksiteinfos="UpdatableWorsiteInfos"
+                        @selected_worksite="EditWorksite"
+                        @new_worksite="CreateNewWorksite"
+                ></worksite-table>
+            </el-main>
+<!--
             <el-container style="height: 100%">
                 <el-aside class="ewin_light" width="150px">
                     <div class="aside-menu-container">
-                        Aside
+                        Aside1
                     </div>
                 </el-aside>
                 <el-main style="height:100%; padding: 0px 0px;">
@@ -51,14 +72,9 @@
                             @selected_worksite="EditWorksite"
                             @new_worksite="CreateNewWorksite"
                     ></worksite-table>
-<!--
-                    <div style="height:100%;">
-                        <worksite-summary  v-for="ws in worksites" :worksite=ws></worksite-summary>
-                    </div>
--->
                 </el-main>
             </el-container>
-
+-->
             <!--<el-footer>Footer</el-footer>-->
         </el-container>
     </div>

@@ -269,3 +269,27 @@ func WorksiteStatusLabel(value string) string {
 		return "<" + value + ">"
 	}
 }
+
+func WorksiteIsUpdatable(value string) bool {
+	switch value {
+	//case WsStatusNew:
+	//	return true
+	//case WsStatusFormInProgress:
+	//	return true
+	case WsStatusInProgress:
+		return true
+	//case WsStatusDOE:
+	//	return true
+	//case WsStatusAttachment:
+	//	return true
+	//case WsStatusPayment:
+	//	return true
+	case WsStatusRework:
+		return true
+	case WsStatusBlocked:
+		return true
+		//case WsStatusDone:
+		//	return true
+	}
+	return false
+}
