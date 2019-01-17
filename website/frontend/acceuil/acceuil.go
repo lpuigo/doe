@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
@@ -22,6 +23,7 @@ func main() {
 		hvue.El("#app"),
 		userloginmodal.RegisterComponent(),
 		worksiteeditmodal.RegisterComponent(),
+		worksiteupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -92,6 +94,11 @@ func (m *MainPageModel) GetWorkSiteInfos() {
 func (m *MainPageModel) EditWorksite(id int) {
 	//m.EditedWorksite = id
 	m.VM.Refs("WorksiteEditModal").Call("Show", id)
+}
+
+func (m *MainPageModel) UpdateWorksite(id int) {
+	//m.EditedWorksite = id
+	m.VM.Refs("WorksiteUpdateModal").Call("Show", id)
 }
 
 func (m *MainPageModel) CreateNewWorksite() {

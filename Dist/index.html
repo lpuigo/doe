@@ -27,6 +27,11 @@
                 @update_worksite="GetWorkSiteInfos"
         ></worksite-edit-modal>
         <!-- -->
+        <worksite-update-modal
+                ref="WorksiteUpdateModal"
+                @update_worksite="GetWorkSiteInfos"
+        ></worksite-update-modal>
+        <!-- -->
         <el-container style="height: 100%;border: 1px solid #eee">
             <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
@@ -55,8 +60,7 @@
                 <worksite-table
                         v-if="ActiveMode == 'Update'"
                         :worksiteinfos="UpdatableWorsiteInfos"
-                        @selected_worksite="EditWorksite"
-                        @new_worksite="CreateNewWorksite"
+                        @selected_worksite="UpdateWorksite"
                 ></worksite-table>
             </el-main>
 <!--

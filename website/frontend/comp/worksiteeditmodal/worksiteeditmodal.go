@@ -61,7 +61,7 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteedit.RegisterComponent(),
-		worksiteinfo.RegisterComponentWorksite(),
+		worksiteinfo.RegisterComponent(),
 		hvue.Template(template),
 		//hvue.Props("edited_worksite"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

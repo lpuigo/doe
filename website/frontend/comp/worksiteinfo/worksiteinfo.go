@@ -30,7 +30,7 @@ const (
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Registration Worksite version
 
-func RegisterComponentWorksite() hvue.ComponentOption {
+func RegisterComponent() hvue.ComponentOption {
 	return hvue.Component("worksite-info", ComponentWorksiteOptions()...)
 }
 
