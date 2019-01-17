@@ -3,8 +3,6 @@ package userloginmodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteedit"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
@@ -99,8 +97,6 @@ func RegisterComponent() hvue.ComponentOption {
 
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		worksiteedit.RegisterComponent(),
-		worksiteinfo.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
