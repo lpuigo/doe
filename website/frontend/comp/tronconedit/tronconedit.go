@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
@@ -17,7 +18,7 @@ const template string = `
     -->
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="3">
-            <el-tag :type="Status" size="medium" style="width: 100%">{{StatusText}}</el-tag>
+            <troncon-status-tag v-model="value"></troncon-status-tag>
         </el-col>
         <el-col :span="6">
             <el-tooltip content="Référence" placement="top" effect="light">
@@ -142,16 +143,11 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ptedit.RegisterComponent(),
+		tronconstatustag.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("value", "readonly", "previous"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewTronconEditModel(vm)
-		}),
-		hvue.Computed("Status", func(vm *hvue.VM) interface{} {
-			pem := &TronconEditModel{Object: vm.Object}
-			statusType, statusText := pem.SetStatus()
-			pem.StatusText = statusText
-			return statusType
 		}),
 		hvue.MethodsOf(&TronconEditModel{}),
 	}
@@ -166,7 +162,6 @@ type TronconEditModel struct {
 	Troncon     *fm.Troncon `js:"value"`
 	PrevTroncon *fm.Troncon `js:"previous"`
 	Readonly    bool        `js:"readonly"`
-	StatusText  string      `js:"StatusText"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -176,7 +171,6 @@ func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 	tem.VM = vm
 	tem.Troncon = nil
 	tem.Readonly = false
-	tem.StatusText = ""
 	return tem
 }
 
@@ -246,48 +240,9 @@ func (tem *TronconEditModel) LastPBinfo(vm *hvue.VM) js.M {
 	return js.M{"PB": pbRef, "PT": ptRef}
 }
 
-func (tem *TronconEditModel) SetStatus() (statusType, statusText string) {
-	tr := tem.Troncon
-
-	switch {
-	case tr.Ref == "" || !tr.Pb.IsFilledIn():
-		return "warning", "A renseigner"
-	case tr.Blockage && !tr.NeedSignature && tr.Comment == "":
-		return "warning", "Saisir desc. bloquage"
-	case tr.Blockage:
-		return "info", "Bloqué"
-	case !tools.Empty(tr.MeasureDate):
-		return "success", "Terminé"
-	case !tools.Empty(tr.InstallDate):
-		return "", "Mesures à faire"
-	case tr.Ref != "" && tr.Pb.IsFilledIn() && !tr.Blockage:
-		return "", "A Réaliser"
-	}
-
-	return "danger", "Erreur"
-}
-
 func (tem *TronconEditModel) CheckMeasureDate(vm *hvue.VM, date string) {
 	tem = &TronconEditModel{Object: vm.Object}
 	if date < tem.Troncon.InstallDate {
 		tem.Troncon.MeasureDate = tem.Troncon.InstallDate
 	}
-}
-
-func (tem *TronconEditModel) StatusBgColor() string {
-	switch tem.StatusText {
-	case "A renseigner":
-		return "#e5e0d7"
-	case "Saisir desc. bloquage":
-		return "#e5e0d7"
-	case "Bloqué":
-		return "#e0e0e0"
-	case "Terminé":
-		return "#dbe2d7"
-	case "Mesures à faire":
-		return "#c9d7e5"
-	case "A Réaliser":
-		return "#c9d7e5"
-	}
-	return "#ffffff"
 }
