@@ -54,7 +54,7 @@ const (
 					width="140px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
-                    <span @click="SetSelectedWorksite(scope.row.Id)" class="link">{{scope.row.Ref}}</span>
+                    <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column

@@ -20,7 +20,6 @@ const template string = `
                          :placeholder="refPH"
                          :readonly="readonly"
                          clearable size="mini"  style="width: 100%"
-                         pattern="[0-9]{6}"
                          @input="CheckRef(value)"
         >
             <template slot="prepend">{{title}}:</template>
