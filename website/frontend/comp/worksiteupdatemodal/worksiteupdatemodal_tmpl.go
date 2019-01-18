@@ -25,7 +25,7 @@ const template string = `
 	<!-- 
 		Modal Body
 	-->
-	<div v-loading="loading" style="min-height: 35vh;height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
+	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
         <el-container style="height: 100%">
             <el-header style="height: auto; padding: 5px">
                 <el-row :span="20">
@@ -40,40 +40,64 @@ const template string = `
                 </el-row>
             </el-header>
             <el-main  style="height: 100%; padding: 0px">
+                <!--:span-method="OrderSpanMethod"-->
                 <el-table
                         :data="filteredTroncons"
                         :row-class-name="TableRowClassName"
+                        :span-method="OrderSpanMethod"
                         height="100%" :border=true size="mini"
                 >
                     <el-table-column
+                            label="Commande" prop="Order"
+                            width="100px" :resizable="true" :show-overflow-tooltip=true
+                    ></el-table-column>
+                    <el-table-column
                             label="Tronçon"
-                            :resizable="true" :show-overflow-tooltip=true
+                            width="140px" :resizable="true" :show-overflow-tooltip=true
                     >
-                        <tempalte slot-scope="scope">
-                            <span>{{scope.row | FormatTronconRef}}</span>
-                        </tempalte>
+                        <template slot-scope="scope">
+                            <div>{{scope.row | FormatTronconRef}}</div>
+                            <div>{{scope.row.Pb.Address}}</div>
+                        </template>
                     </el-table-column>
                     <el-table-column
+                            label="Nb EL" prop="NbRacco"
+                            width="50px" align="center"
+                    ></el-table-column>
+                    <el-table-column
                             label="Status"
-                            :resizable="true" :show-overflow-tooltip=true
+                            width="120px" :resizable="true" :show-overflow-tooltip=true
                     >
-                        <tempalte slot-scope="scope">
-                            <span>{{scope.row | FormatStatus}}</span>
-                        </tempalte>
+                        <template slot-scope="scope">
+                            <troncon-status-tag v-model="scope.row"></troncon-status-tag>
+                        </template>
                     </el-table-column>
                     <el-table-column
                             label="Installation"
-                            :resizable="true"
+                            width="300px" min-width="140px" :resizable="true"
                     >
-                        <tempalte slot-scope="scope">
-                            <el-date-picker format="dd/MM/yyyy" placeholder="Date Install." size="mini"
-                                            style="width: 100%" type="date"
-                                            v-model="scope.row.InstallDate"
-                                            value-format="yyyy-MM-dd"
-                                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                            :clearable="false"
-                            ></el-date-picker>
-                        </tempalte>
+                        <template slot-scope="scope">
+                            <el-row type="flex" align="middle" :gutter="10">
+                                <el-col :span="12">
+                                    <el-date-picker format="dd/MM/yyyy" placeholder="Install." size="mini"
+                                                    style="width: 100%" type="date"
+                                                    v-model="scope.row.InstallDate"
+                                                    value-format="yyyy-MM-dd"
+                                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                                    :clearable="false"
+                                    ></el-date-picker>
+                                </el-col>
+                                <el-col :span="12">
+                                    <el-date-picker format="dd/MM/yyyy" placeholder="Mesure" size="mini"
+                                                    style="width: 100%" type="date"
+                                                    v-model="scope.row.MeasureDate"
+                                                    value-format="yyyy-MM-dd"
+                                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                                    :clearable="false"
+                                    ></el-date-picker>
+                                </el-col>
+                            </el-row>
+                        </template>
                     </el-table-column>
                 </el-table>
             </el-main>

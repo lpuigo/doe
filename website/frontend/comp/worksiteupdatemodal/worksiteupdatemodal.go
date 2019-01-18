@@ -3,9 +3,11 @@ package worksiteupdatemodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	wem "github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"strings"
 )
 
 type WorksiteUpdateModalModel struct {
@@ -41,6 +43,7 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteinfo.RegisterComponent(),
+		tronconstatustag.RegisterComponent(),
 		hvue.Template(template),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteUpdateModalModel(vm)
@@ -67,25 +70,46 @@ func ComponentOptions() []hvue.ComponentOption {
 			t := &fm.Troncon{Object: value}
 			return m.GetFormatTronconRef(t)
 		}),
-		hvue.Filter("FormatStatus", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			m := NewWorksiteUpdateModalModelFromJS(vm.Object)
-			t := &fm.Troncon{Object: value}
-			return m.GetFormatStatus(t)
-		}),
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
-func (wumm *WorksiteUpdateModalModel) GetTroncons() []*fm.Troncon {
-	res := []*fm.Troncon{}
+type OrderTroncon struct {
+	*fm.Troncon
+	Order string `js:"Order"`
+	Span  int    `js:"Span"`
+}
+
+func NewOrderTroncon(t *fm.Troncon, order string, span int) *OrderTroncon {
+	ot := &OrderTroncon{Troncon: t}
+	ot.Order = order
+	ot.Span = span
+	return ot
+}
+
+func NewOrderTronconFromJS(o *js.Object) *OrderTroncon {
+	return &OrderTroncon{Troncon: &fm.Troncon{Object: o}}
+}
+
+func (wumm *WorksiteUpdateModalModel) GetTroncons() []*OrderTroncon {
+	res := []*OrderTroncon{}
 	for _, o := range wumm.CurrentWorksite.Orders {
+		tres := []*fm.Troncon{}
 		for _, t := range o.Troncons {
-			res = append(res, t)
+			if wumm.TextFiltered(t) {
+				tres = append(tres, t)
+			}
+		}
+		for i, t := range tres {
+			span := 0
+			if i == 0 {
+				span = len(tres)
+			}
+			res = append(res, NewOrderTroncon(t, o.Ref, span))
 		}
 	}
-
 	return res
 }
 
@@ -94,10 +118,40 @@ func (wumm *WorksiteUpdateModalModel) TableRowClassName(rowInfo *js.Object) stri
 	return ""
 }
 
-func (wumm *WorksiteUpdateModalModel) GetFormatTronconRef(t *fm.Troncon) string {
-	return t.Ref
+func (wumm *WorksiteUpdateModalModel) OrderSpanMethod(o *js.Object) interface{} {
+	row := NewOrderTronconFromJS(o.Get("row"))
+	col := o.Get("columnIndex").Int()
+	if col == 0 {
+		if row.Span == 0 {
+			return js.M{
+				"rowspan": 0,
+				"colspan": 0,
+			}
+		}
+		return js.M{
+			"rowspan": row.Span,
+			"colspan": 1,
+		}
+	}
+	return js.Undefined
 }
 
-func (wumm *WorksiteUpdateModalModel) GetFormatStatus(t *fm.Troncon) string {
-	return "TODO"
+func (wumm *WorksiteUpdateModalModel) GetFormatTronconRef(t *fm.Troncon) string {
+	return t.Pb.Ref + " / " + t.Pb.RefPt
+}
+
+func (wumm *WorksiteUpdateModalModel) TextFiltered(t *fm.Troncon) bool {
+	filter := wumm.Filter
+	if filter == "" {
+		return true
+	}
+	expected := true
+	if strings.HasPrefix(filter, `\`) {
+		if len(filter) == 1 {
+			return true
+		}
+		expected = false
+		filter = filter[1:]
+	}
+	return strings.Contains(t.SearchInString(), filter) == expected
 }
