@@ -43,6 +43,14 @@ func main() {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.GetUpdatableWorsiteInfos()
 		}),
+		hvue.Computed("NbUpdate", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetUpdatableWorsiteNb()
+		}),
+		hvue.Computed("NbRework", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetReworkWorsiteNb()
+		}),
 	)
 	//js.Global.Get("Vue").Call("use", "ELEMENT.lang.fr")
 
@@ -113,6 +121,28 @@ func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 		}
 	}
 	return res
+}
+
+func (m *MainPageModel) GetUpdatableWorsiteNb() int {
+	res := 0
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteIsUpdatable(wsi.Status) {
+			res += 1
+		}
+	}
+	return res
+
+}
+
+func (m *MainPageModel) GetReworkWorsiteNb() int {
+	res := 0
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteHasRework(wsi.Status) {
+			res += 1
+		}
+	}
+	return res
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

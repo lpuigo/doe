@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"strings"
 )
 
@@ -156,4 +157,35 @@ func (wumm *WorksiteUpdateModalModel) TextFiltered(t *fm.Troncon) bool {
 		filter = filter[1:]
 	}
 	return strings.Contains(t.SearchInString(), filter) == expected
+}
+
+func (wumm *WorksiteUpdateModalModel) CheckSignature(t *fm.Troncon) {
+	// t should be a OrderTroncon, bur gopherjs reflection seems to fail
+	// also working with
+	//func (wumm *WorksiteUpdateModalModel) CheckSignature(o *js.Object) {
+	//	NewOrderTronconFromJS(o).CheckSignature()
+	//}
+	t.CheckSignature()
+}
+
+func (wumm *WorksiteUpdateModalModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
+	users := []string{
+		"BARAGAN Nicolae",
+		"BEN MECHTA Abdelkader",
+		"CRETU Andrei",
+		"OLARU Augustin",
+		"STAN Valentin",
+		"TAMAS Adrian",
+		"VORNICU Dorin",
+	}
+
+	q := strings.ToLower(query)
+
+	res := []*autocomplete.Result{}
+	for _, u := range users {
+		if q == "" || strings.Contains(strings.ToLower(u), q) {
+			res = append(res, autocomplete.NewResult(u))
+		}
+	}
+	callback.Invoke(res)
 }

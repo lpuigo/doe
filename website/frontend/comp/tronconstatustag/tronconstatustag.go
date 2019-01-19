@@ -83,7 +83,7 @@ func (tst *TronconStatusTagModel) SetStatus() (statusType, statusText string) {
 	case !tools.Empty(tr.InstallDate):
 		return "", "Mesures à faire"
 	case tr.Ref != "" && tr.Pb.IsFilledIn() && !tr.Blockage:
-		return "", "A Réaliser"
+		return "", "A Installer"
 	}
 
 	return "danger", "Erreur"

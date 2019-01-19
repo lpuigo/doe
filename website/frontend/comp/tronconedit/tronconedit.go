@@ -194,12 +194,7 @@ func (tem *TronconEditModel) CheckFiber(tr *fm.Troncon) {
 }
 
 func (tem *TronconEditModel) CheckSignature(tr *fm.Troncon) {
-	if tr.NeedSignature {
-		tr.Blockage = !tr.Signed
-		return
-	}
-	tr.Signed = false
-	tr.Blockage = false
+	tr.CheckSignature()
 }
 
 func (tem *TronconEditModel) RefSearch(vm *hvue.VM, query string, callback *js.Object) {

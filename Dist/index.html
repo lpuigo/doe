@@ -40,7 +40,8 @@
                     </el-row>
                     <el-radio-group v-model="ActiveMode" size="mini">
                         <el-radio-button label="Create">Création</el-radio-button>
-                        <el-radio-button label="Update">Mise à jour</el-radio-button>
+                        <el-radio-button label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
+                        <el-radio-button label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
                     <span></span>
                     <span></span>

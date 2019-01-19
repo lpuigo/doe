@@ -82,12 +82,12 @@ const template string = `
                         <template slot-scope="scope">
                             <el-row type="flex" align="middle" :gutter="10">
                                 <el-col :span="12">
-                                    <el-input
-                                            placeholder="Equipier"
-                                            prefix-icon="fas fa-user"
-                                            v-model="scope.row.InstallActor"
-                                            size="mini"	clearable
-                                    ></el-input>
+                                    <el-autocomplete v-model="scope.row.InstallActor"
+                                                     :fetch-suggestions="UserSearch" :trigger-on-focus="false"
+                                                     placeholder="Equipier"
+                                                     prefix-icon="fas fa-user"
+                                                     clearable size="mini" style="width: 100%"
+                                    ></el-autocomplete>
                                 </el-col>
                                 <el-col :span="12">
                                     <el-date-picker format="dd/MM/yyyy" placeholder="Install." size="mini"
@@ -108,12 +108,13 @@ const template string = `
                         <template slot-scope="scope">
                             <el-row type="flex" align="middle" :gutter="10">
                                 <el-col :span="12">
-                                    <el-input
-                                            placeholder="Equipier"
-                                            prefix-icon="fas fa-user"
-                                            v-model="scope.row.MeasureActor"
-                                            size="mini"	clearable
-                                    ></el-input>
+                                    <el-autocomplete v-model="scope.row.MeasureActor"
+                                                     :fetch-suggestions="UserSearch" :trigger-on-focus="false"
+                                                     placeholder="Equipier"
+                                                     prefix-icon="fas fa-user"
+                                                     clearable size="mini" style="width: 100%"
+                                                     :disabled="!scope.row.InstallDate"
+                                    ></el-autocomplete>
                                 </el-col>
                                 <el-col :span="12">
                                     <el-date-picker format="dd/MM/yyyy" placeholder="Mesure" size="mini"
@@ -125,6 +126,34 @@ const template string = `
                                     ></el-date-picker>
                                 </el-col>
                             </el-row>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="Bloquage"
+                            width="140px" :resizable="true"
+                    >
+                        <template slot-scope="scope">
+                            <div>
+                                <el-checkbox 
+                                        v-model="scope.row.Blockage"
+                                        size="mini" :disabled="scope.row.NeedSignature && !scope.row.Signed"
+                                >Bloquage</el-checkbox>
+                                <div v-if="scope.row.NeedSignature">
+                                    <el-checkbox 
+                                            v-model="scope.row.Signed"
+                                            size="mini" @change="CheckSignature(scope.row)"
+                                    >Sign. convention</el-checkbox>
+                                </div>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="Commentaire" prop="Comment"
+                    >
+                        <template slot-scope="scope">
+                            <el-input clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
+                                      v-model.trim="scope.row.Comment"
+                            ></el-input>
                         </template>
                     </el-table-column>
                 </el-table>

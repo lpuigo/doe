@@ -264,7 +264,7 @@ func WorksiteStatusLabel(status string) string {
 	case WsStatusPayment:
 		return "Paiement attendu"
 	case WsStatusRework:
-		return "A Reprendre"
+		return "Reprise à faire"
 	case WsStatusBlocked:
 		return "Bloqué"
 	case WsStatusDone:
@@ -326,6 +326,54 @@ func WorksiteIsUpdatable(value string) bool {
 		return true
 		//case WsStatusDone:
 		//	return true
+	}
+	return false
+}
+
+func WorksiteHasRework(value string) bool {
+	switch value {
+	//case WsStatusNew:
+	//	return true
+	//case WsStatusFormInProgress:
+	//	return true
+	//case WsStatusInProgress:
+	//	return true
+	//case WsStatusDOE:
+	//	return true
+	//case WsStatusAttachment:
+	//	return true
+	//case WsStatusPayment:
+	//	return true
+	case WsStatusRework:
+		return true
+		//case WsStatusBlocked:
+		//	return true
+		//case WsStatusDone:
+		//	return true
+	}
+	return false
+}
+
+func WorksiteIsReworkable(value string) bool {
+	switch value {
+	//case WsStatusNew:
+	//	return true
+	//case WsStatusFormInProgress:
+	//	return true
+	//case WsStatusInProgress:
+	//	return true
+	//case WsStatusDOE:
+	//	return true
+	case WsStatusAttachment:
+		return true
+	case WsStatusPayment:
+		return true
+	case WsStatusRework:
+		return true
+	//case WsStatusBlocked:
+	//	return true
+	case WsStatusDone:
+		return true
 	}
 	return false
 }

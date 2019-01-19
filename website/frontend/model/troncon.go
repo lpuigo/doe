@@ -92,3 +92,12 @@ func (tr *Troncon) IsCompleted() bool {
 func (tr *Troncon) IsFilledIn() bool {
 	return !tools.Empty(tr.Ref) && tr.Pb.IsFilledIn()
 }
+
+func (tr *Troncon) CheckSignature() {
+	if tr.NeedSignature {
+		tr.Blockage = !tr.Signed
+		return
+	}
+	tr.Signed = false
+	tr.Blockage = false
+}
