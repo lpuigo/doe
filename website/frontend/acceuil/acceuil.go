@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
@@ -24,6 +25,7 @@ func main() {
 		userloginmodal.RegisterComponent(),
 		worksiteeditmodal.RegisterComponent(),
 		worksiteupdatemodal.RegisterComponent(),
+		reworkeditmodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -114,6 +116,10 @@ func (m *MainPageModel) UpdateWorksite(id int) {
 
 func (m *MainPageModel) CreateNewWorksite() {
 	m.EditWorksite(-1)
+}
+
+func (m *MainPageModel) EditRework(id int) {
+	m.VM.Refs("ReworkEditModal").Call("Show", id)
 }
 
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {

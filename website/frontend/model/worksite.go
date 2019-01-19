@@ -54,7 +54,7 @@ func NewWorkSite() *Worksite {
 	ws.Pa = NewPT()
 	ws.Comment = ""
 	ws.Orders = []*Order{}
-	ws.Rework = nil
+	ws.Rework = NewRework()
 	ws.Dirty = true
 
 	return ws
