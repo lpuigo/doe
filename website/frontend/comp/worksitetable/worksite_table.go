@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"sort"
 	"strconv"
 )
@@ -92,6 +93,14 @@ func (wtm *WorksiteTableModel) ExpandRow(vm *hvue.VM, ws *fm.WorksiteInfo, other
 
 func (wtm *WorksiteTableModel) AddWorksite(vm *hvue.VM) {
 	vm.Emit("new_worksite")
+}
+
+func (wtm *WorksiteTableModel) IsReworkable(status string) bool {
+	return fm.WorksiteIsReworkable(status)
+}
+
+func (wtm *WorksiteTableModel) CreateRework(vm *hvue.VM, wsi *fm.WorksiteInfo) {
+	message.WarningStr(vm, "Call Modal for Worksite #"+strconv.Itoa(wsi.Id))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

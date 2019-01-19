@@ -54,7 +54,10 @@ const (
 					width="140px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
-                    <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
+                    <div class="header-menu-container">
+                        <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
+                        <i v-if="IsReworkable(scope.row.Status)" class="fas fa-tools link" @click="CreateRework(scope.row)"></i>
+                    </div>
 				</template>
 			</el-table-column>
 			<el-table-column

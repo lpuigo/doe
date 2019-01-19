@@ -120,11 +120,13 @@ pre {
 .link {
     cursor: pointer;
     opacity: .7;
-    transition: opacity .2s ease;
+    font-size: 100%;
+    transition: opacity .2s ease, font-size 0.2s ease;
 }
 
 .link:hover {
     opacity: 1 !important;
+    font-size: 110%;
 }
 
 .el-table--mini td, .el-table--mini th {

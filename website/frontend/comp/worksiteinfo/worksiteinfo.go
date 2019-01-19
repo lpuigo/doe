@@ -12,7 +12,7 @@ const (
 <div> 
     <i class="fas fa-sitemap icon--left"></i><span>{{NbCommand}}&nbsp;</span>
     <i class="fas fa-share-alt icon--left"></i><span>{{NbTroncon}}&nbsp;</span>
-    <i class="fas fa-grip-vertical icon--left"></i>
+    <i class="fas fa-home icon--left"></i>
 	<span v-if="NbAvailLogement != NbLogement">{{NbAvailLogement}} / {{NbLogement}}</span>
 	<span v-else>{{NbLogement}}</span>
 </div>`
@@ -21,7 +21,7 @@ const (
 <div> 
     <i class="fas fa-sitemap icon--left"></i><span>{{value.NbOrder}}&nbsp;</span>
     <i class="fas fa-share-alt icon--left"></i><span>{{value.NbTroncon}}&nbsp;</span>
-    <i class="fas fa-grip-vertical icon--left"></i>
+    <i class="fas fa-home icon--left"></i>
 	<span v-if="value.NbElBlocked > 0">{{value.NbElTotal - value.NbElBlocked}} / {{value.NbElTotal}}</span>
 	<span v-else>{{value.NbElTotal}}</span>
 </div>`
