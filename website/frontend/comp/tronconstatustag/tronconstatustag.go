@@ -33,7 +33,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.Template(template),
 		hvue.Props("value"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
-			return NewTronconEditModel(vm)
+			return NewTronconStatusTagModel(vm)
 		}),
 		hvue.Computed("Status", func(vm *hvue.VM) interface{} {
 			tst := &TronconStatusTagModel{Object: vm.Object}
@@ -57,7 +57,7 @@ type TronconStatusTagModel struct {
 	VM *hvue.VM `js:"VM"`
 }
 
-func NewTronconEditModel(vm *hvue.VM) *TronconStatusTagModel {
+func NewTronconStatusTagModel(vm *hvue.VM) *TronconStatusTagModel {
 	tem := &TronconStatusTagModel{Object: tools.O()}
 	tem.VM = vm
 	tem.Troncon = nil

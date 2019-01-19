@@ -26,7 +26,7 @@ const template string = `
             </el-input>
         </el-col>
         <el-col :span="3" style="text-align: right">
-            <el-tag :type="StatusType" size="medium" style="width: 100%;text-align: left">{{worksite.Status | FormatStatus}}</el-tag>
+            <worksite-status-tag v-model="worksite"></worksite-status-tag>
         </el-col>
         <el-col :span="3">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"

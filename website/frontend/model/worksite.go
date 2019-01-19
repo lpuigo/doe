@@ -245,8 +245,12 @@ func (ws *Worksite) IsBlocked() bool {
 	return nbAivailEl == 0
 }
 
-func WorksiteStatusLabel(value string) string {
-	switch value {
+func (ws *Worksite) WorksiteStatusLabel() string {
+	return WorksiteStatusLabel(ws.Status)
+}
+
+func WorksiteStatusLabel(status string) string {
+	switch status {
 	case WsStatusNew:
 		return "Nouveau"
 	case WsStatusFormInProgress:
@@ -266,7 +270,39 @@ func WorksiteStatusLabel(value string) string {
 	case WsStatusDone:
 		return "Terminé"
 	default:
-		return "<" + value + ">"
+		return "<" + status + ">"
+	}
+}
+
+func (ws *Worksite) UpdateStatus() {
+	if !ws.IsDefined() {
+		ws.Status = WsStatusNew
+		return
+	}
+	if !ws.IsFilledIn() {
+		ws.Status = WsStatusFormInProgress
+		return
+	}
+	if !ws.OrdersCompleted() {
+		ws.DoeDate = ""
+		ws.Status = WsStatusInProgress
+		return
+	}
+	if ws.IsBlocked() {
+		ws.Status = WsStatusDone
+		return
+	}
+	if tools.Empty(ws.DoeDate) {
+		ws.Status = WsStatusDOE
+		return
+	}
+	if tools.Empty(ws.AttachmentDate) {
+		ws.Status = WsStatusAttachment
+		return
+	}
+	if tools.Empty(ws.PaymentDate) {
+		ws.Status = WsStatusPayment
+		return
 	}
 }
 

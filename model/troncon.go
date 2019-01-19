@@ -9,7 +9,9 @@ type Troncon struct {
 	NeedSignature bool
 	Signed        bool
 	InstallDate   string
+	InstallActor  string
 	MeasureDate   string
+	MeasureActor  string
 	Comment       string
 }
 

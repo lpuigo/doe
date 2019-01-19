@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	wem "github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strings"
 )
@@ -44,6 +45,7 @@ func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteinfo.RegisterComponent(),
 		tronconstatustag.RegisterComponent(),
+		worksitestatustag.RegisterComponent(),
 		hvue.Template(template),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteUpdateModalModel(vm)

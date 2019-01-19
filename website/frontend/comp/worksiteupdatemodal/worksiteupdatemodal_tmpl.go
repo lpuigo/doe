@@ -29,7 +29,10 @@ const template string = `
         <el-container style="height: 100%">
             <el-header style="height: auto; padding: 5px">
                 <el-row :span="20">
-                    <el-col :offset="20" :span="4">
+                    <el-col :span="6">
+                        <worksite-status-tag v-model="current_worksite"></worksite-status-tag>
+                    </el-col>		
+                    <el-col :offset="14" :span="4">
                         <el-input
                                 placeholder="filtre"
                                 prefix-icon="el-icon-search"
@@ -74,10 +77,18 @@ const template string = `
                     </el-table-column>
                     <el-table-column
                             label="Installation"
-                            width="300px" min-width="140px" :resizable="true"
+                            width="300px" min-width="250px" :resizable="true"
                     >
                         <template slot-scope="scope">
                             <el-row type="flex" align="middle" :gutter="10">
+                                <el-col :span="12">
+                                    <el-input
+                                            placeholder="Equipier"
+                                            prefix-icon="fas fa-user"
+                                            v-model="scope.row.InstallActor"
+                                            size="mini"	clearable
+                                    ></el-input>
+                                </el-col>
                                 <el-col :span="12">
                                     <el-date-picker format="dd/MM/yyyy" placeholder="Install." size="mini"
                                                     style="width: 100%" type="date"
@@ -86,6 +97,23 @@ const template string = `
                                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                                                     :clearable="false"
                                     ></el-date-picker>
+                                </el-col>
+                            </el-row>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="Mesure"
+                            width="300px" min-width="250px" :resizable="true"
+                    >
+                        <template slot-scope="scope">
+                            <el-row type="flex" align="middle" :gutter="10">
+                                <el-col :span="12">
+                                    <el-input
+                                            placeholder="Equipier"
+                                            prefix-icon="fas fa-user"
+                                            v-model="scope.row.MeasureActor"
+                                            size="mini"	clearable
+                                    ></el-input>
                                 </el-col>
                                 <el-col :span="12">
                                     <el-date-picker format="dd/MM/yyyy" placeholder="Mesure" size="mini"

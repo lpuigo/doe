@@ -1,12 +1,19 @@
 package model
 
+type Defect struct {
+	PT             string
+	SubmissionDate string
+	Description    string
+	FixDate        string
+}
+
 type Rework struct {
 	ControlDate    string
 	SubmissionDate string
 	CompletionDate string
-	Defects        []string
+	Defects        []Defect
 }
 
 func NewRework() *Rework {
-	return &Rework{Defects: []string{}}
+	return &Rework{Defects: []Defect{}}
 }
