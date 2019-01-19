@@ -10,11 +10,12 @@ import (
 
 const template = `
 <div>
-    <div v-if="showProgressBar" :class="progressStatus">
+    <div v-if="showProgressBar" >
         <el-progress 
                  :show-text="false"
                  :stroke-width="5"
                  :percentage="progressPct"
+				 :status="progressStatus"
         ></el-progress>
         <span class="small-font">{{ progressText }}</span>
     </div>
@@ -94,11 +95,15 @@ func (wspbm *WorksiteProgressBarModel) ProgressPct() (pct float64) {
 		val = float64(wsi.NbElMeasured)
 	}
 	pct = val / effNb * 100.0
+	wspbm.Progress = pct
 	return
 }
 
 func (wspbm *WorksiteProgressBarModel) ProgressStatus() (res string) {
-	res = "progress-bar"
+	res = ""
+	if wspbm.Progress >= 100 {
+		res = "success"
+	}
 	return
 }
 
@@ -114,6 +119,8 @@ func (wspbm *WorksiteProgressBarModel) Format() (res string) {
 	}
 	if wspbm.mustShow() {
 		res = strconv.Itoa(val) + " / " + strconv.Itoa(tot)
+		pct := strconv.FormatFloat(wspbm.ProgressPct(), 'f', 0, 64)
+		res += " ( " + pct + "% )"
 		return
 	}
 	res = "-"

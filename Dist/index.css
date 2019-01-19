@@ -201,9 +201,9 @@ pre {
     background-color: #cccccc;
 }
 
-.el-progress-bar__inner {
-    background-color: #51a825;
-}
+/*.el-progress-bar__inner {*/
+    /*background-color: #51a825;*/
+/*}*/
 
 .progress-bar {
     line-height: 1em;
