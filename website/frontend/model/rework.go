@@ -12,6 +12,7 @@ type Defect struct {
 	SubmissionDate string `js:"SubmissionDate"`
 	Description    string `js:"Description"`
 	FixDate        string `js:"FixDate"`
+	FixActor       string `js:"FixActor"`
 }
 
 func NewDefect() *Defect {
@@ -20,6 +21,7 @@ func NewDefect() *Defect {
 	d.SubmissionDate = ""
 	d.Description = ""
 	d.FixDate = ""
+	d.FixActor = ""
 	return d
 }
 
@@ -34,13 +36,15 @@ func (d *Defect) Copy(od *Defect) {
 	d.SubmissionDate = od.SubmissionDate
 	d.Description = od.Description
 	d.FixDate = od.FixDate
+	d.FixActor = od.FixActor
 }
 
 func (d *Defect) SearchInString() string {
 	res := "D_PT:" + d.PT + "\n"
 	res += "D_Submit:" + date.DateString(d.SubmissionDate) + "\n"
 	res += "D_Desc:" + d.Description + "\n"
-	res += "D_Fix:" + date.DateString(d.FixDate) + "\n"
+	res += "D_FixDate:" + date.DateString(d.FixDate) + "\n"
+	res += "D_FixActor:" + d.FixActor + "\n"
 	return res
 }
 

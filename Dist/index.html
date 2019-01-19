@@ -19,7 +19,7 @@
         <user-login-modal
                 ref="UserLoginModal"
                 :user.sync="User"
-                @update:user=""
+                @update:user="GetWorkSiteInfos"
         ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
@@ -60,7 +60,12 @@
                 ></worksite-table>
                 <worksite-table
                         v-if="ActiveMode == 'Update'"
-                        :worksiteinfos="UpdatableWorsiteInfos"
+                        :worksiteinfos="UpdatableWorksiteInfos"
+                        @selected_worksite="UpdateWorksite"
+                ></worksite-table>
+                <worksite-table
+                        v-if="ActiveMode == 'Rework'"
+                        :worksiteinfos="ReworkWorksiteInfos"
                         @selected_worksite="UpdateWorksite"
                 ></worksite-table>
             </el-main>

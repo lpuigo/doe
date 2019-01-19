@@ -30,7 +30,6 @@ func main() {
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.GetUserSession()
-			mpm.GetWorkSiteInfos()
 		}),
 		hvue.Computed("LoggedUser", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -39,9 +38,13 @@ func main() {
 			}
 			return mpm.User.Name
 		}),
-		hvue.Computed("UpdatableWorsiteInfos", func(vm *hvue.VM) interface{} {
+		hvue.Computed("UpdatableWorksiteInfos", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.GetUpdatableWorsiteInfos()
+		}),
+		hvue.Computed("ReworkWorksiteInfos", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetReworkWorksiteInfos()
 		}),
 		hvue.Computed("NbUpdate", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -134,6 +137,16 @@ func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 
 }
 
+func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
+	res := []*fm.WorksiteInfo{}
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteHasRework(wsi.Status) {
+			res = append(res, wsi)
+		}
+	}
+	return res
+}
+
 func (m *MainPageModel) GetReworkWorsiteNb() int {
 	res := 0
 	for _, wsi := range m.WorksiteInfos {
@@ -172,6 +185,7 @@ func (m *MainPageModel) callGetUser() {
 	m.User.Copy(fm.NewUserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true
+		m.GetWorkSiteInfos()
 	}
 }
 
@@ -191,6 +205,7 @@ func (m *MainPageModel) callLogout() {
 	}
 	m.User.Name = ""
 	m.User.Connected = false
+	m.WorksiteInfos = []*fm.WorksiteInfo{}
 }
 
 func (m *MainPageModel) callGetWorkSiteInfos() {

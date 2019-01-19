@@ -5,6 +5,7 @@ type Defect struct {
 	SubmissionDate string
 	Description    string
 	FixDate        string
+	FixActor       string
 }
 
 type Rework struct {
