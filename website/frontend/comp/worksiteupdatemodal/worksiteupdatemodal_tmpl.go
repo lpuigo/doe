@@ -29,10 +29,10 @@ const template string = `
         <el-container style="height: 100%">
             <el-header style="height: auto; padding: 5px">
                 <el-row :span="20">
-                    <el-col :span="6">
+                    <el-col :span="4">
                         <worksite-status-tag v-model="current_worksite"></worksite-status-tag>
                     </el-col>		
-                    <el-col :offset="14" :span="4">
+                    <el-col :offset="16" :span="4">
                         <el-input
                                 placeholder="filtre"
                                 prefix-icon="el-icon-search"
@@ -95,7 +95,7 @@ const template string = `
                                                     v-model="scope.row.InstallDate"
                                                     value-format="yyyy-MM-dd"
                                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                                    :clearable="false"
+                                                    :disabled="!scope.row.InstallActor" :clearable="false"
                                     ></el-date-picker>
                                 </el-col>
                             </el-row>
@@ -121,7 +121,7 @@ const template string = `
                                                     v-model="scope.row.MeasureDate"
                                                     value-format="yyyy-MM-dd"
                                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                                    :clearable="false"
+                                                    :disabled="!scope.row.MeasureActor" :clearable="false"
                                     ></el-date-picker>
                                 </el-col>
                             </el-row>
