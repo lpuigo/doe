@@ -185,12 +185,16 @@ pre {
     background: #e1edff;
 }
 
-.low-risk {
+.rework-green {
+    color: #44cc00;
+}
+
+.rework-orange {
     color: #f29b00;
 }
 
-.high-risk {
-    color: #ff3200;
+.rework-red {
+    color: #f43100;
 }
 
 /* Workload Columns */

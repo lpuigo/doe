@@ -46,9 +46,17 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 	wsi.Status = ws.Status
 	ws.inspectForInfo(wsi)
 
-	wsi.Inspected = false
-	wsi.NbRework = 0
-	wsi.NbReworkDone = 0
+	if ws.Rework != nil && len(ws.Rework.Defects) > 0 {
+		wsi.Inspected = true
+		for _, d := range ws.Rework.Defects {
+			if d.ToBeFixed {
+				wsi.NbRework += 1
+				if d.FixDate != "" {
+					wsi.NbReworkDone = 0
+				}
+			}
+		}
+	}
 	return wsi
 }
 
@@ -57,7 +65,8 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 	searchPt := func(t string, p PT) string {
 		return fmt.Sprintf("%s:%s, PT:%s, Address:%s, ", t, p.Ref, p.RefPt, p.Address)
 	}
-	wsi.Search = searchPt("PMZ", ws.Pmz) + searchPt("PA", ws.Pa)
+	wsi.Search = fmt.Sprintf("Chantier:%s, Ville:%s, ", ws.Ref, ws.City)
+	wsi.Search += searchPt("PMZ", ws.Pmz) + searchPt("PA", ws.Pa)
 	for _, o := range ws.Orders {
 		lf := "\n"
 		wsi.NbOrder += 1

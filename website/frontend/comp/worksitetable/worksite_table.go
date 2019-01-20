@@ -98,6 +98,19 @@ func (wtm *WorksiteTableModel) IsReworkable(status string) bool {
 	return fm.WorksiteIsReworkable(status)
 }
 
+func (wtm *WorksiteTableModel) ReworkIconColor(wsi *fm.WorksiteInfo) string {
+	if !wsi.Inspected {
+		return ""
+	}
+	if wsi.NbRework > 0 {
+		if wsi.NbReworkDone == wsi.NbRework {
+			return "rework-orange"
+		}
+		return "rework-red"
+	}
+	return "rework-green"
+}
+
 func (wtm *WorksiteTableModel) CreateRework(vm *hvue.VM, wsi *fm.WorksiteInfo) {
 	vm.Emit("edit_rework", wsi.Id)
 }

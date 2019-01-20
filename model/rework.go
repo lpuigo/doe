@@ -4,6 +4,9 @@ type Defect struct {
 	PT             string
 	SubmissionDate string
 	Description    string
+	NbOK           int
+	NbKO           int
+	ToBeFixed      bool
 	FixDate        string
 	FixActor       string
 }

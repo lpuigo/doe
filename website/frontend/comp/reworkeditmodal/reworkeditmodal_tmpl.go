@@ -68,6 +68,9 @@ const template string = `
                                         :clearable="false"
                         ></el-date-picker>
                     </el-col>
+                    <el-col :offset="4" :span="4">
+                        <worksite-status-tag v-model="current_worksite"></worksite-status-tag>
+                    </el-col>
                 </el-row>
             </el-header>
             <el-main  style="height: 100%; padding: 0px">
@@ -88,6 +91,7 @@ const template string = `
                             ></el-button>
                         </template>
                     </el-table-column>
+                    
                     <el-table-column
                             label="PT" prop="PT"
                             width="250px" :resizable="true" :show-overflow-tooltip=true
@@ -105,6 +109,7 @@ const template string = `
                             </el-select>                            
                         </template>
                     </el-table-column>
+                    
                     <el-table-column
                             label="Soumission"
                             width="150px" :resizable="true" :show-overflow-tooltip=true
@@ -119,21 +124,50 @@ const template string = `
                             ></el-date-picker>
                         </template>
                     </el-table-column>
+                    
+                    <el-table-column
+                            label="Contrôles OK / KO"   
+                            width="190px"
+                    >
+                        <template slot-scope="scope">
+                            <el-row type="flex" align="middle" :gutter="10">
+                                <el-col :span="12">
+                                    <el-input-number 
+                                            v-model="scope.row.NbOK" 
+                                            controls-position="right" 
+                                            :min="0" size="mini" style="width: 80px"
+                                    ></el-input-number>
+                                </el-col>
+                                <el-col :span="12">
+                                    <el-input-number 
+                                            v-model="scope.row.NbKO" 
+                                            controls-position="right" 
+                                            :min="0" size="mini" style="width: 80px"
+                                    ></el-input-number>
+                                </el-col>
+                            </el-row>
+                        </template>  
+                    </el-table-column>
+                    
+                    <el-table-column
+                            label="Reprise"   
+                            width="100px"
+                    >
+                        <template slot-scope="scope">
+                            <el-checkbox v-model="scope.row.ToBeFixed"></el-checkbox>
+                        </template>  
+                    </el-table-column>
+                    
                     <el-table-column
                             label="Description"                            
                     >
-                        <!--<template slot="header" slot-scope="scope">-->
-                            <!--<el-input-->
-                                    <!--v-model="search"-->
-                                    <!--size="mini"-->
-                                    <!--placeholder="Type to search"/>-->
-                        <!--</template>-->
                         <template slot-scope="scope">
                             <el-input clearable placeholder="Description de la reprise" size="mini" type="textarea" autosize
                                       v-model.trim="scope.row.Description"
                             ></el-input>
                         </template>  
                     </el-table-column>
+                    
                 </el-table>
             </el-main>
         </el-container>

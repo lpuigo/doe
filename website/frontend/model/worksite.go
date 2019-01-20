@@ -245,6 +245,13 @@ func (ws *Worksite) IsBlocked() bool {
 	return nbAivailEl == 0
 }
 
+func (ws *Worksite) NeedRework() bool {
+	if ws.Rework == nil {
+		return false
+	}
+	return ws.Rework.NeedRework()
+}
+
 func (ws *Worksite) WorksiteStatusLabel() string {
 	return WorksiteStatusLabel(ws.Status)
 }
@@ -294,6 +301,10 @@ func (ws *Worksite) UpdateStatus() {
 	}
 	if tools.Empty(ws.DoeDate) {
 		ws.Status = WsStatusDOE
+		return
+	}
+	if ws.NeedRework() {
+		ws.Status = WsStatusRework
 		return
 	}
 	if tools.Empty(ws.AttachmentDate) {

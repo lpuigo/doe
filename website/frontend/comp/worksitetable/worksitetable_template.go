@@ -56,7 +56,7 @@ const (
 				<template slot-scope="scope">
                     <div class="header-menu-container">
                         <span @click="SetSelectedWorksite(scope.row)" class="link">{{scope.row.Ref}}</span>
-                        <i v-if="IsReworkable(scope.row.Status)" class="fas fa-tools link" @click="CreateRework(scope.row)"></i>
+                        <i v-if="IsReworkable(scope.row.Status)" class="fas fa-tools link" :class="ReworkIconColor(scope.row)" @click="CreateRework(scope.row)"></i>
                     </div>
 				</template>
 			</el-table-column>
