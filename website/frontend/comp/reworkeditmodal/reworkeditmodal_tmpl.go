@@ -31,7 +31,7 @@ const template string = `
                 style="height: 100%"
         >
             <el-header style="height: auto; padding: 5px">
-                <el-row :gutter="10" type="flex" align="middle">
+                <el-row :gutter="10" type="flex" align="middle" style="margin-bottom: 10px">
                     <el-col :span="3">
                         <el-button
                                 type="success" plain icon="fas fa-tools icon--left" size="mini"
@@ -94,7 +94,7 @@ const template string = `
                     
                     <el-table-column
                             label="PT" prop="PT"
-                            width="250px" :resizable="true" :show-overflow-tooltip=true
+                            width="300px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
                             <el-select v-model="scope.row.PT" filterable placeholder="Choix PT" size="mini" style="width: 100%">

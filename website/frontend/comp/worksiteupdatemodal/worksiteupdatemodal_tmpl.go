@@ -28,11 +28,19 @@ const template string = `
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
         <el-container style="height: 100%">
             <el-header style="height: auto; padding: 5px">
-                <el-row :span="20">
-                    <el-col :span="4">
+                <el-row :gutter="10" style="margin-bottom: 10px">
+                    <el-col :span="3">
                         <worksite-status-tag v-model="current_worksite"></worksite-status-tag>
+                    </el-col>
+                    <el-col :offset="1" :span="2" >
+                        <span style="float:right; text-align: right">Commentaire dossier:</span>
+                    </el-col>
+                    <el-col :span="13">
+                        <el-input clearable placeholder="Commentaire sur le dossier" size="mini" type="textarea" autosize
+                                  v-model.trim="current_worksite.Comment"
+                        ></el-input>                    
                     </el-col>		
-                    <el-col :offset="16" :span="4">
+                    <el-col :offset="1" :span="4">
                         <el-input
                                 placeholder="filtre"
                                 prefix-icon="el-icon-search"
@@ -87,6 +95,7 @@ const template string = `
                                                      placeholder="Equipier"
                                                      prefix-icon="fas fa-user"
                                                      clearable size="mini" style="width: 100%"
+                                                     @clear="scope.row.InstallDate = ''"
                                     ></el-autocomplete>
                                 </el-col>
                                 <el-col :span="12">
@@ -114,6 +123,7 @@ const template string = `
                                                      prefix-icon="fas fa-user"
                                                      clearable size="mini" style="width: 100%"
                                                      :disabled="!scope.row.InstallDate"
+                                                     @clear="scope.row.MeasureDate = ''"
                                     ></el-autocomplete>
                                 </el-col>
                                 <el-col :span="12">

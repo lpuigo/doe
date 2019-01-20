@@ -325,8 +325,8 @@ func WorksiteIsUpdatable(value string) bool {
 	//	return true
 	case WsStatusInProgress:
 		return true
-	//case WsStatusDOE:
-	//	return true
+	case WsStatusDOE:
+		return true
 	//case WsStatusAttachment:
 	//	return true
 	//case WsStatusPayment:

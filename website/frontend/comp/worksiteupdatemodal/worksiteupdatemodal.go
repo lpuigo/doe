@@ -96,6 +96,9 @@ func NewOrderTronconFromJS(o *js.Object) *OrderTroncon {
 	return &OrderTroncon{Troncon: &fm.Troncon{Object: o}}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Actions Methods
+
 func (wumm *WorksiteUpdateModalModel) GetTroncons() []*OrderTroncon {
 	res := []*OrderTroncon{}
 	for _, o := range wumm.CurrentWorksite.Orders {
