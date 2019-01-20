@@ -104,7 +104,7 @@ func (remm *ReworkEditModalModel) AddDefect() {
 	//m := NewReworkEditModalModelFromJS(vm.Object)
 	r := remm.CurrentWorksite.Rework
 	d := fm.NewDefect()
-	d.SubmissionDate = r.SubmissionDate
+	d.SubmissionDate = r.ControlDate
 	r.Defects = append(r.Defects, d)
 }
 
