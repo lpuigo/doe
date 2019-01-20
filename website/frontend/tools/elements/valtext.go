@@ -1,6 +1,9 @@
 package elements
 
-import "github.com/gopherjs/gopherjs/js"
+import (
+	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
+)
 
 type ValText struct {
 	*js.Object
@@ -9,7 +12,7 @@ type ValText struct {
 }
 
 func NewValText(val, text string) *ValText {
-	vt := &ValText{Object: js.Global.Get("Object").New()}
+	vt := &ValText{Object: tools.O()}
 	vt.Value = val
 	vt.Text = text
 	return vt
@@ -31,4 +34,17 @@ func NewValTextList(list *js.Object) []*ValText {
 		res = append(res, o.(*ValText))
 	}
 	return res
+}
+
+type ValueLabel struct {
+	*js.Object
+	Value string `js:"value"`
+	Label string `js:"label"`
+}
+
+func NewValueLabel(value, label string) *ValueLabel {
+	vl := &ValueLabel{Object: tools.O()}
+	vl.Value = value
+	vl.Label = label
+	return vl
 }

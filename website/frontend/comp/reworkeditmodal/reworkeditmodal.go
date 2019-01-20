@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 type ReworkEditModalModel struct {
@@ -88,6 +89,25 @@ func (remm *ReworkEditModalModel) GetReworks() []*fm.Defect {
 	return remm.CurrentWorksite.Rework.Defects
 }
 
-func (remm *ReworkEditModalModel) GetPTs() {
+func (remm *ReworkEditModalModel) GetPTs() []*elements.ValueLabel {
+	res := []*elements.ValueLabel{}
+	for _, o := range remm.CurrentWorksite.Orders {
+		for _, t := range o.Troncons {
+			label := t.Pb.Ref + " / " + t.Pb.RefPt + " (" + t.Ref + ")"
+			res = append(res, elements.NewValueLabel(t.Pb.RefPt, label))
+		}
+	}
+	return res
+}
 
+func (remm *ReworkEditModalModel) AddDefect() {
+	//m := NewReworkEditModalModelFromJS(vm.Object)
+	r := remm.CurrentWorksite.Rework
+	d := fm.NewDefect()
+	d.SubmissionDate = r.SubmissionDate
+	r.Defects = append(r.Defects, d)
+}
+
+func (remm *ReworkEditModalModel) RemoveDefect(i int) {
+	remm.CurrentWorksite.Rework.Object.Get("Defects").Call("splice", i, 1)
 }

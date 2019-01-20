@@ -32,7 +32,13 @@ const template string = `
         >
             <el-header style="height: auto; padding: 5px">
                 <el-row :gutter="10" type="flex" align="middle">
-                    <el-col :span="4">
+                    <el-col :span="3">
+                        <el-button
+                                type="success" plain icon="fas fa-tools icon--left" size="mini"
+                                @click="AddDefect"
+                        >Ajouter Reprise</el-button>
+                    </el-col>
+                    <el-col :offset="2" :span="2">
                         <span style="float:right">Contrôle:</span>
                     </el-col>
                     <el-col :span="4">
@@ -44,14 +50,14 @@ const template string = `
                                         :clearable="false"
                         ></el-date-picker>
                     </el-col>
-                    <el-col :span="4">
-                        <span style="float:right">Soumission:</span>
-                    </el-col>
                     <el-col :span="1">
-                        <el-button 
-                                icon="fas fa-angle-double-right" size="mini" circle 
+                        <el-button
+                                icon="fas fa-angle-double-right" size="mini" circle
                                 @click="current_worksite.Rework.SubmissionDate=current_worksite.Rework.ControlDate"
                         ></el-button>
+                    </el-col>
+                    <el-col :span="2">
+                        <span style="float:right">Soumission:</span>
                     </el-col>
                     <el-col :span="4">
                         <el-date-picker format="dd/MM/yyyy" placeholder="Soumission" size="mini"
@@ -72,25 +78,36 @@ const template string = `
                         height="100%" :border=true size="mini"
                 >
                     <el-table-column
-                            label="PT" prop="PT"
-                            width="140px" :resizable="true" :show-overflow-tooltip=true
+                            label="Action"
+                            width="60px"
                     >
                         <template slot-scope="scope">
-                            <el-select v-model="scope.row.PT" placeholder="Choix PT">
-                                <!--<el-option-->
-                                        <!--v-for="item in GetPTs()"-->
-                                        <!--:key="item.value"-->
-                                        <!--:label="item.label"-->
-                                        <!--:value="item.value">-->
-                                    <!--<span style="float: left">{{ item.label }}</span>-->
-                                    <!--<span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>-->
-                                <!--</el-option>-->
+                            <el-button
+                                    type="danger" icon="el-icon-delete" circle size="mini"
+                                    @click="RemoveDefect(scope.$index)"
+                            ></el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="PT" prop="PT"
+                            width="250px" :resizable="true" :show-overflow-tooltip=true
+                    >
+                        <template slot-scope="scope">
+                            <el-select v-model="scope.row.PT" filterable placeholder="Choix PT" size="mini" style="width: 100%">
+                                <el-option
+                                        v-for="item in GetPTs()"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                    <!--<span style="float: left">{{ item.value }}</span>-->
+                                    <!--<span style="float: right; color: #8492a6; font-size: 90%">{{ item.label }}</span>-->
+                                </el-option>
                             </el-select>                            
                         </template>
                     </el-table-column>
                     <el-table-column
                             label="Soumission"
-                            width="140px" :resizable="true" :show-overflow-tooltip=true
+                            width="150px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
                             <el-date-picker format="dd/MM/yyyy" placeholder="Soumission" size="mini"
@@ -105,20 +122,16 @@ const template string = `
                     <el-table-column
                             label="Description"                            
                     >
+                        <!--<template slot="header" slot-scope="scope">-->
+                            <!--<el-input-->
+                                    <!--v-model="search"-->
+                                    <!--size="mini"-->
+                                    <!--placeholder="Type to search"/>-->
+                        <!--</template>-->
                         <template slot-scope="scope">
-                            <el-row type="flex" align="top" :gutter="10">
-                                <el-col :span="20">
-                                    <el-autocomplete v-model="scope.row.InstallActor"
-                                                     :fetch-suggestions="UserSearch" :trigger-on-focus="false"
-                                                     placeholder="Equipier"
-                                                     prefix-icon="fas fa-user"
-                                                     clearable size="mini" style="width: 100%"
-                                    ></el-autocomplete>
-                                </el-col>
-                                <el-col :offset="1" :span="3">
-                                    <el-button type="danger" icon="el-icon-delete" circle></el-button>
-                                </el-col>
-                            </el-row>
+                            <el-input clearable placeholder="Description de la reprise" size="mini" type="textarea" autosize
+                                      v-model.trim="scope.row.Description"
+                            ></el-input>
                         </template>  
                     </el-table-column>
                 </el-table>
