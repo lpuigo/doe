@@ -20,27 +20,30 @@ const template string = `
         <el-col :span="3">
             <troncon-status-tag v-model="value"></troncon-status-tag>
         </el-col>
-        <el-col :span="6">
-            <el-tooltip content="Référence" placement="top" effect="light">
-                <el-autocomplete v-model="value.Ref"
-                                 :fetch-suggestions="RefSearch"
-                                 placeholder="TR-99-9999"
-                                 clearable size="mini" style="width: 100%"
-                                 @input="CheckRef(value)"
+        <el-col :span="13">
+            <el-autocomplete v-model="value.Ref"
+                             :fetch-suggestions="RefSearch"
+                             placeholder="TR-99-9999"
+                             clearable size="mini" style="width: 100%"
+                             @input="CheckRef(value)"
+            >
+                <template slot="prepend">Tronçon:</template>
+            </el-autocomplete>
+        </el-col>
+        <el-col :span="4">
+            <el-tooltip content="Nb. Fibre" placement="top" effect="light" :open-delay="500">
+                <el-input-number v-model="value.NbFiber"
+                                 :min="6" :step="6"
+                                 :readonly="readonly"
+                                 size="mini" controls-position="right" style="width: 100%"
+                                 @input="CheckFiber(value)"
                 >
-                    <template slot="prepend">Tronçon:</template>
-                </el-autocomplete>
+
+                    <template slot="prepend">Nb Fibre</template>
+                </el-input-number>
             </el-tooltip>
         </el-col>
-        <el-col :span="15">
-            <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
-        </el-col>
-    </el-row>
-    <!-- 
-        Attributes Blockage, Size and Dates 
-    -->
-    <el-row :gutter="10" type="flex" align="middle">
-        <el-col :span="3">
+        <el-col :offset="1" :span="3">
             <el-switch v-model="value.Blockage"
                        active-color="#db2828"
                        active-text="Bloquage"
@@ -48,69 +51,38 @@ const template string = `
                        :disabled="value.NeedSignature && !value.Signed"
             ></el-switch>
         </el-col>
-        <el-col :span="3">
+    </el-row>
+    <!-- 
+        Attributes Blockage, Size and Dates 
+    -->
+    <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="16">
+            <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
+        </el-col>
+        <el-col :span="4">
+            <el-tooltip content="Nb. EL raccordable" placement="bottom" effect="light" :open-delay="500">
+                <el-slider
+                        v-model="value.NbRacco"
+                        :min="0" :max="value.NbFiber"
+                        :step="1"
+                        :readonly="readonly"
+                        show-stops>
+                </el-slider>
+                <!--<el-input-number-->
+                        <!--v-model="value.NbRacco"-->
+                        <!--:min="0" :max="value.NbFiber"-->
+                        <!--:readonly="readonly"-->
+                        <!--size="mini"	controls-position="right" style="width: 100%"-->
+                <!--&gt;</el-input-number>-->
+            </el-tooltip>
+        </el-col>
+        <el-col :offset="1" :span="3">
             <el-switch v-model="value.NeedSignature"
                        active-color="#db2828"
                        active-text="Signature demandée"
                        inactive-color="#bcbcbc"
                        @input="CheckSignature(value)"
             ></el-switch>
-        </el-col>
-        <el-col :span="3">
-            <el-switch v-if="value.NeedSignature"
-                       v-model="value.Signed"
-                       active-color="#51a825"
-                       active-text="Signature obtenue"
-                       inactive-color="#bcbcbc"
-                       @input="CheckSignature(value)"
-            ></el-switch>
-        </el-col>
-        <el-col :span="3">
-            <el-tooltip content="Nb. EL raccordable" placement="bottom" effect="light" :open-delay="500">
-                <el-input-number
-                        v-model="value.NbRacco"
-                        :min="0" :max="value.NbFiber"
-                        :readonly="readonly"
-                        size="mini"	controls-position="right" style="width: 100%"
-                ></el-input-number>
-            </el-tooltip>
-        </el-col>
-        <el-col :span="3">
-            <el-tooltip content="Nb. Fibre" placement="bottom" effect="light" :open-delay="500">
-                <el-input-number v-model="value.NbFiber"
-                                 :min="6" :step="6"
-                                 :readonly="readonly"
-                                 size="mini" controls-position="right" style="width: 100%"
-                                 @input="CheckFiber(value)"
-                >
-                                
-                    <template slot="prepend">Nb Fibre</template>
-                </el-input-number>
-            </el-tooltip>
-        </el-col>
-        <el-col :offset="1" :span="4">
-            <el-tooltip content="Date Pose PB" placement="bottom" effect="light" :open-delay="500">
-                <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Installation" size="mini"
-                                style="width: 100%" type="date"
-                                v-model="value.InstallDate"
-                                value-format="yyyy-MM-dd"
-                                :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                :clearable="false"
-                ></el-date-picker>
-            </el-tooltip>
-        </el-col>
-        <el-col :span="4">
-            <el-tooltip content="Date Mesure" placement="bottom" effect="light" :open-delay="500">
-                <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Date Mesure" size="mini"
-                                style="width: 100%" type="date"
-                                v-model="value.MeasureDate"
-                                value-format="yyyy-MM-dd"
-                                :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                :clearable="false"
-                                :disabled="!value.InstallDate"
-                                @change="CheckMeasureDate(value.MeasureDate)"
-                ></el-date-picker>
-            </el-tooltip>
         </el-col>
     </el-row>
 

@@ -95,9 +95,11 @@ func (tr *Troncon) IsFilledIn() bool {
 
 func (tr *Troncon) CheckSignature() {
 	if tr.NeedSignature {
+		tr.Comment = "Signature demandée"
 		tr.Blockage = !tr.Signed
 		return
 	}
+	tr.Comment = ""
 	tr.Signed = false
 	tr.Blockage = false
 }
