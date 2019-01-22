@@ -3,7 +3,6 @@ package reworkeditmodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	wem "github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
@@ -36,7 +35,6 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteinfo.RegisterComponent(),
-		tronconstatustag.RegisterComponent(),
 		worksitestatustag.RegisterComponent(),
 		hvue.Template(template),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

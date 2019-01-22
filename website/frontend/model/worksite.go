@@ -317,6 +317,17 @@ func (ws *Worksite) UpdateStatus() {
 	}
 }
 
+func (ws *Worksite) GetPtByName(refpt string) *Troncon {
+	for _, o := range ws.Orders {
+		for _, tr := range o.Troncons {
+			if tr.Pb.RefPt == refpt {
+				return tr
+			}
+		}
+	}
+	return nil
+}
+
 func WorksiteIsUpdatable(value string) bool {
 	switch value {
 	//case WsStatusNew:
