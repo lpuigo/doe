@@ -352,7 +352,7 @@ func WorksiteIsUpdatable(value string) bool {
 	return false
 }
 
-func WorksiteHasRework(value string) bool {
+func WorksiteMustRework(value string) bool {
 	switch value {
 	//case WsStatusNew:
 	//	return true

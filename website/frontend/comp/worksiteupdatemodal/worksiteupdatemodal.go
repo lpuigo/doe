@@ -172,15 +172,7 @@ func (wumm *WorksiteUpdateModalModel) CheckSignature(t *fm.Troncon) {
 }
 
 func (wumm *WorksiteUpdateModalModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
-	users := []string{
-		"BARAGAN Nicolae",
-		"BEN MECHTA Abdelkader",
-		"CRETU Andrei",
-		"OLARU Augustin",
-		"STAN Valentin",
-		"TAMAS Adrian",
-		"VORNICU Dorin",
-	}
+	users := fm.GetTeamUsers()
 
 	q := strings.ToLower(query)
 

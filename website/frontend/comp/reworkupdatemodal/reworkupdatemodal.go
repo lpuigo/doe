@@ -7,6 +7,9 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"strings"
 )
 
 type ReworkUpdateModalModel struct {
@@ -14,6 +17,8 @@ type ReworkUpdateModalModel struct {
 
 	Pts map[string]*fm.Troncon `js:"Pts"`
 }
+
+var Pts = make(map[string]*fm.Troncon)
 
 func NewReworkUpdateModalModel(vm *hvue.VM) *ReworkUpdateModalModel {
 	rumm := &ReworkUpdateModalModel{WorksiteEditModalModel: wem.NewWorksiteEditModalModel(vm)}
@@ -69,22 +74,40 @@ func ComponentOptions() []hvue.ComponentOption {
 			return "success"
 		}),
 		hvue.Filter("FormatTronconRef", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			m := NewReworkUpdateModalModelFromJS(vm.Object)
+			//m := NewReworkUpdateModalModelFromJS(vm.Object)
 			defect := &fm.Defect{Object: value}
-			tr := m.Pts[defect.PT]
+			tr := Pts[defect.PT]
 			if tr == nil {
 				return "PT non trouvé"
 			}
 			return tr.Pb.Ref + " / " + tr.Pb.RefPt
 		}),
 		hvue.Filter("FormatTronconAddress", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			m := NewReworkUpdateModalModelFromJS(vm.Object)
+			//m := NewReworkUpdateModalModelFromJS(vm.Object)
 			defect := &fm.Defect{Object: value}
-			tr := m.Pts[defect.PT]
+			tr := Pts[defect.PT]
+			if tr == nil {
+				return "PT non trouvé"
+			}
+			return tr.Pb.Address
+		}),
+		hvue.Filter("FormatInstallDate", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
+			//m := NewReworkUpdateModalModelFromJS(vm.Object)
+			defect := &fm.Defect{Object: value}
+			tr := Pts[defect.PT]
 			if tr == nil {
 				return ""
 			}
-			return tr.Pb.Address
+			return "Install.: " + date.DateString(tr.InstallDate)
+		}),
+		hvue.Filter("FormatInstallActor", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
+			//m := NewReworkUpdateModalModelFromJS(vm.Object)
+			defect := &fm.Defect{Object: value}
+			tr := Pts[defect.PT]
+			if tr == nil {
+				return ""
+			}
+			return "par: " + tr.InstallActor
 		}),
 	}
 }
@@ -99,14 +122,28 @@ func (rumm *ReworkUpdateModalModel) TableRowClassName(rowInfo *js.Object) string
 
 func (rumm *ReworkUpdateModalModel) GetReworks() []*fm.Defect {
 	res := []*fm.Defect{}
-	rumm.Pts = make(map[string]*fm.Troncon)
+	Pts = make(map[string]*fm.Troncon)
 	for _, defect := range rumm.CurrentWorksite.Rework.Defects {
 		if defect.ToBeFixed {
 			res = append(res, defect)
-			rumm.Pts[defect.PT] = rumm.CurrentWorksite.GetPtByName(defect.PT)
+			Pts[defect.PT] = rumm.CurrentWorksite.GetPtByName(defect.PT)
 		}
 	}
 	return res
+}
+
+func (rumm *ReworkUpdateModalModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
+	users := fm.GetTeamUsers()
+
+	q := strings.ToLower(query)
+
+	res := []*autocomplete.Result{}
+	for _, u := range users {
+		if q == "" || strings.Contains(strings.ToLower(u), q) {
+			res = append(res, autocomplete.NewResult(u))
+		}
+	}
+	callback.Invoke(res)
 }
 
 //func (rumm *ReworkUpdateModalModel) GetPTs() []*elements.ValueLabel {

@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
@@ -26,6 +27,7 @@ func main() {
 		worksiteeditmodal.RegisterComponent(),
 		worksiteupdatemodal.RegisterComponent(),
 		reworkeditmodal.RegisterComponent(),
+		reworkupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -122,6 +124,10 @@ func (m *MainPageModel) EditRework(id int) {
 	m.VM.Refs("ReworkEditModal").Call("Show", id)
 }
 
+func (m *MainPageModel) UpdateRework(id int) {
+	m.VM.Refs("ReworkUpdateModal").Call("Show", id)
+}
+
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
@@ -146,7 +152,8 @@ func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteHasRework(wsi.Status) {
+		//if fm.WorksiteMustRework(wsi.Status) {
+		if wsi.NbRework > 0 {
 			res = append(res, wsi)
 		}
 	}
@@ -156,7 +163,7 @@ func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetReworkWorsiteNb() int {
 	res := 0
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteHasRework(wsi.Status) {
+		if fm.WorksiteMustRework(wsi.Status) {
 			res += 1
 		}
 	}

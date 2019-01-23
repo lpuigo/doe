@@ -29,3 +29,16 @@ func (u *User) Copy(ou *User) {
 	u.Name = ou.Name
 	u.Connected = ou.Connected
 }
+
+func GetTeamUsers() []string {
+	//TODO Make this dynamic (depending on logged user info)
+	return []string{
+		"BARAGAN Nicolae",
+		"BEN MECHTA Abdelkader",
+		"CRETU Andrei",
+		"OLARU Augustin",
+		"STAN Valentin",
+		"TAMAS Adrian",
+		"VORNICU Dorin",
+	}
+}

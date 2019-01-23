@@ -52,7 +52,7 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 			if d.ToBeFixed {
 				wsi.NbRework += 1
 				if d.FixDate != "" {
-					wsi.NbReworkDone = 0
+					wsi.NbReworkDone += 1
 				}
 			}
 		}

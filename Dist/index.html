@@ -37,6 +37,11 @@
                 @update_worksite="GetWorkSiteInfos"
         ></rework-edit-modal>
         <!-- -->
+        <rework-update-modal
+                ref="ReworkUpdateModal"
+                @update_worksite="GetWorkSiteInfos"
+        ></rework-update-modal>
+        <!-- -->
         <el-container style="height: 100%;border: 1px solid #eee">
             <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
@@ -68,11 +73,13 @@
                         v-if="ActiveMode == 'Update'"
                         :worksiteinfos="UpdatableWorksiteInfos"
                         @selected_worksite="UpdateWorksite"
+                        @edit_rework="UpdateRework"
                 ></worksite-table>
                 <worksite-table
                         v-if="ActiveMode == 'Rework'"
                         :worksiteinfos="ReworkWorksiteInfos"
                         @selected_worksite="UpdateWorksite"
+                        @edit_rework="UpdateRework"
                 ></worksite-table>
             </el-main>
 <!--

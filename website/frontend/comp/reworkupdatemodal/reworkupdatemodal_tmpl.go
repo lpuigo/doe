@@ -70,7 +70,7 @@ const template string = `
                    
                     <el-table-column
                             label="PT" prop="PT"
-                            width="300px" :resizable="true" :show-overflow-tooltip=true
+                            width="150px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
                             <div>{{scope.row | FormatTronconRef}}</div>
@@ -79,60 +79,53 @@ const template string = `
                     </el-table-column>
                     
                     <el-table-column
-                            label="Soumission"
-                            width="150px" :resizable="true" :show-overflow-tooltip=true
+                            label="Nb Reprise"
+                            width="70px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
-                            <el-date-picker format="dd/MM/yyyy" placeholder="Soumission" size="mini"
-                                            style="width: 100%" type="date"
-                                            v-model="scope.row.SubmissionDate"
-                                            value-format="yyyy-MM-dd"
-                                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                            :clearable="false"
-                            ></el-date-picker>
+                            <div>{{scope.row.NbKO}}</div>
                         </template>
                     </el-table-column>
                     
                     <el-table-column
-                            label="Contrôles OK / KO"   
-                            width="190px"
+                            label="Installation"
+                            width="200px" :resizable="true" :show-overflow-tooltip=true
+                    >
+                        <template slot-scope="scope">
+                            <div>{{scope.row | FormatInstallDate}}</div>
+                            <div>{{scope.row | FormatInstallActor}}</div>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column
+                            label="Description" prop="Description"
+                            width="400px" :resizable=true
+                    ></el-table-column>
+                    
+                    <el-table-column
+                            label="Reprise"   
                     >
                         <template slot-scope="scope">
                             <el-row type="flex" align="middle" :gutter="10">
                                 <el-col :span="12">
-                                    <el-input-number 
-                                            v-model="scope.row.NbOK" 
-                                            controls-position="right" 
-                                            :min="0" size="mini" style="width: 80px"
-                                    ></el-input-number>
+                                    <el-autocomplete v-model="scope.row.FixActor"
+                                                     :fetch-suggestions="UserSearch"
+                                                     placeholder="Equipier"
+                                                     prefix-icon="fas fa-user"
+                                                     clearable size="mini" style="width: 100%"
+                                                     @clear="scope.row.FixDate = ''"
+                                    ></el-autocomplete>
                                 </el-col>
                                 <el-col :span="12">
-                                    <el-input-number 
-                                            v-model="scope.row.NbKO" 
-                                            controls-position="right" 
-                                            :min="0" size="mini" style="width: 80px"
-                                    ></el-input-number>
+                                    <el-date-picker format="dd/MM/yyyy" placeholder="Reprise" size="mini"
+                                                    style="width: 100%" type="date"
+                                                    v-model="scope.row.FixDate"
+                                                    value-format="yyyy-MM-dd"
+                                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                                    :disabled="!scope.row.FixActor" :clearable="false"
+                                    ></el-date-picker>
                                 </el-col>
                             </el-row>
-                        </template>  
-                    </el-table-column>
-                    
-                    <el-table-column
-                            label="Reprise"   
-                            width="100px"
-                    >
-                        <template slot-scope="scope">
-                            <el-checkbox v-model="scope.row.ToBeFixed"></el-checkbox>
-                        </template>  
-                    </el-table-column>
-                    
-                    <el-table-column
-                            label="Description"                            
-                    >
-                        <template slot-scope="scope">
-                            <el-input clearable placeholder="Description de la reprise" size="mini" type="textarea" autosize
-                                      v-model.trim="scope.row.Description"
-                            ></el-input>
                         </template>  
                     </el-table-column>
                     

@@ -91,7 +91,7 @@ const template string = `
                             <el-row type="flex" align="middle" :gutter="10">
                                 <el-col :span="12">
                                     <el-autocomplete v-model="scope.row.InstallActor"
-                                                     :fetch-suggestions="UserSearch" :trigger-on-focus="false"
+                                                     :fetch-suggestions="UserSearch"
                                                      placeholder="Equipier"
                                                      prefix-icon="fas fa-user"
                                                      clearable size="mini" style="width: 100%"
@@ -118,7 +118,7 @@ const template string = `
                             <el-row type="flex" align="middle" :gutter="10">
                                 <el-col :span="12">
                                     <el-autocomplete v-model="scope.row.MeasureActor"
-                                                     :fetch-suggestions="UserSearch" :trigger-on-focus="false"
+                                                     :fetch-suggestions="UserSearch"
                                                      placeholder="Equipier"
                                                      prefix-icon="fas fa-user"
                                                      clearable size="mini" style="width: 100%"
