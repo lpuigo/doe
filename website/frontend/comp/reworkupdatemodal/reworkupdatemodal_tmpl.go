@@ -73,8 +73,8 @@ const template string = `
                             width="150px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
-                            <div>{{scope.row | FormatTronconRef}}</div>
-                            <div>{{scope.row | FormatTronconAddress}}</div>
+                            <div>{{GetTronconRef(scope.row.PT)}}</div>
+                            <div>{{GetTronconAddress(scope.row.PT)}}</div>
                         </template>
                     </el-table-column>
                     
@@ -92,8 +92,8 @@ const template string = `
                             width="200px" :resizable="true" :show-overflow-tooltip=true
                     >
                         <template slot-scope="scope">
-                            <div>{{scope.row | FormatInstallDate}}</div>
-                            <div>{{scope.row | FormatInstallActor}}</div>
+                            <div>{{GetTronconInstallDate(scope.row.PT)}}</div>
+                            <div>{{GetTronconInstallActor(scope.row.PT)}}</div>
                         </template>
                     </el-table-column>
 

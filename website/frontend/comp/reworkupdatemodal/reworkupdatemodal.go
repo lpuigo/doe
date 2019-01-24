@@ -18,8 +18,6 @@ type ReworkUpdateModalModel struct {
 	Pts map[string]*fm.Troncon `js:"Pts"`
 }
 
-var Pts = make(map[string]*fm.Troncon)
-
 func NewReworkUpdateModalModel(vm *hvue.VM) *ReworkUpdateModalModel {
 	rumm := &ReworkUpdateModalModel{WorksiteEditModalModel: wem.NewWorksiteEditModalModel(vm)}
 	rumm.Pts = make(map[string]*fm.Troncon)
@@ -73,42 +71,6 @@ func ComponentOptions() []hvue.ComponentOption {
 			//}
 			return "success"
 		}),
-		hvue.Filter("FormatTronconRef", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			//m := NewReworkUpdateModalModelFromJS(vm.Object)
-			defect := &fm.Defect{Object: value}
-			tr := Pts[defect.PT]
-			if tr == nil {
-				return "PT non trouvé"
-			}
-			return tr.Pb.Ref + " / " + tr.Pb.RefPt
-		}),
-		hvue.Filter("FormatTronconAddress", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			//m := NewReworkUpdateModalModelFromJS(vm.Object)
-			defect := &fm.Defect{Object: value}
-			tr := Pts[defect.PT]
-			if tr == nil {
-				return "PT non trouvé"
-			}
-			return tr.Pb.Address
-		}),
-		hvue.Filter("FormatInstallDate", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			//m := NewReworkUpdateModalModelFromJS(vm.Object)
-			defect := &fm.Defect{Object: value}
-			tr := Pts[defect.PT]
-			if tr == nil {
-				return ""
-			}
-			return "Install.: " + date.DateString(tr.InstallDate)
-		}),
-		hvue.Filter("FormatInstallActor", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
-			//m := NewReworkUpdateModalModelFromJS(vm.Object)
-			defect := &fm.Defect{Object: value}
-			tr := Pts[defect.PT]
-			if tr == nil {
-				return ""
-			}
-			return "par: " + tr.InstallActor
-		}),
 	}
 }
 
@@ -122,11 +84,13 @@ func (rumm *ReworkUpdateModalModel) TableRowClassName(rowInfo *js.Object) string
 
 func (rumm *ReworkUpdateModalModel) GetReworks() []*fm.Defect {
 	res := []*fm.Defect{}
-	Pts = make(map[string]*fm.Troncon)
+	rumm.Pts = make(map[string]*fm.Troncon)
 	for _, defect := range rumm.CurrentWorksite.Rework.Defects {
 		if defect.ToBeFixed {
 			res = append(res, defect)
-			Pts[defect.PT] = rumm.CurrentWorksite.GetPtByName(defect.PT)
+			//Pts[defect.PT] = rumm.CurrentWorksite.GetPtByName(defect.PT)
+			rumm.Get("Pts").Set(defect.PT, rumm.CurrentWorksite.GetPtByName(defect.PT))
+
 		}
 	}
 	return res
@@ -146,25 +110,34 @@ func (rumm *ReworkUpdateModalModel) UserSearch(vm *hvue.VM, query string, callba
 	callback.Invoke(res)
 }
 
-//func (rumm *ReworkUpdateModalModel) GetPTs() []*elements.ValueLabel {
-//	res := []*elements.ValueLabel{}
-//	for _, o := range rumm.CurrentWorksite.Orders {
-//		for _, t := range o.Troncons {
-//			label := t.Pb.Ref + " / " + t.Pb.RefPt + " (" + t.Ref + ")"
-//			res = append(res, elements.NewValueLabel(t.Pb.RefPt, label))
-//		}
-//	}
-//	return res
-//}
+func (rumm *ReworkUpdateModalModel) GetTronconRef(ptref string) string {
+	tr := rumm.Pts[ptref]
+	if tr == nil {
+		return "PT non trouvé"
+	}
+	return tr.Pb.Ref + " / " + tr.Pb.RefPt
+}
 
-//func (rumm *ReworkUpdateModalModel) AddDefect() {
-//	//m := NewReworkUpdateModalModelFromJS(vm.Object)
-//	r := rumm.CurrentWorksite.Rework
-//	d := fm.NewDefect()
-//	d.SubmissionDate = r.ControlDate
-//	r.Defects = append(r.Defects, d)
-//}
-//
-//func (rumm *ReworkUpdateModalModel) RemoveDefect(i int) {
-//	rumm.CurrentWorksite.Rework.Object.Get("Defects").Call("splice", i, 1)
-//}
+func (rumm *ReworkUpdateModalModel) GetTronconAddress(ptref string) string {
+	tr := rumm.Pts[ptref]
+	if tr == nil {
+		return "PT non trouvé"
+	}
+	return tr.Pb.Address
+}
+
+func (rumm *ReworkUpdateModalModel) GetTronconInstallDate(ptref string) string {
+	tr := rumm.Pts[ptref]
+	if tr == nil {
+		return ""
+	}
+	return "Install.: " + date.DateString(tr.InstallDate)
+}
+
+func (rumm *ReworkUpdateModalModel) GetTronconInstallActor(ptref string) string {
+	tr := rumm.Pts[ptref]
+	if tr == nil {
+		return ""
+	}
+	return "par: " + tr.InstallActor
+}
