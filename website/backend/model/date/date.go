@@ -4,7 +4,10 @@ import "time"
 
 type Date time.Time
 
-const TimeJSLayout string = "2006-01-02"
+const (
+	TimeJSLayout string = "2006-01-02"
+	TimeLayout   string = "02/01/2006"
+)
 
 func DateFrom(d string) Date {
 	date, err := time.Parse(TimeJSLayout, d)
@@ -20,6 +23,10 @@ func (d Date) ToTime() time.Time {
 
 func (d Date) String() string {
 	return time.Time(d).Format(TimeJSLayout)
+}
+
+func (d Date) ToDDMMAAAA() string {
+	return time.Time(d).Format(TimeLayout)
 }
 
 func (d Date) GetMonday() Date {

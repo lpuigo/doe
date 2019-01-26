@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
@@ -12,10 +13,11 @@ import (
 )
 
 type Manager struct {
-	Worksites    *ws.WorkSitesPersister
-	Users        *users.UsersPersister
-	SessionStore *session.SessionStore
-	CurrentUser  *users.UserRecord
+	Worksites      *ws.WorkSitesPersister
+	Users          *users.UsersPersister
+	TemplateEngine *doc.DocTemplateEngine
+	SessionStore   *session.SessionStore
+	CurrentUser    *users.UserRecord
 }
 
 func NewManager(conf ManagerConfig) (*Manager, error) {
@@ -39,11 +41,19 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		return nil, fmt.Errorf("could not populate user:%s", err.Error())
 	}
 
+	// Init DocTemplate engine
+	te, err := doc.NewDocTemplateEngine(conf.TemplatesDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create doc template engine", err.Error())
+	}
+
 	// Init manager
-	m := &Manager{Worksites: wsp, Users: up}
+	m := &Manager{Worksites: wsp, Users: up, TemplateEngine: te}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worsites and %d users", wsp.NbWorsites(), up.NbUsers()))
 
 	m.SessionStore = session.NewSessionStore(conf.SessionKey)
+
+	// m.CurrentUser is set transaction during session control
 
 	return m, nil
 }

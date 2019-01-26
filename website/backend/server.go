@@ -33,6 +33,7 @@ const (
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
+	TemplatesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
 	LaunchWebBrowser = true
 
@@ -45,6 +46,7 @@ func main() {
 		ManagerConfig: manager.ManagerConfig{
 			WorksitesDir: WorksitesDir,
 			UsersDir:     UsersDir,
+			TemplatesDir: TemplatesDir,
 			SessionKey:   SessionKey,
 		},
 		LogFile:          LogFile,
@@ -96,6 +98,7 @@ func main() {
 	router.HandleFunc("/api/worksites", withUserManager("CreateWorkSite", route.CreateWorkSite)).Methods("POST")
 	router.HandleFunc("/api/worksites/stat", withUserManager("GetWorksitesStats", route.GetWorksitesStats)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("GetWorkSite", route.GetWorkSite)).Methods("GET")
+	router.HandleFunc("/api/worksites/{wsid:[0-9]+}/attach", withUserManager("GetWorkSiteAttachement", route.GetWorkSiteAttachement)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("UpdateWorkSite", route.UpdateWorkSite)).Methods("PUT")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("DeleteWorkSite", route.DeleteWorkSite)).Methods("DELETE")
 

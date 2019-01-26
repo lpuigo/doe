@@ -106,3 +106,8 @@ func (e *Record) AddInfoResponse(inf string, code int) *Record {
 	e.Response = code
 	return e
 }
+
+func (e *Record) AddResponse(code int) *Record {
+	e.Response = code
+	return e
+}

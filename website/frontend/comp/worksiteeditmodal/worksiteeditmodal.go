@@ -128,6 +128,11 @@ func (wemm *WorksiteEditModalModel) Hide() {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Action Button Methods
 
+func (wemm *WorksiteEditModalModel) Attachment() string {
+	url := "/api/worksites/" + strconv.Itoa(wemm.CurrentWorksite.Id) + "/attach"
+	return url
+}
+
 func (wemm *WorksiteEditModalModel) ConfirmChange() {
 	wemm.Saving = true
 	if wemm.CurrentWorksite.Id >= 0 {

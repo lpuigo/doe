@@ -11,14 +11,17 @@ const template string = `
 	-->
     <span slot="title">
 		<el-row :gutter="10" type="flex" align="middle">
-			<el-col :span="10">
+			<el-col :span="12">
 				<h2 v-if="current_worksite" style="margin: 0 0">
 					<i class="far fa-edit icon--left"></i>Edition du chantier: <span style="color: #ccebff">{{current_worksite.City}} - {{current_worksite.Ref}}</span>
 				</h2>
 			</el-col>
 			<el-col :span="6">
 				<worksite-info :worksite="current_worksite"></worksite-info>
-			</el-col>		
+			</el-col>	
+            <el-col :offset="2" :span="1">
+                <h2 style="margin: 0 0"><a :href="Attachment(current_worksite.Id)"><i class="link fas fa-file-excel"></i></a></h2>
+            </el-col>
 		</el-row>
     </span>
 
