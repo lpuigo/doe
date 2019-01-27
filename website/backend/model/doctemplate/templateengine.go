@@ -2,17 +2,19 @@ package doctemplate
 
 import (
 	"fmt"
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/worksites"
-	"github.com/tealeg/xlsx"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 const (
 	attachementFile string = "ATTACHEMENT _REF_CITY.xlsx"
-	rowTotal        int    = 20
+	sheetName       string = "EWIN"
+	rowTotal        int    = 21
 	colTotal        int    = 9
 	colFI           int    = 1
 	colPA           int    = 2
@@ -48,42 +50,47 @@ func (te *DocTemplateEngine) GetAttachmentName(ws *worksites.WorkSiteRecord) str
 // GetAttachmentXLS generates and writes on given writer the attachment data pertaining to given Worksite
 func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSiteRecord) error {
 	file := filepath.Join(te.tmplDir, attachementFile)
-	xf, err := xlsx.OpenFile(file)
+	xf, err := excelize.OpenFile(file)
 	if err != nil {
 		return err
 	}
 
-	xs, found := xf.Sheet["EWIN"]
-	if !found {
-		return fmt.Errorf("could not find EWIN sheet")
+	coord := func(row, col int) string {
+		acol := excelize.ToAlphaString(col)
+		return acol + strconv.Itoa(row)
 	}
 
-	line := 25
+	//_, found := xf.Sheet[sheetName]
+	//if !found {
+	//	return fmt.Errorf("could not find EWIN sheet")
+	//}
+
+	line := 26
 	totEl := 0
 	for _, ord := range ws.Orders {
 		for _, tr := range ord.Troncons {
-			xs.Cell(line, colFI).Value = ord.Ref
-			xs.Cell(line, colPA).Value = ws.Ref
-			xs.Cell(line, colPB).Value = tr.Pb.Ref
-			xs.Cell(line, colCode).Value = "CEM42"
-			xs.Cell(line, colAddr).Value = tr.Pb.Address
-			xs.Cell(line, colCity).Value = ws.City
+			xf.SetCellStr(sheetName, coord(line, colFI), ord.Ref)
+			xf.SetCellStr(sheetName, coord(line, colPA), ws.Ref)
+			xf.SetCellStr(sheetName, coord(line, colPB), tr.Pb.Ref)
+			xf.SetCellStr(sheetName, coord(line, colCode), "CEM42")
+			xf.SetCellStr(sheetName, coord(line, colAddr), tr.Pb.Address)
+			xf.SetCellStr(sheetName, coord(line, colCity), ws.City)
 			nbEl := tr.NbRacco
 			if tr.Blockage {
 				nbEl = 0
 			}
 			totEl += nbEl
-			xs.Cell(line, colNbEl).SetInt(nbEl)
+			xf.SetCellInt(sheetName, coord(line, colNbEl), nbEl)
 			endDate := ""
 			if tr.MeasureDate != "" {
 				endDate = date.DateFrom(tr.MeasureDate).ToDDMMAAAA()
 			}
-			xs.Cell(line, colEndD).Value = endDate
+			xf.SetCellStr(sheetName, coord(line, colEndD), endDate)
 			line++
 		}
 	}
 
-	xs.Cell(rowTotal, colTotal).SetInt(totEl)
+	xf.SetCellInt(sheetName, coord(rowTotal, colTotal), totEl)
 
 	return xf.Write(w)
 }
