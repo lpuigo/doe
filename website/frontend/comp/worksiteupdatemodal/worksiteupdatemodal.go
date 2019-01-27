@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"strconv"
 	"strings"
 )
 
@@ -98,6 +99,11 @@ func NewOrderTronconFromJS(o *js.Object) *OrderTroncon {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Actions Methods
+
+func (wumm *WorksiteUpdateModalModel) DOEArchive() string {
+	url := "/api/worksites/" + strconv.Itoa(wumm.CurrentWorksite.Id) + "/zip"
+	return url
+}
 
 func (wumm *WorksiteUpdateModalModel) GetTroncons() []*OrderTroncon {
 	res := []*OrderTroncon{}

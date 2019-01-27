@@ -1,6 +1,7 @@
 package doctemplate
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -93,4 +95,67 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 	xf.SetCellInt(sheetName, coord(rowTotal, colTotal), totEl)
 
 	return xf.Write(w)
+}
+
+// GetDOEArchiveName returns the name of the DOE Struct zip file pertaining to given Worksite
+func (te *DocTemplateEngine) GetDOEArchiveName(ws *worksites.WorkSiteRecord) string {
+	return fmt.Sprintf("DOE %s_%s.zip", ws.Ref, ws.City)
+}
+
+// GetDOEArchiveZIP generates and writes on given writer the DOE Struct zip pertaining to given Worksite
+func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *worksites.WorkSiteRecord) error {
+	zw := zip.NewWriter(w)
+
+	path := strings.TrimSuffix(te.GetDOEArchiveName(ws), ".zip")
+
+	makeDir := func(base ...string) string {
+		return filepath.Join(base...) + "/"
+	}
+
+	// Create list of Pb's PT refs
+	Pbs := []string{}
+	for _, ord := range ws.Orders {
+		for _, tr := range ord.Troncons {
+			trname := tr.Pb.RefPt
+			if tr.Blockage {
+				trname += " (bloqué)"
+			}
+			Pbs = append(Pbs, trname)
+		}
+	}
+
+	_, err := zw.Create(makeDir(path, "Alveoles utilisees"))
+	if err != nil {
+		return err
+	}
+
+	_, err = zw.Create(makeDir(path, "Convention ajoutee"))
+	if err != nil {
+		return err
+	}
+
+	mpath := makeDir(path, "Mesures")
+	for _, ptname := range Pbs {
+		_, err := zw.Create(makeDir(mpath, ptname))
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = zw.Create(makeDir(path, "Photos "+ws.Pa.Ref))
+	if err != nil {
+		return err
+	}
+
+	ppath := makeDir(path, "Photos PBs")
+	for _, ptname := range Pbs {
+		for _, subd := range []string{"Pose Boitier", "Test laser"} {
+			_, err := zw.Create(makeDir(ppath, ptname, subd))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return zw.Close()
 }

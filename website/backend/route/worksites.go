@@ -173,11 +173,37 @@ func GetWorkSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetAttachmentName(wsr)))
-	//w.Header().Set("Content-Type", "application/vnd.ms-excel")
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Transfer-Encoding", "binary")
+	w.Header().Set("Content-Type", "application/vnd.ms-excel")
 
 	err = mgr.TemplateEngine.GetAttachmentXLS(w, wsr)
+	if err != nil {
+		AddError(w, logmsg, "could not generate WorkSite Attachment file. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for worksite id %d", wsrid), http.StatusOK)
+}
+
+func GetWorkSiteDOEArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorkSiteDOEArchive").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	vars := mux.Vars(r)
+	wsrid, err := strconv.Atoi(vars["wsid"])
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted WorkSite id '"+vars["wsid"]+"'", http.StatusBadRequest)
+		return
+	}
+	wsr := mgr.Worksites.GetById(wsrid)
+	if wsr == nil {
+		AddError(w, logmsg, fmt.Sprintf("workSite with id %d does not exist", wsrid), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetDOEArchiveName(wsr)))
+	w.Header().Set("Content-Type", "application/zip")
+
+	err = mgr.TemplateEngine.GetDOEArchiveZIP(w, wsr)
 	if err != nil {
 		AddError(w, logmsg, "could not generate WorkSite Attachment file. "+err.Error(), http.StatusInternalServerError)
 		return

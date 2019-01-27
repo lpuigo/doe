@@ -11,7 +11,7 @@ const template string = `
 	-->
     <span slot="title">
 		<el-row :gutter="10" type="flex" align="middle">
-			<el-col :span="10">
+			<el-col :span="12">
 				<h2 v-if="current_worksite" style="margin: 0 0">
 					<i class="fas fa-wrench icon--left"></i>Mise à jour du chantier: <span style="color: #ccebff">{{current_worksite.City}} - {{current_worksite.Ref}}</span>
 				</h2>
@@ -19,7 +19,10 @@ const template string = `
 			<el-col :span="6">
 				<worksite-info :worksite="current_worksite"></worksite-info>
 			</el-col>		
-		</el-row>
+            <el-col :offset="2" :span="2">
+                <h2 style="margin: 0 0"><a :href="DOEArchive(current_worksite.Id)"><i class="link fas fa-file-archive icon--left"></i>DOE Zip</a></h2>
+            </el-col>
+        </el-row>
     </span>
 
 	<!-- 

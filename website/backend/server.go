@@ -57,12 +57,12 @@ func main() {
 		LaunchWebBrowser: LaunchWebBrowser,
 	}
 
-	logFile := logger.StartLog(conf.LogFile)
-	defer logFile.Close()
-
 	if err := config.SetFromFile(ConfigFile, conf); err != nil {
 		logger.Entry("Server").Fatal(err)
 	}
+
+	logFile := logger.StartLog(conf.LogFile)
+	defer logFile.Close()
 	logger.Entry("Server").LogInfo("============================= SERVER STARTING ==================================")
 
 	mgr, err := manager.NewManager(conf.ManagerConfig)
@@ -99,6 +99,7 @@ func main() {
 	router.HandleFunc("/api/worksites/stat", withUserManager("GetWorksitesStats", route.GetWorksitesStats)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("GetWorkSite", route.GetWorkSite)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}/attach", withUserManager("GetWorkSiteAttachement", route.GetWorkSiteAttachement)).Methods("GET")
+	router.HandleFunc("/api/worksites/{wsid:[0-9]+}/zip", withUserManager("GetWorkSiteDOEArchive", route.GetWorkSiteDOEArchive)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("UpdateWorkSite", route.UpdateWorkSite)).Methods("PUT")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("DeleteWorkSite", route.DeleteWorkSite)).Methods("DELETE")
 
