@@ -60,10 +60,10 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 		return acol + strconv.Itoa(row)
 	}
 
-	//_, found := xf.Sheet[sheetName]
-	//if !found {
-	//	return fmt.Errorf("could not find EWIN sheet")
-	//}
+	found := xf.GetSheetIndex(sheetName)
+	if found == 0 {
+		return fmt.Errorf("could not find EWIN sheet")
+	}
 
 	line := 26
 	totEl := 0
