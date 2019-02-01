@@ -93,6 +93,7 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 	}
 
 	xf.SetCellInt(sheetName, coord(rowTotal, colTotal), totEl)
+	xf.UpdateLinkedValue()
 
 	return xf.Write(w)
 }
