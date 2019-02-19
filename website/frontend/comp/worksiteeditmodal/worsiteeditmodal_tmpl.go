@@ -44,7 +44,9 @@ const template string = `
                 ></worksite-edit>
             </el-tab-pane>
             <el-tab-pane label="Edition" name="Edit">
-                Edition
+                <worksite-update style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
+                               :worksite="current_worksite"
+                ></worksite-update>
             </el-tab-pane>
         </el-tabs>
 	</div>

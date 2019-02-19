@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
@@ -61,6 +62,7 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteedit.RegisterComponent(),
+		worksiteupdate.RegisterComponent(),
 		worksiteinfo.RegisterComponent(),
 		hvue.Template(template),
 		//hvue.Props("edited_worksite"),
