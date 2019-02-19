@@ -27,12 +27,26 @@ const template string = `
 
 	<!-- 
 		Modal Body
+		style="height: 100%;"
+		
 	-->
-	<div v-loading="loading" style="min-height: 35vh;max-height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-		<worksite-edit v-if="!loading"
-                :worksite="current_worksite"
-				:readonly="false"
-		></worksite-edit>
+	<div v-loading="loading" style="height: 65vh;">
+        <el-tabs v-if="!loading" 
+                 v-model="activeTabName" 
+                 tab-position="left"
+                 :stretch="true"
+                 style="height: 100%;"
+        >
+            <el-tab-pane label="Création" name="Create">
+                <worksite-edit style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
+                               :worksite="current_worksite"
+                               :readonly="false"
+                ></worksite-edit>
+            </el-tab-pane>
+            <el-tab-pane label="Edition" name="Edit">
+                Edition
+            </el-tab-pane>
+        </el-tabs>
 	</div>
 
 	<!-- 

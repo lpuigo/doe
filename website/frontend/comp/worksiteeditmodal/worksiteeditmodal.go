@@ -19,7 +19,7 @@ type WorksiteEditModalModel struct {
 	Visible bool     `js:"visible"`
 	VM      *hvue.VM `js:"VM"`
 
-	//ActiveTabName string `js:"activeTabName"`
+	ActiveTabName string `js:"activeTabName"`
 
 	EditedWorksite  *fm.Worksite `js:"edited_worksite"`
 	CurrentWorksite *fm.Worksite `js:"current_worksite"`
@@ -34,7 +34,7 @@ func NewWorksiteEditModalModel(vm *hvue.VM) *WorksiteEditModalModel {
 	wemm.Visible = false
 	wemm.VM = vm
 
-	//wemm.ActiveTabName = "project"
+	wemm.ActiveTabName = "Create"
 
 	wemm.EditedWorksite = fm.NewWorkSite()
 	wemm.CurrentWorksite = fm.NewWorkSite()
