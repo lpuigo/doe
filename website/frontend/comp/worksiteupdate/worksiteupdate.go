@@ -39,17 +39,6 @@ func ComponentOptions() []hvue.ComponentOption {
 			return NewWorksiteUpdateModel(vm)
 		}),
 		hvue.MethodsOf(&WorksiteUpdateModel{}),
-		//hvue.Computed("HasChanged", func(vm *hvue.VM) interface{} {
-		//	wdm := &WorksiteUpdateModel{Object: vm.Object}
-		//	if wdm.ReferenceWorksite.Object == nil {
-		//		wdm.ReferenceWorksite = wdm.Worksite.Clone()
-		//		return wdm.Worksite.Dirty
-		//	}
-		//	s1 := wdm.Worksite.SearchInString()
-		//	s2 := wdm.ReferenceWorksite.SearchInString()
-		//	wdm.Worksite.Dirty = s1 != s2
-		//	return wdm.Worksite.Dirty
-		//}),
 		hvue.Computed("filteredTroncons", func(vm *hvue.VM) interface{} {
 			wdm := &WorksiteUpdateModel{Object: vm.Object}
 			return wdm.GetTroncons()
@@ -174,35 +163,6 @@ func (wum *WorksiteUpdateModel) UserSearch(vm *hvue.VM, query string, callback *
 	}
 	callback.Invoke(res)
 }
-
-//func (wum *WorksiteUpdateModel) DeleteOrder(vm *hvue.VM, i int) {
-//	wum = &WorksiteUpdateModel{Object: vm.Object}
-//	wum.Worksite.DeleteOrder(i)
-//}
-//
-//func (wum *WorksiteUpdateModel) AddOrder(vm *hvue.VM) {
-//	wum = &WorksiteUpdateModel{Object: vm.Object}
-//	wum.Worksite.AddOrder()
-//}
-//
-//func (wum *WorksiteUpdateModel) Save(vm *hvue.VM) {
-//	wum = &WorksiteUpdateModel{Object: vm.Object}
-//	vm.Emit("save_worksite", wum.Worksite)
-//}
-//
-//func (wum *WorksiteUpdateModel) Undo(vm *hvue.VM) {
-//	wum = &WorksiteUpdateModel{Object: vm.Object}
-//	wum.Worksite.Copy(wum.ReferenceWorksite)
-//}
-//
-//func (wdm *WorksiteUpdateModel) CheckDoeDate(vm *hvue.VM) {
-//	wdm = &WorksiteUpdateModel{Object: vm.Object}
-//	if tools.Empty(wdm.Worksite.DoeDate) {
-//		wdm.Worksite.Status = fm.WsStatusDOE
-//		return
-//	}
-//	wdm.Worksite.Status = fm.WsStatusDone
-//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp OrderTroncon Model
