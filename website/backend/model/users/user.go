@@ -1,11 +1,21 @@
 package users
 
 type User struct {
-	Id       int
-	Name     string
-	Password string
+	Id          int
+	Name        string
+	Password    string
+	Clients     []string
+	Permissions map[string]bool
+	Teams       []string
 }
 
 func NewUser(name string) *User {
-	return &User{Name: name}
+	return &User{
+		Id:          0,
+		Name:        name,
+		Password:    "",
+		Clients:     []string{},
+		Permissions: make(map[string]bool),
+		Teams:       []string{},
+	}
 }

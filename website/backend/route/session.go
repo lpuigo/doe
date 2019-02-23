@@ -9,11 +9,17 @@ import (
 )
 
 type authentUser struct {
-	Name string
+	Name        string
+	Clients     []string
+	Permissions map[string]bool
+	Teams       []string
 }
 
 func (au *authentUser) SetFrom(ur *users.UserRecord) {
 	au.Name = ur.Name
+	au.Clients = ur.Clients
+	au.Permissions = ur.Permissions
+	au.Teams = ur.Teams
 }
 
 // GetUser checks for session cookie, and return pertaining user
