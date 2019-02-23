@@ -33,7 +33,7 @@ const template string = `
 	<div v-loading="loading" style="height: 65vh;">
         <el-tabs v-if="!loading" 
                  v-model="activeTabName" 
-                 tab-position="left"
+                 tab-position="left" type="border-card"
                  :stretch="true"
                  style="height: 100%;"
         >

@@ -38,15 +38,3 @@ func (u *User) Copy(ou *User) {
 	u.Permissions = ou.Permissions
 	u.Teams = ou.Teams
 }
-
-func GetTeamUsers() []string {
-	return []string{
-		"BARAGAN Nicolae",
-		"BEN MECHTA Abdelkader",
-		"CRETU Andrei",
-		"OLARU Augustin",
-		"STAN Valentin",
-		"TAMAS Adrian",
-		"VORNICU Dorin",
-	}
-}
