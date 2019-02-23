@@ -108,12 +108,12 @@ func (m *MainPageModel) GetWorkSiteInfos() {
 
 func (m *MainPageModel) EditWorksite(id int) {
 	//m.EditedWorksite = id
-	m.VM.Refs("WorksiteEditModal").Call("Show", id)
+	m.VM.Refs("WorksiteEditModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) UpdateWorksite(id int) {
 	//m.EditedWorksite = id
-	m.VM.Refs("WorksiteUpdateModal").Call("Show", id)
+	m.VM.Refs("WorksiteUpdateModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) CreateNewWorksite() {
@@ -121,11 +121,11 @@ func (m *MainPageModel) CreateNewWorksite() {
 }
 
 func (m *MainPageModel) EditRework(id int) {
-	m.VM.Refs("ReworkEditModal").Call("Show", id)
+	m.VM.Refs("ReworkEditModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) UpdateRework(id int) {
-	m.VM.Refs("ReworkUpdateModal").Call("Show", id)
+	m.VM.Refs("ReworkUpdateModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
@@ -216,7 +216,7 @@ func (m *MainPageModel) callLogout() {
 		m.errorMessage(req)
 		return
 	}
-	m.User.Name = ""
+	m.User = fm.NewUser()
 	m.User.Connected = false
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
 }

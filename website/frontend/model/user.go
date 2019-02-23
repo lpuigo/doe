@@ -8,9 +8,12 @@ import (
 type User struct {
 	*js.Object
 
-	Name      string `js:"Name"`
-	Pwd       string `js:"Pwd"`
-	Connected bool   `js:"Connected"`
+	Name        string          `js:"Name"`
+	Pwd         string          `js:"Pwd"`
+	Connected   bool            `js:"Connected"`
+	Clients     []string        `js:"Clients"`
+	Permissions map[string]bool `js:"Permissions"`
+	Teams       []string        `js:"Teams"`
 }
 
 func NewUser() *User {
@@ -18,6 +21,9 @@ func NewUser() *User {
 	user.Name = ""
 	user.Pwd = ""
 	user.Connected = false
+	user.Clients = []string{}
+	user.Permissions = make(map[string]bool)
+	user.Teams = []string{}
 	return user
 }
 
@@ -28,10 +34,12 @@ func NewUserFromJS(o *js.Object) *User {
 func (u *User) Copy(ou *User) {
 	u.Name = ou.Name
 	u.Connected = ou.Connected
+	u.Clients = ou.Clients
+	u.Permissions = ou.Permissions
+	u.Teams = ou.Teams
 }
 
 func GetTeamUsers() []string {
-	//TODO Make this dynamic (depending on logged user info)
 	return []string{
 		"BARAGAN Nicolae",
 		"BEN MECHTA Abdelkader",

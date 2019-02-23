@@ -8,6 +8,8 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"strings"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +31,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		orderedit.RegisterComponent(),
 		worksitestatustag.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("worksite", "readonly"),
+		hvue.Props("worksite", "user", "readonly"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteDetailModel(vm)
 		}),
@@ -55,6 +57,7 @@ type WorksiteDetailModel struct {
 	*js.Object
 
 	Worksite          *fm.Worksite `js:"worksite"`
+	User              *fm.User     `js:"user"`
 	ReferenceWorksite *fm.Worksite `js:"refWorksite"`
 	ReadOnly          bool         `js:"readonly"`
 
@@ -65,9 +68,28 @@ func NewWorksiteDetailModel(vm *hvue.VM) *WorksiteDetailModel {
 	wdm := &WorksiteDetailModel{Object: tools.O()}
 	wdm.VM = vm
 	wdm.Worksite = nil
+	wdm.User = fm.NewUser()
 	wdm.ReferenceWorksite = nil
 	wdm.ReadOnly = false
 	return wdm
+}
+
+func WorksiteDetailModelFromJS(o *js.Object) *WorksiteDetailModel {
+	return &WorksiteDetailModel{Object: o}
+}
+
+func (wdm *WorksiteDetailModel) ClientSearch(vm *hvue.VM, query string, callback *js.Object) {
+	wdm = WorksiteDetailModelFromJS(vm.Object)
+
+	q := strings.ToLower(query)
+
+	res := []*autocomplete.Result{}
+	for _, u := range wdm.User.Clients {
+		if q == "" || strings.Contains(strings.ToLower(u), q) {
+			res = append(res, autocomplete.NewResult(u))
+		}
+	}
+	callback.Invoke(res)
 }
 
 func (wdm *WorksiteDetailModel) DeleteOrder(vm *hvue.VM, i int) {

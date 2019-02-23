@@ -30,6 +30,7 @@ const template string = `
 	-->
     <worksite-update style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
                      :worksite="current_worksite"
+					 :user="user"
     ></worksite-update>    
     
 	<!-- 

@@ -22,6 +22,7 @@ type WorksiteEditModalModel struct {
 
 	ActiveTabName string `js:"activeTabName"`
 
+	User            *fm.User     `js:"user"`
 	EditedWorksite  *fm.Worksite `js:"edited_worksite"`
 	CurrentWorksite *fm.Worksite `js:"current_worksite"`
 
@@ -37,6 +38,7 @@ func NewWorksiteEditModalModel(vm *hvue.VM) *WorksiteEditModalModel {
 
 	wemm.ActiveTabName = "Create"
 
+	wemm.User = fm.NewUser()
 	wemm.EditedWorksite = fm.NewWorkSite()
 	wemm.CurrentWorksite = fm.NewWorkSite()
 	wemm.Loading = false
@@ -99,12 +101,14 @@ func (wemm *WorksiteEditModalModel) HasChanged() bool {
 	return wemm.CurrentWorksite.SearchInString() != wemm.EditedWorksite.SearchInString()
 }
 
-func (wemm *WorksiteEditModalModel) Show(id int) {
+func (wemm *WorksiteEditModalModel) Show(id int, user *fm.User) {
 	wemm.EditedWorksite = fm.NewWorkSite()
 	if id < 0 {
 		wemm.EditedWorksite.AddOrder()
 	}
 	wemm.CurrentWorksite = wemm.EditedWorksite.Clone()
+	wemm.User = user
+	wemm.SetActiveTab()
 	wemm.ShowConfirmDelete = false
 	if id >= 0 {
 		wemm.Loading = true
@@ -112,6 +116,13 @@ func (wemm *WorksiteEditModalModel) Show(id int) {
 	}
 	//wemm.ActiveTabName = "project" //force Project Tab active
 	wemm.Visible = true
+}
+
+func (wemm *WorksiteEditModalModel) SetActiveTab() {
+	wemm.ActiveTabName = "Update"
+	if wemm.User.Permissions["Create"] {
+		wemm.ActiveTabName = "Create"
+	}
 }
 
 func (wemm *WorksiteEditModalModel) HideWithControl() {

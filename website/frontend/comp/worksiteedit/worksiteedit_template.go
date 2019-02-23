@@ -4,11 +4,20 @@ const template string = `
 <div class="worksite-detail">
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="3">
-            <el-input placeholder="Client" :readonly="readonly" clearable size="mini"
-                      v-model="worksite.Client"
+            <!--@input="CheckRef(value)"-->
+            <el-autocomplete v-model.trim="worksite.Client"
+                             :fetch-suggestions="ClientSearch"
+                             placeholder="Client"
+                             :readonly="readonly"
+                             clearable size="mini"  style="width: 100%"
             >
                 <template slot="prepend">Client:</template>
-            </el-input>
+            </el-autocomplete>
+            <!--<el-input placeholder="Client" :readonly="readonly" clearable size="mini"-->
+                      <!--v-model="worksite.Client"-->
+            <!--&gt;-->
+                <!--<template slot="prepend">Client:</template>-->
+            <!--</el-input>-->
         </el-col>
         <el-col :span="4">
             <el-input placeholder="Ville" :readonly="readonly" clearable size="mini"

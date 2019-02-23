@@ -34,7 +34,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		tronconstatustag.RegisterComponent(),
 		worksitestatustag.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("worksite"),
+		hvue.Props("worksite", "user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteUpdateModel(vm)
 		}),
@@ -59,6 +59,7 @@ type WorksiteUpdateModel struct {
 
 	Worksite          *fm.Worksite `js:"worksite"`
 	ReferenceWorksite *fm.Worksite `js:"refWorksite"`
+	User              *fm.User     `js:"user"`
 	Filter            string       `js:"filter"`
 
 	VM *hvue.VM `js:"VM"`
@@ -69,8 +70,13 @@ func NewWorksiteUpdateModel(vm *hvue.VM) *WorksiteUpdateModel {
 	wum.VM = vm
 	wum.Worksite = nil
 	wum.ReferenceWorksite = nil
+	wum.User = nil
 	wum.Filter = ""
 	return wum
+}
+
+func WorksiteUpdateModelFromJS(o *js.Object) *WorksiteUpdateModel {
+	return &WorksiteUpdateModel{Object: o}
 }
 
 func (wum *WorksiteUpdateModel) DOEArchive() string {
@@ -151,12 +157,12 @@ func (wum *WorksiteUpdateModel) CheckSignature(t *fm.Troncon) {
 }
 
 func (wum *WorksiteUpdateModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
-	users := fm.GetTeamUsers()
+	wum = WorksiteUpdateModelFromJS(vm.Object)
 
 	q := strings.ToLower(query)
 
 	res := []*autocomplete.Result{}
-	for _, u := range users {
+	for _, u := range wum.User.Teams {
 		if q == "" || strings.Contains(strings.ToLower(u), q) {
 			res = append(res, autocomplete.NewResult(u))
 		}

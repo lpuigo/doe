@@ -19,7 +19,7 @@
         <user-login-modal
                 ref="UserLoginModal"
                 :user.sync="User"
-                @update:user="GetWorkSiteInfos"
+                @update:user="GetUserSession"
         ></user-login-modal>
         <!-- -->
         <worksite-edit-modal
@@ -49,7 +49,7 @@
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
                     <el-radio-group v-model="ActiveMode" size="mini">
-                        <el-radio-button label="Create">Création</el-radio-button>
+                        <el-radio-button v-if="User.Permissions.Create" label="Create">Création</el-radio-button>
                         <el-radio-button label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
                         <el-radio-button label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
@@ -66,6 +66,7 @@
                         v-if="ActiveMode == 'Create'"
                         :worksiteinfos="worksiteInfos"
                         @selected_worksite="EditWorksite"
+                        :enable_add_worksite="true"
                         @new_worksite="CreateNewWorksite"
                         @edit_rework="EditRework"
                 ></worksite-table>

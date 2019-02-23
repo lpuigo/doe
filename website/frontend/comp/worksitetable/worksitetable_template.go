@@ -7,7 +7,8 @@ const (
 	<el-header style="height: auto; padding: 5px">
 		<el-row type="flex" :gutter="10" align="middle">
 			<el-col :span="20">
-				<el-button type="primary" plain
+				<el-button v-if="enable_add_worksite" 
+                           type="primary" plain
 						   icon="fas map-marker-alt icon--left"
 						   size="mini"
 						   @click="AddWorksite"

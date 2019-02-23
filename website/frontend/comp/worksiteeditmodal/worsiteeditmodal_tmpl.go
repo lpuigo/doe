@@ -37,15 +37,17 @@ const template string = `
                  :stretch="true"
                  style="height: 100%;"
         >
-            <el-tab-pane label="Création" name="Create">
+            <el-tab-pane v-if="user.Permissions.Create" label="Création" name="Create">
                 <worksite-edit style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
                                :worksite="current_worksite"
                                :readonly="false"
+                               :user="user"
                 ></worksite-edit>
             </el-tab-pane>
-            <el-tab-pane label="Edition" name="Edit">
+            <el-tab-pane v-if="user.Permissions.Update" label="Maj" name="Update">
                 <worksite-update style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
                                :worksite="current_worksite"
+							   :user="user"
                 ></worksite-update>
             </el-tab-pane>
         </el-tabs>

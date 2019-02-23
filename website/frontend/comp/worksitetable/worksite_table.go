@@ -31,7 +31,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		worksiteinfo.RegisterComponentWorksiteInfo(),
 		progressbar.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("worksiteinfos"),
+		hvue.Props("worksiteinfos", "enable_add_worksite"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteTableModel(vm)
 		}),
@@ -61,8 +61,9 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteTableModel struct {
 	*js.Object
 
-	Worksiteinfos []*fm.WorksiteInfo `js:"worksiteinfos"`
-	Filter        string             `js:"filter"`
+	Worksiteinfos     []*fm.WorksiteInfo `js:"worksiteinfos"`
+	EnableAddWorksite bool               `js:"enable_add_worksite"`
+	Filter            string             `js:"filter"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -70,6 +71,7 @@ type WorksiteTableModel struct {
 func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 	wtm := &WorksiteTableModel{Object: tools.O()}
 	wtm.Worksiteinfos = nil
+	wtm.EnableAddWorksite = false
 	wtm.Filter = ""
 	wtm.VM = vm
 	return wtm
