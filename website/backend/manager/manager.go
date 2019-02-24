@@ -67,9 +67,16 @@ func (m Manager) GetWorkSites(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
 }
 
-// GetWorkSites returns Arrays of WorksiteInfos (JSON in writer)
+// GetWorkSites returns array of WorksiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesInfo(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(func(ws *model.Worksite) bool { return true }))
+	isVisible := make(map[string]bool)
+	for _, client := range m.CurrentUser.Clients {
+		isVisible[client] = true
+	}
+	filterWorksite := func(ws *model.Worksite) bool {
+		return isVisible[ws.Client]
+	}
+	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(filterWorksite))
 }
 
 // GetWorkSitesStats returns Worksites Stats (JSON in writer)
