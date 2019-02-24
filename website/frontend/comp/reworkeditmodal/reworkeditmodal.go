@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkedit"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdate"
 	wem "github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -35,6 +36,7 @@ func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		worksiteinfo.RegisterComponent(),
 		reworkedit.RegisterComponent(),
+		reworkupdate.RegisterComponent(),
 		hvue.Template(template),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewReworkEditModalModel(vm)

@@ -25,12 +25,28 @@ const template string = `
 	<!-- 
 		Modal Body
 	-->
-	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-        <rework-edit
-                v-if="HasRework"
-				:worksite="current_worksite"
-				:user="user"
-        ></rework-edit>
+	<div v-loading="loading" style="height: 65vh;">
+        <el-tabs v-if="!loading" 
+                 v-model="activeTabName" 
+                 tab-position="left" type="border-card"
+                 :stretch="true"
+                 style="height: 100%;"
+        >
+            <el-tab-pane v-if="user.Permissions.Create" label="Création" name="Create">
+                <rework-edit v-if="HasRework"
+                             style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
+                             :worksite="current_worksite"
+                             :user="user"
+                ></rework-edit>
+            </el-tab-pane>
+            <el-tab-pane v-if="user.Permissions.Update" label="Maj" name="Update">
+                <rework-update v-if="HasRework"
+                             style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
+                             :worksite="current_worksite"
+                             :user="user"
+                ></rework-update>
+            </el-tab-pane>
+        </el-tabs>
 	</div>
 
 	<!-- 
