@@ -296,7 +296,7 @@ func (ws *Worksite) UpdateStatus() {
 		return
 	}
 	if ws.IsBlocked() {
-		ws.Status = WsStatusDone
+		ws.Status = WsStatusBlocked
 		return
 	}
 	if tools.Empty(ws.DoeDate) {
@@ -315,6 +315,7 @@ func (ws *Worksite) UpdateStatus() {
 		ws.Status = WsStatusPayment
 		return
 	}
+	ws.Status = WsStatusDone
 }
 
 func (ws *Worksite) GetPtByName(refpt string) *Troncon {
