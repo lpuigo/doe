@@ -13,7 +13,8 @@ const (
 	WsStatusInProgress     string = "20 InProgress"
 	WsStatusDOE            string = "30 DOE"
 	WsStatusAttachment     string = "40 Attachment"
-	WsStatusPayment        string = "50 Payment"
+	WsStatusInvoice        string = "50 Invoice"
+	WsStatusPayment        string = "60 Payment"
 	WsStatusRework         string = "80 Rework"
 	WsStatusBlocked        string = "98 Blocked"
 	WsStatusDone           string = "99 Done"
@@ -28,6 +29,8 @@ type Worksite struct {
 	OrderDate      string   `js:"OrderDate"`
 	DoeDate        string   `js:"DoeDate"`
 	AttachmentDate string   `js:"AttachmentDate"`
+	InvoiceDate    string   `js:"InvoiceDate"`
+	InvoiceName    string   `js:"InvoiceName"`
 	PaymentDate    string   `js:"PaymentDate"`
 	City           string   `js:"City"`
 	Status         string   `js:"Status"`
@@ -47,6 +50,8 @@ func NewWorkSite() *Worksite {
 	ws.OrderDate = ""
 	ws.DoeDate = ""
 	ws.AttachmentDate = ""
+	ws.InvoiceDate = ""
+	ws.InvoiceName = ""
 	ws.PaymentDate = ""
 	ws.City = ""
 	ws.Status = WsStatusNew
@@ -92,6 +97,8 @@ func (ws *Worksite) Copy(ows *Worksite) {
 	ws.OrderDate = ows.OrderDate
 	ws.DoeDate = ows.DoeDate
 	ws.AttachmentDate = ows.AttachmentDate
+	ws.InvoiceDate = ows.InvoiceDate
+	ws.InvoiceName = ows.InvoiceName
 	ws.PaymentDate = ows.PaymentDate
 	ws.City = ows.City
 	ws.Status = ows.Status
@@ -137,6 +144,8 @@ func (ws *Worksite) SearchInString() string {
 	res += "OrderDate:" + date.DateString(ws.OrderDate) + "\n"
 	res += "DoeDate:" + date.DateString(ws.DoeDate) + "\n"
 	res += "AttachmentDate:" + date.DateString(ws.AttachmentDate) + "\n"
+	res += "InvoiceDate:" + date.DateString(ws.InvoiceDate) + "\n"
+	res += "InvoiceName:" + date.DateString(ws.InvoiceName) + "\n"
 	res += "PaymentDate:" + date.DateString(ws.PaymentDate) + "\n"
 	res += "City:" + ws.City + "\n"
 	res += "Status:" + ws.Status + "\n"
@@ -268,6 +277,8 @@ func WorksiteStatusLabel(status string) string {
 		return "DOE à faire"
 	case WsStatusAttachment:
 		return "Attachement attendu"
+	case WsStatusInvoice:
+		return "Facture à émettre"
 	case WsStatusPayment:
 		return "Paiement attendu"
 	case WsStatusRework:
@@ -275,7 +286,7 @@ func WorksiteStatusLabel(status string) string {
 	case WsStatusBlocked:
 		return "Bloqué"
 	case WsStatusDone:
-		return "Terminé"
+		return "Payé"
 	default:
 		return "<" + status + ">"
 	}
@@ -311,6 +322,10 @@ func (ws *Worksite) UpdateStatus() {
 		ws.Status = WsStatusAttachment
 		return
 	}
+	if tools.Empty(ws.InvoiceDate) {
+		ws.Status = WsStatusInvoice
+		return
+	}
 	if tools.Empty(ws.PaymentDate) {
 		ws.Status = WsStatusPayment
 		return
@@ -329,8 +344,8 @@ func (ws *Worksite) GetPtByName(refpt string) *Troncon {
 	return nil
 }
 
-func WorksiteIsUpdatable(value string) bool {
-	switch value {
+func WorksiteIsUpdatable(status string) bool {
+	switch status {
 	//case WsStatusNew:
 	//	return true
 	//case WsStatusFormInProgress:
@@ -340,6 +355,8 @@ func WorksiteIsUpdatable(value string) bool {
 	case WsStatusDOE:
 		return true
 	//case WsStatusAttachment:
+	//	return true
+	//case WsStatusInvoice:
 	//	return true
 	//case WsStatusPayment:
 	//	return true
@@ -353,8 +370,8 @@ func WorksiteIsUpdatable(value string) bool {
 	return false
 }
 
-func WorksiteMustRework(value string) bool {
-	switch value {
+func WorksiteMustRework(status string) bool {
+	switch status {
 	//case WsStatusNew:
 	//	return true
 	//case WsStatusFormInProgress:
@@ -364,6 +381,8 @@ func WorksiteMustRework(value string) bool {
 	//case WsStatusDOE:
 	//	return true
 	//case WsStatusAttachment:
+	//	return true
+	//case WsStatusInvoice:
 	//	return true
 	//case WsStatusPayment:
 	//	return true
@@ -377,8 +396,8 @@ func WorksiteMustRework(value string) bool {
 	return false
 }
 
-func WorksiteIsReworkable(value string) bool {
-	switch value {
+func WorksiteIsReworkable(status string) bool {
+	switch status {
 	//case WsStatusNew:
 	//	return true
 	//case WsStatusFormInProgress:
@@ -388,6 +407,34 @@ func WorksiteIsReworkable(value string) bool {
 	//case WsStatusDOE:
 	//	return true
 	case WsStatusAttachment:
+		return true
+	case WsStatusInvoice:
+		return true
+	case WsStatusPayment:
+		return true
+	case WsStatusRework:
+		return true
+	//case WsStatusBlocked:
+	//	return true
+	case WsStatusDone:
+		return true
+	}
+	return false
+}
+
+func WorksiteIsBillable(status string) bool {
+	switch status {
+	//case WsStatusNew:
+	//	return true
+	//case WsStatusFormInProgress:
+	//	return true
+	//case WsStatusInProgress:
+	//	return true
+	//case WsStatusDOE:
+	//	return true
+	case WsStatusAttachment:
+		return true
+	case WsStatusInvoice:
 		return true
 	case WsStatusPayment:
 		return true

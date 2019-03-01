@@ -13,6 +13,8 @@ type Worksite struct {
 	OrderDate      string
 	DoeDate        string
 	AttachmentDate string
+	InvoiceDate    string
+	InvoiceName    string
 	PaymentDate    string
 	City           string
 	Status         string
@@ -33,7 +35,6 @@ func (w Worksite) FileName() string {
 
 func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 	wsi := fm.NewBEWorksiteInfo()
-	wsi.Id = ws.Id
 
 	wsi.Id = ws.Id
 	wsi.Client = ws.Client
@@ -41,6 +42,8 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 	wsi.OrderDate = ws.OrderDate
 	wsi.DoeDate = ws.DoeDate
 	wsi.AttachmentDate = ws.AttachmentDate
+	wsi.InvoiceDate = ws.InvoiceDate
+	wsi.InvoiceName = ws.InvoiceName
 	wsi.PaymentDate = ws.PaymentDate
 	wsi.City = ws.City
 	wsi.Status = ws.Status
@@ -58,6 +61,16 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 		}
 	}
 	return wsi
+}
+
+// setInvoiceAmount sets Invoice Amount in given WorksiteInfo (only if DoeDate is set)
+func (ws *Worksite) setInvoiceAmount(wsi *fm.WorksiteInfo) {
+	if ws.DoeDate == "" || ws.DoeDate == "null" {
+		return
+	}
+	// TODO To be updated for different CEM amount
+	const CEM42Amount float64 = 70
+	wsi.InvoiceAmount = float64(wsi.NbElMeasured) * CEM42Amount
 }
 
 func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
@@ -99,6 +112,7 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 			wsi.Search += searchPt("PB", t.Pb)
 		}
 	}
+	ws.setInvoiceAmount(wsi)
 }
 
 // AddStat adds nb of El installed per date (in map[date]nbEl)
