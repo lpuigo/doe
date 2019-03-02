@@ -115,12 +115,21 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 	ws.setInvoiceAmount(wsi)
 }
 
+type StatKey struct {
+	Team string
+	Date string
+}
+
 // AddStat adds nb of El installed per date (in map[date]nbEl)
-func (ws *Worksite) AddStat(nbels map[string]int) {
+func (ws *Worksite) AddStat(nbels map[StatKey]int) {
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
 			if !t.Blockage && t.InstallDate != "" {
-				nbels[date.GetMonday(t.InstallDate)] += t.NbRacco
+				key := StatKey{
+					Team: t.InstallActor,
+					Date: date.GetMonday(t.InstallDate),
+				}
+				nbels[key] += t.NbRacco
 			}
 		}
 	}

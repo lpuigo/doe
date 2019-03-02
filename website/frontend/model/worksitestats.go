@@ -5,8 +5,9 @@ import "github.com/gopherjs/gopherjs/js"
 type WorksiteStats struct {
 	*js.Object
 
-	StartDate string `js:"StartDate"`
-	NbEls     []int  `js:"NbEls"`
+	StartDate string   `js:"StartDate"`
+	Teams     []string `js:"Teams"`
+	NbEls     [][]int  `js:"NbEls"`
 }
 
 func NewBEWorksiteStats() *WorksiteStats {

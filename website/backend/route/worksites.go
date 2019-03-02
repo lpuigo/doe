@@ -216,13 +216,10 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 
-	//TODO Manage User Authorization (control on mgr.CurrentUser)
-
 	err := mgr.GetWorkSitesStats(w)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logmsg.Response = http.StatusOK
-
 }

@@ -62,6 +62,16 @@ func (m Manager) Clone() *Manager {
 	return &m
 }
 
+func (m *Manager) visibleWorksiteFilter() func(*model.Worksite) bool {
+	isVisible := make(map[string]bool)
+	for _, client := range m.CurrentUser.Clients {
+		isVisible[client] = true
+	}
+	return func(ws *model.Worksite) bool {
+		return isVisible[ws.Client]
+	}
+}
+
 // GetWorkSites returns Arrays of Worksites (JSON in writer)
 func (m Manager) GetWorkSites(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
@@ -69,17 +79,10 @@ func (m Manager) GetWorkSites(writer io.Writer) error {
 
 // GetWorkSites returns array of WorksiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesInfo(writer io.Writer) error {
-	isVisible := make(map[string]bool)
-	for _, client := range m.CurrentUser.Clients {
-		isVisible[client] = true
-	}
-	filterWorksite := func(ws *model.Worksite) bool {
-		return isVisible[ws.Client]
-	}
-	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(filterWorksite))
+	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(m.visibleWorksiteFilter()))
 }
 
-// GetWorkSitesStats returns Worksites Stats (JSON in writer)
+// GetWorkSitesStats returns Worksites Stats (JSON in writer) visibles by current user
 func (m Manager) GetWorkSitesStats(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(func(ws *model.Worksite) bool { return true }))
+	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter()))
 }

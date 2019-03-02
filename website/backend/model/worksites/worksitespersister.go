@@ -154,26 +154,45 @@ func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.
 	wsp.RLock()
 	defer wsp.RUnlock()
 
-	nbEls := make(map[string]int)
+	// calc Nb installed ELs per Team/date
+	nbEls := make(map[model.StatKey]int)
 	for _, wsr := range wsp.workSites {
 		if keep(wsr.Worksite) {
 			wsr.AddStat(nbEls)
 		}
 	}
 
-	dates := []string{}
-	for date, _ := range nbEls {
-		dates = append(dates, date)
-	}
-	sort.Strings(dates)
-	start := date.DateFrom(dates[0])
-	end := date.Today().GetMonday()
-
 	ws := fm.NewBEWorksiteStats()
-	ws.StartDate = start.String()
 
-	for d := start; !d.After(end); d = d.AddDays(7) {
-		ws.NbEls = append(ws.NbEls, nbEls[d.String()])
+	//create team List & Dates
+	end := date.Today().GetMonday()
+	start := end.String()
+	teamset := make(map[string]int)
+	for key, _ := range nbEls {
+		teamset[key.Team] = 1
+		if key.Date < start {
+			start = key.Date
+		}
+	}
+	teams := []string{}
+	for t, _ := range teamset {
+		teams = append(teams, t)
+	}
+	sort.Strings(teams)
+	dates := []string{}
+	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
+		dates = append(dates, d.String())
+	}
+	ws.StartDate = start
+	ws.Teams = teams
+
+	// calc nbEls per teams/date
+	ws.NbEls = make([][]int, len(teams))
+	for i, t := range teams {
+		ws.NbEls[i] = make([]int, len(dates))
+		for j, d := range dates {
+			ws.NbEls[i][j] = nbEls[model.StatKey{Team: t, Date: d}]
+		}
 	}
 
 	return ws
