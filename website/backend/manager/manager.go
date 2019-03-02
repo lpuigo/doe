@@ -86,3 +86,11 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 func (m Manager) GetWorkSitesStats(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter()))
 }
+
+func (m Manager) ArchiveName() string {
+	return m.Worksites.ArchiveName()
+}
+
+func (m Manager) CreateArchive(writer io.Writer) error {
+	return m.Worksites.CreateArchive(writer)
+}

@@ -1,11 +1,13 @@
 package worksites
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"io"
 	"path/filepath"
 	"sort"
 	"sync"
@@ -196,4 +198,30 @@ func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.
 	}
 
 	return ws
+}
+
+// ArchiveName returns the WorksiteArchive file name with today's date
+func (wsp WorkSitesPersister) ArchiveName() string {
+	return fmt.Sprintf("Worksites %s.zip", date.Today().String())
+}
+
+// CreateArchive writes a zipped archive of all contained Worksites files to the given writer
+func (wsp *WorkSitesPersister) CreateArchive(writer io.Writer) error {
+	wsp.RLock()
+	defer wsp.RUnlock()
+
+	zw := zip.NewWriter(writer)
+
+	for _, wsr := range wsp.workSites {
+		wfw, err := zw.Create(wsr.GetFileName())
+		if err != nil {
+			return fmt.Errorf("could not create zip entry for worksite %d", wsr.Id)
+		}
+		err = wsr.Marshall(wfw)
+		if err != nil {
+			return fmt.Errorf("could not write zip entry for worksite %d", wsr.Id)
+		}
+	}
+
+	return zw.Close()
 }

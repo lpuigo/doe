@@ -96,6 +96,7 @@ func main() {
 	// Worsite method
 	router.HandleFunc("/api/worksites", withUserManager("GetWorksitesInfo", route.GetWorksitesInfo)).Methods("GET")
 	router.HandleFunc("/api/worksites", withUserManager("CreateWorkSite", route.CreateWorkSite)).Methods("POST")
+	router.HandleFunc("/api/worksites/archive", withUserManager("GetWorksitesArchive", route.GetWorksitesArchive)).Methods("GET")
 	router.HandleFunc("/api/worksites/stat", withUserManager("GetWorksitesStats", route.GetWorksitesStats)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("GetWorkSite", route.GetWorkSite)).Methods("GET")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}/attach", withUserManager("GetWorkSiteAttachement", route.GetWorkSiteAttachement)).Methods("GET")
