@@ -152,15 +152,15 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords such as keep(wsr.Worksite) == true
-func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(isWSVisible func(ws *model.Worksite) bool, isTeamVisible func(team string) bool) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
 	// calc Nb installed ELs per Team/date
 	nbEls := make(map[model.StatKey]int)
 	for _, wsr := range wsp.workSites {
-		if keep(wsr.Worksite) {
-			wsr.AddStat(nbEls)
+		if isWSVisible(wsr.Worksite) {
+			wsr.AddStat(nbEls, isTeamVisible)
 		}
 	}
 

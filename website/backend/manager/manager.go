@@ -63,6 +63,9 @@ func (m Manager) Clone() *Manager {
 }
 
 func (m *Manager) visibleWorksiteFilter() func(*model.Worksite) bool {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(*model.Worksite) bool { return true }
+	}
 	isVisible := make(map[string]bool)
 	for _, client := range m.CurrentUser.Clients {
 		isVisible[client] = true
@@ -84,7 +87,19 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 
 // GetWorkSitesStats returns Worksites Stats (JSON in writer) visibles by current user
 func (m Manager) GetWorkSitesStats(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter()))
+	var isTeamVisible func(team string) bool
+	if len(m.CurrentUser.Teams) > 0 {
+		teamVisible := make(map[string]bool)
+		for _, team := range m.CurrentUser.Teams {
+			teamVisible[team] = true
+		}
+		isTeamVisible = func(team string) bool {
+			return teamVisible[team]
+		}
+	} else {
+		isTeamVisible = func(team string) bool { return true }
+	}
+	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter(), isTeamVisible))
 }
 
 func (m Manager) ArchiveName() string {

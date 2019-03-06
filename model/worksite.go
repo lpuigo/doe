@@ -120,11 +120,11 @@ type StatKey struct {
 	Date string
 }
 
-// AddStat adds nb of El installed per date (in map[date]nbEl)
-func (ws *Worksite) AddStat(nbels map[StatKey]int) {
+// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Teams
+func (ws *Worksite) AddStat(nbels map[StatKey]int, isTeamVisible func(team string) bool) {
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
-			if !t.Blockage && t.InstallDate != "" {
+			if !t.Blockage && t.InstallDate != "" && isTeamVisible(t.InstallActor) {
 				key := StatKey{
 					Team: t.InstallActor,
 					Date: date.GetMonday(t.InstallDate),
