@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
@@ -30,6 +31,7 @@ func main() {
 		reworkeditmodal.RegisterComponent(),
 		reworkupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
+		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -51,6 +53,10 @@ func main() {
 		hvue.Computed("ReworkWorksiteInfos", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.GetReworkWorksiteInfos()
+		}),
+		hvue.Computed("BillableWorksiteInfos", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetBillableWorksiteInfos()
 		}),
 		hvue.Computed("NbUpdate", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -83,7 +89,7 @@ type MainPageModel struct {
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.User = fm.NewUser()
-	mpm.ActiveMode = "Update"
+	mpm.SetActiveMode()
 	mpm.WorksiteInfos = []*fm.WorksiteInfo{}
 	//mpm.EditedWorksite = -2
 	return mpm
@@ -91,6 +97,20 @@ func NewMainPageModel() *MainPageModel {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
+
+func (m *MainPageModel) SetActiveMode() {
+	switch {
+	case m.User.Name == "":
+		m.ActiveMode = ""
+	case m.User.Permissions["Update"]:
+		m.ActiveMode = "Update"
+	case m.User.Permissions["Invoice"]:
+		m.ActiveMode = "Invoice"
+	default:
+		m.ActiveMode = ""
+	}
+	return
+}
 
 func (m *MainPageModel) GetUserSession() {
 	go m.callGetUser()
@@ -177,6 +197,16 @@ func (m *MainPageModel) GetReworkWorsiteNb() int {
 
 }
 
+func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
+	res := []*fm.WorksiteInfo{}
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteIsBillable(wsi.Status) {
+			res = append(res, wsi)
+		}
+	}
+	return res
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
@@ -204,6 +234,7 @@ func (m *MainPageModel) callGetUser() {
 	m.User.Copy(fm.NewUserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true
+		m.SetActiveMode()
 		m.GetWorkSiteInfos()
 	}
 }
@@ -225,6 +256,7 @@ func (m *MainPageModel) callLogout() {
 	m.User = fm.NewUser()
 	m.User.Connected = false
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
+	m.SetActiveMode()
 }
 
 func (m *MainPageModel) callGetWorkSiteInfos() {

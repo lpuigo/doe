@@ -53,9 +53,10 @@
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
                     <el-radio-group v-model="ActiveMode" size="mini">
+                        <el-radio-button v-if="User.Permissions.Invoice" label="Invoice">Factures</el-radio-button>
                         <el-radio-button v-if="User.Permissions.Create" label="Create">Création</el-radio-button>
-                        <el-radio-button label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
-                        <el-radio-button label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
+                        <el-radio-button v-if="User.Permissions.Update" label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
+                        <el-radio-button v-if="User.Permissions.Update" label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
                     <el-button-group>
                         <el-button :disabled="!User.Permissions.Update" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
@@ -89,23 +90,11 @@
                         @selected_worksite="UpdateWorksite"
                         @edit_rework="UpdateRework"
                 ></worksite-table>
+                <invoice-table
+                        v-if="ActiveMode == 'Invoice'"
+                        :worksiteinfos="BillableWorksiteInfos"
+                ></invoice-table>
             </el-main>
-<!--
-            <el-container style="height: 100%">
-                <el-aside class="ewin_light" width="150px">
-                    <div class="aside-menu-container">
-                        Aside1
-                    </div>
-                </el-aside>
-                <el-main style="height:100%; padding: 0px 0px;">
-                    <worksite-table
-                            :worksiteinfos="worksiteInfos"
-                            @selected_worksite="EditWorksite"
-                            @new_worksite="CreateNewWorksite"
-                    ></worksite-table>
-                </el-main>
-            </el-container>
--->
             <!--<el-footer>Footer</el-footer>-->
         </el-container>
     </div>
