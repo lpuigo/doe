@@ -22,7 +22,7 @@ const template string = `
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
 		<div v-for="(ts, index) in TeamStats" :key="index"
 		>
-			{{ts.Team}}
+			<h3>Equipe : {{ts.Team}}</h3>
 			<team-productivity-chart :stats="ts"></team-productivity-chart>			
 		</div>	
 	</div>

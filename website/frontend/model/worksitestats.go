@@ -32,9 +32,9 @@ func WorksiteStatsFromJs(o *js.Object) *WorksiteStats {
 func (ws *WorksiteStats) CreateTeamStats() []*TeamStats {
 	res := []*TeamStats{}
 	for i, team := range ws.Teams {
-		if i == 0 {
-			continue // Skip first Team as it is Worksites global
-		}
+		//if i == 0 {
+		//	continue // Skip first Team as it is Worksites global
+		//}
 		ts := NewTeamStats()
 		ts.Team = team
 		ts.StartDate = ws.StartDate

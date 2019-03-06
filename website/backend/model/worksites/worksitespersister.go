@@ -181,6 +181,7 @@ func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.
 		teams = append(teams, t)
 	}
 	sort.Strings(teams)
+	teams = append([]string{"GLOBAL"}, teams...)
 	dates := []string{}
 	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
 		dates = append(dates, d.String())
@@ -190,10 +191,13 @@ func (wsp *WorkSitesPersister) GetStats(keep func(ws *model.Worksite) bool) *fm.
 
 	// calc nbEls per teams/date
 	ws.NbEls = make([][]int, len(teams))
-	for i, t := range teams {
-		ws.NbEls[i] = make([]int, len(dates))
+	ws.NbEls[0] = make([]int, len(dates))
+	for i, t := range teams[1:] {
+		ws.NbEls[i+1] = make([]int, len(dates))
 		for j, d := range dates {
-			ws.NbEls[i][j] = nbEls[model.StatKey{Team: t, Date: d}]
+			nbEl := nbEls[model.StatKey{Team: t, Date: d}]
+			ws.NbEls[i+1][j] = nbEl
+			ws.NbEls[0][j] += nbEl
 		}
 	}
 
