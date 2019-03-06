@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
@@ -29,6 +30,7 @@ func main() {
 		reworkeditmodal.RegisterComponent(),
 		reworkupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
+		teamproductivitymodal.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -126,6 +128,10 @@ func (m *MainPageModel) EditRework(id int) {
 
 func (m *MainPageModel) UpdateRework(id int) {
 	m.VM.Refs("ReworkUpdateModal").Call("Show", id, m.User)
+}
+
+func (m *MainPageModel) ShowTeamProductivity() {
+	m.VM.Refs("TeamProductivityModal").Call("Show", m.User)
 }
 
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {

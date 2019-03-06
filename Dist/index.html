@@ -42,6 +42,10 @@
                 @update_worksite="GetWorkSiteInfos"
         ></rework-update-modal>
         <!-- -->
+        <team-productivity-modal
+                ref="TeamProductivityModal"
+        ></team-productivity-modal>
+        <!-- -->
         <el-container style="height: 100%;border: 1px solid #eee">
             <el-header class="ewin" style="height: 40px">
                 <div class="header-menu-container">
@@ -53,6 +57,9 @@
                         <el-radio-button label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
                         <el-radio-button label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
+                    <el-button-group>
+                        <el-button class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
+                    </el-button-group>
                     <span></span>
                     <span></span>
                     <el-row :gutter="20" type="flex" align="middle">
@@ -113,7 +120,7 @@
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
 <!--<script src="/Assets/jquery/jquery-3.1.1.min.js"></script>-->
-<!--<script src="/Assets/highcharts/highcharts.js"></script>-->
+<script src="/Assets/highcharts/highcharts.js"></script>
 <script type="text/javascript" src="acceuil.js"></script>
 
 </html>

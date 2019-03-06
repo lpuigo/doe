@@ -7,6 +7,12 @@ import (
 
 const TimeJSLayout string = "2006-01-02"
 
+func JSDate(s string) int64 {
+	res := time.Time{}
+	res, _ = time.Parse(TimeJSLayout, s)
+	return res.Unix() * 1000
+}
+
 func New(s string) time.Time {
 	t, err := time.Parse(TimeJSLayout, s)
 	if err != nil {
