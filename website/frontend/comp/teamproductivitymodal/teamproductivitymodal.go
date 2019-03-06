@@ -60,6 +60,7 @@ func componentOption() []hvue.ComponentOption {
 
 func (tpmm *TeamProductivityModalModel) Show(user *fm.User) {
 	tpmm.Stats = fm.NewWorksiteStats()
+	tpmm.TeamStats = []*fm.TeamStats{}
 	tpmm.User = user
 	tpmm.Loading = true
 	go tpmm.callGetWorksitesStats()
@@ -84,6 +85,11 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)
 	if err != nil {
+		message.ErrorStr(tpmm.VM, "Oups! "+err.Error(), true)
+		tpmm.Hide()
+		return
+	}
+	if req.Status != tools.HttpOK {
 		tpmm.errorMessage(req)
 		tpmm.Hide()
 		return
