@@ -33,6 +33,7 @@ func NewUserFromJS(o *js.Object) *User {
 
 func (u *User) Copy(ou *User) {
 	u.Name = ou.Name
+	u.Pwd = ou.Pwd
 	u.Connected = ou.Connected
 	u.Clients = ou.Clients
 	u.Permissions = ou.Permissions
