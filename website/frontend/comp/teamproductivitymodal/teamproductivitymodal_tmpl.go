@@ -20,7 +20,11 @@ const template string = `
 		style="height: 100%;"		
 	-->
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-		<pre>{{Stats}}</pre>
+		<div v-for="(ts, index) in TeamStats" :key="index"
+		>
+			{{ts.Team}}
+			<team-productivity-chart :stats="ts"></team-productivity-chart>			
+		</div>	
 	</div>
 
 	<!-- 

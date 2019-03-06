@@ -2,10 +2,10 @@ package teamproductivitychart
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
-	"github.com/lpuig/hvue"
 )
 
 type TeamProductivityChart struct {
@@ -97,14 +97,14 @@ func (tpc *TeamProductivityChart) setChart() {
 			"series": js.M{
 				"allowPointSelect": false,
 				"pointStart":       startDate,
-				"pointInterval":    24 * 3600 * 1000, // one day
+				"pointInterval":    7 * 24 * 3600 * 1000, // one week
 				"marker":           js.M{"enabled": false},
 				"animation":        false,
 			},
 		},
 		"series": js.S{
 			js.M{
-				"name":      "Spent",
+				"name":      "Nb. EL",
 				"color":     "#51A825",
 				"lineWidth": 5,
 				"data":      ts.NbEls,
