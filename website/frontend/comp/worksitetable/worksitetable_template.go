@@ -80,11 +80,6 @@ const (
                     align="center"	:formatter="FormatDate"
             ></el-table-column>
             <el-table-column
-                    label="Attachement" prop="AttachmentDate" sortable :sort-by="['AttachmentDate', 'Ref']"
-                    width="110px" :resizable=true :show-overflow-tooltip=true
-                    align="center"	:formatter="FormatDate"
-            ></el-table-column>
-            <el-table-column
                     label="Install." width="110px" :resizable=true align="center"
             >
                 <template slot-scope="scope">

@@ -1,9 +1,9 @@
-package worksiteupdatemodal
+package invoiceupdatemodal
 
 const template string = `
 <el-dialog
 		:visible.sync="visible" 
-		width="90%"
+		width="70%"
 		:before-close="HideWithControl"
 >
 	<!-- 
@@ -13,25 +13,21 @@ const template string = `
 		<el-row :gutter="10" type="flex" align="middle">
 			<el-col :span="12">
 				<h2 v-if="current_worksite" style="margin: 0 0">
-					<i class="fas fa-sitemap icon--left"></i>Mise à jour du chantier: <span style="color: #ccebff">{{current_worksite.City}} - {{current_worksite.Ref}}</span>
+					<i class="fas fa-euro-sign icon--left"></i>Mise à jour facture: <span style="color: #ccebff">{{current_worksite.City}} - {{current_worksite.Ref}}</span>
 				</h2>
 			</el-col>
 			<el-col :span="6">
 				<worksite-info :worksite="current_worksite"></worksite-info>
 			</el-col>		
-            <el-col :offset="2" :span="2">
-                <h2 style="margin: 0 0"><a :href="DOEArchive(current_worksite.Id)"><i class="link fas fa-file-archive icon--left"></i>DOE Zip</a></h2>
-            </el-col>
         </el-row>
     </span>
 
 	<!-- 
 		Modal Body
 	-->
-    <worksite-update style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;"
+    <invoice-update style="height: 35vh;"
                      :worksite="current_worksite"
-					 :user="user"
-    ></worksite-update>    
+    ></invoice-update>    
     
 	<!-- 
 		Body Action Bar

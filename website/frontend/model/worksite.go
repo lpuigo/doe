@@ -145,7 +145,7 @@ func (ws *Worksite) SearchInString() string {
 	res += "DoeDate:" + date.DateString(ws.DoeDate) + "\n"
 	res += "AttachmentDate:" + date.DateString(ws.AttachmentDate) + "\n"
 	res += "InvoiceDate:" + date.DateString(ws.InvoiceDate) + "\n"
-	res += "InvoiceName:" + date.DateString(ws.InvoiceName) + "\n"
+	res += "InvoiceName:" + ws.InvoiceName + "\n"
 	res += "PaymentDate:" + date.DateString(ws.PaymentDate) + "\n"
 	res += "City:" + ws.City + "\n"
 	res += "Status:" + ws.Status + "\n"
@@ -342,6 +342,18 @@ func (ws *Worksite) GetPtByName(refpt string) *Troncon {
 		}
 	}
 	return nil
+}
+
+func (ws *Worksite) IsDisabled(attr string) bool {
+	switch attr {
+	case "AttachmentDate":
+		return ws.Status <= WsStatusDOE
+	case "InvoiceDate", "InvoiceName":
+		return ws.Status <= WsStatusAttachment
+	case "PaymentDate":
+		return ws.Status <= WsStatusInvoice
+	}
+	return false
 }
 
 func WorksiteIsUpdatable(status string) bool {

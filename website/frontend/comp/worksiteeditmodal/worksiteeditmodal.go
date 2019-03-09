@@ -95,7 +95,7 @@ func ComponentOptions() []hvue.ComponentOption {
 // Modal Methods
 
 func (wemm *WorksiteEditModalModel) HasChanged() bool {
-	if wemm.EditedWorksite.Object == nil {
+	if wemm.EditedWorksite.Object == js.Undefined {
 		return true
 	}
 	return wemm.CurrentWorksite.SearchInString() != wemm.EditedWorksite.SearchInString()

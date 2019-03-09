@@ -58,10 +58,6 @@ const (
 					label="Montant" prop="InvoiceAmount" sortable :sort-by="['InvoiceAmount', 'Ref']"
 					width="110px" :resizable=true :show-overflow-tooltip=true align="right"
 			></el-table-column>
-			<el-table-column
-					label="Référence" prop="Ref" sortable :sort-by="['City', 'Ref']"
-					width="110px" :resizable=true :show-overflow-tooltip=true
-			></el-table-column>
             <el-table-column
                     label="DOE" prop="DoeDate" sortable :sort-by="['DoeDate', 'Ref']"
                     width="110px" :resizable=true :show-overflow-tooltip=true

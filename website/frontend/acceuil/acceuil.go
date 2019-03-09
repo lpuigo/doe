@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/adminmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/invoiceupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
@@ -31,6 +32,7 @@ func main() {
 		worksiteupdatemodal.RegisterComponent(),
 		reworkeditmodal.RegisterComponent(),
 		reworkupdatemodal.RegisterComponent(),
+		invoiceupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
@@ -131,12 +133,10 @@ func (m *MainPageModel) GetWorkSiteInfos() {
 }
 
 func (m *MainPageModel) EditWorksite(id int) {
-	//m.EditedWorksite = id
 	m.VM.Refs("WorksiteEditModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) UpdateWorksite(id int) {
-	//m.EditedWorksite = id
 	m.VM.Refs("WorksiteUpdateModal").Call("Show", id, m.User)
 }
 
@@ -150,6 +150,10 @@ func (m *MainPageModel) EditRework(id int) {
 
 func (m *MainPageModel) UpdateRework(id int) {
 	m.VM.Refs("ReworkUpdateModal").Call("Show", id, m.User)
+}
+
+func (m *MainPageModel) UpdateInvoice(id int) {
+	m.VM.Refs("InvoiceUpdateModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) ShowTeamProductivity() {
@@ -245,7 +249,6 @@ func (m *MainPageModel) callGetUser() {
 		m.errorMessage(req)
 		return
 	}
-	print(m.User)
 	m.User.Copy(fm.UserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true

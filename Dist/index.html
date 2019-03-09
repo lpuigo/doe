@@ -42,6 +42,11 @@
                 @update_worksite="GetWorkSiteInfos"
         ></rework-update-modal>
         <!-- -->
+        <invoice-update-modal
+                ref="InvoiceUpdateModal"
+                @update_worksite="GetWorkSiteInfos"
+        ></invoice-update-modal>
+        <!-- -->
         <team-productivity-modal
                 ref="TeamProductivityModal"
         ></team-productivity-modal>
@@ -98,6 +103,7 @@
                 <invoice-table
                         v-if="ActiveMode == 'Invoice'"
                         :worksiteinfos="BillableWorksiteInfos"
+                        @selected_worksite="UpdateInvoice"
                 ></invoice-table>
             </el-main>
             <!--<el-footer>Footer</el-footer>-->
