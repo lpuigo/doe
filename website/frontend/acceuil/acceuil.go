@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/adminmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
@@ -33,6 +34,7 @@ func main() {
 		worksitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
+		adminmodal.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -154,6 +156,10 @@ func (m *MainPageModel) ShowTeamProductivity() {
 	m.VM.Refs("TeamProductivityModal").Call("Show", m.User)
 }
 
+func (m *MainPageModel) ShowAdmin() {
+	m.VM.Refs("AdminModal").Call("Show", m.User)
+}
+
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
@@ -172,7 +178,6 @@ func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 		}
 	}
 	return res
-
 }
 
 func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
@@ -194,7 +199,6 @@ func (m *MainPageModel) GetReworkWorsiteNb() int {
 		}
 	}
 	return res
-
 }
 
 func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
@@ -202,6 +206,16 @@ func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
 	for _, wsi := range m.WorksiteInfos {
 		if fm.WorksiteIsBillable(wsi.Status) {
 			res = append(res, wsi)
+		}
+	}
+	return res
+}
+
+func (m *MainPageModel) GetBillableWorksiteNb() int {
+	res := 0
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteIsBillable(wsi.Status) {
+			res += 1
 		}
 	}
 	return res
