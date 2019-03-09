@@ -27,7 +27,7 @@ func NewUser() *User {
 	return user
 }
 
-func NewUserFromJS(o *js.Object) *User {
+func UserFromJS(o *js.Object) *User {
 	return &User{Object: o}
 }
 

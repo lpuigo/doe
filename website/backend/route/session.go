@@ -15,6 +15,15 @@ type authentUser struct {
 	Teams       []string
 }
 
+func newAuthentUser() authentUser {
+	return authentUser{
+		Name:        "",
+		Clients:     []string{},
+		Permissions: make(map[string]bool),
+		Teams:       []string{},
+	}
+}
+
 func (au *authentUser) SetFrom(ur *users.UserRecord) {
 	au.Name = ur.Name
 	au.Clients = ur.Clients
@@ -32,7 +41,7 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	user := authentUser{Name: ""}
+	user := newAuthentUser()
 	// check for session cookie
 	if mgr.CheckSessionUser(r) {
 		// found a correct one, set user

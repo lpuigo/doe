@@ -245,12 +245,15 @@ func (m *MainPageModel) callGetUser() {
 		m.errorMessage(req)
 		return
 	}
-	m.User.Copy(fm.NewUserFromJS(req.Response))
+	print(m.User)
+	m.User.Copy(fm.UserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true
 		m.SetActiveMode()
 		m.GetWorkSiteInfos()
+		return
 	}
+	m.User = fm.NewUser()
 }
 
 func (m *MainPageModel) callLogout() {
