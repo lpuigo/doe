@@ -55,3 +55,13 @@ func (wsi *WorksiteInfo) TextFiltered(filter string) bool {
 	}
 	return strings.Contains(wsi.Search, filter) == expected
 }
+
+func (wsi *WorksiteInfo) NeedRework() bool {
+	if wsi.NbRework > 0 {
+		if wsi.NbReworkDone == wsi.NbRework {
+			return false
+		}
+		return true
+	}
+	return false
+}

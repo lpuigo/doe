@@ -15,9 +15,9 @@ const (
 	WsStatusAttachment     string = "40 Attachment"
 	WsStatusInvoice        string = "50 Invoice"
 	WsStatusPayment        string = "60 Payment"
-	WsStatusRework         string = "80 Rework"
-	WsStatusBlocked        string = "98 Blocked"
-	WsStatusDone           string = "99 Done"
+	//WsStatusRework         string = "80 Rework"
+	WsStatusBlocked string = "98 Blocked"
+	WsStatusDone    string = "99 Done"
 )
 
 type Worksite struct {
@@ -281,8 +281,8 @@ func WorksiteStatusLabel(status string) string {
 		return "Facture à émettre"
 	case WsStatusPayment:
 		return "Paiement attendu"
-	case WsStatusRework:
-		return "Reprise à faire"
+	//case WsStatusRework:
+	//	return "Reprise à faire"
 	case WsStatusBlocked:
 		return "Bloqué"
 	case WsStatusDone:
@@ -314,10 +314,10 @@ func (ws *Worksite) UpdateStatus() {
 		ws.Status = WsStatusDOE
 		return
 	}
-	if ws.NeedRework() {
-		ws.Status = WsStatusRework
-		return
-	}
+	//if ws.NeedRework() {
+	//	ws.Status = WsStatusRework
+	//	return
+	//}
 	if tools.Empty(ws.AttachmentDate) {
 		ws.Status = WsStatusAttachment
 		return
@@ -372,8 +372,8 @@ func WorksiteIsUpdatable(status string) bool {
 	//	return true
 	//case WsStatusPayment:
 	//	return true
-	case WsStatusRework:
-		return true
+	//case WsStatusRework:
+	//	return true
 	case WsStatusBlocked:
 		return true
 		//case WsStatusDone:
@@ -398,12 +398,12 @@ func WorksiteMustRework(status string) bool {
 	//	return true
 	//case WsStatusPayment:
 	//	return true
-	case WsStatusRework:
-		return true
-		//case WsStatusBlocked:
-		//	return true
-		//case WsStatusDone:
-		//	return true
+	//case WsStatusRework:
+	//	return true
+	//case WsStatusBlocked:
+	//	return true
+	//case WsStatusDone:
+	//	return true
 	}
 	return false
 }
@@ -424,8 +424,8 @@ func WorksiteIsReworkable(status string) bool {
 		return true
 	case WsStatusPayment:
 		return true
-	case WsStatusRework:
-		return true
+	//case WsStatusRework:
+	//	return true
 	//case WsStatusBlocked:
 	//	return true
 	case WsStatusDone:
@@ -450,12 +450,41 @@ func WorksiteIsBillable(status string) bool {
 		return true
 	case WsStatusPayment:
 		return true
-	case WsStatusRework:
-		return true
+	//case WsStatusRework:
+	//	return true
 	//case WsStatusBlocked:
 	//	return true
 	case WsStatusDone:
 		return true
 	}
 	return false
+}
+
+func WorksiteRowClassName(status string) string {
+	var res string = ""
+	switch status {
+	case WsStatusNew:
+		res = "worksite-row-new"
+	case WsStatusFormInProgress:
+		res = "worksite-row-forminprogress"
+	case WsStatusInProgress:
+		res = "worksite-row-inprogress"
+	case WsStatusDOE:
+		res = "worksite-row-doe"
+	case WsStatusAttachment:
+		res = "worksite-row-attachment"
+	case WsStatusInvoice:
+		res = "worksite-row-invoice"
+	case WsStatusPayment:
+		res = "worksite-row-payment"
+	//case WsStatusRework:
+	//	res = "worksite-row-rework"
+	case WsStatusBlocked:
+		res = "worksite-row-blocked"
+	case WsStatusDone:
+		res = "worksite-row-done"
+	default:
+		res = "worksite-row-error"
+	}
+	return res
 }

@@ -155,9 +155,47 @@ pre {
     padding-bottom: .3em;
 }
 
-.el-table .worksite-row-need-save {
+/*.el-table .worksite-row-need-save {*/
+    /*background: #f8f8f8;*/
+    /*color: #ffbf80;*/
+/*}*/
+
+.el-table .worksite-row-new {
+    background: #e1edff;
+}
+
+.el-table .worksite-row-forminprogress {
+    background: #e1edff;
+}
+
+.el-table .worksite-row-inprogress {
+    background: #ffffff;
+}
+
+.el-table .worksite-row-doe {
+    background: #bbe6b8;
+}
+
+.el-table .worksite-row-attachment {
+    background: #ffe6cc;
+}
+
+.el-table .worksite-row-invoice {
+    background: #ffcc99;
+}
+
+.el-table .worksite-row-payment {
+    background: #fff8e6;
+}
+
+.el-table .worksite-row-rework {
+    background: #ffd5cc;
+    color: #690000;
+}
+
+.el-table .worksite-row-blocked {
     background: #f8f8f8;
-    color: #ffbf80;
+    color: #7d3e3e;
 }
 
 .el-table .worksite-row-done {
@@ -165,44 +203,20 @@ pre {
     color: #adadad;
 }
 
-.el-table .worksite-row-payment {
-    background: #fff8e6;
-}
-
-.el-table .worksite-row-attachment {
-    background: #ffe6cc;
-}
-
-.el-table .worksite-row-doe {
-    background: #caebc7;
-}
-
-.el-table .worksite-row-rework {
-    background: #ffebcc;
-}
-
-.el-table .worksite-row-inprogress {
-    background: #ffffff;
-}
-
-.el-table .worksite-row-forminprogress {
-    background: #e1edff;
-}
-
-.el-table .worksite-row-new {
-    background: #e1edff;
+.el-table .worksite-row-error {
+    background: #f77c63;
 }
 
 .rework-green {
-    color: #44cc00;
+    color: #1fcc00;
 }
 
 .rework-orange {
-    color: #f29b00;
+    color: #f2a500;
 }
 
 .rework-red {
-    color: #f43100;
+    color: #ff4100;
 }
 
 /* Workload Columns */

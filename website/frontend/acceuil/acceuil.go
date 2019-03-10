@@ -167,7 +167,7 @@ func (m *MainPageModel) ShowAdmin() {
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsUpdatable(wsi.Status) {
+		if fm.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
 			res = append(res, wsi)
 		}
 	}
@@ -198,7 +198,7 @@ func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetReworkWorsiteNb() int {
 	res := 0
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteMustRework(wsi.Status) {
+		if wsi.NeedRework() {
 			res += 1
 		}
 	}

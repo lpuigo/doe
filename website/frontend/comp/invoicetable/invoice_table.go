@@ -85,28 +85,7 @@ func (itm *InvoiceTableModel) ExpandRow(vm *hvue.VM, ws *fm.WorksiteInfo, others
 
 func (itm *InvoiceTableModel) TableRowClassName(rowInfo *js.Object) string {
 	wsi := &fm.WorksiteInfo{Object: rowInfo.Get("row")}
-	var res string = ""
-	switch wsi.Status {
-	case fm.WsStatusDone:
-		res = "worksite-row-done"
-	case fm.WsStatusRework:
-		res = "worksite-row-rework"
-	case fm.WsStatusPayment:
-		res = "worksite-row-payment"
-	case fm.WsStatusAttachment:
-		res = "worksite-row-attachment"
-	case fm.WsStatusDOE:
-		res = "worksite-row-doe"
-	case fm.WsStatusInProgress:
-		res = "worksite-row-inprogress"
-	case fm.WsStatusFormInProgress:
-		res = "worksite-row-forminprogress"
-	case fm.WsStatusNew:
-		res = "worksite-row-new"
-	default:
-		res = ""
-	}
-	return res
+	return fm.WorksiteRowClassName(wsi.Status)
 }
 
 func (itm *InvoiceTableModel) HeaderCellStyle() string {
@@ -180,7 +159,7 @@ func (itm *InvoiceTableModel) FilteredStatusValue() []string {
 		fm.WsStatusAttachment,
 		fm.WsStatusInvoice,
 		fm.WsStatusPayment,
-		fm.WsStatusRework,
+		//		fm.WsStatusRework,
 	}
 	return res
 }

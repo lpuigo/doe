@@ -122,28 +122,7 @@ func (wtm *WorksiteTableModel) CreateRework(vm *hvue.VM, wsi *fm.WorksiteInfo) {
 
 func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
 	wsi := &fm.WorksiteInfo{Object: rowInfo.Get("row")}
-	var res string = ""
-	switch wsi.Status {
-	case fm.WsStatusDone:
-		res = "worksite-row-done"
-	case fm.WsStatusRework:
-		res = "worksite-row-rework"
-	case fm.WsStatusPayment:
-		res = "worksite-row-payment"
-	case fm.WsStatusAttachment:
-		res = "worksite-row-attachment"
-	case fm.WsStatusDOE:
-		res = "worksite-row-doe"
-	case fm.WsStatusInProgress:
-		res = "worksite-row-inprogress"
-	case fm.WsStatusFormInProgress:
-		res = "worksite-row-forminprogress"
-	case fm.WsStatusNew:
-		res = "worksite-row-new"
-	default:
-		res = ""
-	}
-	return res
+	return fm.WorksiteRowClassName(wsi.Status)
 }
 
 func (wtm *WorksiteTableModel) HeaderCellStyle() string {
@@ -220,7 +199,7 @@ func (wtm *WorksiteTableModel) FilteredStatusValue() []string {
 		fm.WsStatusDOE,
 		fm.WsStatusAttachment,
 		fm.WsStatusPayment,
-		fm.WsStatusRework,
+		//fm.WsStatusRework,
 	}
 	return res
 }

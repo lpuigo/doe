@@ -3,7 +3,19 @@ package worksiteedit
 const template string = `
 <div class="worksite-detail">
     <el-row :gutter="10" type="flex" align="middle">
-        <el-col :span="3">
+        <el-col :span="4" style="text-align: right">
+            <worksite-status-tag v-model="worksite"></worksite-status-tag>
+        </el-col>
+        <el-col :span="4">
+            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="worksite.OrderDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+            ></el-date-picker>
+        </el-col>
+        <el-col :span="4">
             <el-autocomplete v-model.trim="worksite.Client"
                              :fetch-suggestions="ClientSearch"
                              placeholder="Client"
@@ -20,7 +32,7 @@ const template string = `
                 <template slot="prepend">Ville:</template>
             </el-input>
         </el-col>
-        <el-col :span="3">
+        <el-col :span="4">
             <el-input placeholder="PA-99999-XXXX" 
                       v-model="worksite.Ref"
                       :readonly="readonly" clearable size="mini"
@@ -28,19 +40,7 @@ const template string = `
                 <template slot="prepend">Chantier:</template>
             </el-input>
         </el-col>
-        <el-col :span="3" style="text-align: right">
-            <worksite-status-tag v-model="worksite"></worksite-status-tag>
-        </el-col>
-        <el-col :span="3">
-            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Soumission" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="worksite.OrderDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-            ></el-date-picker>
-        </el-col>
-        <el-col :span="3">
+        <el-col :span="4">
             <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Envoi DOE" size="mini"
                             style="width: 100%" type="date"
                             v-model="worksite.DoeDate"
@@ -48,26 +48,6 @@ const template string = `
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
                             :disabled="worksite.Status < '30 DOE'"
-            ></el-date-picker>
-        </el-col>
-        <el-col :span="3">
-            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Attachement" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="worksite.AttachmentDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-                            :disabled="worksite.Status < '40 Attachment'"
-            ></el-date-picker>
-        </el-col>
-        <el-col :span="3">
-            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Payement" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="worksite.PaymentDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-                            :disabled="worksite.Status < '50 Payment'"
             ></el-date-picker>
         </el-col>
     </el-row>
