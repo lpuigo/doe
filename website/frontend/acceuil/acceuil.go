@@ -188,7 +188,7 @@ func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
 		//if fm.WorksiteMustRework(wsi.Status) {
-		if wsi.NbRework > 0 {
+		if wsi.NeedRework() {
 			res = append(res, wsi)
 		}
 	}

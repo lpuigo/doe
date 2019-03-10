@@ -28,7 +28,7 @@ const (
 		<el-table
 				:data="filteredWorksites"
 				:row-class-name="TableRowClassName"
-				:default-sort = "{prop: 'Status', order: 'descending'}"
+				:default-sort = "{prop: 'OrderDate', order: 'descending'}"
 				height="100%"
 				:border=true size="mini"
 				@row-dblclick="SetSelectedWorksite"

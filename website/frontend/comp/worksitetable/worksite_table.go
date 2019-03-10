@@ -193,12 +193,12 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 
 func (wtm *WorksiteTableModel) FilteredStatusValue() []string {
 	res := []string{
-		fm.WsStatusNew,
-		fm.WsStatusFormInProgress,
-		fm.WsStatusInProgress,
-		fm.WsStatusDOE,
-		fm.WsStatusAttachment,
-		fm.WsStatusPayment,
+		//fm.WsStatusNew,
+		//fm.WsStatusFormInProgress,
+		//fm.WsStatusInProgress,
+		//fm.WsStatusDOE,
+		//fm.WsStatusAttachment,
+		//fm.WsStatusPayment,
 		//fm.WsStatusRework,
 	}
 	return res
