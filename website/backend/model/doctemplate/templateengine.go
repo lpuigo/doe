@@ -130,6 +130,11 @@ func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *worksites.WorkSit
 		return err
 	}
 
+	_, err = zw.Create(makeDir(path, "Changement du synoptique"))
+	if err != nil {
+		return err
+	}
+
 	_, err = zw.Create(makeDir(path, "Convention ajoutee"))
 	if err != nil {
 		return err
