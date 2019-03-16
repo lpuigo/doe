@@ -66,5 +66,5 @@ func InvoiceUpdateModelFromJS(o *js.Object) *InvoiceUpdateModel {
 
 func (ium *InvoiceUpdateModel) IsDisabled(vm *hvue.VM, info string) bool {
 	ium = &InvoiceUpdateModel{Object: vm.Object}
-	return ium.Worksite.IsDisabled(info)
+	return ium.Worksite.IsInfoDisabled(info)
 }

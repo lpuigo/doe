@@ -92,6 +92,11 @@ func (wdm *WorksiteDetailModel) ClientSearch(vm *hvue.VM, query string, callback
 	callback.Invoke(res)
 }
 
+func (wdm *WorksiteDetailModel) IsDisabled(vm *hvue.VM, info string) bool {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	return wdm.Worksite.IsInfoDisabled(info)
+}
+
 func (wdm *WorksiteDetailModel) DeleteOrder(vm *hvue.VM, i int) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.DeleteOrder(i)
@@ -111,12 +116,3 @@ func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.Copy(wdm.ReferenceWorksite)
 }
-
-//func (wdm *WorksiteDetailModel) CheckDoeDate(vm *hvue.VM) {
-//	wdm = &WorksiteDetailModel{Object: vm.Object}
-//	if tools.Empty(wdm.Worksite.DoeDate) {
-//		wdm.Worksite.Status = fm.WsStatusDOE
-//		return
-//	}
-//	wdm.Worksite.Status = fm.WsStatusDone
-//}

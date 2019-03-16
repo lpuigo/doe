@@ -194,13 +194,18 @@ pre {
 }
 
 .el-table .worksite-row-blocked {
-    background: #f8f8f8;
-    color: #7d3e3e;
+    background: #e6bfb8;
+    color: #800d0d;
+}
+
+.el-table .worksite-row-canceled {
+    background: #f2e6e6;
+    color: #b3a1a1;
 }
 
 .el-table .worksite-row-done {
-    background: #f8f8f8;
-    color: #adadad;
+    background: #f2f2f2;
+    color: #b3b3b3;
 }
 
 .el-table .worksite-row-error {

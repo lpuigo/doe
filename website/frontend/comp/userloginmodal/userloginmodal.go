@@ -39,7 +39,7 @@ const (
             <el-input v-model.trim="editedUser.Name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Mot de Passe" :label-width="labelSize">
-            <el-input type="password" v-model.trim="editedUser.Pwd" autocomplete="off"></el-input>
+            <el-input show-password v-model.trim="editedUser.Pwd" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item v-if="Message" :label-width="labelSize">
             <el-tag type="danger" style="width: 100%">{{Message}}</el-tag>

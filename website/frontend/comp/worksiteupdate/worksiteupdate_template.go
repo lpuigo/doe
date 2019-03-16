@@ -12,7 +12,7 @@ const template string = `
                     <span style="float:right; text-align: right">Commentaire dossier:</span>
                 </el-col>
                 <el-col :span="13">
-                    <el-input clearable placeholder="Commentaire sur le dossier" size="mini" type="textarea" autosize
+                    <el-input type="textarea" autosize placeholder="Commentaire sur le dossier" size="mini"
                               v-model.trim="worksite.Comment"
                     ></el-input>                    
                 </el-col>		
@@ -64,7 +64,7 @@ const template string = `
                 >
                     <template slot-scope="scope">
                         <el-row type="flex" align="middle" :gutter="10">
-                            <el-col :span="12">
+                            <el-col :span="13">
                                 <el-autocomplete v-model="scope.row.InstallActor"
                                                  :fetch-suggestions="UserSearch"
                                                  placeholder="Equipier"
@@ -73,7 +73,7 @@ const template string = `
                                                  @clear="scope.row.InstallDate = ''"
                                 ></el-autocomplete>
                             </el-col>
-                            <el-col :span="12">
+                            <el-col :span="11">
                                 <el-date-picker format="dd/MM/yyyy" placeholder="Install." size="mini"
                                                 style="width: 100%" type="date"
                                                 v-model="scope.row.InstallDate"
@@ -91,7 +91,7 @@ const template string = `
                 >
                     <template slot-scope="scope">
                         <el-row type="flex" align="middle" :gutter="10">
-                            <el-col :span="12">
+                            <el-col :span="13">
                                 <el-autocomplete v-model="scope.row.MeasureActor"
                                                  :fetch-suggestions="UserSearch"
                                                  placeholder="Equipier"
@@ -101,7 +101,7 @@ const template string = `
                                                  @clear="scope.row.MeasureDate = ''"
                                 ></el-autocomplete>
                             </el-col>
-                            <el-col :span="12">
+                            <el-col :span="11">
                                 <el-date-picker format="dd/MM/yyyy" placeholder="Mesure" size="mini"
                                                 style="width: 100%" type="date"
                                                 v-model="scope.row.MeasureDate"
@@ -136,7 +136,7 @@ const template string = `
                         label="Commentaire" prop="Comment"
                 >
                     <template slot-scope="scope">
-                        <el-input clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
+                        <el-input type="textarea" autosize placeholder="Commentaire sur tronçon" size="mini"
                                   v-model.trim="scope.row.Comment"
                         ></el-input>
                     </template>

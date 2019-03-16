@@ -41,13 +41,13 @@ const template string = `
             </el-input>
         </el-col>
         <el-col :span="4">
-            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Envoi DOE" size="mini"
+            <el-date-picker :readonly="readonly" format="dd/MM/yyyy" placeholder="Envoi Dossier" size="mini"
                             style="width: 100%" type="date"
                             v-model="worksite.DoeDate"
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
-                            :disabled="worksite.Status < '30 DOE'"
+                            :disabled="IsDisabled('DoeDate')"
             ></el-date-picker>
         </el-col>
     </el-row>

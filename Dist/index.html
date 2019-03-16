@@ -4,7 +4,7 @@
 <head>
     <title>EWIN</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/Assets/element-ui/2.4.11/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="/Assets/element-ui/2.6.1/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
     <link rel="stylesheet" href="index.css">
 </head>
@@ -68,7 +68,7 @@
                         <el-radio-button v-if="User.Permissions.Update" label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
                     <el-button-group>
-                        <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
+                        <el-button v-if="User.Permissions.Update" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-wrench icon--big" @click="ShowAdmin" size="mini"></el-button>
                     </el-button-group>
                     <span></span>
@@ -114,8 +114,8 @@
 
 <script src="/Assets/vue/2.5.17/vue.min.js"></script>
 <!--<script src="/Assets/vue/2.5.17/vue.js"></script>-->
-<script src="/Assets/element-ui/2.4.11/lib/index.js"></script>
-<script src="/Assets/element-ui/2.4.11/lib/umd/locale/fr.js"></script>
+<script src="/Assets/element-ui/2.6.1/lib/index.js"></script>
+<script src="/Assets/element-ui/2.6.1/lib/umd/locale/fr.js"></script>
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>

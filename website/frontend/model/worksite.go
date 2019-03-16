@@ -16,8 +16,9 @@ const (
 	WsStatusInvoice        string = "50 Invoice"
 	WsStatusPayment        string = "60 Payment"
 	//WsStatusRework         string = "80 Rework"
-	WsStatusBlocked string = "98 Blocked"
-	WsStatusDone    string = "99 Done"
+	WsStatusBlocked   string = "90 Blocked"
+	WsStatusCancelled string = "98 Canceled"
+	WsStatusDone      string = "99 Done"
 )
 
 type Worksite struct {
@@ -284,7 +285,9 @@ func WorksiteStatusLabel(status string) string {
 	//case WsStatusRework:
 	//	return "Reprise à faire"
 	case WsStatusBlocked:
-		return "Bloqué"
+		return "Dossier Blocage à faire"
+	case WsStatusCancelled:
+		return "Annulé"
 	case WsStatusDone:
 		return "Payé"
 	default:
@@ -307,7 +310,11 @@ func (ws *Worksite) UpdateStatus() {
 		return
 	}
 	if ws.IsBlocked() {
-		ws.Status = WsStatusBlocked
+		if tools.Empty(ws.DoeDate) {
+			ws.Status = WsStatusBlocked
+			return
+		}
+		ws.Status = WsStatusCancelled
 		return
 	}
 	if tools.Empty(ws.DoeDate) {
@@ -344,8 +351,11 @@ func (ws *Worksite) GetPtByName(refpt string) *Troncon {
 	return nil
 }
 
-func (ws *Worksite) IsDisabled(attr string) bool {
+// IsInfoDisabled returns true if given Worksite Attribute can not be updated yet, according to worksite status
+func (ws *Worksite) IsInfoDisabled(attr string) bool {
 	switch attr {
+	case "DoeDate":
+		return ws.Status < WsStatusDOE
 	case "AttachmentDate":
 		return ws.Status <= WsStatusDOE
 	case "InvoiceDate", "InvoiceName":
@@ -376,6 +386,8 @@ func WorksiteIsUpdatable(status string) bool {
 	//	return true
 	case WsStatusBlocked:
 		return true
+		//case WsStatusCancelled:
+		//	return true
 		//case WsStatusDone:
 		//	return true
 	}
@@ -401,6 +413,8 @@ func WorksiteMustRework(status string) bool {
 	//case WsStatusRework:
 	//	return true
 	//case WsStatusBlocked:
+	//	return true
+	//case WsStatusCancelled:
 	//	return true
 	//case WsStatusDone:
 	//	return true
@@ -428,6 +442,8 @@ func WorksiteIsReworkable(status string) bool {
 	//	return true
 	//case WsStatusBlocked:
 	//	return true
+	//case WsStatusCancelled:
+	//	return true
 	case WsStatusDone:
 		return true
 	}
@@ -453,6 +469,8 @@ func WorksiteIsBillable(status string) bool {
 	//case WsStatusRework:
 	//	return true
 	//case WsStatusBlocked:
+	//	return true
+	//case WsStatusCancelled:
 	//	return true
 	case WsStatusDone:
 		return true
@@ -481,6 +499,8 @@ func WorksiteRowClassName(status string) string {
 	//	res = "worksite-row-rework"
 	case WsStatusBlocked:
 		res = "worksite-row-blocked"
+	case WsStatusCancelled:
+		res = "worksite-row-canceled"
 	case WsStatusDone:
 		res = "worksite-row-done"
 	default:

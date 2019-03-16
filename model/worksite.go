@@ -68,6 +68,10 @@ func (ws *Worksite) setInvoiceAmount(wsi *fm.WorksiteInfo) {
 	if ws.DoeDate == "" || ws.DoeDate == "null" {
 		return
 	}
+	// fast exit if whole worksite blocked
+	if wsi.NbElBlocked == wsi.NbElTotal {
+		return
+	}
 	// TODO To be updated for different CEM amount
 	const CEM42Amount float64 = 70
 	wsi.InvoiceAmount = float64(wsi.NbElMeasured) * CEM42Amount
