@@ -11,9 +11,8 @@ type User struct {
 	Name        string          `js:"Name"`
 	Pwd         string          `js:"Pwd"`
 	Connected   bool            `js:"Connected"`
-	Clients     []string        `js:"Clients"`
+	Clients     []*Client       `js:"Clients"`
 	Permissions map[string]bool `js:"Permissions"`
-	Teams       []string        `js:"Teams"`
 }
 
 func NewUser() *User {
@@ -21,9 +20,8 @@ func NewUser() *User {
 	user.Name = ""
 	user.Pwd = ""
 	user.Connected = false
-	user.Clients = []string{}
+	user.Clients = []*Client{}
 	user.Permissions = make(map[string]bool)
-	user.Teams = []string{}
 	return user
 }
 
@@ -37,5 +35,13 @@ func (u *User) Copy(ou *User) {
 	u.Connected = ou.Connected
 	u.Clients = ou.Clients
 	u.Permissions = ou.Permissions
-	u.Teams = ou.Teams
+}
+
+func (u *User) GetClientByName(clientName string) *Client {
+	for _, c := range u.Clients {
+		if c.Name == clientName {
+			return c
+		}
+	}
+	return nil
 }

@@ -216,7 +216,7 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 
-	err := mgr.GetWorkSitesStats(w)
+	err := mgr.GetWorksitesStats(w)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return

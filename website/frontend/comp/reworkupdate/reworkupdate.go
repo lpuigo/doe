@@ -92,12 +92,16 @@ func (rum *ReworkUpdateModel) GetReworks() []*fm.Defect {
 
 func (rum *ReworkUpdateModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
 	rum = ReworkUpdateModelFromJS(vm.Object)
-	q := strings.ToLower(query)
-
 	res := []*autocomplete.Result{}
-	for _, u := range rum.User.Teams {
-		if q == "" || strings.Contains(strings.ToLower(u), q) {
-			res = append(res, autocomplete.NewResult(u))
+	q := strings.ToLower(query)
+	client := rum.User.GetClientByName(rum.Worksite.Client)
+	if client == nil {
+		callback.Invoke(res)
+		return
+	}
+	for _, team := range client.Teams {
+		if (q == "" && team.IsActive) || (q != "" && strings.Contains(strings.ToLower(team.Members), q)) {
+			res = append(res, autocomplete.NewResult(team.Members))
 		}
 	}
 	callback.Invoke(res)

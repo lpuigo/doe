@@ -84,6 +84,7 @@ func (m Manager) Clone() *Manager {
 	return &m
 }
 
+// visibleWorksiteFilter returns a filtering function on CurrentUser.Clients visibility
 func (m *Manager) visibleWorksiteFilter() model.IsWSVisible {
 	if len(m.CurrentUser.Clients) == 0 {
 		return func(ws *model.Worksite) bool { return true }
@@ -107,8 +108,8 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(m.visibleWorksiteFilter()))
 }
 
-// GetWorkSitesStats returns Worksites Stats (JSON in writer) visibles by current user
-func (m Manager) GetWorkSitesStats(writer io.Writer) error {
+// GetWorksitesStats returns Worksites Stats (JSON in writer) visibles by current user
+func (m Manager) GetWorksitesStats(writer io.Writer) error {
 	var isTeamVisible model.IsTeamVisible
 	if len(m.CurrentUser.Clients) > 0 {
 		teamVisible := make(map[model.ClientTeam]bool)
@@ -118,7 +119,7 @@ func (m Manager) GetWorkSitesStats(writer io.Writer) error {
 		}
 		for _, client := range clts {
 			for _, team := range client.Teams {
-				teamVisible[model.ClientTeam{Client: client.Name, Team: team.Name}] = true
+				teamVisible[model.ClientTeam{Client: client.Name, Team: team.Members}] = true
 			}
 		}
 		isTeamVisible = func(ct model.ClientTeam) bool {

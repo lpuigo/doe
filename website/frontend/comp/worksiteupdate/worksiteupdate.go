@@ -173,8 +173,14 @@ func (wum *WorksiteUpdateModel) CheckSignature(t *fm.Troncon) {
 func (wum *WorksiteUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
 	wum = WorksiteUpdateModelFromJS(vm.Object)
 	res := []*elements.ValueLabel{}
-	for iteam, team := range wum.User.Teams {
-		res = append(res, elements.NewValueLabel(team, strconv.Itoa(iteam+1)+" "+team))
+	client := wum.User.GetClientByName(wum.Worksite.Client)
+	if client == nil {
+		return nil
+	}
+	for _, team := range client.Teams {
+		if team.IsActive {
+			res = append(res, elements.NewValueLabel(team.Members, team.Name+" "+team.Members))
+		}
 	}
 	return res
 }

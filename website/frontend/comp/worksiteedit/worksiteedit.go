@@ -80,13 +80,12 @@ func WorksiteDetailModelFromJS(o *js.Object) *WorksiteDetailModel {
 
 func (wdm *WorksiteDetailModel) ClientSearch(vm *hvue.VM, query string, callback *js.Object) {
 	wdm = WorksiteDetailModelFromJS(vm.Object)
+	res := []*autocomplete.Result{}
 
 	q := strings.ToLower(query)
-
-	res := []*autocomplete.Result{}
-	for _, u := range wdm.User.Clients {
-		if q == "" || strings.Contains(strings.ToLower(u), q) {
-			res = append(res, autocomplete.NewResult(u))
+	for _, client := range wdm.User.Clients {
+		if q == "" || strings.Contains(strings.ToLower(client.Name), q) {
+			res = append(res, autocomplete.NewResult(client.Name))
 		}
 	}
 	callback.Invoke(res)
