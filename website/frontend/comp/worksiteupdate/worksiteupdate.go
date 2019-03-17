@@ -9,7 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strconv"
 	"strings"
 )
@@ -156,18 +156,27 @@ func (wum *WorksiteUpdateModel) CheckSignature(t *fm.Troncon) {
 	t.CheckSignature()
 }
 
-func (wum *WorksiteUpdateModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
+//func (wum *WorksiteUpdateModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {
+//	wum = WorksiteUpdateModelFromJS(vm.Object)
+//
+//	q := strings.ToLower(query)
+//
+//	res := []*autocomplete.Result{}
+//	for _, u := range wum.User.Teams {
+//		if q == "" || strings.Contains(strings.ToLower(u), q) {
+//			res = append(res, autocomplete.NewResult(u))
+//		}
+//	}
+//	callback.Invoke(res)
+//}
+
+func (wum *WorksiteUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
 	wum = WorksiteUpdateModelFromJS(vm.Object)
-
-	q := strings.ToLower(query)
-
-	res := []*autocomplete.Result{}
-	for _, u := range wum.User.Teams {
-		if q == "" || strings.Contains(strings.ToLower(u), q) {
-			res = append(res, autocomplete.NewResult(u))
-		}
+	res := []*elements.ValueLabel{}
+	for iteam, team := range wum.User.Teams {
+		res = append(res, elements.NewValueLabel(team, strconv.Itoa(iteam+1)+" "+team))
 	}
-	callback.Invoke(res)
+	return res
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -84,10 +84,10 @@ func (wst *WorksiteStatusTagModel) SetStatus() (statusType, statusText string) {
 		statusType = "success"
 	case fm.WsStatusPayment:
 		statusType = "success"
+	case fm.WsStatusCancelled:
+		statusType = "info"
 	case fm.WsStatusDone:
 		statusType = "success"
-	case fm.WsStatusRework:
-		statusType = "danger"
 	default:
 		statusType = "danger"
 	}

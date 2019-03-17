@@ -125,19 +125,18 @@ func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *worksites.WorkSit
 		}
 	}
 
-	_, err := zw.Create(makeDir(path, "Alveoles utilisees"))
-	if err != nil {
-		return err
+	dirs := []string{
+		"Alveoles utilisees",
+		"Changement du synoptique",
+		"Convention ajoutee",
+		"Photos poteaux",
+		"Photos " + ws.Pa.Ref,
 	}
-
-	_, err = zw.Create(makeDir(path, "Changement du synoptique"))
-	if err != nil {
-		return err
-	}
-
-	_, err = zw.Create(makeDir(path, "Convention ajoutee"))
-	if err != nil {
-		return err
+	for _, dir := range dirs {
+		_, err := zw.Create(makeDir(path, dir))
+		if err != nil {
+			return err
+		}
 	}
 
 	mpath := makeDir(path, "Mesures")
@@ -146,11 +145,6 @@ func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *worksites.WorkSit
 		if err != nil {
 			return err
 		}
-	}
-
-	_, err = zw.Create(makeDir(path, "Photos "+ws.Pa.Ref))
-	if err != nil {
-		return err
 	}
 
 	ppath := makeDir(path, "Photos PBs")

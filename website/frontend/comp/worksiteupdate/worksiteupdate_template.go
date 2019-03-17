@@ -65,13 +65,20 @@ const template string = `
                     <template slot-scope="scope">
                         <el-row type="flex" align="middle" :gutter="10">
                             <el-col :span="13">
-                                <el-autocomplete v-model="scope.row.InstallActor"
-                                                 :fetch-suggestions="UserSearch"
-                                                 placeholder="Equipier"
-                                                 prefix-icon="fas fa-user"
-                                                 clearable size="mini" style="width: 100%"
-                                                 @clear="scope.row.InstallDate = ''"
-                                ></el-autocomplete>
+                                <el-select v-model="scope.row.InstallActor" 
+                                           clearable filterable
+                                           size="mini" style="width: 100%"
+                                           placeholder="Equipe"
+                                           @clear="scope.row.InstallDate = ''"
+                                >
+                                    <!--<i slot="prefix" class="fas fa-user"></i>-->
+                                    <el-option
+                                            v-for="item in GetTeams()"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </el-col>
                             <el-col :span="11">
                                 <el-date-picker format="dd/MM/yyyy" placeholder="Install." size="mini"
@@ -92,14 +99,21 @@ const template string = `
                     <template slot-scope="scope">
                         <el-row type="flex" align="middle" :gutter="10">
                             <el-col :span="13">
-                                <el-autocomplete v-model="scope.row.MeasureActor"
-                                                 :fetch-suggestions="UserSearch"
-                                                 placeholder="Equipier"
-                                                 prefix-icon="fas fa-user"
-                                                 clearable size="mini" style="width: 100%"
-                                                 :disabled="!scope.row.InstallDate"
-                                                 @clear="scope.row.MeasureDate = ''"
-                                ></el-autocomplete>
+                                <el-select v-model="scope.row.MeasureActor"
+                                           clearable filterable
+                                           size="mini" style="width: 100%"
+                                           placeholder="Equipe"
+                                           :disabled="!scope.row.InstallDate"
+                                           @clear="scope.row.MeasureDate = ''"
+                                >
+                                    <!--<i slot="prefix" class="fas fa-user"></i>-->
+                                    <el-option
+                                            v-for="item in GetTeams()"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </el-col>
                             <el-col :span="11">
                                 <el-date-picker format="dd/MM/yyyy" placeholder="Mesure" size="mini"
