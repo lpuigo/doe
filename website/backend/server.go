@@ -33,6 +33,7 @@ const (
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
+	ClientsDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
 	TemplatesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
 	LaunchWebBrowser = true
@@ -46,6 +47,7 @@ func main() {
 		ManagerConfig: manager.ManagerConfig{
 			WorksitesDir: WorksitesDir,
 			UsersDir:     UsersDir,
+			ClientsDir:   ClientsDir,
 			TemplatesDir: TemplatesDir,
 			SessionKey:   SessionKey,
 		},

@@ -10,23 +10,23 @@ import (
 	"strconv"
 )
 
-func GetWorksites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksites").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	w.Header().Set("Content-Type", "application/json")
-
-	//TODO Manage User Authorization (control on mgr.CurrentUser)
-
-	err := mgr.GetWorkSites(w)
-	if err != nil {
-		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.Response = http.StatusOK
-}
-
+//func GetWorksites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+//	defer r.Body.Close()
+//	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksites").AddUser(mgr.CurrentUser.Name)
+//	defer logmsg.Log()
+//
+//	w.Header().Set("Content-Type", "application/json")
+//
+//	// TODO Manage User Authorization (control on mgr.CurrentUser)
+//
+//	err := mgr.GetWorkSites(w)
+//	if err != nil {
+//		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+//		return
+//	}
+//	logmsg.Response = http.StatusOK
+//}
+//
 func GetWorksitesInfo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesInfo").AddUser(mgr.CurrentUser.Name)

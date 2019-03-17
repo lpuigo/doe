@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
@@ -15,6 +16,7 @@ import (
 type Manager struct {
 	Worksites      *ws.WorkSitesPersister
 	Users          *users.UsersPersister
+	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
 	CurrentUser    *users.UserRecord
@@ -28,7 +30,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	}
 	err = wsp.LoadDirectory()
 	if err != nil {
-		return nil, fmt.Errorf("could not populate worksites:%s", err.Error())
+		return nil, fmt.Errorf("could not populate worksites: %s", err.Error())
 	}
 
 	// Init Users persister
@@ -38,7 +40,17 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	}
 	err = up.LoadDirectory()
 	if err != nil {
-		return nil, fmt.Errorf("could not populate user:%s", err.Error())
+		return nil, fmt.Errorf("could not populate user: %s", err.Error())
+	}
+
+	// Init Clients persister
+	cp, err := clients.NewClientsPersister(conf.ClientsDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create clients: %s", err.Error())
+	}
+	err = cp.LoadDirectory()
+	if err != nil {
+		return nil, fmt.Errorf("could not populate client: %s", err.Error())
 	}
 
 	// Init DocTemplate engine
@@ -48,8 +60,18 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	}
 
 	// Init manager
-	m := &Manager{Worksites: wsp, Users: up, TemplateEngine: te}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worsites and %d users", wsp.NbWorsites(), up.NbUsers()))
+	m := &Manager{
+		Worksites:      wsp,
+		Users:          up,
+		Clients:        cp,
+		TemplateEngine: te,
+	}
+	logger.Entry("Server").LogInfo(
+		fmt.Sprintf("loaded %d Worsites, %d Clients and %d users",
+			wsp.NbWorsites(),
+			cp.NbClients(),
+			up.NbUsers(),
+		))
 
 	m.SessionStore = session.NewSessionStore(conf.SessionKey)
 
@@ -62,9 +84,9 @@ func (m Manager) Clone() *Manager {
 	return &m
 }
 
-func (m *Manager) visibleWorksiteFilter() func(*model.Worksite) bool {
+func (m *Manager) visibleWorksiteFilter() model.IsWSVisible {
 	if len(m.CurrentUser.Clients) == 0 {
-		return func(*model.Worksite) bool { return true }
+		return func(ws *model.Worksite) bool { return true }
 	}
 	isVisible := make(map[string]bool)
 	for _, client := range m.CurrentUser.Clients {
@@ -76,9 +98,9 @@ func (m *Manager) visibleWorksiteFilter() func(*model.Worksite) bool {
 }
 
 // GetWorkSites returns Arrays of Worksites (JSON in writer)
-func (m Manager) GetWorkSites(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
-}
+//func (m Manager) GetWorkSites(writer io.Writer) error {
+//	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
+//}
 
 // GetWorkSites returns array of WorksiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesInfo(writer io.Writer) error {
@@ -87,17 +109,23 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 
 // GetWorkSitesStats returns Worksites Stats (JSON in writer) visibles by current user
 func (m Manager) GetWorkSitesStats(writer io.Writer) error {
-	var isTeamVisible func(team string) bool
-	if len(m.CurrentUser.Teams) > 0 {
-		teamVisible := make(map[string]bool)
-		for _, team := range m.CurrentUser.Teams {
-			teamVisible[team] = true
+	var isTeamVisible model.IsTeamVisible
+	if len(m.CurrentUser.Clients) > 0 {
+		teamVisible := make(map[model.ClientTeam]bool)
+		clts, err := m.GetCurrentUserClients()
+		if err != nil {
+			return err
 		}
-		isTeamVisible = func(team string) bool {
-			return teamVisible[team]
+		for _, client := range clts {
+			for _, team := range client.Teams {
+				teamVisible[model.ClientTeam{Client: client.Name, Team: team.Name}] = true
+			}
+		}
+		isTeamVisible = func(ct model.ClientTeam) bool {
+			return teamVisible[ct]
 		}
 	} else {
-		isTeamVisible = func(team string) bool { return true }
+		isTeamVisible = func(model.ClientTeam) bool { return true }
 	}
 	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter(), isTeamVisible))
 }
@@ -108,4 +136,23 @@ func (m Manager) ArchiveName() string {
 
 func (m Manager) CreateArchive(writer io.Writer) error {
 	return m.Worksites.CreateArchive(writer)
+}
+
+// GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
+func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
+	res := []*clients.Client{}
+	if m.CurrentUser == nil {
+		return nil, nil
+	}
+	if len(m.CurrentUser.Clients) == 0 {
+		return m.Clients.GetAllClients(), nil
+	}
+	for _, clientName := range m.CurrentUser.Clients {
+		client := m.Clients.GetByName(clientName)
+		if client == nil {
+			return nil, fmt.Errorf("could not retrieve client '%s' info", clientName)
+		}
+		res = append(res, client.Client)
+	}
+	return res, nil
 }

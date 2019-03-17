@@ -152,7 +152,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords such as keep(wsr.Worksite) == true
-func (wsp *WorkSitesPersister) GetStats(isWSVisible func(ws *model.Worksite) bool, isTeamVisible func(team string) bool) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 

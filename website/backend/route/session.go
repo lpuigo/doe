@@ -4,31 +4,29 @@ import (
 	"encoding/json"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	"net/http"
 )
 
 type authentUser struct {
 	Name        string
-	Clients     []string
+	Clients     []*clients.Client
 	Permissions map[string]bool
-	Teams       []string
 }
 
 func newAuthentUser() authentUser {
 	return authentUser{
 		Name:        "",
-		Clients:     []string{},
+		Clients:     []*clients.Client{},
 		Permissions: make(map[string]bool),
-		Teams:       []string{},
 	}
 }
 
-func (au *authentUser) SetFrom(ur *users.UserRecord) {
+func (au *authentUser) SetFrom(ur *users.UserRecord, clients []*clients.Client) {
 	au.Name = ur.Name
-	au.Clients = ur.Clients
+	au.Clients = clients
 	au.Permissions = ur.Permissions
-	au.Teams = ur.Teams
 }
 
 // GetUser checks for session cookie, and return pertaining user
@@ -45,8 +43,13 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	// check for session cookie
 	if mgr.CheckSessionUser(r) {
 		// found a correct one, set user
-		user.SetFrom(mgr.CurrentUser)
-		logmsg.AddUser(user.Name)
+		logmsg.AddUser(mgr.CurrentUser.Name)
+		clts, err := mgr.GetCurrentUserClients()
+		if err != nil {
+			AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		user.SetFrom(mgr.CurrentUser, clts)
 		logmsg.Info = "authenticated"
 	} else {
 		// not found or improper, remove it first
