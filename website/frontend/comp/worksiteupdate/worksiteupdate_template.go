@@ -151,7 +151,7 @@ const template string = `
                 >
                     <template slot-scope="scope">
                         <el-input type="textarea" autosize placeholder="Commentaire sur tronçon" size="mini"
-                                  v-model.trim="scope.row.Comment"
+                                  v-model="scope.row.Comment"
                         ></el-input>
                     </template>
                 </el-table-column>
