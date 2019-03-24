@@ -46,7 +46,7 @@ const template string = `
         <el-col :offset="1" :span="3">
             <el-switch v-model="value.Blockage"
                        active-color="#db2828"
-                       active-text="Bloquage"
+                       active-text="Blocage"
                        inactive-color="#bcbcbc"
                        :disabled="value.NeedSignature && !value.Signed"
             ></el-switch>

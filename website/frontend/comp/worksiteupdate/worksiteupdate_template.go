@@ -128,7 +128,7 @@ const template string = `
                     </template>
                 </el-table-column>
                 <el-table-column
-                        label="Bloquage"
+                        label="Blocage"
                         width="140px" :resizable="true"
                 >
                     <template slot-scope="scope">
@@ -136,7 +136,7 @@ const template string = `
                             <el-checkbox 
                                     v-model="scope.row.Blockage"
                                     size="mini" :disabled="scope.row.NeedSignature && !scope.row.Signed"
-                            >Bloquage</el-checkbox>
+                            >Blocage</el-checkbox>
                             <div v-if="scope.row.NeedSignature">
                                 <el-checkbox 
                                         v-model="scope.row.Signed"
