@@ -101,10 +101,10 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 			if t.Blockage {
 				wsi.NbElBlocked += t.NbRacco
 			}
-			if t.InstallDate != "" && t.InstallDate != "null" {
+			if !t.Blockage && t.InstallDate != "" && t.InstallDate != "null" {
 				wsi.NbElInstalled += t.NbRacco
 			}
-			if t.MeasureDate != "" && t.MeasureDate != "null" {
+			if !t.Blockage && t.MeasureDate != "" && t.MeasureDate != "null" {
 				wsi.NbElMeasured += t.NbRacco
 			}
 			if t.Comment != "" {
