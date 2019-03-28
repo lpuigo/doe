@@ -92,7 +92,7 @@ const template string = `
     <el-row v-if="value.Blockage" :gutter="10">
         <el-col :span="24">
             <el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
-                      v-model.trim="value.Comment"
+                      v-model="value.Comment"
             ></el-input>
         </el-col>
     </el-row>

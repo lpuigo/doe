@@ -39,7 +39,7 @@ const template string = `
     </el-col>
     <el-col :span="11">
         <el-input :placeholder="addressPH" :readonly="readonly" clearable size="mini"
-                  v-model.trim="value.Address"
+                  v-model="value.Address"
         >
         </el-input>
     </el-col>

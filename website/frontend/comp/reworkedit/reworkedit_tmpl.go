@@ -136,7 +136,7 @@ const template string = `
             >
                 <template slot-scope="scope">
                     <el-input type="textarea" autosize placeholder="Description de la reprise" size="mini"
-                              v-model.trim="scope.row.Description"
+                              v-model="scope.row.Description"
                     ></el-input>
                 </template>  
             </el-table-column>

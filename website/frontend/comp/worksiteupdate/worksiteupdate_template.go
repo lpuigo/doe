@@ -13,7 +13,7 @@ const template string = `
                 </el-col>
                 <el-col :span="13">
                     <el-input type="textarea" autosize placeholder="Commentaire sur le dossier" size="mini"
-                              v-model.trim="worksite.Comment"
+                              v-model="worksite.Comment"
                     ></el-input>                    
                 </el-col>		
                 <el-col :offset="1" :span="4">
