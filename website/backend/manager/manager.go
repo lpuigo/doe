@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
@@ -108,8 +109,23 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(m.visibleWorksiteFilter()))
 }
 
-// GetWorksitesStats returns Worksites Stats (JSON in writer) visibles by current user
+// GetWorksitesStats returns Worksites Stats per Week (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonday(d)
+	}
+	return m.getWorksitesStats(writer, 12, df)
+}
+
+// GetWorksitesStats returns Worksites Stats per Month (JSON in writer) visibles by current user
+func (m Manager) GetWorksitesMonthStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonth(d)
+	}
+	return m.getWorksitesStats(writer, 12, df)
+}
+
+func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor model.DateAggreg) error {
 	var isTeamVisible model.IsTeamVisible
 	if len(m.CurrentUser.Clients) > 0 {
 		teamVisible := make(map[model.ClientTeam]bool)
@@ -128,7 +144,7 @@ func (m Manager) GetWorksitesStats(writer io.Writer) error {
 	} else {
 		isTeamVisible = func(model.ClientTeam) bool { return true }
 	}
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(m.visibleWorksiteFilter(), isTeamVisible))
+	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible))
 }
 
 func (m Manager) ArchiveName() string {

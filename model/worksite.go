@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 )
 
@@ -122,6 +121,7 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 type StatKey struct {
 	Team string
 	Date string
+	Mes  string
 }
 
 type ClientTeam struct {
@@ -131,18 +131,67 @@ type ClientTeam struct {
 
 type IsWSVisible func(ws *Worksite) bool
 type IsTeamVisible func(ClientTeam) bool
+type DateAggreg func(string) string
+
+const (
+	NbElsInstalled string = "Installed"
+	NbElsBlocked   string = "Blocked"
+	NbElsMeasured  string = "Measured"
+	NbElsDOE       string = "DOE"
+)
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Teams
-func (ws *Worksite) AddStat(nbels map[StatKey]int, isTeamVisible IsTeamVisible) {
+func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor DateAggreg, isTeamVisible IsTeamVisible) {
+	nbDOE := 0
+	teamDOE := ""
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
-			if !t.Blockage && t.InstallDate != "" && isTeamVisible(ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
+			if !isTeamVisible(ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
+				continue
+			}
+			// NbElsInstalled
+			if !t.Blockage && t.InstallDate != "" {
 				key := StatKey{
 					Team: t.InstallActor,
-					Date: date.GetMonday(t.InstallDate),
+					Date: dateFor(t.InstallDate),
+					Mes:  NbElsInstalled,
+				}
+				nbels[key] += t.NbRacco
+			}
+			// NbElsMeasured
+			if !t.Blockage && t.MeasureDate != "" {
+				key := StatKey{
+					Team: t.MeasureActor,
+					Date: dateFor(t.MeasureDate),
+					Mes:  NbElsMeasured,
+				}
+				nbels[key] += t.NbRacco
+				nbDOE += t.NbRacco
+				teamDOE = t.MeasureActor
+			}
+			// NbElsBlocked
+			if t.Blockage {
+				d := dateFor(ws.OrderDate)
+				if t.InstallDate != "" {
+					d = dateFor(t.InstallDate)
+				}
+				key := StatKey{
+					Team: t.MeasureActor,
+					Date: d,
+					Mes:  NbElsBlocked,
 				}
 				nbels[key] += t.NbRacco
 			}
 		}
+	}
+
+	// NbElsDOE
+	if ws.DoeDate != "" {
+		key := StatKey{
+			Team: teamDOE,
+			Date: dateFor(ws.DoeDate),
+			Mes:  NbElsDOE,
+		}
+		nbels[key] += nbDOE
 	}
 }

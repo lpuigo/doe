@@ -8,16 +8,16 @@ import (
 type WorksiteStats struct {
 	*js.Object
 
-	StartDate string   `js:"StartDate"`
-	Teams     []string `js:"Teams"`
-	NbEls     [][]int  `js:"NbEls"`
+	Dates  []string           `js:"Dates"`
+	Teams  []string           `js:"Teams"`
+	Values map[string][][]int `js:"Values"`
 }
 
 func NewWorksiteStats() *WorksiteStats {
 	ws := &WorksiteStats{Object: tools.O()}
-	ws.StartDate = ""
-	ws.Teams = nil
-	ws.NbEls = nil
+	ws.Dates = []string{}
+	ws.Teams = []string{}
+	ws.Values = map[string][][]int{}
 	return ws
 }
 
@@ -32,13 +32,13 @@ func WorksiteStatsFromJs(o *js.Object) *WorksiteStats {
 func (ws *WorksiteStats) CreateTeamStats() []*TeamStats {
 	res := []*TeamStats{}
 	for i, team := range ws.Teams {
-		//if i == 0 {
-		//	continue // Skip first Team as it is Worksites global
-		//}
 		ts := NewTeamStats()
 		ts.Team = team
-		ts.StartDate = ws.StartDate
-		ts.NbEls = ws.NbEls[i]
+		ts.Dates = ws.Dates
+		for mes, _ := range ws.Values {
+			//ts.Values[mes] = ws.Values[mes][i]
+			ts.Get("Values").Set(mes, ws.Values[mes][i])
+		}
 		res = append(res, ts)
 	}
 	return res

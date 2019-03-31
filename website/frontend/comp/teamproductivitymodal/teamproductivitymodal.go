@@ -12,31 +12,6 @@ import (
 	"strconv"
 )
 
-type TeamProductivityModalModel struct {
-	*modal.ModalModel
-
-	User      *fm.User          `js:"user"`
-	Stats     *fm.WorksiteStats `js:"Stats"`
-	TeamStats []*fm.TeamStats   `js:"TeamStats"`
-}
-
-func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
-	tpmm := &TeamProductivityModalModel{
-		ModalModel: modal.NewModalModel(vm),
-	}
-	tpmm.Stats = fm.NewWorksiteStats()
-	tpmm.User = fm.NewUser()
-	tpmm.TeamStats = []*fm.TeamStats{}
-	return tpmm
-}
-
-func TeamProductivityModalModelFromJS(o *js.Object) *TeamProductivityModalModel {
-	tpmm := &TeamProductivityModalModel{
-		ModalModel: &modal.ModalModel{Object: o},
-	}
-	return tpmm
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Component Methods
 
@@ -58,14 +33,45 @@ func componentOption() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
+type TeamProductivityModalModel struct {
+	*modal.ModalModel
+
+	User       *fm.User          `js:"user"`
+	Stats      *fm.WorksiteStats `js:"Stats"`
+	TeamStats  []*fm.TeamStats   `js:"TeamStats"`
+	ActiveMode string            `js:"ActiveMode"`
+}
+
+func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
+	tpmm := &TeamProductivityModalModel{
+		ModalModel: modal.NewModalModel(vm),
+	}
+	tpmm.Stats = fm.NewWorksiteStats()
+	tpmm.User = fm.NewUser()
+	tpmm.TeamStats = []*fm.TeamStats{}
+	tpmm.ActiveMode = "week"
+	return tpmm
+}
+
+func TeamProductivityModalModelFromJS(o *js.Object) *TeamProductivityModalModel {
+	tpmm := &TeamProductivityModalModel{
+		ModalModel: &modal.ModalModel{Object: o},
+	}
+	return tpmm
+}
+
 func (tpmm *TeamProductivityModalModel) Show(user *fm.User) {
 	tpmm.Stats = fm.NewWorksiteStats()
 	tpmm.TeamStats = []*fm.TeamStats{}
 	tpmm.User = user
+	tpmm.RefreshStat()
+	tpmm.ModalModel.Show()
+}
+
+func (tpmm *TeamProductivityModalModel) RefreshStat() {
+	print(tpmm.ActiveMode)
 	tpmm.Loading = true
 	go tpmm.callGetWorksitesStats()
-
-	tpmm.ModalModel.Show()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +86,7 @@ func (tpmm *TeamProductivityModalModel) errorMessage(req *xhr.Request) {
 
 func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 	defer func() { tpmm.Loading = false }()
-	req := xhr.NewRequest("GET", "/api/worksites/stat")
+	req := xhr.NewRequest("GET", "/api/worksites/stat/"+tpmm.ActiveMode)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)

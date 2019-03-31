@@ -8,15 +8,15 @@ import (
 type TeamStats struct {
 	*js.Object
 
-	Team      string `js:"Team"`
-	StartDate string `js:"StartDate"`
-	NbEls     []int  `js:"NbEls"`
+	Team   string           `js:"Team"`
+	Dates  []string         `js:"Dates"`
+	Values map[string][]int `js:"Values"`
 }
 
 func NewTeamStats() *TeamStats {
 	ts := &TeamStats{Object: tools.O()}
 	ts.Team = ""
-	ts.StartDate = ""
-	ts.NbEls = []int{}
+	ts.Dates = []string{}
+	ts.Values = make(map[string][]int)
 	return ts
 }

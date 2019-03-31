@@ -152,26 +152,28 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords such as keep(wsr.Worksite) == true
-func (wsp *WorkSitesPersister) GetStats(isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
-	// calc Nb installed ELs per Team/date
+	// calc Nb installed ELs per Team/date/mesurement
 	nbEls := make(map[model.StatKey]int)
 	for _, wsr := range wsp.workSites {
 		if isWSVisible(wsr.Worksite) {
-			wsr.AddStat(nbEls, isTeamVisible)
+			wsr.AddStat(nbEls, dateFor, isTeamVisible)
 		}
 	}
 
 	ws := fm.NewBEWorksiteStats()
 
 	//create team List & Dates
-	end := date.Today().GetMonday()
+	end := date.Today()
 	start := end.String()
 	teamset := make(map[string]int)
+	messet := make(map[string]int)
 	for key, _ := range nbEls {
 		teamset[key.Team] = 1
+		messet[key.Mes] = 1
 		if key.Date < start {
 			start = key.Date
 		}
@@ -181,23 +183,42 @@ func (wsp *WorkSitesPersister) GetStats(isWSVisible model.IsWSVisible, isTeamVis
 		teams = append(teams, t)
 	}
 	sort.Strings(teams)
-	teams = append([]string{"GLOBAL"}, teams...)
-	dates := []string{}
-	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
-		dates = append(dates, d.String())
+	measurements := []string{}
+	for m, _ := range messet {
+		measurements = append(measurements, m)
 	}
-	ws.StartDate = start
+	sort.Strings(measurements)
+
+	// Aggregate Data for Global
+	teams = append([]string{"GLOBAL"}, teams...)
+	dateset := make(map[string]int)
+	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
+		dateset[dateFor(d.String())] = 1
+	}
+	dates := []string{}
+	for d, _ := range dateset {
+		dates = append(dates, d)
+	}
+	sort.Strings(dates)
+	// discard unwanted too old dates
+	if len(dates) > maxVal {
+		dates = dates[len(dates)-maxVal:]
+	}
+	ws.Dates = dates
 	ws.Teams = teams
 
 	// calc nbEls per teams/date
-	ws.NbEls = make([][]int, len(teams))
-	ws.NbEls[0] = make([]int, len(dates))
-	for i, t := range teams[1:] {
-		ws.NbEls[i+1] = make([]int, len(dates))
-		for j, d := range dates {
-			nbEl := nbEls[model.StatKey{Team: t, Date: d}]
-			ws.NbEls[i+1][j] = nbEl
-			ws.NbEls[0][j] += nbEl
+	ws.Values = make(map[string][][]int, len(teams))
+	for _, meas := range measurements {
+		ws.Values[meas] = make([][]int, len(teams))
+		ws.Values[meas][0] = make([]int, len(dates))
+		for i, t := range teams[1:] {
+			ws.Values[meas][i+1] = make([]int, len(dates))
+			for j, d := range dates {
+				nbEl := nbEls[model.StatKey{Team: t, Date: d, Mes: meas}]
+				ws.Values[meas][i+1][j] = nbEl
+				ws.Values[meas][0][j] += nbEl
+			}
 		}
 	}
 

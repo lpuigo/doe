@@ -216,7 +216,20 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 
-	err := mgr.GetWorksitesStats(w)
+	var err error
+
+	vars := mux.Vars(r)
+	freq := vars["freq"]
+	switch freq {
+	case "week":
+		err = mgr.GetWorksitesStats(w)
+	case "month":
+		err = mgr.GetWorksitesMonthStats(w)
+	default:
+		AddError(w, logmsg, "mis-formatted stat type '"+freq+"'", http.StatusBadRequest)
+		return
+	}
+
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return

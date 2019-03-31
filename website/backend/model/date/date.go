@@ -38,6 +38,11 @@ func (d Date) GetMonday() Date {
 	return Date(d.ToTime().AddDate(0, 0, -wd))
 }
 
+func (d Date) GetMonth() Date {
+	t := d.ToTime()
+	return Date(time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC))
+}
+
 func (d Date) AddDays(n int) Date {
 	return Date(d.ToTime().AddDate(0, 0, n))
 }
@@ -60,4 +65,8 @@ func Today() Date {
 
 func GetMonday(d string) string {
 	return DateFrom(d).GetMonday().String()
+}
+
+func GetMonth(d string) string {
+	return DateFrom(d).GetMonth().String()
 }

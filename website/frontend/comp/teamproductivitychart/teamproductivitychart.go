@@ -5,21 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 )
-
-type TeamProductivityChart struct {
-	*js.Object
-	VM    *hvue.VM      `js:"VM"`
-	Stats *fm.TeamStats `js:"stats"`
-}
-
-func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
-	tpc := &TeamProductivityChart{Object: tools.O()}
-	tpc.VM = vm
-	tpc.Stats = fm.NewTeamStats()
-	return tpc
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Component Template
@@ -49,7 +35,7 @@ func componentOption() []hvue.ComponentOption {
 		hvue.MethodsOf(&TeamProductivityChart{}),
 		hvue.Mounted(func(vm *hvue.VM) {
 			tpc := &TeamProductivityChart{Object: vm.Object}
-			tpc.setChart()
+			tpc.setColumnChart()
 		}),
 	}
 }
@@ -57,35 +43,94 @@ func componentOption() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Model Methods
 
+type TeamProductivityChart struct {
+	*js.Object
+	VM    *hvue.VM      `js:"VM"`
+	Stats *fm.TeamStats `js:"stats"`
+}
+
+func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
+	tpc := &TeamProductivityChart{Object: tools.O()}
+	tpc.VM = vm
+	tpc.Stats = fm.NewTeamStats()
+	return tpc
+}
+
 func (tpc *TeamProductivityChart) SetStyle() string {
 	return "width:100%; height:250px;"
 }
 
-func (tpc *TeamProductivityChart) setChart() {
+//func (tpc *TeamProductivityChart) setChart() {
+//	ts := tpc.Stats
+//	startDate := date.JSDate(ts.StartDate)
+//
+//	chartdesc := js.M{
+//		"chart": js.M{
+//			"backgroundColor": "#F7F7F7",
+//			"type":            "line",
+//		},
+//		"title": js.M{
+//			"text": nil,
+//		},
+//		//"xAxis": js.M{
+//		//	"categories": ts.Dates,
+//		//	"tickPixelInterval" : 400,
+//		//},
+//		"xAxis": js.M{
+//			"type": "datetime",
+//			"dateTimeLabelFormats": js.M{
+//				"day": "%e %b",
+//			},
+//		},
+//		"yAxis": js.M{
+//			"title": js.M{
+//				"text": "Nbs.",
+//			},
+//		},
+//		"legend": js.M{
+//			"layout":        "vertical",
+//			"align":         "right",
+//			"verticalAlign": "top",
+//		},
+//		"plotOptions": js.M{
+//			"series": js.M{
+//				"allowPointSelect": false,
+//				"pointStart":       startDate,
+//				"pointInterval":    7 * 24 * 3600 * 1000, // one week
+//				"marker":           js.M{"enabled": false},
+//				"animation":        false,
+//			},
+//		},
+//		"series": tpc.getSeries(),
+//	}
+//	js.Global.Get("Highcharts").Call("chart", tpc.VM.Refs("container"), chartdesc)
+//}
+
+func (tpc *TeamProductivityChart) setColumnChart() {
 	ts := tpc.Stats
-	startDate := date.JSDate(ts.StartDate)
+	//startDate := date.JSDate(ts.StartDate)
 
 	chartdesc := js.M{
 		"chart": js.M{
 			"backgroundColor": "#F7F7F7",
-			"type":            "line",
+			"type":            "column",
 		},
 		"title": js.M{
 			"text": nil,
 		},
-		//"xAxis": js.M{
-		//	"categories": ts.Dates,
-		//	"tickPixelInterval" : 400,
-		//},
 		"xAxis": js.M{
-			"type": "datetime",
-			"dateTimeLabelFormats": js.M{
-				"day": "%e %b",
-			},
+			"categories": ts.Dates,
+			//"tickPixelInterval" : 400,
 		},
+		//"xAxis": js.M{
+		//	"type": "datetime",
+		//	"dateTimeLabelFormats": js.M{
+		//		"day": "%e %b",
+		//	},
+		//},
 		"yAxis": js.M{
 			"title": js.M{
-				"text": "Days",
+				"text": "Nb. ELs",
 			},
 		},
 		"legend": js.M{
@@ -93,23 +138,36 @@ func (tpc *TeamProductivityChart) setChart() {
 			"align":         "right",
 			"verticalAlign": "top",
 		},
+		"tooltip": js.M{
+			"shared": true,
+		},
 		"plotOptions": js.M{
 			"series": js.M{
 				"allowPointSelect": false,
-				"pointStart":       startDate,
-				"pointInterval":    7 * 24 * 3600 * 1000, // one week
-				"marker":           js.M{"enabled": false},
-				"animation":        false,
+				//"pointStart":       startDate,
+				//"pointInterval":    7 * 24 * 3600 * 1000, // one week
+				"marker":    js.M{"enabled": false},
+				"animation": false,
+			},
+			"column": js.M{
+				//"pointPadding": 0.1,
+				//"borderWidth":  0,
+				//"groupPadding": 0,
+				"borderRadius": 2,
+				"shadow":       false,
+				"grouping":     true,
 			},
 		},
-		"series": js.S{
-			js.M{
-				"name":      "Nb. EL",
-				"color":     "#51A825",
-				"lineWidth": 5,
-				"data":      ts.NbEls,
-			},
-		},
+		"series": tpc.getSeries(),
 	}
 	js.Global.Get("Highcharts").Call("chart", tpc.VM.Refs("container"), chartdesc)
+}
+
+func (tpc *TeamProductivityChart) getSeries() []interface{} {
+	res := []interface{}{}
+	res = append(res, newSerie("column", "Installed", "#51A825", 0, tpc.Stats.Values["Installed"]))
+	res = append(res, newSerie("column", "Measured", "#29d1cb", 0, tpc.Stats.Values["Measured"]))
+	res = append(res, newSerie("column", "Blocked", "#cc2020", 0.2, tpc.Stats.Values["Blocked"]))
+	res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values["DOE"]))
+	return res
 }
