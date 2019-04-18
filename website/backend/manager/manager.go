@@ -109,15 +109,15 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(m.visibleWorksiteFilter()))
 }
 
-// GetWorksitesStats returns Worksites Stats per Week (JSON in writer) visibles by current user
-func (m Manager) GetWorksitesStats(writer io.Writer) error {
+// GetWorksitesWeekStats returns Worksites Stats per Week (JSON in writer) visibles by current user
+func (m Manager) GetWorksitesWeekStats(writer io.Writer) error {
 	df := func(d string) string {
 		return date.GetMonday(d)
 	}
 	return m.getWorksitesStats(writer, 12, df)
 }
 
-// GetWorksitesStats returns Worksites Stats per Month (JSON in writer) visibles by current user
+// GetWorksitesWeekStats returns Worksites Stats per Month (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesMonthStats(writer io.Writer) error {
 	df := func(d string) string {
 		return date.GetMonth(d)

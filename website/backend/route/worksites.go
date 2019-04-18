@@ -211,7 +211,7 @@ func GetWorkSiteDOEArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Requ
 
 func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesStats").AddUser(mgr.CurrentUser.Name)
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesWeekStats").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -222,7 +222,7 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	freq := vars["freq"]
 	switch freq {
 	case "week":
-		err = mgr.GetWorksitesStats(w)
+		err = mgr.GetWorksitesWeekStats(w)
 	case "month":
 		err = mgr.GetWorksitesMonthStats(w)
 	default:

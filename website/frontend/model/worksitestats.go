@@ -10,7 +10,7 @@ type WorksiteStats struct {
 
 	Dates  []string           `js:"Dates"`
 	Teams  []string           `js:"Teams"`
-	Values map[string][][]int `js:"Values"`
+	Values map[string][][]int `js:"Values"` // map[measurement][teamNum][dateNum]int{}
 }
 
 func NewWorksiteStats() *WorksiteStats {

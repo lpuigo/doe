@@ -140,32 +140,39 @@ const (
 	NbElsDOE       string = "DOE"
 )
 
-// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Teams
+// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
 func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor DateAggreg, isTeamVisible IsTeamVisible) {
 	nbDOE := 0
 	teamDOE := ""
+
+	addNbEls := func(client, team, date, measurement string, nbEl int) {
+		// add client / team info
+		nbels[StatKey{
+			Team: client + " : " + team,
+			Date: date,
+			Mes:  measurement,
+		}] += nbEl
+		// add client info
+		nbels[StatKey{
+			Team: client,
+			Date: date,
+			Mes:  measurement,
+		}] += nbEl
+	}
+
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
 			if !isTeamVisible(ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
 				continue
 			}
-			// NbElsInstalled
+			// NbElsInstalled for Team & Client
 			if !t.Blockage && t.InstallDate != "" {
-				key := StatKey{
-					Team: t.InstallActor,
-					Date: dateFor(t.InstallDate),
-					Mes:  NbElsInstalled,
-				}
-				nbels[key] += t.NbRacco
+				addNbEls(ws.Client, t.InstallActor, dateFor(t.InstallDate), NbElsInstalled, t.NbRacco)
 			}
-			// NbElsMeasured
+			// NbElsMeasured for Team & Client
 			if !t.Blockage && t.MeasureDate != "" {
-				key := StatKey{
-					Team: t.MeasureActor,
-					Date: dateFor(t.MeasureDate),
-					Mes:  NbElsMeasured,
-				}
-				nbels[key] += t.NbRacco
+				addNbEls(ws.Client, t.MeasureActor, dateFor(t.MeasureDate), NbElsMeasured, t.NbRacco)
+
 				nbDOE += t.NbRacco
 				teamDOE = t.MeasureActor
 			}
@@ -175,23 +182,13 @@ func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor DateAggreg, isTeamVis
 				if t.InstallDate != "" {
 					d = dateFor(t.InstallDate)
 				}
-				key := StatKey{
-					Team: t.MeasureActor,
-					Date: d,
-					Mes:  NbElsBlocked,
-				}
-				nbels[key] += t.NbRacco
+				addNbEls(ws.Client, t.InstallActor, d, NbElsBlocked, t.NbRacco)
 			}
 		}
 	}
 
 	// NbElsDOE
 	if ws.DoeDate != "" {
-		key := StatKey{
-			Team: teamDOE,
-			Date: dateFor(ws.DoeDate),
-			Mes:  NbElsDOE,
-		}
-		nbels[key] += nbDOE
+		addNbEls(ws.Client, teamDOE, dateFor(ws.DoeDate), NbElsDOE, nbDOE)
 	}
 }

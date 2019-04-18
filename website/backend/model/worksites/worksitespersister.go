@@ -151,7 +151,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 	return nil
 }
 
-// GetStats returns all Stats about all contained WorkSiteRecords such as keep(wsr.Worksite) == true
+// GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
 func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
@@ -166,7 +166,7 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 
 	ws := fm.NewBEWorksiteStats()
 
-	//create team List & Dates
+	//create client, team, measurments & dates Lists
 	end := date.Today()
 	start := end.String()
 	teamset := make(map[string]int)
@@ -183,14 +183,13 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 		teams = append(teams, t)
 	}
 	sort.Strings(teams)
+
 	measurements := []string{}
 	for m, _ := range messet {
 		measurements = append(measurements, m)
 	}
 	sort.Strings(measurements)
 
-	// Aggregate Data for Global
-	teams = append([]string{"GLOBAL"}, teams...)
 	dateset := make(map[string]int)
 	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
 		dateset[dateFor(d.String())] = 1
@@ -200,24 +199,23 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 		dates = append(dates, d)
 	}
 	sort.Strings(dates)
-	// discard unwanted too old dates
+	// keep maxVal newest data
 	if len(dates) > maxVal {
 		dates = dates[len(dates)-maxVal:]
 	}
 	ws.Dates = dates
 	ws.Teams = teams
 
-	// calc nbEls per teams/date
+	// calc nbEls per measurements/teams/date
 	ws.Values = make(map[string][][]int, len(teams))
 	for _, meas := range measurements {
 		ws.Values[meas] = make([][]int, len(teams))
 		ws.Values[meas][0] = make([]int, len(dates))
-		for i, t := range teams[1:] {
-			ws.Values[meas][i+1] = make([]int, len(dates))
-			for j, d := range dates {
+		for teamNum, t := range teams {
+			ws.Values[meas][teamNum] = make([]int, len(dates))
+			for dateNum, d := range dates {
 				nbEl := nbEls[model.StatKey{Team: t, Date: d, Mes: meas}]
-				ws.Values[meas][i+1][j] = nbEl
-				ws.Values[meas][0][j] += nbEl
+				ws.Values[meas][teamNum][dateNum] = nbEl
 			}
 		}
 	}
