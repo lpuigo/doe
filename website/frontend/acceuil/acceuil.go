@@ -106,6 +106,8 @@ func (m *MainPageModel) SetActiveMode() {
 	switch {
 	case m.User.Name == "":
 		m.ActiveMode = ""
+	case m.User.Permissions["Create"]:
+		m.ActiveMode = "Create"
 	case m.User.Permissions["Update"]:
 		m.ActiveMode = "Update"
 	case m.User.Permissions["Invoice"]:

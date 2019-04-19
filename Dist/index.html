@@ -69,6 +69,7 @@
                         <el-radio-button v-if="User.Permissions.Update" label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                     </el-radio-group>
                     <el-button-group>
+                        <el-button v-if="User.Permissions.Update" class="icon" icon="fas fa-sync-alt icon--big" @click="GetWorkSiteInfos" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Update" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-wrench icon--big" @click="ShowAdmin" size="mini"></el-button>
                     </el-button-group>
