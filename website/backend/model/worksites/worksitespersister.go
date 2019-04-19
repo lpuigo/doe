@@ -203,23 +203,30 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 	if len(dates) > maxVal {
 		dates = dates[len(dates)-maxVal:]
 	}
-	ws.Dates = dates
-	ws.Teams = teams
 
-	// calc nbEls per measurements/teams/date
-	ws.Values = make(map[string][][]int, len(teams))
-	for _, meas := range measurements {
-		ws.Values[meas] = make([][]int, len(teams))
-		ws.Values[meas][0] = make([]int, len(dates))
-		for teamNum, t := range teams {
-			ws.Values[meas][teamNum] = make([]int, len(dates))
+	ws.Values = make(map[string][][]int)
+	ws.Dates = dates
+
+	for _, teamName := range teams {
+		teamActivity := 0
+		values := make(map[string][]int)
+		for _, meas := range measurements {
+			values[meas] = make([]int, len(dates))
 			for dateNum, d := range dates {
-				nbEl := nbEls[model.StatKey{Team: t, Date: d, Mes: meas}]
-				ws.Values[meas][teamNum][dateNum] = nbEl
+				nbEl := nbEls[model.StatKey{Team: teamName, Date: d, Mes: meas}]
+				teamActivity += nbEl
+				values[meas][dateNum] = nbEl
 			}
 		}
+		if teamActivity == 0 {
+			// current team as no activity on the time laps, skip it
+			continue
+		}
+		ws.Teams = append(ws.Teams, teamName)
+		for _, meas := range measurements {
+			ws.Values[meas] = append(ws.Values[meas], values[meas])
+		}
 	}
-
 	return ws
 }
 
