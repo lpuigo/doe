@@ -14,7 +14,7 @@ const template string = `
     <!--<el-col :span="1">-->
         <!--<span><strong>{{title}}:</strong></span>-->
     <!--</el-col>-->
-    <el-col :span="7">
+    <el-col :span="6">
         <el-autocomplete v-model.trim="value.Ref"
                          :fetch-suggestions="RefSearchRef"
                          :placeholder="refPH"
@@ -28,7 +28,7 @@ const template string = `
         <!--@input="CheckRef(tr)"-->
 
     </el-col>
-    <el-col :span="6">
+    <el-col :span="5">
         <el-autocomplete v-model.trim="value.RefPt"
                          :fetch-suggestions="RefSearchRefPt"
                          placeholder="PT-009999"
@@ -37,7 +37,7 @@ const template string = `
                          @input="CheckRefPt(value)"
         ></el-autocomplete>
     </el-col>
-    <el-col :span="11">
+    <el-col :span="13">
         <el-input :placeholder="addressPH" :readonly="readonly" clearable size="mini"
                   v-model="value.Address"
         >

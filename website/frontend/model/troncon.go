@@ -14,6 +14,7 @@ type Troncon struct {
 	Pb            *PT    `js:"Pb"`
 	NbRacco       int    `js:"NbRacco"`
 	NbFiber       int    `js:"NbFiber"`
+	Article       string `js:"Article"`
 	Blockage      bool   `js:"Blockage"`
 	NeedSignature bool   `js:"NeedSignature"`
 	Signed        bool   `js:"Signed"`
@@ -30,6 +31,7 @@ func NewTroncon() *Troncon {
 	tr.Pb = NewPT()
 	tr.NbRacco = 3
 	tr.NbFiber = 6
+	tr.Article = "CEM42"
 	tr.Blockage = false
 	tr.NeedSignature = false
 	tr.Signed = false
@@ -52,6 +54,7 @@ func (tr *Troncon) Copy(otr *Troncon) {
 	tr.Pb = otr.Pb.Clone()
 	tr.NbRacco = otr.NbRacco
 	tr.NbFiber = otr.NbFiber
+	tr.Article = otr.Article
 	tr.Blockage = otr.Blockage
 	tr.NeedSignature = otr.NeedSignature
 	tr.Signed = otr.Signed
@@ -67,6 +70,7 @@ func (tr *Troncon) SearchInString() string {
 	res += "T_Pb:" + tr.Pb.SearchInString()
 	res += "T_NbRacco:" + strconv.Itoa(tr.NbRacco) + "\n"
 	res += "T_NbFiber:" + strconv.Itoa(tr.NbFiber) + "\n"
+	res += "T_Article:" + tr.Article + "\n"
 	res += "T_Blockage:" + strconv.FormatBool(tr.Blockage) + "\n"
 	res += "T_NeedSignature:" + strconv.FormatBool(tr.NeedSignature) + "\n"
 	res += "T_Signed:" + strconv.FormatBool(tr.Signed) + "\n"

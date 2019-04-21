@@ -9,23 +9,43 @@ import (
 	"net/http"
 )
 
+// Facade structs dedicated to expose User & Client info to FrontEnd
+
+type authentClient struct {
+	Name     string
+	Teams    []clients.Team
+	Articles []string
+}
+
+func getAuthentClientFrom(clients []*clients.Client) []authentClient {
+	res := []authentClient{}
+	for _, client := range clients {
+		res = append(res, authentClient{
+			Name:     client.Name,
+			Teams:    client.Teams,
+			Articles: client.GetArticleNames(),
+		})
+	}
+	return res
+}
+
 type authentUser struct {
 	Name        string
-	Clients     []*clients.Client
+	Clients     []authentClient
 	Permissions map[string]bool
 }
 
 func newAuthentUser() authentUser {
 	return authentUser{
 		Name:        "",
-		Clients:     []*clients.Client{},
+		Clients:     []authentClient{},
 		Permissions: make(map[string]bool),
 	}
 }
 
 func (au *authentUser) SetFrom(ur *users.UserRecord, clients []*clients.Client) {
 	au.Name = ur.Name
-	au.Clients = clients
+	au.Clients = getAuthentClientFrom(clients)
 	au.Permissions = ur.Permissions
 }
 
@@ -52,7 +72,7 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		user.SetFrom(mgr.CurrentUser, clts)
 		logmsg.Info = "authenticated"
 	} else {
-		// not found or improper, remove it first
+		// user cookie not found or improper, remove it first
 		err := mgr.SessionStore.RemoveSessionCookie(w, r)
 		if err != nil {
 			AddError(w, logmsg, "could not remove session info", http.StatusInternalServerError)

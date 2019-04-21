@@ -9,6 +9,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strings"
 )
 
@@ -114,4 +115,17 @@ func (wdm *WorksiteDetailModel) Save(vm *hvue.VM) {
 func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
 	wdm.Worksite.Copy(wdm.ReferenceWorksite)
+}
+
+func (wdm *WorksiteDetailModel) GetArticles(vm *hvue.VM) []*elements.ValueLabel {
+	wdm = &WorksiteDetailModel{Object: vm.Object}
+	res := []*elements.ValueLabel{}
+	client := wdm.User.GetClientByName(wdm.Worksite.Client)
+	if client == nil {
+		return nil
+	}
+	for _, a := range client.Articles {
+		res = append(res, elements.NewValueLabel(a, a))
+	}
+	return res
 }

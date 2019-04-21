@@ -5,6 +5,7 @@ import "github.com/gopherjs/gopherjs/js"
 type Client struct {
 	*js.Object
 
-	Name  string  `js:"Name"`
-	Teams []*Team `js:"Teams"`
+	Name     string   `js:"Name"`
+	Teams    []*Team  `js:"Teams"`
+	Articles []string `js:"Articles"`
 }

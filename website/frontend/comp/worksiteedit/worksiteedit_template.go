@@ -62,12 +62,10 @@ const template string = `
         Attributes about PMZ & PA
     -->
 	<el-row :gutter="10">
-		<el-col :offset="2" :span="22">
+		<el-col :offset="1" :span="11">
 			<pt-edit title="PMZ" v-model="worksite.Pmz" :readonly="readonly"></pt-edit>
 		</el-col>
-	</el-row>
-	<el-row :gutter="10">
-		<el-col :offset="2" :span="22">
+		<el-col :offset="1" :span="11">
 			<pt-edit title="PA" v-model="worksite.Pa" :readonly="readonly"></pt-edit>
 		</el-col>
 	</el-row>
@@ -77,19 +75,21 @@ const template string = `
 	<div v-for="(order, index) in worksite.Orders" :key="index">
 		<hr>
 		<el-row :gutter="10">
-			<el-col :span="2">
-				<el-button type="danger" plain
-						   icon="fas fa-sitemap icon--left"
-						   size="mini" style="width: 100%"
-						   :disabled="worksite.Orders.length<=1"
-						   @click="DeleteOrder(index)"
-				>Supprimer</el-button>
+			<el-col :span="1">
+				<el-tooltip content="Supprimer Commande" effect="light" placement="top-start" :open-delay="500">
+					<el-button type="danger" plain
+							   icon="fas fa-sitemap icon--left"
+							   size="mini" style="width: 100%"
+							   :disabled="worksite.Orders.length<=1"
+							   @click="DeleteOrder(index)"
+					></el-button>
+				</el-tooltip>
 			</el-col>
-			<el-col :span="22">
+			<el-col :span="23">
 				<!-- 
 					Attributes about each Order 
 				-->
-				<order-edit v-model="order" :readonly="readonly"></order-edit>
+				<order-edit v-model="order" :readonly="readonly" :articles="GetArticles()"></order-edit>
 			</el-col>
 		</el-row>
 	</div>

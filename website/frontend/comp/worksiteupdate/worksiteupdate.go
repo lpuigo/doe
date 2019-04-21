@@ -3,8 +3,6 @@ package worksiteupdate
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/orderedit"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -29,8 +27,6 @@ func RegisterComponent() hvue.ComponentOption {
 
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		ptedit.RegisterComponent(),
-		orderedit.RegisterComponent(),
 		tronconstatustag.RegisterComponent(),
 		worksitestatustag.RegisterComponent(),
 		hvue.Template(template),

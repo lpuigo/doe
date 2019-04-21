@@ -8,19 +8,21 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strings"
 )
 
 const template string = `
 <div>
     <!-- 
-        Attributes about value and PB 
+        Status, Troncon and PB info, Size, Nb El
     -->
     <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="3">
             <troncon-status-tag v-model="value"></troncon-status-tag>
         </el-col>
-        <el-col :span="13">
+
+        <el-col :span="3">
             <el-autocomplete v-model="value.Ref"
                              :fetch-suggestions="RefSearch"
                              placeholder="TR-99-9999"
@@ -30,53 +32,43 @@ const template string = `
                 <template slot="prepend">Tronçon:</template>
             </el-autocomplete>
         </el-col>
-        <el-col :span="4">
-            <el-tooltip content="Nb. Fibre" placement="top" effect="light" :open-delay="500">
+
+        <el-col :span="12">
+            <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
+        </el-col>
+
+        <el-col :span="2">
+            <el-tooltip content="Nb. Fibre" placement="bottom" effect="light" :open-delay="500">
                 <el-input-number v-model="value.NbFiber"
                                  :min="6" :step="6"
                                  :readonly="readonly"
-                                 size="mini" controls-position="right" style="width: 100%"
+                                 size="mini" style="width: 100%"
                                  @input="CheckFiber(value)"
-                >
-
-                    <template slot="prepend">Nb Fibre</template>
-                </el-input-number>
+                ></el-input-number>
+<!--                    <template slot="prepend">Nb Fibre</template>-->
             </el-tooltip>
         </el-col>
-        <el-col :offset="1" :span="3">
-            <el-switch v-model="value.Blockage"
-                       active-color="#db2828"
-                       active-text="Blocage"
-                       inactive-color="#bcbcbc"
-                       :disabled="value.NeedSignature && !value.Signed"
-            ></el-switch>
-        </el-col>
-    </el-row>
-    <!-- 
-        Attributes Blockage, Size and Dates 
-    -->
-    <el-row :gutter="10" type="flex" align="middle">
-        <el-col :span="16">
-            <pt-edit title="PB" v-model="value.Pb" :readonly="readonly" :info="LastPBinfo()"></pt-edit>
-        </el-col>
+
         <el-col :span="4">
-            <el-tooltip content="Nb. EL raccordable" placement="bottom" effect="light" :open-delay="500">
+            <el-tooltip style="padding: 0px 12px;" content="Nb. EL raccordable" placement="bottom" effect="light" :open-delay="500">
                 <el-slider
                         v-model="value.NbRacco"
                         :min="0" :max="value.NbFiber"
                         :step="1"
                         :readonly="readonly"
-                        show-stops>
-                </el-slider>
-                <!--<el-input-number-->
-                        <!--v-model="value.NbRacco"-->
-                        <!--:min="0" :max="value.NbFiber"-->
-                        <!--:readonly="readonly"-->
-                        <!--size="mini"	controls-position="right" style="width: 100%"-->
-                <!--&gt;</el-input-number>-->
+                        show-stops
+                ></el-slider>
+<!--					show-input input-size="mini" :show-input-controls="false"-->
             </el-tooltip>
-        </el-col>
-        <el-col :offset="1" :span="3">
+        </el-col>  
+        
+    </el-row>
+
+    <!-- 
+        Blockage & Signature Request, Comment
+    -->
+    <el-row :gutter="10" type="flex" align="middle">
+        <el-col :span="3">
             <el-switch v-model="value.NeedSignature"
                        active-color="#db2828"
                        active-text="Signature demandée"
@@ -84,16 +76,31 @@ const template string = `
                        @input="CheckSignature(value)"
             ></el-switch>
         </el-col>
-    </el-row>
 
-    <!-- 
-        Comment Attributes
-    -->	
-    <el-row v-if="value.Blockage" :gutter="10">
-        <el-col :span="24">
+        <el-col :span="3">
+            <el-switch v-model="value.Blockage"
+                       active-color="#db2828"
+                       active-text="Blocage"
+                       inactive-color="#bcbcbc"
+                       :disabled="value.NeedSignature && !value.Signed"
+            ></el-switch>
+        </el-col>
+
+        <el-col :span="14">
             <el-input :readonly="readonly" clearable placeholder="Commentaire sur tronçon" size="mini" type="textarea" autosize
-                      v-model="value.Comment"
+                      v-model="value.Comment" :disabled="!value.Blockage"
             ></el-input>
+        </el-col>
+
+		<el-col :span="4">
+			<el-select v-model="value.Article" filterable placeholder="CEM" size="mini" style="width: 100%">
+				<el-option
+						v-for="item in articles"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value">
+				</el-option>
+			</el-select>                            
         </el-col>
     </el-row>
 </div>
@@ -117,7 +124,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		ptedit.RegisterComponent(),
 		tronconstatustag.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "readonly", "previous"),
+		hvue.Props("value", "readonly", "previous", "articles"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewTronconEditModel(vm)
 		}),
@@ -131,9 +138,10 @@ func ComponentOptions() []hvue.ComponentOption {
 type TronconEditModel struct {
 	*js.Object
 
-	Troncon     *fm.Troncon `js:"value"`
-	PrevTroncon *fm.Troncon `js:"previous"`
-	Readonly    bool        `js:"readonly"`
+	Articles    []*elements.ValueLabel `js:"articles"`
+	Troncon     *fm.Troncon            `js:"value"`
+	PrevTroncon *fm.Troncon            `js:"previous"`
+	Readonly    bool                   `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -141,6 +149,7 @@ type TronconEditModel struct {
 func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 	tem := &TronconEditModel{Object: tools.O()}
 	tem.VM = vm
+	tem.Articles = nil
 	tem.Troncon = nil
 	tem.Readonly = false
 	return tem

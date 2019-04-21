@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconedit"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 const template string = `
@@ -34,17 +35,19 @@ const template string = `
     <div v-for="(tr, index) in value.Troncons" :key="index" >
         <hr>
         <el-row :gutter="10">
-            <el-col :span="2">
-                <el-button type="danger"
-                           plain icon="fas fa-share-alt icon--left"
-                           size="mini"
-                           style="width: 100%"
-                           :disabled="value.Troncons.length<=1"
-                           @click="DeleteTroncon(index)"
-                >Supprimer</el-button>
+            <el-col :span="1">
+				<el-tooltip content="Supprimer Tronçon" effect="light" placement="top-start" :open-delay="500">
+					<el-button type="danger"
+							   plain icon="fas fa-share-alt icon--left"
+							   size="mini"
+							   style="width: 100%"
+							   :disabled="value.Troncons.length<=1"
+							   @click="DeleteTroncon(index)"
+					></el-button>
+				</el-tooltip>
             </el-col>
-            <el-col :span="22">
-                <troncon-edit v-model="tr" :previous="PreviousTroncon(index)" :readonly="readonly"></troncon-edit>
+            <el-col :span="23">
+                <troncon-edit v-model="tr" :previous="PreviousTroncon(index)" :readonly="readonly" :articles="articles"></troncon-edit>
             </el-col>
         </el-row>
     </div>
@@ -77,7 +80,7 @@ func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		tronconedit.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("readonly", "value"),
+		hvue.Props("readonly", "value", "articles"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewOrderEditModel(vm)
 		}),
@@ -95,8 +98,9 @@ func ComponentOptions() []hvue.ComponentOption {
 type OrderEditModel struct {
 	*js.Object
 
-	Order    *fm.Order `js:"value"`
-	Readonly bool      `js:"readonly"`
+	Articles []*elements.ValueLabel `js:"articles"`
+	Order    *fm.Order              `js:"value"`
+	Readonly bool                   `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -104,6 +108,7 @@ type OrderEditModel struct {
 func NewOrderEditModel(vm *hvue.VM) *OrderEditModel {
 	oem := &OrderEditModel{Object: tools.O()}
 	oem.VM = vm
+	oem.Articles = nil
 	oem.Order = nil
 	oem.Readonly = false
 	return oem
