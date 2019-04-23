@@ -144,7 +144,7 @@ func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor model.D
 	} else {
 		isTeamVisible = func(model.ClientTeam) bool { return true }
 	}
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible))
+	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, !m.CurrentUser.Permissions["Review"]))
 }
 
 func (m Manager) ArchiveName() string {

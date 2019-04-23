@@ -50,6 +50,10 @@ func main() {
 			}
 			return mpm.User.Name
 		}),
+		hvue.Computed("ReviewWorksiteInfos", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.GetReviewableWorsiteInfos()
+		}),
 		hvue.Computed("UpdatableWorksiteInfos", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.GetUpdatableWorsiteInfos()
@@ -112,6 +116,8 @@ func (m *MainPageModel) SetActiveMode() {
 		m.ActiveMode = "Update"
 	case m.User.Permissions["Invoice"]:
 		m.ActiveMode = "Invoice"
+	case m.User.Permissions["Review"]:
+		m.ActiveMode = "Review"
 	default:
 		m.ActiveMode = ""
 	}
@@ -170,6 +176,16 @@ func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
 		if fm.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
+			res = append(res, wsi)
+		}
+	}
+	return res
+}
+
+func (m *MainPageModel) GetReviewableWorsiteInfos() []*fm.WorksiteInfo {
+	res := []*fm.WorksiteInfo{}
+	for _, wsi := range m.WorksiteInfos {
+		if fm.WorksiteIsReviewable(wsi.Status) {
 			res = append(res, wsi)
 		}
 	}

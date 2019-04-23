@@ -10,6 +10,7 @@ import (
 	"io"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -152,7 +153,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible, showTeam bool) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
@@ -180,7 +181,10 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 	}
 	teams := []string{}
 	for t, _ := range teamset {
-		teams = append(teams, t)
+		// if showTeam is false, only show client sum-up
+		if !(!showTeam && strings.Contains(t, " : ")) {
+			teams = append(teams, t)
+		}
 	}
 	sort.Strings(teams)
 

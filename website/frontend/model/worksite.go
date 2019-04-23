@@ -394,6 +394,34 @@ func WorksiteIsUpdatable(status string) bool {
 	return false
 }
 
+func WorksiteIsReviewable(status string) bool {
+	switch status {
+	//case WsStatusNew:
+	//	return true
+	//case WsStatusFormInProgress:
+	//	return true
+	case WsStatusInProgress:
+		return true
+	case WsStatusDOE:
+		return true
+	case WsStatusAttachment:
+		return true
+	case WsStatusInvoice:
+		return true
+	case WsStatusPayment:
+		return true
+	//case WsStatusRework:
+	//	return true
+	case WsStatusBlocked:
+		return true
+	case WsStatusCancelled:
+		return true
+	case WsStatusDone:
+		return true
+	}
+	return false
+}
+
 func WorksiteMustRework(status string) bool {
 	switch status {
 	//case WsStatusNew:
