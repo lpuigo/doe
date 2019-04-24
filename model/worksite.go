@@ -32,7 +32,7 @@ func (w Worksite) FileName() string {
 	return w.OrderDate + "_" + w.Ref
 }
 
-func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
+func (ws *Worksite) GetInfo(priceByClientArticle func(clientName string, articleName string, qty int) (float64, error)) *fm.WorksiteInfo {
 	wsi := fm.NewBEWorksiteInfo()
 
 	wsi.Id = ws.Id
@@ -46,7 +46,7 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 	wsi.PaymentDate = ws.PaymentDate
 	wsi.City = ws.City
 	wsi.Status = ws.Status
-	ws.inspectForInfo(wsi)
+	ws.inspectForInfo(wsi, priceByClientArticle)
 
 	if ws.Rework != nil && len(ws.Rework.Defects) > 0 {
 		wsi.Inspected = true
@@ -62,27 +62,16 @@ func (ws *Worksite) GetInfo() *fm.WorksiteInfo {
 	return wsi
 }
 
-// setInvoiceAmount sets Invoice Amount in given WorksiteInfo (only if DoeDate is set)
-func (ws *Worksite) setInvoiceAmount(wsi *fm.WorksiteInfo) {
-	if ws.DoeDate == "" || ws.DoeDate == "null" {
-		return
-	}
-	// fast exit if whole worksite blocked
-	if wsi.NbElBlocked == wsi.NbElTotal {
-		return
-	}
-	// TODO To be updated for different CEM amount
-	const CEM42Amount float64 = 70
-	wsi.InvoiceAmount = float64(wsi.NbElMeasured) * CEM42Amount
-}
-
-func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
+func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo, priceByClientArticle func(clientName string, articleName string, qty int) (float64, error)) {
 	wsi.Comment = ws.Comment
 	searchPt := func(t string, p PT) string {
 		return fmt.Sprintf("%s:%s, PT:%s, Address:%s, ", t, p.Ref, p.RefPt, p.Address)
 	}
 	wsi.Search = fmt.Sprintf("Chantier:%s, Ville:%s, ", ws.Ref, ws.City)
 	wsi.Search += searchPt("PMZ", ws.Pmz) + searchPt("PA", ws.Pa)
+
+	calcInvoice := ws.DoeDate != "" && ws.DoeDate != "null"
+
 	for _, o := range ws.Orders {
 		lf := "\n"
 		wsi.NbOrder += 1
@@ -105,6 +94,14 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 			}
 			if !t.Blockage && t.MeasureDate != "" && t.MeasureDate != "null" {
 				wsi.NbElMeasured += t.NbRacco
+				if calcInvoice {
+					price, err := priceByClientArticle(wsi.Client, t.Article, t.NbRacco)
+					if err != nil {
+						fmt.Printf("Error evaluating Invoice on %s : %v\n", ws.Ref, err)
+						price = 0
+					}
+					wsi.InvoiceAmount += price
+				}
 			}
 			if t.Comment != "" {
 				if wsi.Comment == "" {
@@ -115,7 +112,6 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo) {
 			wsi.Search += searchPt("PB", t.Pb)
 		}
 	}
-	ws.setInvoiceAmount(wsi)
 }
 
 type StatKey struct {

@@ -11,6 +11,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
 )
 
@@ -106,7 +107,14 @@ func (m *Manager) visibleWorksiteFilter() model.IsWSVisible {
 
 // GetWorkSites returns array of WorksiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesInfo(writer io.Writer) error {
-	return json.NewEncoder(writer).Encode(m.Worksites.GetAllInfo(m.visibleWorksiteFilter()))
+	priceByClientArticle := m.Clients.CalcPriceByClientArticleGetter()
+
+	wsis := []*fm.WorksiteInfo{}
+	for _, wsr := range m.Worksites.GetAll(m.visibleWorksiteFilter()) {
+		wsis = append(wsis, wsr.Worksite.GetInfo(priceByClientArticle))
+	}
+
+	return json.NewEncoder(writer).Encode(wsis)
 }
 
 // GetWorksitesWeekStats returns Worksites Stats per Week (JSON in writer) visibles by current user

@@ -73,20 +73,6 @@ func (wsp WorkSitesPersister) GetAll(keep func(ws *model.Worksite) bool) []*Work
 	return ws
 }
 
-// GetAll returns all contained WorkSiteRecords for which keep(wsr.Worksite) == true
-func (wsp WorkSitesPersister) GetAllInfo(keep func(ws *model.Worksite) bool) []*fm.WorksiteInfo {
-	wsp.RLock()
-	defer wsp.RUnlock()
-
-	ws := []*fm.WorksiteInfo{}
-	for _, wsr := range wsp.workSites {
-		if keep(wsr.Worksite) {
-			ws = append(ws, wsr.Worksite.GetInfo())
-		}
-	}
-	return ws
-}
-
 // Add adds the given WorkSiteRecord to the WorkSitesPersister and return its (new) WorkSiteRecord
 func (wsp *WorkSitesPersister) Add(wsr *WorkSiteRecord) *WorkSiteRecord {
 	wsp.Lock()

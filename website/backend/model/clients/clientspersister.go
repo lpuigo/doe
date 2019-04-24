@@ -140,3 +140,32 @@ func (cp *ClientsPersister) GetAllClients() []*Client {
 	}
 	return res
 }
+
+func (cp *ClientsPersister) CalcPriceByClientArticleGetter() func(clientName, articleName string, qty int) (float64, error) {
+	cp.RLock()
+	defer cp.RUnlock()
+
+	clts := make(map[string]map[string]Article)
+	for _, cr := range cp.clients {
+		articles := make(map[string]Article)
+		for _, article := range cr.Client.Articles {
+			articles[article.Name] = article
+		}
+		clts[cr.Client.Name] = articles
+	}
+
+	return func(clientName, articleName string, qty int) (float64, error) {
+		if articleName == "" {
+			articleName = "CEM42"
+		}
+		articles := clts[clientName]
+		if articles == nil {
+			return 0, fmt.Errorf("unknown client name: %s", clientName)
+		}
+		article := articles[articleName]
+		if article.Name == "" {
+			return 0, fmt.Errorf("unknown article name: %s", articleName)
+		}
+		return article.CalcPrice(qty), nil
+	}
+}
