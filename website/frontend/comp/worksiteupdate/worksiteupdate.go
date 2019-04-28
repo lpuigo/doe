@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	date "github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strconv"
 	"strings"
@@ -143,6 +144,18 @@ func (wum *WorksiteUpdateModel) TextFiltered(t *fm.Troncon) bool {
 	return strings.Contains(t.SearchInString(), filter) == expected
 }
 
+func (wum *WorksiteUpdateModel) SetInstallDate(t *fm.Troncon) {
+	if tools.Empty(t.InstallDate) {
+		t.InstallDate = date.TodayAfter(0)
+	}
+}
+
+func (wum *WorksiteUpdateModel) SetMeasureDate(t *fm.Troncon) {
+	if tools.Empty(t.MeasureDate) {
+		t.MeasureDate = date.TodayAfter(0)
+	}
+}
+
 func (wum *WorksiteUpdateModel) CheckSignature(t *fm.Troncon) {
 	// t should be a OrderTroncon, bur gopherjs reflection seems to fail
 	// also working with
@@ -150,6 +163,22 @@ func (wum *WorksiteUpdateModel) CheckSignature(t *fm.Troncon) {
 	//	NewOrderTronconFromJS(o).CheckSignature()
 	//}
 	t.CheckSignature()
+}
+
+func (wum *WorksiteUpdateModel) CheckInstallDate(t *fm.Troncon) {
+	// t should be a OrderTroncon, bur gopherjs reflection seems to fail
+	// also working with
+	//func (wumm *WorksiteUpdateModalModel) CheckSignature(o *js.Object) {
+	//	NewOrderTronconFromJS(o).CheckSignature()
+	//}
+	// If blocked without any installation done yet => Set InstallDate as Blockage detection date
+	if t.Blockage && tools.Empty(t.InstallActor) && tools.Empty(t.InstallDate) {
+		t.InstallDate = date.TodayAfter(0)
+	}
+	// If unblocked without any installation done yet => Delete InstallDate
+	if !t.Blockage && tools.Empty(t.InstallActor) {
+		t.InstallDate = ""
+	}
 }
 
 //func (wum *WorksiteUpdateModel) UserSearch(vm *hvue.VM, query string, callback *js.Object) {

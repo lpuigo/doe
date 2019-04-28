@@ -70,6 +70,7 @@ const template string = `
                                            size="mini" style="width: 100%"
                                            placeholder="Equipe"
                                            @clear="scope.row.InstallDate = ''"
+										   @change="SetInstallDate(scope.row)"
                                 >
                                     <!--<i slot="prefix" class="fas fa-user"></i>-->
                                     <el-option
@@ -103,8 +104,9 @@ const template string = `
                                            clearable filterable
                                            size="mini" style="width: 100%"
                                            placeholder="Equipe"
-                                           :disabled="!scope.row.InstallDate"
+                                           :disabled="!(scope.row.InstallActor && scope.row.InstallDate) || scope.row.Blockage"
                                            @clear="scope.row.MeasureDate = ''"
+   										   @change="SetMeasureDate(scope.row)"
                                 >
                                     <!--<i slot="prefix" class="fas fa-user"></i>-->
                                     <el-option
@@ -136,6 +138,7 @@ const template string = `
                             <el-checkbox 
                                     v-model="scope.row.Blockage"
                                     size="mini" :disabled="scope.row.NeedSignature && !scope.row.Signed"
+ 									@change="CheckInstallDate(scope.row)"
                             >Blocage</el-checkbox>
                             <div v-if="scope.row.NeedSignature">
                                 <el-checkbox 

@@ -9,8 +9,8 @@ const template string = `
             <el-col :span="3">
                 <el-button
                         type="primary" plain icon="fas fa-tools icon--left" size="mini"
-                        @click="AddDefect"
-                >Ajouter Reprise</el-button>
+                        @click="AddAllDefect"
+                >Ajouter Reprises</el-button>
             </el-col>
             <el-col :offset="2" :span="2">
                 <span style="float:right">Contrôle:</span>

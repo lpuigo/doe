@@ -86,10 +86,17 @@ func (rem *ReworkEditModel) GetPTs(vm *hvue.VM) []*elements.ValueLabel {
 	return res
 }
 
-func (rem *ReworkEditModel) AddDefect(vm *hvue.VM) {
+func (rem *ReworkEditModel) AddAllDefect(vm *hvue.VM) {
 	rem = ReworkEditModelFromJS(vm.Object)
+	for _, vl := range rem.GetPTs(vm) {
+		rem.addDefect(vl.Value)
+	}
+}
+
+func (rem *ReworkEditModel) addDefect(ptName string) {
 	r := rem.Worksite.Rework
 	d := fm.NewDefect()
+	d.PT = ptName
 	d.SubmissionDate = r.ControlDate
 	r.Defects = append(r.Defects, d)
 }
