@@ -40,15 +40,15 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 	rsi.NbMeasurement, rsi.NbMeasurementBlocked, rsi.NbMeasurementDone = s.GetMeasurementNumbers()
 
 	var searchBuilder strings.Builder
-	fmt.Fprintf(&searchBuilder, "%s:%s, ", "Client", s.Client)
-	fmt.Fprintf(&searchBuilder, "%s:%s, ", "Ref", s.Ref)
-	fmt.Fprintf(&searchBuilder, "%s:%s, ", "Manager", s.Manager)
-	fmt.Fprintf(&searchBuilder, "%s:%s, ", "OrderDate", s.OrderDate)
-	fmt.Fprintf(&searchBuilder, "%s:%s, ", "Comment", s.Comment)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Client", s.Client)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Ref", s.Ref)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Manager", s.Manager)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "OrderDate", s.OrderDate)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Comment", s.Comment)
 	for _, node := range s.Nodes {
-		fmt.Fprint(&searchBuilder, "nRef:%s", node.Ref)
-		fmt.Fprint(&searchBuilder, "nName:%s", node.Name)
-		fmt.Fprint(&searchBuilder, "nAddr:%s", node.Address)
+		fmt.Fprintf(&searchBuilder, "nRef:%s,", node.Ref)
+		fmt.Fprintf(&searchBuilder, "nName:%s,", node.Name)
+		fmt.Fprintf(&searchBuilder, "nAddr:%s,", node.Address)
 	}
 	rsi.Search = searchBuilder.String()
 

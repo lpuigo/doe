@@ -9,7 +9,7 @@ type Operation struct {
 }
 
 type Junction struct {
-	TronconName string
-	Operations  []Operation
-	State       State
+	NodeName   string
+	Operations []Operation
+	State      State
 }
