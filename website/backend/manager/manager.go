@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	rs "github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
@@ -17,6 +18,7 @@ import (
 
 type Manager struct {
 	Worksites      *ws.WorkSitesPersister
+	Ripsites       *rs.SitesPersister
 	Users          *users.UsersPersister
 	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
@@ -33,6 +35,16 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	err = wsp.LoadDirectory()
 	if err != nil {
 		return nil, fmt.Errorf("could not populate worksites: %s", err.Error())
+	}
+
+	// Init RipSites persister
+	rsp, err := rs.NewSitesPersit(conf.RipsitesDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create Ripsites persister: %s", err.Error())
+	}
+	err = rsp.LoadDirectory()
+	if err != nil {
+		return nil, fmt.Errorf("could not populate Ripsites: %s", err.Error())
 	}
 
 	// Init Users persister
@@ -64,20 +76,21 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	// Init manager
 	m := &Manager{
 		Worksites:      wsp,
+		Ripsites:       rsp,
 		Users:          up,
 		Clients:        cp,
 		TemplateEngine: te,
 	}
 	logger.Entry("Server").LogInfo(
-		fmt.Sprintf("loaded %d Worsites, %d Clients and %d users",
+		fmt.Sprintf("loaded %d Worsites, %d Ripsites, %d Clients and %d users",
 			wsp.NbWorsites(),
+			rsp.NbSites(),
 			cp.NbClients(),
 			up.NbUsers(),
 		))
 
 	m.SessionStore = session.NewSessionStore(conf.SessionKey)
-
-	// m.CurrentUser is set transaction during session control
+	// m.CurrentUser is set during session control transaction
 
 	return m, nil
 }
@@ -85,6 +98,10 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 func (m Manager) Clone() *Manager {
 	return &m
 }
+
+// =====================================================================================================================
+// Worksites related methods
+//
 
 // visibleWorksiteFilter returns a filtering function on CurrentUser.Clients visibility
 func (m *Manager) visibleWorksiteFilter() model.IsWSVisible {
@@ -99,11 +116,6 @@ func (m *Manager) visibleWorksiteFilter() model.IsWSVisible {
 		return isVisible[ws.Client]
 	}
 }
-
-// GetWorkSites returns Arrays of Worksites (JSON in writer)
-//func (m Manager) GetWorkSites(writer io.Writer) error {
-//	return json.NewEncoder(writer).Encode(m.Worksites.GetAll(func(ws *model.Worksite) bool { return true }))
-//}
 
 // GetWorkSites returns array of WorksiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetWorksitesInfo(writer io.Writer) error {
@@ -155,13 +167,17 @@ func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor model.D
 	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, !m.CurrentUser.Permissions["Review"]))
 }
 
-func (m Manager) ArchiveName() string {
+func (m Manager) WorksitesArchiveName() string {
 	return m.Worksites.ArchiveName()
 }
 
-func (m Manager) CreateArchive(writer io.Writer) error {
+func (m Manager) CreateWorksitesArchive(writer io.Writer) error {
 	return m.Worksites.CreateArchive(writer)
 }
+
+// =====================================================================================================================
+// User related methods
+//
 
 // GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
 func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
@@ -180,4 +196,40 @@ func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 		res = append(res, client.Client)
 	}
 	return res, nil
+}
+
+// =====================================================================================================================
+// Ripsites related methods
+//
+
+// visibleRipsiteFilter returns a filtering function on CurrentUser.Clients visibility
+func (m *Manager) visibleRipsiteFilter() rs.IsSiteVisible {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(*rs.Site) bool { return true }
+	}
+	isVisible := make(map[string]bool)
+	for _, client := range m.CurrentUser.Clients {
+		isVisible[client] = true
+	}
+	return func(s *rs.Site) bool {
+		return isVisible[s.Client]
+	}
+}
+
+// GetRipsitesInfo returns array of RipsiteInfos (JSON in writer) visibles by current user
+func (m Manager) GetRipsitesInfo(writer io.Writer) error {
+	rsis := []*fm.RipsiteInfo{}
+	for _, rsr := range m.Ripsites.GetAll(m.visibleRipsiteFilter()) {
+		rsis = append(rsis, rsr.Site.GetInfo())
+	}
+
+	return json.NewEncoder(writer).Encode(rsis)
+}
+
+func (m Manager) RipsitesArchiveName() string {
+	return m.Ripsites.ArchiveName()
+}
+
+func (m Manager) CreateRipsitesArchive(writer io.Writer) error {
+	return m.Ripsites.CreateArchive(writer)
 }

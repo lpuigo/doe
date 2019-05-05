@@ -45,7 +45,7 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 
 	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
-		return fmt.Errorf("could not get files from persister: %v", err)
+		return fmt.Errorf("could not get files from worksites persister: %v", err)
 	}
 
 	for _, file := range files {
@@ -60,7 +60,7 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 }
 
 // GetAll returns all contained WorkSiteRecords for which keep(wsr.Worksite) == true
-func (wsp WorkSitesPersister) GetAll(keep func(ws *model.Worksite) bool) []*WorkSiteRecord {
+func (wsp WorkSitesPersister) GetAll(keep model.IsWSVisible) []*WorkSiteRecord {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
@@ -220,12 +220,12 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 	return ws
 }
 
-// ArchiveName returns the WorksiteArchive file name with today's date
+// WorksitesArchiveName returns the WorksiteArchive file name with today's date
 func (wsp WorkSitesPersister) ArchiveName() string {
 	return fmt.Sprintf("Worksites %s.zip", date.Today().String())
 }
 
-// CreateArchive writes a zipped archive of all contained Worksites files to the given writer
+// CreateWorksitesArchive writes a zipped archive of all contained Worksites files to the given writer
 func (wsp *WorkSitesPersister) CreateArchive(writer io.Writer) error {
 	wsp.RLock()
 	defer wsp.RUnlock()

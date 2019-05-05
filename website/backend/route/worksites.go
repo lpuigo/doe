@@ -10,23 +10,6 @@ import (
 	"strconv"
 )
 
-//func GetWorksites(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-//	defer r.Body.Close()
-//	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksites").AddUser(mgr.CurrentUser.Name)
-//	defer logmsg.Log()
-//
-//	w.Header().Set("Content-Type", "application/json")
-//
-//	// TODO Manage User Authorization (control on mgr.CurrentUser)
-//
-//	err := mgr.GetWorkSites(w)
-//	if err != nil {
-//		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//	logmsg.Response = http.StatusOK
-//}
-//
 func GetWorksitesInfo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesInfo").AddUser(mgr.CurrentUser.Name)
@@ -64,7 +47,7 @@ func GetWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, "could not marshall WorkSite. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("workSite Id %d returned", wsr.Id), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("workSite Id %d (%s) returned", wsr.Id, wsr.Ref), http.StatusOK)
 }
 
 func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -89,7 +72,7 @@ func CreateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, "could not marshall WorkSite. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("New WorkSite Id %d added", wsr.Id), http.StatusCreated)
+	logmsg.AddInfoResponse(fmt.Sprintf("New WorkSite Id %d (%s) added", wsr.Id, wsr.Ref), http.StatusCreated)
 }
 
 func UpdateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -126,7 +109,7 @@ func UpdateWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, fmt.Sprintf("could not update WorkSite with id %d: %v", wsrid, err), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("WorkSite with id %d updated", wsrid), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("WorkSite with id %d (%s) updated", wsrid, wsr.Ref), http.StatusOK)
 }
 
 func DeleteWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -150,7 +133,7 @@ func DeleteWorkSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, fmt.Sprintf("could not delete WorkSite with id %d: %v", wsrid, err), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("WorkSite with id %d deleted", wsrid), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("WorkSite with id %d (%s) deleted", wsrid, wsr.Ref), http.StatusOK)
 }
 
 func GetWorkSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -178,7 +161,7 @@ func GetWorkSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Req
 		AddError(w, logmsg, "could not generate WorkSite Attachment file. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for worksite id %d", wsrid), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for worksite id %d (%s)", wsrid, wsr.Ref), http.StatusOK)
 }
 
 func GetWorkSiteDOEArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -206,12 +189,12 @@ func GetWorkSiteDOEArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Requ
 		AddError(w, logmsg, "could not generate WorkSite Attachment file. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for worksite id %d", wsrid), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("DOE archive produced for worksite id %d (%s)", wsrid, wsr.Ref), http.StatusOK)
 }
 
 func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesWeekStats").AddUser(mgr.CurrentUser.Name)
+	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesStats").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -234,7 +217,7 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.Response = http.StatusOK
+	logmsg.AddInfoResponse(fmt.Sprintf("%s stats produced", freq), http.StatusOK)
 }
 
 func GetWorksitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -242,10 +225,10 @@ func GetWorksitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 	logmsg := logger.TimedEntry("Route").AddRequest("GetWorksitesArchive").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.ArchiveName()))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.WorksitesArchiveName()))
 	w.Header().Set("Content-Type", "application/zip")
 
-	err := mgr.CreateArchive(w)
+	err := mgr.CreateWorksitesArchive(w)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
