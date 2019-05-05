@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoiceupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
@@ -34,6 +35,7 @@ func main() {
 		reworkupdatemodal.RegisterComponent(),
 		invoiceupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
+		ripsitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
 		adminmodal.RegisterComponent(),
@@ -88,25 +90,35 @@ type MainPageModel struct {
 
 	User *fm.User `js:"User"`
 
+	SiteMode   string `js:"SiteMode"`
 	ActiveMode string `js:"ActiveMode"`
 
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
+	RipsiteInfos  []*fm.RipsiteInfo  `js:"ripsiteInfos"`
 	//EditedWorksite int      `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.User = fm.NewUser()
-	mpm.SetActiveMode()
 	mpm.WorksiteInfos = []*fm.WorksiteInfo{}
-	//mpm.EditedWorksite = -2
+	mpm.RipsiteInfos = []*fm.RipsiteInfo{}
+	mpm.SetMode()
+
 	return mpm
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) SetActiveMode() {
+func (m *MainPageModel) SetMode() {
+	// SiteMode setting
+	m.SiteMode = "Orange"
+	if len(m.RipsiteInfos) > 0 && len(m.WorksiteInfos) == 0 {
+		m.SiteMode = "Rip"
+	}
+
+	// ActiveMode setting
 	switch {
 	case m.User.Name == "":
 		m.ActiveMode = ""
@@ -136,8 +148,17 @@ func (m *MainPageModel) UserLogout() {
 	go m.callLogout()
 }
 
+func (m *MainPageModel) GetSiteInfos() {
+	go m.callGetWorkSiteInfos()
+	go m.callGetRipSiteInfos()
+}
+
 func (m *MainPageModel) GetWorkSiteInfos() {
 	go m.callGetWorkSiteInfos()
+}
+
+func (m *MainPageModel) GetRipSiteInfos() {
+	go m.callGetRipSiteInfos()
 }
 
 func (m *MainPageModel) EditWorksite(id int) {
@@ -270,8 +291,8 @@ func (m *MainPageModel) callGetUser() {
 	m.User.Copy(fm.UserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true
-		m.SetActiveMode()
-		m.GetWorkSiteInfos()
+		m.SetMode()
+		m.GetSiteInfos()
 		return
 	}
 	m.User = fm.NewUser()
@@ -294,13 +315,19 @@ func (m *MainPageModel) callLogout() {
 	m.User = fm.NewUser()
 	m.User.Connected = false
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
-	m.SetActiveMode()
+	m.SetMode()
 }
 
 func (m *MainPageModel) callGetWorkSiteInfos() {
 	req := xhr.NewRequest("GET", "/api/worksites")
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
+	sites := m.WorksiteInfos
+	m.WorksiteInfos = nil
+	defer func() {
+		m.WorksiteInfos = sites
+		m.SetMode()
+	}()
 	//m.DispPrj = false
 	err := req.Send(nil)
 	if err != nil {
@@ -316,5 +343,33 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 		ws := fm.NewWorksiteInfoFromJs(item)
 		wsis = append(wsis, ws)
 	})
-	m.WorksiteInfos = wsis
+	sites = wsis
+}
+
+func (m *MainPageModel) callGetRipSiteInfos() {
+	req := xhr.NewRequest("GET", "/api/ripsites")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	sites := m.RipsiteInfos
+	m.RipsiteInfos = nil
+	defer func() {
+		m.RipsiteInfos = sites
+		m.SetMode()
+	}()
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		m.errorMessage(req)
+		return
+	}
+	rsis := []*fm.RipsiteInfo{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		rs := fm.NewRipsiteInfoFromJS(item)
+		rsis = append(rsis, rs)
+	})
+	sites = rsis
 }
