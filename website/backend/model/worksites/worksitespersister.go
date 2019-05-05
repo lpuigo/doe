@@ -181,8 +181,15 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, is
 	sort.Strings(measurements)
 
 	dateset := make(map[string]int)
-	for d := date.DateFrom(start); !d.After(end); d = d.AddDays(7) {
-		dateset[dateFor(d.String())] = 1
+	curStringDate := dateFor(date.DateFrom(start).String())
+	curDate := date.DateFrom(curStringDate)
+	endStringDate := dateFor(end.String())
+	endReached := false
+	for !endReached {
+		dateset[curStringDate] = 1
+		curDate = curDate.AddDays(7)
+		curStringDate = dateFor(curDate.String())
+		endReached = curStringDate > endStringDate
 	}
 	dates := []string{}
 	for d, _ := range dateset {
