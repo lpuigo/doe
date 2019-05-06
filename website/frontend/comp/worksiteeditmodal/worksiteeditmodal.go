@@ -173,13 +173,6 @@ func (wemm *WorksiteEditModalModel) Duplicate() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (wemm *WorksiteEditModalModel) errorMessage(req *xhr.Request) {
-	message.SetDuration(tools.WarningMsgDuration)
-	msg := "Quelquechose c'est mal passé !\n"
-	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
-	message.ErrorMsgStr(wemm.VM, msg, req.Response, true)
-}
-
 func (wemm *WorksiteEditModalModel) callGetWorksite(id int) {
 	defer func() { wemm.Loading = false }()
 	req := xhr.NewRequest("GET", "/api/worksites/"+strconv.Itoa(id))
@@ -191,7 +184,7 @@ func (wemm *WorksiteEditModalModel) callGetWorksite(id int) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		wemm.errorMessage(req)
+		message.ErrorMessage(wemm.VM, req)
 		wemm.Hide()
 		return
 	}
@@ -211,7 +204,7 @@ func (wemm *WorksiteEditModalModel) callUpdateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		wemm.errorMessage(req)
+		message.ErrorMessage(wemm.VM, req)
 		return
 	}
 	wemm.VM.Emit("update_worksite")
@@ -230,7 +223,7 @@ func (wemm *WorksiteEditModalModel) callCreateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpCreated {
-		wemm.errorMessage(req)
+		message.ErrorMessage(wemm.VM, req)
 		return
 	}
 	wemm.VM.Emit("update_worksite")
@@ -249,7 +242,7 @@ func (wemm *WorksiteEditModalModel) callDeleteWorksite(dws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		wemm.errorMessage(req)
+		message.ErrorMessage(wemm.VM, req)
 	}
 	wemm.VM.Emit("update_worksite")
 	message.SuccesStr(wemm.VM, "Chantier supprimé !")

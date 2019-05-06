@@ -1,5 +1,7 @@
 package ripsites
 
+import ferip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+
 type State struct {
 	Status    string
 	Team      string
@@ -7,14 +9,6 @@ type State struct {
 	DateEnd   string
 	Comment   string
 }
-
-const (
-	StateToDo       string = "A faire"
-	StateInProgress string = "En cours"
-	StateBlocked    string = "Bloqué"
-	StateDone       string = "Fait"
-	StateCancelled  string = "Annulé"
-)
 
 func (s State) TotalBlockedDone() (total, blocked, done int) {
 	if s.ToDo() {
@@ -30,13 +24,13 @@ func (s State) TotalBlockedDone() (total, blocked, done int) {
 }
 
 func (s State) ToDo() bool {
-	return !(s.Status == StateCancelled)
+	return !(s.Status == ferip.StateCancelled)
 }
 
 func (s State) Blocked() bool {
-	return s.Status == StateBlocked
+	return s.Status == ferip.StateBlocked
 }
 
 func (s State) Done() bool {
-	return s.Status == StateDone
+	return s.Status == ferip.StateDone
 }

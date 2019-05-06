@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsitetable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
@@ -34,6 +35,7 @@ func main() {
 		reworkeditmodal.RegisterComponent(),
 		reworkupdatemodal.RegisterComponent(),
 		invoiceupdatemodal.RegisterComponent(),
+		ripsiteupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		ripsitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
@@ -167,6 +169,10 @@ func (m *MainPageModel) EditWorksite(id int) {
 
 func (m *MainPageModel) UpdateWorksite(id int) {
 	m.VM.Refs("WorksiteUpdateModal").Call("Show", id, m.User)
+}
+
+func (m *MainPageModel) UpdateRipsite(id int) {
+	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
 }
 
 func (m *MainPageModel) CreateNewWorksite() {

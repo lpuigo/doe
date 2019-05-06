@@ -52,6 +52,11 @@
                 ref="TeamProductivityModal"
         ></team-productivity-modal>
         <!-- -->
+        <ripsite-update-modal
+                ref="RipsiteUpdateModal"
+                @update_ripsite="GetRipSiteInfos"
+        ></ripsite-update-modal>
+        <!-- -->
         <admin-modal
                 ref="AdminModal"
         ></admin-modal>
@@ -121,7 +126,7 @@
                 <ripsite-table
                         v-if="ActiveMode == 'Create'"
                         :ripsiteinfos="ripsiteInfos"
-                        @selected_ripsite=""
+                        @selected_ripsite="UpdateRipsite"
                         @new_ripsite=""
                 ></ripsite-table>
             </el-main>

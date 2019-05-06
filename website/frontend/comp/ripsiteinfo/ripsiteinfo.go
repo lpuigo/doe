@@ -4,17 +4,22 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
 const (
 	template1 string = `
 <div> 
-    <i class="fas fa-code-branch icon--left"></i><span>{{NbCommand}}&nbsp;</span>
-    <i class="fas fa-share-alt icon--left"></i><span>{{NbTroncon}}&nbsp;</span>
-    <i class="fas fa-home icon--left"></i>
-	<span v-if="NbAvailLogement != NbLogement">{{NbAvailLogement}} / {{NbLogement}}</span>
-	<span v-else>{{NbLogement}}</span>
+    <i class="fas fa-arrows-alt-h icon--left"></i>
+    <span v-if="NbAvailPulling != NbPulling">{{NbAvailPulling}} / {{NbPulling}}&nbsp;</span>
+    <span v-else>{{NbPulling}}&nbsp;</span>
+    <i class="fas fa-project-diagram icon--left"></i>
+    <span v-if="NbAvailJunction != NbJunction">{{NbAvailJunction}} / {{NbJunction}}&nbsp;</span>
+    <span v-else>{{NbJunction}}&nbsp;</span>
+    <i class="fas fa-weight icon--left"></i>
+	<span v-if="NbAvailMeasurement != NbMeasurement">{{NbAvailMeasurement}} / {{NbMeasurement}}</span>
+	<span v-else>{{NbMeasurement}}</span>
 </div>`
 
 	template2 string = `
@@ -31,16 +36,14 @@ const (
 </div>`
 )
 
-/* TODO implement Ripsite & RipsiteInfoModel
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Registration Ripsite version
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("ripsite-info", ComponentRipsiteOptions()...)
+	return hvue.Component("ripsite-info", componentRipsiteOptions()...)
 }
 
-func ComponentRipsiteOptions() []hvue.ComponentOption {
+func componentRipsiteOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template1),
 		hvue.Props("ripsite"),
@@ -48,13 +51,15 @@ func ComponentRipsiteOptions() []hvue.ComponentOption {
 			return NewRipsiteInfoModel(vm)
 		}),
 		hvue.MethodsOf(&RipsiteInfoModel{}),
-		hvue.Computed("NbCommand", func(vm *hvue.VM) interface{} {
+		hvue.Computed("NbAvailPulling", func(vm *hvue.VM) interface{} {
 			wim := &RipsiteInfoModel{Object: vm.Object}
-			nbCommand, nbTroncon, nbAvailLogement, nbLogement := wim.Ripsite.GetInfo()
-			wim.NbTroncon = nbTroncon
-			wim.NbLogement = nbLogement
-			wim.NbAvailLogement = nbAvailLogement
-			return nbCommand
+			NbAvailPulling, NbPulling, NbAvailJunction, NbJunction, NbAvailMeasurement, NbMeasurement := wim.Ripsite.GetInfo()
+			wim.NbPulling = NbPulling
+			wim.NbAvailJunction = NbAvailJunction
+			wim.NbJunction = NbJunction
+			wim.NbAvailMeasurement = NbAvailMeasurement
+			wim.NbMeasurement = NbMeasurement
+			return NbAvailPulling
 		}),
 	}
 }
@@ -65,33 +70,37 @@ func ComponentRipsiteOptions() []hvue.ComponentOption {
 type RipsiteInfoModel struct {
 	*js.Object
 
-	Ripsite         *fm.Worksite `js:"ripsite"`
-	NbTroncon       int          `js:"NbTroncon"`
-	NbLogement      int          `js:"NbLogement"`
-	NbAvailLogement int          `js:"NbAvailLogement"`
+	Ripsite            *fmrip.Ripsite `js:"ripsite"`
+	NbPulling          int            `js:"NbPulling"`
+	NbJunction         int            `js:"NbJunction"`
+	NbAvailJunction    int            `js:"NbAvailJunction"`
+	NbMeasurement      int            `js:"NbMeasurement"`
+	NbAvailMeasurement int            `js:"NbAvailMeasurement"`
 
 	VM *hvue.VM `js:"VM"`
 }
 
 func NewRipsiteInfoModel(vm *hvue.VM) *RipsiteInfoModel {
-	wim := &RipsiteInfoModel{Object: tools.O()}
-	wim.VM = vm
-	wim.Ripsite = nil
-	wim.NbTroncon = 0
-	wim.NbLogement = 0
-	wim.NbAvailLogement = 0
-	return wim
+	rim := &RipsiteInfoModel{Object: tools.O()}
+	rim.VM = vm
+	rim.Ripsite = nil
+	rim.NbPulling = 0
+	rim.NbJunction = 0
+	rim.NbAvailJunction = 0
+	rim.NbMeasurement = 0
+	rim.NbAvailMeasurement = 0
+
+	return rim
 }
-*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Registration RipsiteInfo version
 
 func RegisterComponentRipsiteInfoInfo() hvue.ComponentOption {
-	return hvue.Component("ripsiteinfo-info", ComponentRipsiteInfoOptions()...)
+	return hvue.Component("ripsiteinfo-info", componentRipsiteInfoOptions()...)
 }
 
-func ComponentRipsiteInfoOptions() []hvue.ComponentOption {
+func componentRipsiteInfoOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template2),
 		hvue.Props("value"),

@@ -9,7 +9,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
-	"strconv"
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,13 +76,6 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (tpmm *TeamProductivityModalModel) errorMessage(req *xhr.Request) {
-	message.SetDuration(tools.WarningMsgDuration)
-	msg := "Quelque chose c'est mal passé !\n"
-	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
-	message.ErrorMsgStr(tpmm.VM, msg, req.Response, true)
-}
-
 func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 	defer func() { tpmm.Loading = false }()
 	req := xhr.NewRequest("GET", "/api/worksites/stat/"+tpmm.ActiveMode)
@@ -96,7 +88,7 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		tpmm.errorMessage(req)
+		message.ErrorMessage(tpmm.VM, req)
 		tpmm.Hide()
 		return
 	}

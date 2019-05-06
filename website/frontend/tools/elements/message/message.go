@@ -3,6 +3,10 @@ package message
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/prjptf/src/client/goel/message"
+	"honnef.co/go/js/xhr"
+	"strconv"
 )
 
 var (
@@ -62,4 +66,11 @@ type ErrorMsg struct {
 
 func ErrorMsgFromJS(o *js.Object) *ErrorMsg {
 	return &ErrorMsg{Object: o}
+}
+
+func ErrorMessage(vm *hvue.VM, req *xhr.Request) {
+	message.SetDuration(tools.WarningMsgDuration)
+	msg := "Quelquechose c'est mal passé !\n"
+	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
+	ErrorMsgStr(vm, msg, req.Response, true)
 }

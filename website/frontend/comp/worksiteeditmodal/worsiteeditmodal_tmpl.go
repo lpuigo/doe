@@ -20,7 +20,7 @@ const template string = `
 				<worksite-info :worksite="current_worksite"></worksite-info>
 			</el-col>	
             <el-col :offset="2" :span="1">
-                <h2 style="margin: 0 0"><a :href="Attachment(current_worksite.Id)"><i class="link fas fa-file-excel"></i></a></h2>
+                <h2 style="margin: 0 0"><a :href="Attachment()"><i class="link fas fa-file-excel"></i></a></h2>
             </el-col>
 		</el-row>
     </span>
