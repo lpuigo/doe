@@ -1,6 +1,6 @@
 package ripsites
 
-import ferip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+import "github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 
 type State struct {
 	Status    string
@@ -24,13 +24,13 @@ func (s State) TotalBlockedDone() (total, blocked, done int) {
 }
 
 func (s State) ToDo() bool {
-	return !(s.Status == ferip.StateCancelled)
+	return !(s.Status == ripconst.StateCancelled)
 }
 
 func (s State) Blocked() bool {
-	return s.Status == ferip.StateBlocked
+	return s.Status == ripconst.StateBlocked
 }
 
 func (s State) Done() bool {
-	return s.Status == ferip.StateDone
+	return s.Status == ripconst.StateDone
 }

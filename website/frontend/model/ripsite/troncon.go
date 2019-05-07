@@ -3,6 +3,7 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 type Troncon struct {
@@ -18,4 +19,8 @@ func NewTroncon() *Troncon {
 	tr.Size = 0
 
 	return tr
+}
+
+func (tr *Troncon) Clone() *Troncon {
+	return &Troncon{Object: json.Parse(json.Stringify(tr))}
 }

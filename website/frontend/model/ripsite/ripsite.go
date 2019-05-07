@@ -51,7 +51,38 @@ func (rs *Ripsite) SearchInString() string {
 }
 
 func (rs *Ripsite) Copy(ors *Ripsite) {
-	rs.Object = json.Parse(json.Stringify(ors))
+	nodes := make(map[string]*Node)
+	for nodeName, node := range ors.Nodes {
+		nodes[nodeName] = node.Clone()
+	}
+	troncons := make(map[string]*Troncon)
+	for trName, tr := range ors.Troncons {
+		troncons[trName] = tr.Clone()
+	}
+	pullings := make([]*Pulling, len(ors.Pullings))
+	for ip, pull := range ors.Pullings {
+		pullings[ip] = pull.Clone()
+	}
+	junctions := make([]*Junction, len(ors.Junctions))
+	for ij, junc := range ors.Junctions {
+		junctions[ij] = junc.Clone()
+	}
+	measurements := make([]*Measurement, len(ors.Measurements))
+	for im, meas := range ors.Measurements {
+		measurements[im] = meas.Clone()
+	}
+	rs.Id = ors.Id
+	rs.Client = ors.Client
+	rs.Ref = ors.Ref
+	rs.Manager = ors.Manager
+	rs.OrderDate = ors.OrderDate
+	rs.Status = ors.Status
+	rs.Comment = ors.Comment
+	rs.Nodes = nodes
+	rs.Troncons = troncons
+	rs.Pullings = pullings
+	rs.Junctions = junctions
+	rs.Measurements = measurements
 }
 
 func (rs *Ripsite) Clone() *Ripsite {

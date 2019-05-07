@@ -3,6 +3,7 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 type PullingChunk struct {
@@ -34,9 +35,9 @@ func NewPullingChunk() *PullingChunk {
 type Pulling struct {
 	*js.Object
 
-	CableName string
-	Chuncks   []*PullingChunk
-	State     *State
+	CableName string          `js:"CableName"`
+	Chuncks   []*PullingChunk `js:"Chuncks"`
+	State     *State          `js:"State"`
 }
 
 func NewPulling() *Pulling {
@@ -46,4 +47,8 @@ func NewPulling() *Pulling {
 	p.State = NewState()
 
 	return p
+}
+
+func (p *Pulling) Clone() *Pulling {
+	return &Pulling{Object: json.Parse(json.Stringify(p))}
 }

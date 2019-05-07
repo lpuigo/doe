@@ -3,6 +3,7 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 type Node struct {
@@ -28,4 +29,8 @@ func NewNode() *Node {
 	n.DistFromPm = 0
 
 	return n
+}
+
+func (node *Node) Clone() *Node {
+	return &Node{Object: json.Parse(json.Stringify(node))}
 }

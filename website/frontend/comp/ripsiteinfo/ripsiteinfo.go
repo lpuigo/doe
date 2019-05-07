@@ -52,13 +52,13 @@ func componentRipsiteOptions() []hvue.ComponentOption {
 		}),
 		hvue.MethodsOf(&RipsiteInfoModel{}),
 		hvue.Computed("NbAvailPulling", func(vm *hvue.VM) interface{} {
-			wim := &RipsiteInfoModel{Object: vm.Object}
-			NbAvailPulling, NbPulling, NbAvailJunction, NbJunction, NbAvailMeasurement, NbMeasurement := wim.Ripsite.GetInfo()
-			wim.NbPulling = NbPulling
-			wim.NbAvailJunction = NbAvailJunction
-			wim.NbJunction = NbJunction
-			wim.NbAvailMeasurement = NbAvailMeasurement
-			wim.NbMeasurement = NbMeasurement
+			rim := &RipsiteInfoModel{Object: vm.Object}
+			NbAvailPulling, NbPulling, NbAvailJunction, NbJunction, NbAvailMeasurement, NbMeasurement := rim.Ripsite.GetInfo()
+			rim.NbPulling = NbPulling
+			rim.NbAvailJunction = NbAvailJunction
+			rim.NbJunction = NbJunction
+			rim.NbAvailMeasurement = NbAvailMeasurement
+			rim.NbMeasurement = NbMeasurement
 			return NbAvailPulling
 		}),
 	}

@@ -5,14 +5,12 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var (
-	json = js.Global.Get("JSON")
-)
-
 func Stringify(obj interface{}) string {
+	json := js.Global.Get("JSON")
 	return json.Call("stringify", obj).String()
 }
 
 func Parse(jsonStr string) *js.Object {
+	json := js.Global.Get("JSON")
 	return json.Call("parse", jsonStr)
 }

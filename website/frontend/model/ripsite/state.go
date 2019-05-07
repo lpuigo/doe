@@ -2,15 +2,8 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-)
-
-const (
-	StateToDo       string = "00 A faire"
-	StateInProgress string = "10 En cours"
-	StateBlocked    string = "20 Bloqué"
-	StateDone       string = "90 Fait"
-	StateCancelled  string = "99 Annulé"
 )
 
 type State struct {
@@ -25,7 +18,7 @@ type State struct {
 
 func NewState() *State {
 	s := &State{Object: tools.O()}
-	s.Status = StateToDo
+	s.Status = ripconst.StateToDo
 	s.Team = ""
 	s.DateStart = ""
 	s.DateEnd = ""
@@ -35,5 +28,5 @@ func NewState() *State {
 }
 
 func (s *State) IsBlocked() bool {
-	return s.Status == StateBlocked
+	return s.Status == ripconst.StateBlocked
 }

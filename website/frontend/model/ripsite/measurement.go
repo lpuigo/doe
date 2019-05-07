@@ -3,6 +3,7 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 type Measurement struct {
@@ -25,4 +26,8 @@ func NewMeasurement() *Measurement {
 	m.State = NewState()
 
 	return m
+}
+
+func (m *Measurement) Clone() *Measurement {
+	return &Measurement{Object: json.Parse(json.Stringify(m))}
 }

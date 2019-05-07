@@ -3,6 +3,7 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 type Operation struct {
@@ -41,4 +42,8 @@ func NewJunction() *Junction {
 	j.State = NewState()
 
 	return j
+}
+
+func (j *Junction) Clone() *Junction {
+	return &Junction{Object: json.Parse(json.Stringify(j))}
 }

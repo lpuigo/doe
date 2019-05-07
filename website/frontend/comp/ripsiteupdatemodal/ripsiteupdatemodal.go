@@ -164,6 +164,7 @@ func (rsumm *RipsiteUpdateModalModel) callGetRipsite(id int) {
 	}
 	rsumm.EditedRipsite = fmrip.RipsiteFromJS(req.Response)
 	rsumm.CurrentRipsite.Copy(rsumm.EditedRipsite)
+	js.Global.Set("currip", rsumm.CurrentRipsite)
 	return
 }
 
