@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/modal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
@@ -58,6 +59,7 @@ func componentOption() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
 		ripsiteinfo.RegisterComponent(),
+		rippullingupdate.RegisterComponent(),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipsiteUpdateModalModel(vm)
 		}),

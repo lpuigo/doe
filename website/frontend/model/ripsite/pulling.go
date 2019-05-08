@@ -52,3 +52,14 @@ func NewPulling() *Pulling {
 func (p *Pulling) Clone() *Pulling {
 	return &Pulling{Object: json.Parse(json.Stringify(p))}
 }
+
+func (p *Pulling) GetDists() (total, love, under, aerial, building int) {
+	for _, chunk := range p.Chuncks {
+		love += chunk.LoveDist
+		under += chunk.UndergroundDist
+		aerial += chunk.AerialDist
+		building += chunk.BuildingDist
+		total += chunk.LoveDist + chunk.UndergroundDist + chunk.AerialDist + chunk.BuildingDist
+	}
+	return
+}

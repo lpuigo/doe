@@ -30,7 +30,7 @@ const template string = `
 		style="height: 100%;"		
 	-->
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding: 6px 20px;">
-        <pre>{{current_ripsite}}</pre>
+        <rip-pulling-update v-model="current_ripsite" :user="User"></rip-pulling-update>
 	</div>
 
 	<!-- 
