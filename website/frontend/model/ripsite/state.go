@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 type State struct {
@@ -29,4 +30,14 @@ func NewState() *State {
 
 func (s *State) IsBlocked() bool {
 	return s.Status == ripconst.StateBlocked
+}
+
+func GetStateStatusesValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
+		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
+		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
+		elements.NewValueLabel(ripconst.StateDone, "Fait"),
+		elements.NewValueLabel(ripconst.StateCancelled, "Annulé"),
+	}
 }

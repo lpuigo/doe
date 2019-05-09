@@ -197,17 +197,7 @@ func (wum *WorksiteUpdateModel) CheckInstallDate(t *fm.Troncon) {
 
 func (wum *WorksiteUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
 	wum = WorksiteUpdateModelFromJS(vm.Object)
-	res := []*elements.ValueLabel{}
-	client := wum.User.GetClientByName(wum.Worksite.Client)
-	if client == nil {
-		return nil
-	}
-	for _, team := range client.Teams {
-		if team.IsActive {
-			res = append(res, elements.NewValueLabel(team.Members, team.Name+" "+team.Members))
-		}
-	}
-	return res
+	return wum.User.GetTeamValueLabelsFor(wum.Worksite.Client)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

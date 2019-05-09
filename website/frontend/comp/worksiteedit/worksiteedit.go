@@ -119,13 +119,5 @@ func (wdm *WorksiteDetailModel) Undo(vm *hvue.VM) {
 
 func (wdm *WorksiteDetailModel) GetArticles(vm *hvue.VM) []*elements.ValueLabel {
 	wdm = &WorksiteDetailModel{Object: vm.Object}
-	res := []*elements.ValueLabel{}
-	client := wdm.User.GetClientByName(wdm.Worksite.Client)
-	if client == nil {
-		return nil
-	}
-	for _, a := range client.Articles {
-		res = append(res, elements.NewValueLabel(a, a))
-	}
-	return res
+	return wdm.User.GetArticlesValueLabelsFor(wdm.Worksite.Client)
 }

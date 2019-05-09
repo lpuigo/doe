@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 type User struct {
@@ -44,4 +45,30 @@ func (u *User) GetClientByName(clientName string) *Client {
 		}
 	}
 	return nil
+}
+
+func (u *User) GetTeamValueLabelsFor(clientName string) []*elements.ValueLabel {
+	res := []*elements.ValueLabel{}
+	client := u.GetClientByName(clientName)
+	if client == nil {
+		return nil
+	}
+	for _, team := range client.Teams {
+		if team.IsActive {
+			res = append(res, elements.NewValueLabel(team.Members, team.Name+": "+team.Members))
+		}
+	}
+	return res
+}
+
+func (u *User) GetArticlesValueLabelsFor(clientName string) []*elements.ValueLabel {
+	res := []*elements.ValueLabel{}
+	client := u.GetClientByName(clientName)
+	if client == nil {
+		return nil
+	}
+	for _, a := range client.Articles {
+		res = append(res, elements.NewValueLabel(a, a))
+	}
+	return res
 }

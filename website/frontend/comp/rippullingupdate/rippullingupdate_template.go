@@ -41,40 +41,40 @@ const template string = `
                     </template>
                 </el-table-column>
                 <el-table-column
-                        label="PT Départ"
-                        width="110px" :resizable="true" :show-overflow-tooltip=true
+                        label="PT Départ / Arrivée"
+                        width="160px" :resizable="true" :show-overflow-tooltip=true
                 >
                     <template slot-scope="scope">
-                        <div>{{GetFirstPullingChunk(scope.row).StartingNodeName}}</div>
+                        <div>{{GetFirstPullingChunk(scope.row).StartingNodeName}}<i class="icon--right fas fa-arrow-right icon--left"></i>{{GetLastPullingChunk(scope.row).EndingNodeName}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column
-                        label="Adresse Départ"
-                        width="240px" :resizable="true" :show-overflow-tooltip=true
-                >
-                    <template slot-scope="scope">
-                        <div>{{GetNode(GetFirstPullingChunk(scope.row).StartingNodeName).Address}}</div>
-                    </template>
-                </el-table-column>
-                <el-table-column
-                        label="PT Arrivée"
-                        width="110px" :resizable="true" :show-overflow-tooltip=true
-                >
-                    <template slot-scope="scope">
-                        <div>{{GetLastPullingChunk(scope.row).EndingNodeName}}</div>
-                    </template>
-                </el-table-column>
-                <el-table-column
-                        label="Adresse Arrivée"
-                        width="240px" :resizable="true" :show-overflow-tooltip=true
-                >
-                    <template slot-scope="scope">
-                        <div>{{GetNode(GetLastPullingChunk(scope.row).EndingNodeName).Address}}</div>
-                    </template>
-                </el-table-column>
+<!--                <el-table-column-->
+<!--                        label="Adresse Départ"-->
+<!--                        width="240px" :resizable="true" :show-overflow-tooltip=true-->
+<!--                >-->
+<!--                    <template slot-scope="scope">-->
+<!--                        <div>{{GetNode(GetFirstPullingChunk(scope.row).StartingNodeName).Address}}</div>-->
+<!--                    </template>-->
+<!--                </el-table-column>-->
+<!--                <el-table-column-->
+<!--                        label="PT Arrivée"-->
+<!--                        width="100px" :resizable="true" :show-overflow-tooltip=true-->
+<!--                >-->
+<!--                    <template slot-scope="scope">-->
+<!--                        <div>{{GetLastPullingChunk(scope.row).EndingNodeName}}</div>-->
+<!--                    </template>-->
+<!--                </el-table-column>-->
+<!--                <el-table-column-->
+<!--                        label="Adresse Arrivée"-->
+<!--                        width="240px" :resizable="true" :show-overflow-tooltip=true-->
+<!--                >-->
+<!--                    <template slot-scope="scope">-->
+<!--                        <div>{{GetNode(GetLastPullingChunk(scope.row).EndingNodeName).Address}}</div>-->
+<!--                    </template>-->
+<!--                </el-table-column>-->
                 <el-table-column
                         label="Distance"
-                        width="300px" :resizable="true"
+                        width="100px" :resizable="true" :show-overflow-tooltip=true
                 >
                     <template slot-scope="scope">
                         <pulling-distances-info v-model="scope.row"></pulling-distances-info>
@@ -84,7 +84,7 @@ const template string = `
                         label="Etat"
                 >
                     <template slot-scope="scope">
-                        <span>TODO</span>
+                        <state-update v-model="scope.row.State" :user="user" :client="value.Client"></state-update>
                     </template>
                 </el-table-column>
             </el-table>

@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingdistinfo"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/stateupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -18,6 +19,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		rippullingdistinfo.RegisterComponent(),
+		stateupdate.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("value", "user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

@@ -115,9 +115,10 @@ func NewMainPageModel() *MainPageModel {
 
 func (m *MainPageModel) SetMode() {
 	// SiteMode setting
-	m.SiteMode = "Orange"
 	if len(m.RipsiteInfos) > 0 && len(m.WorksiteInfos) == 0 {
 		m.SiteMode = "Rip"
+	} else {
+		m.SiteMode = "Orange"
 	}
 
 	// ActiveMode setting
@@ -332,7 +333,6 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 	m.WorksiteInfos = nil
 	defer func() {
 		m.WorksiteInfos = sites
-		m.SetMode()
 	}()
 	//m.DispPrj = false
 	err := req.Send(nil)
@@ -360,7 +360,6 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 	m.RipsiteInfos = nil
 	defer func() {
 		m.RipsiteInfos = sites
-		m.SetMode()
 	}()
 	//m.DispPrj = false
 	err := req.Send(nil)
