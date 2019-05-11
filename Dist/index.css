@@ -250,6 +250,33 @@ pre {
     background-color: #DB2828;
 }
 
+/* ====================================================================================================================
+    === Worksite Table Detail style ===
+ */
+.el-table__expanded-cell[class*=cell] {
+    padding: 10px 20px;
+}
+
+.worksite-detail .el-row {
+    margin-bottom: 8px;
+}
+
+.worksite-detail .el-row:last-child {
+    margin-bottom: 0;
+}
+
+.invoice-detail .el-row {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 8px;
+}
+
+.invoice-detail .el-row:last-child {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 0px;
+}
+
 /*  ====================================================================================================================
     === Edit Worksite Modal style
  */
@@ -291,207 +318,26 @@ pre {
 }
 
 /* ====================================================================================================================
-    === Worksite Table Detail style ===
+    === Ripsite Table Update Row style ===
  */
-.el-table__expanded-cell[class*=cell] {
-    padding: 10px 20px;
+
+.el-table .ripactivitystatus-row-todo {
+    background: #ffffff;
 }
 
-.worksite-detail .el-row {
-    margin-bottom: 8px;
+.el-table .ripactivitystatus-row-inprogress {
+    background: #ffffff;
 }
 
-.worksite-detail .el-row:last-child {
-    margin-bottom: 0;
+.el-table .ripactivitystatus-row-done {
+    background: #d0e6cf;
 }
 
-.invoice-detail .el-row {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-bottom: 8px;
+.el-table .ripactivitystatus-row-blocked {
+    background: #e6b2a1;
 }
 
-.invoice-detail .el-row:last-child {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-bottom: 0px;
+.el-table .ripactivitystatus-row-canceled {
+    background: #F5F7FA;
 }
 
-/*
-    === Jira Stat Modal style ===
- */
-.custom-tree-node {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    /*font-size: 14px;*/
-    padding-right: 8px;
-}
-
-.custom-tree-node .custom-node-name {
-    /*flex: 0 1 20%;*/
-}
-
-.custom-tree-node .custom-hours-row {
-    width: 55vw;
-}
-
-.custom-hours-row.reduce {
-    width: 45vw;
-}
-
-.custom-hours-row .hours-table {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    line-height: 1.3em;
-}
-
-.hours-table .hours-cell {
-    flex: 1 1 0;
-    text-align: center;
-    margin: 0px 1px;
-    padding: 3px;
-}
-
-.hours-table .hours-cell {
-    flex: 1 1 0;
-    text-align: center;
-    margin: 0px 1px;
-    padding: 3px;
-}
-
-.hours-cell.right {
-    text-align: right;
-}
-
-.hours-cell.large {
-    flex: 4 1 0;
-}
-
-/*
-    === Workload Schedule Modal style ===
- */
-.workload-schedule {
-    height: 65vh;
-}
-
-.workload-schedule .el-aside {
-    width: 30%;
-    overflow: auto;
-}
-
-/*
-    === TimeLine Modal style ===
- */
-.timeline {
-    height: 70vh;
-}
-
-.timeline .el-table .cell {
-    line-height: 1.3em;
-    padding-top: 1px;
-    padding-bottom: 1px;
-}
-
-.timeline .project-line {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: flex-start;
-    align-content: center;
-    width: 100%;
-    height: 16px;
-    margin: 0px 0px;
-    background: linear-gradient(to right, #ffffff 0%, #ffffff 49.95%, #e0e0e0 49.96%, #e0e0e0 50.04%, #ffffff 50.05%, #ffffff 100%)
-}
-
-.project-line .item {
-    flex: 0 1 auto;
-    align-self: auto;
-    height: 100%;
-    /*text-align: center;*/
-    background-color: #DB2828;
-}
-
-
-.item.first {
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
-
-.item.last {
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-
-.item.study {
-    height: 50%;
-    background-color: #9fe3e3;
-}
-
-.item.study.lead {
-    background-color: #f0e8a5;
-}
-
-.item.study.monitor {
-    background-color: #c0e6bc;
-}
-
-.item.study.done {
-    background-color: #e3e3e3;
-}
-
-
-.item.real {
-    background-color: #4abbbd;
-}
-
-.item.real.lead {
-    background-color: #ded159;
-}
-
-.item.real.monitor {
-    background-color: #9ecc99;
-}
-
-.item.real.done {
-    background-color: #bdbdbd;
-}
-
-
-.item.service {
-    background-color: #9fe3e3;
-}
-
-.item.service.lead {
-    background-color: #f0e8a5;
-}
-
-.item.service.monitor {
-    background-color: #c0e6bc;
-}
-
-.item.service.done {
-    background-color: #e3e3e3;
-}
-
-
-.item.pilot {
-    height: 50%;
-    background-color: #9fe3e3;
-}
-
-.item.pilot.lead {
-    background-color: #f0e8a5;
-}
-
-.item.pilot.monitor {
-    background-color: #c0e6bc;
-}
-
-.item.pilot.done {
-    background-color: #e3e3e3;
-}

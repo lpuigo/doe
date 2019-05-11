@@ -10,21 +10,15 @@ type State struct {
 	Comment   string
 }
 
-func (s State) TotalBlockedDone() (total, blocked, done int) {
+func (s State) TodoBlockedDone() (todo, blocked, done bool) {
 	if s.ToDo() {
-		total++
-		if s.Blocked() {
-			blocked++
-		}
-		if s.Done() {
-			done++
-		}
+		return true, s.Blocked(), s.Done()
 	}
 	return
 }
 
 func (s State) ToDo() bool {
-	return !(s.Status == ripconst.StateCancelled)
+	return !(s.Status == ripconst.StateCanceled)
 }
 
 func (s State) Blocked() bool {

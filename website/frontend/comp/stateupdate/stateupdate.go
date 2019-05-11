@@ -11,27 +11,13 @@ import (
 
 const template string = `
 	<el-row type="flex" align="middle" :gutter="10">
-		<el-col :span="3">
-			<el-select v-model="value.Status" filterable
-					   size="mini" style="width: 100%"
-					   placeholder="Etat"
-					   @clear=""
-					   @change=""
-			>
-				<el-option
-						v-for="item in GetStatuses()"
-						:key="item.value"
-						:label="item.label"
-						:value="item.value">
-				</el-option>
-			</el-select>
-		</el-col>
 		<el-col :span="5">
 			<el-select v-model="value.Team" clearable filterable
 					   size="mini" style="width: 100%"
 					   placeholder="Equipe"
-					   @clear=""
+					   @clear="UpdateStatus()"
 					   @change="SetDates(scope.row)"
+                       :disabled="DisableTeam()"
 			>
 				<el-option
 						v-for="item in GetTeams()"
@@ -41,25 +27,42 @@ const template string = `
 				</el-option>
 			</el-select>
 		</el-col>
-		<el-col :span="5">
+		<el-col :span="3">
 			<el-date-picker format="dd/MM/yyyy" placeholder="Début" size="mini"
 							style="width: 100%" type="date"
 							v-model="value.DateStart"
 							value-format="yyyy-MM-dd"
 							:picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-							:disabled="false" :clearable="false"
+							:disabled="DisableDates()" :clearable="true"
+                            @change="UpdateStatus()"
 			></el-date-picker>
 		</el-col>
-		<el-col :span="5">
+		<el-col :span="3">
 			<el-date-picker format="dd/MM/yyyy" placeholder="Fin" size="mini"
 							style="width: 100%" type="date"
 							v-model="value.DateEnd"
 							value-format="yyyy-MM-dd"
 							:picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-							:disabled="false" :clearable="false"
+							:disabled="DisableDates()" :clearable="true"
+                            @change="UpdateStatus()"
 			></el-date-picker>
 		</el-col>
-		<el-col :span="6">
+        <el-col :span="3">
+            <el-select v-model="value.Status" filterable
+                       size="mini" style="width: 100%"
+                       placeholder="Etat"
+                       @clear=""
+                       @change="UpdateStatus()"
+            >
+                <el-option
+                        v-for="item in GetStatuses()"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                </el-option>
+            </el-select>
+        </el-col>
+		<el-col :span="10">
 			<el-input type="textarea" autosize placeholder="Commentaire" size="mini"
 					  v-model="value.Comment"
 			></el-input>
@@ -82,10 +85,6 @@ func componentOptions() []hvue.ComponentOption {
 			return NewStateUpdateModel(vm)
 		}),
 		hvue.MethodsOf(&StateUpdateModel{}),
-		//hvue.Computed("NbAvailPulling", func(vm *hvue.VM) interface{} {
-		//	rim := &StateUpdateModel{Object: vm.Object}
-		//	return NbAvailPulling
-		//}),
 	}
 }
 
@@ -123,4 +122,22 @@ func (sum *StateUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
 
 func (sum *StateUpdateModel) GetStatuses() []*elements.ValueLabel {
 	return fmrip.GetStateStatusesValueLabel()
+}
+
+func (sum *StateUpdateModel) UpdateStatus(vm *hvue.VM) {
+	sum = StateUpdateModelFromJS(vm.Object)
+	sum.State.UpdateStatus()
+}
+
+func (sum *StateUpdateModel) DisableDates(vm *hvue.VM) bool {
+	sum = StateUpdateModelFromJS(vm.Object)
+	if !sum.State.IsCanceled() && !tools.Empty(sum.State.Team) {
+		return false
+	}
+	return true
+}
+
+func (sum *StateUpdateModel) DisableTeam(vm *hvue.VM) bool {
+	sum = StateUpdateModelFromJS(vm.Object)
+	return sum.State.IsCanceled()
 }

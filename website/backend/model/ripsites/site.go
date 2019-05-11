@@ -58,10 +58,17 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 // GetPullingNumbers returns total, blocked and done number of Pullings
 func (s *Site) GetPullingNumbers() (total, blocked, done int) {
 	for _, p := range s.Pullings {
-		t, b, d := p.State.TotalBlockedDone()
-		total += t
-		blocked += b
-		done += d
+		t, b, d := p.State.TodoBlockedDone()
+		if t {
+			dist := p.GetTotalDist()
+			total += dist
+			if b {
+				blocked += dist
+			}
+			if d {
+				done += dist
+			}
+		}
 	}
 	return
 }
@@ -69,10 +76,17 @@ func (s *Site) GetPullingNumbers() (total, blocked, done int) {
 // GetJunctionNumbers returns total, blocked and done number of Junctions
 func (s *Site) GetJunctionNumbers() (total, blocked, done int) {
 	for _, j := range s.Junctions {
-		t, b, d := j.State.TotalBlockedDone()
-		total += t
-		blocked += b
-		done += d
+		t, b, d := j.State.TodoBlockedDone()
+		if t {
+			nbFiber := j.GetNbFiber()
+			total += nbFiber
+			if b {
+				blocked += nbFiber
+			}
+			if d {
+				done += nbFiber
+			}
+		}
 	}
 	return
 }
@@ -80,10 +94,17 @@ func (s *Site) GetJunctionNumbers() (total, blocked, done int) {
 // GetMeasurementNumbers returns total, blocked and done number of Measurements
 func (s *Site) GetMeasurementNumbers() (total, blocked, done int) {
 	for _, m := range s.Measurements {
-		t, b, d := m.State.TotalBlockedDone()
-		total += t
-		blocked += b
-		done += d
+		t, b, d := m.State.TodoBlockedDone()
+		if t {
+			nbMeas := m.GetNbMeas()
+			total += nbMeas
+			if b {
+				blocked += nbMeas
+			}
+			if d {
+				done += nbMeas
+			}
+		}
 	}
 	return
 }

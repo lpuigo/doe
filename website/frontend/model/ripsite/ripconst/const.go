@@ -5,5 +5,5 @@ const (
 	StateInProgress string = "10 En cours"
 	StateBlocked    string = "20 Bloqué"
 	StateDone       string = "90 Fait"
-	StateCancelled  string = "99 Annulé"
+	StateCanceled   string = "99 Annulé"
 )

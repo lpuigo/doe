@@ -81,7 +81,8 @@ func (rpum *RipPullingUpdateModel) GetFilteredPullings() []*fmrip.Pulling {
 }
 
 func (rpum *RipPullingUpdateModel) TableRowClassName(rowInfo *js.Object) string {
-	return ""
+	pulling := &fmrip.Pulling{Object: rowInfo.Get("row")}
+	return pulling.State.GetRowStyle()
 }
 
 func (rpum *RipPullingUpdateModel) GetFirstPullingChunk(pulling *fmrip.Pulling) *fmrip.PullingChunk {

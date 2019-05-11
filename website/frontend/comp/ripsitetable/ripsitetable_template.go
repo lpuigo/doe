@@ -32,11 +32,13 @@ const (
 					width="100px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Status')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
 			></el-table-column>
+
 			<el-table-column
 					label="Client" prop="Client" sortable :sort-by="['Client', 'Ref']"
 					width="140px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Client')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
+
 			<el-table-column
 					label="Référence" sortable
 					width="140px" :resizable=true :show-overflow-tooltip=true
@@ -47,33 +49,46 @@ const (
                     </div>
 				</template>
 			</el-table-column>
+
 			<el-table-column
 					label="Info"
-					width="150px" :resizable=true :show-overflow-tooltip=true
+					width="200px" :resizable=true :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
 					<ripsiteinfo-info v-model="scope.row"></ripsiteinfo-info>
 				</template>
 			</el-table-column>
+
             <el-table-column
                     label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
                     width="110px" :resizable=true :show-overflow-tooltip=true
                     align="center"	:formatter="FormatDate"
             ></el-table-column>
-<!--            <el-table-column-->
-<!--                    label="Install." width="110px" :resizable=true align="center"-->
-<!--            >-->
-<!--                <template slot-scope="scope">-->
-<!--                    <worksiteinfo-progress-bar v-model="scope.row"></worksiteinfo-progress-bar>-->
-<!--                </template>-->
-<!--            </el-table-column>-->
-<!--            <el-table-column-->
-<!--                    label="Mesures" width="110px" :resizable=true align="center"-->
-<!--            >-->
-<!--                <template slot-scope="scope">-->
-<!--                    <worksiteinfo-progress-bar v-model="scope.row" :measure="true"></worksiteinfo-progress-bar>-->
-<!--                </template>-->
-<!--            </el-table-column>-->
+
+            <el-table-column
+                    label="Tirage" width="110px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <ripsiteinfo-progress-bar :total="scope.row.NbPulling - scope.row.NbPullingBlocked" :done="scope.row.NbPullingDone"></ripsiteinfo-progress-bar>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                    label="Raccordement" width="110px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <ripsiteinfo-progress-bar :total="scope.row.NbJunction - scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                    label="Mesure" width="110px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement - scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
+                </template>
+            </el-table-column>
+
 			<el-table-column
 					label="Commentaire" prop="Comment"
 					min-width="120px" :resizable=true

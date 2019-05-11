@@ -13,3 +13,11 @@ type Junction struct {
 	Operations []Operation
 	State      State
 }
+
+func (j *Junction) GetNbFiber() int {
+	nbFiber := 0
+	for _, ope := range j.Operations {
+		nbFiber += ope.NbFiber
+	}
+	return nbFiber
+}

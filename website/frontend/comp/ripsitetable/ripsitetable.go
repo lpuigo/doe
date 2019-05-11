@@ -3,6 +3,7 @@ package ripsitetable
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripprogressbar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -22,7 +23,7 @@ func RegisterComponent() hvue.ComponentOption {
 func ComponentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripsiteinfo.RegisterComponentRipsiteInfoInfo(),
-		//progressbar.RegisterComponent(),
+		ripprogressbar.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("ripsiteinfos"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {

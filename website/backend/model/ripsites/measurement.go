@@ -8,3 +8,7 @@ type Measurement struct {
 	NodeNames []string
 	State     State
 }
+
+func (m *Measurement) GetNbMeas() int {
+	return m.NbFiber
+}
