@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/modal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripjunctionupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -18,7 +19,9 @@ import (
 type RipsiteUpdateModalModel struct {
 	*modal.ModalModel
 
+	ActivityMode   string         `js:"ActivityMode"`
 	User           *fm.User       `js:"User"`
+	Filter         string         `js:"filter"`
 	EditedRipsite  *fmrip.Ripsite `js:"edited_ripsite"`
 	CurrentRipsite *fmrip.Ripsite `js:"current_ripsite"`
 
@@ -31,7 +34,9 @@ func NewRipsiteUpdateModalModel(vm *hvue.VM) *RipsiteUpdateModalModel {
 		ModalModel: modal.NewModalModel(vm),
 	}
 
+	rsumm.ActivityMode = "Pulling"
 	rsumm.User = fm.NewUser()
+	rsumm.Filter = ""
 	rsumm.EditedRipsite = fmrip.NewRisite()
 	rsumm.CurrentRipsite = fmrip.NewRisite()
 
@@ -60,6 +65,7 @@ func componentOption() []hvue.ComponentOption {
 		hvue.Template(template),
 		ripsiteinfo.RegisterComponent(),
 		rippullingupdate.RegisterComponent(),
+		ripjunctionupdate.RegisterComponent(),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipsiteUpdateModalModel(vm)
 		}),
@@ -149,6 +155,21 @@ func (rsumm *RipsiteUpdateModalModel) DeleteRipsite() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
+func (rsumm *RipsiteUpdateModalModel) SetActivityMode() {
+	if len(rsumm.CurrentRipsite.Pullings) > 0 {
+		rsumm.ActivityMode = "Pulling"
+		return
+	}
+	if len(rsumm.CurrentRipsite.Junctions) > 0 {
+		rsumm.ActivityMode = "Junction"
+		return
+	}
+	if len(rsumm.CurrentRipsite.Pullings) > 0 {
+		rsumm.ActivityMode = "Measurement"
+		return
+	}
+}
+
 func (rsumm *RipsiteUpdateModalModel) callGetRipsite(id int) {
 	defer func() { rsumm.Loading = false }()
 	req := xhr.NewRequest("GET", "/api/ripsites/"+strconv.Itoa(id))
@@ -166,7 +187,7 @@ func (rsumm *RipsiteUpdateModalModel) callGetRipsite(id int) {
 	}
 	rsumm.EditedRipsite = fmrip.RipsiteFromJS(req.Response)
 	rsumm.CurrentRipsite.Copy(rsumm.EditedRipsite)
-	js.Global.Set("currip", rsumm.CurrentRipsite)
+	rsumm.SetActivityMode()
 	return
 }
 

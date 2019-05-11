@@ -47,3 +47,11 @@ func NewJunction() *Junction {
 func (j *Junction) Clone() *Junction {
 	return &Junction{Object: json.Parse(json.Stringify(j))}
 }
+
+func (j *Junction) GetNbFiber() int {
+	nb := 0
+	for _, op := range j.Operations {
+		nb += op.NbFiber
+	}
+	return nb
+}

@@ -41,7 +41,12 @@ func (s *State) SetDone() {
 }
 
 func (s *State) SetInProgress() {
-	s.Status = ripconst.StateInProgress
+	switch s.Status {
+	case ripconst.StateDone, ripconst.StateToDo:
+		s.Status = ripconst.StateInProgress
+	default:
+		// do not change current status
+	}
 }
 
 func (s *State) SetToDo() {
@@ -69,7 +74,7 @@ func (s *State) UpdateStatus() {
 	if tools.Empty(s.DateStart) {
 		s.SetToDo()
 	} else {
-		s.Status = ripconst.StateInProgress
+		s.SetInProgress()
 	}
 }
 

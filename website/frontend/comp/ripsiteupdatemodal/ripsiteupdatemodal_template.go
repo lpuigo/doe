@@ -29,10 +29,42 @@ const template string = `
 		Modal Body
 		style="height: 100%;"		
 	-->
-	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding: 6px 20px;">
-        <rip-pulling-update v-model="current_ripsite" :user="User"></rip-pulling-update>
-	</div>
+	<el-container v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding: 6px 6px;">
+        <el-header style="height: auto; padding: 0px 0px">
+            <el-row :gutter="10" style="margin-bottom: 10px">
+<!--                GroupButton for Pulling / Junction / Measurement-->
+                <el-col :span="4">
+                    <el-radio-group v-model="ActivityMode" size="mini">
+                        <el-radio-button v-if="current_ripsite.Pullings.length > 0" label="Pulling">Tirage: {{current_ripsite.Pullings.length}}</el-radio-button>
+                        <el-radio-button v-if="current_ripsite.Junctions.length > 0" label="Junction">Racco: {{current_ripsite.Junctions.length}}</el-radio-button>
+                        <el-radio-button v-if="current_ripsite.Measurements.length > 0" label="Measurement">Mesure: {{current_ripsite.Measurements.length}}</el-radio-button>
+                    </el-radio-group>
+                </el-col>
+                <el-col :offset="1" :span="2" >
+                    <span style="float:right; text-align: right">Commentaire dossier:</span>
+                </el-col>
+                <el-col :span="12">
+                    <el-input type="textarea" autosize placeholder="Commentaire sur le chantier" size="mini"
+                              v-model="current_ripsite.Comment"
+                    ></el-input>
+                </el-col>
+                <el-col :offset="1" :span="4">
+                    <el-input
+                            placeholder="filtre"
+                            prefix-icon="el-icon-search"
+                            v-model="filter"
+                            size="mini"	clearable
+                    ></el-input>
+                </el-col>
+            </el-row>
+        </el-header>
+        <el-main style="height: 100%; padding: 0px">
+            <rip-pulling-update v-if="ActivityMode == 'Pulling'" v-model="current_ripsite" :user="User" :filter="filter"></rip-pulling-update>
+            <rip-junction-update v-if="ActivityMode == 'Junction'" v-model="current_ripsite" :user="User" :filter="filter"></rip-junction-update>
+            <rip-measurement-update v-if="ActivityMode == 'Measurement'" v-model="current_ripsite" :user="User" :filter="filter"></rip-measurement-update>
+        </el-main>
 
+	</el-container>
 	<!-- 
 		Body Action Bar
 	-->	

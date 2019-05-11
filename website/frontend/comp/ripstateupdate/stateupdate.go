@@ -1,4 +1,4 @@
-package stateupdate
+package ripstateupdate
 
 import (
 	"github.com/gopherjs/gopherjs/js"
@@ -16,7 +16,7 @@ const template string = `
 					   size="mini" style="width: 100%"
 					   placeholder="Equipe"
 					   @clear="UpdateStatus()"
-					   @change="SetDates(scope.row)"
+					   @change="UpdateStatus()"
                        :disabled="DisableTeam()"
 			>
 				<el-option
@@ -74,7 +74,7 @@ const template string = `
 // Comp Registration Ripsite version
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("state-update", componentOptions()...)
+	return hvue.Component("rip-state-update", componentOptions()...)
 }
 
 func componentOptions() []hvue.ComponentOption {
