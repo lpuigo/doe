@@ -2,6 +2,7 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -112,4 +113,40 @@ func (rs *Ripsite) GetInfo() (nbAvailPulling, nbPulling, nbAvailJunction, nbJunc
 		}
 	}
 	return
+}
+
+func RipsiteStatusLabel(status string) string {
+	switch status {
+	case ripconst.RsStatusNew:
+		return "Nouveau"
+	case ripconst.RsStatusInProgress:
+		return "Réal. En cours"
+	case ripconst.RsStatusBlocked:
+		return "Dossier Blocage à faire"
+	case ripconst.RsStatusCancelled:
+		return "Annulé"
+	case ripconst.RsStatusDone:
+		return "Terminé"
+	default:
+		return "<" + status + ">"
+	}
+}
+
+func RipsiteRowClassName(status string) string {
+	var res string = ""
+	switch status {
+	case ripconst.RsStatusNew:
+		return "worksite-row-new"
+	case ripconst.RsStatusInProgress:
+		return "worksite-row-inprogress"
+	case ripconst.RsStatusBlocked:
+		return "worksite-row-blocked"
+	case ripconst.RsStatusCancelled:
+		return "worksite-row-canceled"
+	case ripconst.RsStatusDone:
+		return "worksite-row-done"
+	default:
+		res = "worksite-row-error"
+	}
+	return res
 }

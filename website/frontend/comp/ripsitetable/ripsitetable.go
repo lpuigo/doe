@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripprogressbar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -86,8 +87,8 @@ func (rtm *RipsiteTableModel) AddRipsite(vm *hvue.VM) {
 // Formatting Related Methods
 
 func (rtm *RipsiteTableModel) TableRowClassName(rowInfo *js.Object) string {
-	wsi := &fm.WorksiteInfo{Object: rowInfo.Get("row")}
-	return fm.WorksiteRowClassName(wsi.Status)
+	wsi := &fm.RipsiteInfo{Object: rowInfo.Get("row")}
+	return fmrip.RipsiteRowClassName(wsi.Status)
 }
 
 func (rtm *RipsiteTableModel) HeaderCellStyle() string {
@@ -99,12 +100,12 @@ func (rtm *RipsiteTableModel) FormatDate(r, c *js.Object, d string) string {
 }
 
 func (rtm *RipsiteTableModel) FormatStatus(r, c *js.Object, d string) string {
-	return fm.WorksiteStatusLabel(d)
+	return fmrip.RipsiteStatusLabel(d)
 }
 
 func (rtm *RipsiteTableModel) SortStatus(a, b *fm.RipsiteInfo) int {
-	la := fm.WorksiteStatusLabel(a.Status)
-	lb := fm.WorksiteStatusLabel(b.Status)
+	la := fmrip.RipsiteStatusLabel(a.Status)
+	lb := fmrip.RipsiteStatusLabel(b.Status)
 	if la < lb {
 		return -1
 	}
@@ -131,7 +132,7 @@ func (rtm *RipsiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.V
 	switch prop {
 	case "Status":
 		translate = func(val string) string {
-			return fm.WorksiteStatusLabel(val)
+			return fmrip.RipsiteStatusLabel(val)
 		}
 	default:
 		translate = func(val string) string { return val }

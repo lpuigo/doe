@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/modal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripjunctionupdate"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripmeasurementupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -66,6 +67,7 @@ func componentOption() []hvue.ComponentOption {
 		ripsiteinfo.RegisterComponent(),
 		rippullingupdate.RegisterComponent(),
 		ripjunctionupdate.RegisterComponent(),
+		ripmeasurementupdate.RegisterComponent(),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipsiteUpdateModalModel(vm)
 		}),
@@ -178,6 +180,7 @@ func (rsumm *RipsiteUpdateModalModel) callGetRipsite(id int) {
 	err := req.Send(nil)
 	if err != nil {
 		message.ErrorStr(rsumm.VM, "Oups! "+err.Error(), true)
+		rsumm.Hide()
 		return
 	}
 	if req.Status != tools.HttpOK {
