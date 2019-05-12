@@ -125,10 +125,10 @@ func (m *MainPageModel) SetMode() {
 	switch {
 	case m.User.Name == "":
 		m.ActiveMode = ""
-	case m.User.Permissions["Create"]:
-		m.ActiveMode = "Create"
 	case m.User.Permissions["Update"]:
 		m.ActiveMode = "Update"
+	case m.User.Permissions["Create"]:
+		m.ActiveMode = "Create"
 	case m.User.Permissions["Invoice"]:
 		m.ActiveMode = "Invoice"
 	case m.User.Permissions["Review"]:
@@ -222,12 +222,15 @@ func (m *MainPageModel) GetReviewableWorsiteInfos() []*fm.WorksiteInfo {
 
 func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 	res := 0
-	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsUpdatable(wsi.Status) {
-			res += 1
+	if m.SiteMode == "Orange" {
+		for _, wsi := range m.WorksiteInfos {
+			if fm.WorksiteIsUpdatable(wsi.Status) {
+				res += 1
+			}
 		}
+		return res
 	}
-	return res
+	return len(m.RipsiteInfos)
 }
 
 func (m *MainPageModel) GetReworkWorksiteInfos() []*fm.WorksiteInfo {
@@ -298,7 +301,6 @@ func (m *MainPageModel) callGetUser() {
 	m.User.Copy(fm.UserFromJS(req.Response))
 	if m.User.Name != "" {
 		m.User.Connected = true
-		m.SetMode()
 		m.GetSiteInfos()
 		return
 	}
@@ -333,6 +335,7 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 	m.WorksiteInfos = nil
 	defer func() {
 		m.WorksiteInfos = sites
+		m.SetMode()
 	}()
 	//m.DispPrj = false
 	err := req.Send(nil)
@@ -360,6 +363,7 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 	m.RipsiteInfos = nil
 	defer func() {
 		m.RipsiteInfos = sites
+		m.SetMode()
 	}()
 	//m.DispPrj = false
 	err := req.Send(nil)

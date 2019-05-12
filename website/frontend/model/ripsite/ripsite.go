@@ -91,25 +91,25 @@ func (rs *Ripsite) Clone() *Ripsite {
 }
 
 func (rs *Ripsite) GetInfo() (nbAvailPulling, nbPulling, nbAvailJunction, nbJunction, nbAvailMeas, nbMeas int) {
-	nbPulling = len(rs.Pullings)
-	nbAvailPulling = nbPulling
 	for _, pulling := range rs.Pullings {
-		if pulling.State.IsBlocked() {
-			nbAvailPulling--
+		dist, _, _, _, _ := pulling.GetDists()
+		nbPulling += dist
+		if !pulling.State.IsBlocked() {
+			nbAvailPulling += dist
 		}
 	}
-	nbJunction = len(rs.Junctions)
-	nbAvailJunction = nbJunction
 	for _, junction := range rs.Junctions {
-		if junction.State.IsBlocked() {
-			nbAvailJunction--
+		nbFiber := junction.GetNbFiber()
+		nbJunction += nbFiber
+		if !junction.State.IsBlocked() {
+			nbAvailJunction += nbFiber
 		}
 	}
-	nbMeas = len(rs.Measurements)
-	nbAvailMeas = nbMeas
 	for _, meas := range rs.Measurements {
-		if meas.State.IsBlocked() {
-			nbAvailMeas--
+		nbFiber := meas.NbFiber
+		nbMeas += nbFiber
+		if !meas.State.IsBlocked() {
+			nbAvailMeas += nbFiber
 		}
 	}
 	return
