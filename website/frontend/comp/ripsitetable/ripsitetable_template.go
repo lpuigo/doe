@@ -1,7 +1,6 @@
 package ripsitetable
 
-const (
-	template string = `<!--header-row-class-name="prjptf-light"-->
+const template string = `<!--header-row-class-name="prjptf-light"-->
 <!--:default-sort = "{prop: 'client', order: 'ascending'}"-->
 <el-container style="height: 100%">
 	<el-header style="height: auto; padding: 5px">
@@ -52,7 +51,7 @@ const (
 
 			<el-table-column
 					label="Info"
-					width="200px" :resizable=true :show-overflow-tooltip=true
+					width="240px" :resizable=true :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
 					<ripsiteinfo-info v-model="scope.row"></ripsiteinfo-info>
@@ -96,7 +95,4 @@ const (
 		</el-table>		
 	</el-main>
 </el-container>
-
-
 `
-)
