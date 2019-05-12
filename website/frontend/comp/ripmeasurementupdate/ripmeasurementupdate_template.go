@@ -7,9 +7,29 @@ const template string = `
         height="100%" :border=true size="mini"
 >
     <el-table-column
-            label="Noeud" prop="DestNodeName"
+            label="Noeud"
             width="100px" :resizable="true" :show-overflow-tooltip=true
-    ></el-table-column>
+    >
+        <template slot-scope="scope">
+            <el-popover placement="bottom-start" width="600"
+                        title="Evenements de mesure:"
+                        trigger="hover"
+            >
+                <el-row v-for="(nodename, index) in scope.row.NodeNames" :key="index" :gutter="5">
+                    <el-col :span="7">
+                        <div>{{index+1}} - {{nodename}}</div>
+                    </el-col>
+                    <el-col :span="3">
+                        <span>{{GetNode(nodename).DistFromPm}} m</span>
+                    </el-col>
+                    <el-col :span="14">
+                        <span>{{GetNode(nodename).Address}}</span>
+                    </el-col>
+                </el-row>
+                <div slot="reference">{{scope.row.DestNodeName}}</div>
+            </el-popover>
+        </template>
+    </el-table-column>
     <el-table-column
             label="Nb Fibre" prop="NbFiber"
             width="70px" :resizable="true" :show-overflow-tooltip=true

@@ -83,10 +83,10 @@ func (rmum *RipMeasurementUpdateModel) TableRowClassName(rowInfo *js.Object) str
 	return junction.State.GetRowStyle()
 }
 
-//func (rmum *RipMeasurementUpdateModel) GetNbFiber(vm *hvue.VM, junction *fmrip.Junction) int {
-//	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
-//	return junction.GetNbFiber()
-//}
+func (rmum *RipMeasurementUpdateModel) GetNode(vm *hvue.VM, name string) *fmrip.Node {
+	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
+	return rmum.Ripsite.Nodes[name]
+}
 
 func (rmum *RipMeasurementUpdateModel) GetDestNodeDist(vm *hvue.VM, meas *fmrip.Measurement) int {
 	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
