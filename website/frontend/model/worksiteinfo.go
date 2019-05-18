@@ -17,6 +17,7 @@ type WorksiteInfo struct {
 	InvoiceDate    string  `js:"InvoiceDate"`
 	InvoiceName    string  `js:"InvoiceName"`
 	PaymentDate    string  `js:"PaymentDate"`
+	UpdateDate     string  `js:"UpdateDate"`
 	City           string  `js:"City"`
 	Status         string  `js:"Status"`
 	Comment        string  `js:"Comment"`

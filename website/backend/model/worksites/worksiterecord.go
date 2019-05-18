@@ -3,6 +3,7 @@ package worksites
 import (
 	"encoding/json"
 	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"io"
 	"os"
@@ -47,5 +48,13 @@ func NewWorkSiteRecordFromFile(file string) (wsr *WorkSiteRecord, err error) {
 		return
 	}
 	wsr.SetId(wsr.Id)
+	if wsr.Worksite.UpdateDate != "" {
+		return
+	}
+	fs, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	wsr.Worksite.UpdateDate = date.Date(fs.ModTime()).String()
 	return
 }

@@ -78,6 +78,9 @@ func (wsp *WorkSitesPersister) Add(wsr *WorkSiteRecord) *WorkSiteRecord {
 	wsp.Lock()
 	defer wsp.Unlock()
 
+	// Set the Update Date
+	wsr.Worksite.UpdateDate = date.Today().String()
+
 	// give the record its new ID
 	wsp.persister.Add(wsr)
 	wsr.Id = wsr.GetId()
@@ -95,6 +98,7 @@ func (wsp *WorkSitesPersister) Update(uwsr *WorkSiteRecord) error {
 		return fmt.Errorf("id not found")
 	}
 	owsr.Worksite = uwsr.Worksite
+	owsr.Worksite.UpdateDate = date.Today().String()
 	wsp.persister.MarkDirty(owsr)
 	return nil
 }

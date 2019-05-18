@@ -13,6 +13,7 @@ type RipsiteInfo struct {
 	Ref                  string `js:"Ref"`
 	Manager              string `js:"Manager"`
 	OrderDate            string `js:"OrderDate"`
+	UpdateDate           string `js:"UpdateDate"`
 	Status               string `js:"Status"`
 	Comment              string `js:"Comment"`
 	NbPulling            int    `js:"NbPulling"`

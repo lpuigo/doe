@@ -7,15 +7,16 @@ import (
 )
 
 type Site struct {
-	Id        int
-	Client    string
-	Ref       string
-	Manager   string
-	OrderDate string
-	Status    string
-	Comment   string
-	Nodes     map[string]*Node
-	Troncons  map[string]*Troncon
+	Id         int
+	Client     string
+	Ref        string
+	Manager    string
+	OrderDate  string
+	UpdateDate string
+	Status     string
+	Comment    string
+	Nodes      map[string]*Node
+	Troncons   map[string]*Troncon
 
 	Pullings     []*Pulling
 	Junctions    []*Junction
@@ -32,6 +33,7 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 	rsi.Ref = s.Ref
 	rsi.Manager = s.Manager
 	rsi.OrderDate = s.OrderDate
+	rsi.UpdateDate = s.UpdateDate
 	rsi.Status = s.Status
 	rsi.Comment = s.Comment
 

@@ -15,6 +15,7 @@ type Worksite struct {
 	InvoiceDate    string
 	InvoiceName    string
 	PaymentDate    string
+	UpdateDate     string
 	City           string
 	Status         string
 	Pmz            PT
@@ -44,6 +45,7 @@ func (ws *Worksite) GetInfo(priceByClientArticle func(clientName string, article
 	wsi.InvoiceDate = ws.InvoiceDate
 	wsi.InvoiceName = ws.InvoiceName
 	wsi.PaymentDate = ws.PaymentDate
+	wsi.UpdateDate = ws.UpdateDate
 	wsi.City = ws.City
 	wsi.Status = ws.Status
 	ws.inspectForInfo(wsi, priceByClientArticle)

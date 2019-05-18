@@ -34,13 +34,13 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 
 			<el-table-column
 					label="Client" prop="Client" sortable :sort-by="['Client', 'Ref']"
-					width="140px" :resizable=true :show-overflow-tooltip=true
+					width="120px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Client')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 
 			<el-table-column
 					label="Référence" sortable
-					width="140px" :resizable=true :show-overflow-tooltip=true
+					width="120px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
                     <div class="header-menu-container">
@@ -87,6 +87,12 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
                     <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement - scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
+
+            <el-table-column
+                    label="Maj" prop="UpdateDate"
+                    width="90px" :resizable=true :show-overflow-tooltip=true
+                    align="center"	:formatter="FormatDate"
+            ></el-table-column>
 
 			<el-table-column
 					label="Commentaire" prop="Comment"

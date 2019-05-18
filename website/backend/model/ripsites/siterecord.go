@@ -2,6 +2,7 @@ package ripsites
 
 import (
 	"encoding/json"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"io"
 	"os"
@@ -44,5 +45,13 @@ func NewSiteRecordFromFile(file string) (sr *SiteRecord, err error) {
 	if err != nil {
 		sr = nil
 	}
+	if sr.Site.UpdateDate != "" {
+		return
+	}
+	fs, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	sr.Site.UpdateDate = date.Date(fs.ModTime()).String()
 	return
 }

@@ -42,17 +42,17 @@ const (
 			></el-table-column>
 			<el-table-column
 					label="Client" prop="Client" sortable :sort-by="['Client', 'City', 'Ref']"
-					width="140px" :resizable=true :show-overflow-tooltip=true
+					width="110px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Client')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 			<el-table-column
 					label="Ville" prop="City" sortable :sort-by="['City', 'Ref']"
-					width="140px" :resizable=true :show-overflow-tooltip=true
+					width="120px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('City')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 			<el-table-column
 					label="Référence" sortable
-					width="140px" :resizable=true :show-overflow-tooltip=true
+					width="120px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
                     <div class="header-menu-container">
@@ -93,6 +93,11 @@ const (
                     <worksiteinfo-progress-bar v-model="scope.row" :measure="true"></worksiteinfo-progress-bar>
                 </template>
             </el-table-column>
+            <el-table-column
+                    label="Maj" prop="UpdateDate"
+                    width="90px" :resizable=true :show-overflow-tooltip=true
+                    align="center"	:formatter="FormatDate"
+            ></el-table-column>
 			<el-table-column
 					label="Commentaire" prop="Comment"
 					min-width="120px" :resizable=true
