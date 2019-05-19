@@ -4,8 +4,9 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
-	"github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,16 +17,22 @@ import (
 const (
 	attachementFile string = "ATTACHEMENT _REF_CITY.xlsx"
 	sheetName       string = "EWIN"
-	rowTotal        int    = 21
-	colTotal        int    = 9
-	colFI           int    = 1
-	colPA           int    = 2
-	colPB           int    = 3
-	colCode         int    = 4
-	colAddr         int    = 5
-	colCity         int    = 6
-	colNbEl         int    = 7
-	colEndD         int    = 8
+
+	rowCEM12 int = 13
+	rowCEM22 int = 14
+	rowCEM32 int = 15
+	rowCEM42 int = 16
+	rowIMB   int = 21
+
+	colFI       int = 1
+	colPA       int = 2
+	colPB       int = 3
+	colCode     int = 4
+	colAddr     int = 5
+	colCity     int = 6
+	colNbEl     int = 7
+	colEndD     int = 8
+	colCEMPrice int = 8
 )
 
 type DocTemplateEngine struct {
@@ -45,12 +52,17 @@ func NewDocTemplateEngine(dir string) (*DocTemplateEngine, error) {
 }
 
 // GetAttachmentName returns the name of the WLSx file pertaining to given Worksite
-func (te *DocTemplateEngine) GetAttachmentName(ws *worksites.WorkSiteRecord) string {
+func (te *DocTemplateEngine) GetAttachmentName(ws *model.Worksite) string {
 	return fmt.Sprintf("ATTACHEMENT %s_%s.xlsx", ws.Ref, ws.City)
 }
 
 // GetAttachmentXLS generates and writes on given writer the attachment data pertaining to given Worksite
-func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSiteRecord) error {
+func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *model.Worksite, getClient func(clientName string) *clients.Client) error {
+	client := getClient(ws.Client)
+	if client == nil {
+		return fmt.Errorf("unknown client '%s'", ws.Client)
+	}
+
 	file := filepath.Join(te.tmplDir, attachementFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {
@@ -67,8 +79,18 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 		return fmt.Errorf("could not find EWIN sheet")
 	}
 
-	line := 26
-	totEl := 0
+	// Set BPU prices
+	cemLine := map[string]int{
+		"CEM12": rowCEM12,
+		"CEM22": rowCEM22,
+		"CEM32": rowCEM32,
+		"CEM42": rowCEM42,
+	}
+	for _, article := range client.Articles {
+		xf.SetCellValue(sheetName, coord(cemLine[article.Name], colCEMPrice), article.Price)
+	}
+
+	line := rowIMB
 	for _, ord := range ws.Orders {
 		for _, tr := range ord.Troncons {
 			xf.SetCellStr(sheetName, coord(line, colFI), ord.Ref)
@@ -81,7 +103,6 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 			if tr.Blockage {
 				nbEl = 0
 			}
-			totEl += nbEl
 			xf.SetCellInt(sheetName, coord(line, colNbEl), nbEl)
 			endDate := ""
 			if tr.MeasureDate != "" {
@@ -92,19 +113,18 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 		}
 	}
 
-	xf.SetCellInt(sheetName, coord(rowTotal, colTotal), totEl)
 	xf.UpdateLinkedValue()
 
 	return xf.Write(w)
 }
 
 // GetDOEArchiveName returns the name of the DOE Struct zip file pertaining to given Worksite
-func (te *DocTemplateEngine) GetDOEArchiveName(ws *worksites.WorkSiteRecord) string {
+func (te *DocTemplateEngine) GetDOEArchiveName(ws *model.Worksite) string {
 	return fmt.Sprintf("DOE %s_%s.zip", ws.Ref, ws.City)
 }
 
 // GetDOEArchiveZIP generates and writes on given writer the DOE Struct zip pertaining to given Worksite
-func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *worksites.WorkSiteRecord) error {
+func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *model.Worksite) error {
 	zw := zip.NewWriter(w)
 
 	path := strings.TrimSuffix(te.GetDOEArchiveName(ws), ".zip")

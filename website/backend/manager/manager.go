@@ -167,6 +167,17 @@ func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor model.D
 	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, !m.CurrentUser.Permissions["Review"]))
 }
 
+func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite) error {
+	getClient := func(clientName string) *clients.Client {
+		cr := m.Clients.GetByName(clientName)
+		if cr == nil {
+			return nil
+		}
+		return cr.Client
+	}
+	return m.TemplateEngine.GetAttachmentXLS(writer, ws, getClient)
+}
+
 func (m Manager) WorksitesArchiveName() string {
 	return m.Worksites.ArchiveName()
 }
