@@ -19,7 +19,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
-	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -97,31 +96,54 @@ type MainPageModel struct {
 
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
 	RipsiteInfos  []*fm.RipsiteInfo  `js:"ripsiteInfos"`
-	//EditedWorksite int      `js:"editedWorksite"`
 }
 
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.User = fm.NewUser()
-	mpm.WorksiteInfos = []*fm.WorksiteInfo{}
-	mpm.RipsiteInfos = []*fm.RipsiteInfo{}
-	mpm.SetMode()
+	mpm.ClearSiteInfos()
+	mpm.ClearModes()
+	//mpm.SetMode()
 
 	return mpm
+}
+
+func (m *MainPageModel) ClearModes() {
+	m.SiteMode = ""
+	m.ActiveMode = ""
+}
+
+func (m *MainPageModel) ClearSiteInfos() {
+	m.WorksiteInfos = []*fm.WorksiteInfo{}
+	m.RipsiteInfos = []*fm.RipsiteInfo{}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) SetMode() {
-	// SiteMode setting
-	if len(m.RipsiteInfos) > 0 && len(m.WorksiteInfos) == 0 {
-		m.SiteMode = "Rip"
+func (m *MainPageModel) CheckSiteMode() {
+	if m.SiteMode == "Rip" && m.User.Permissions["Create"] {
+		m.ActiveMode = "Update"
 	} else {
-		m.SiteMode = "Orange"
+		m.ActiveMode = "Create"
+	}
+}
+
+func (m *MainPageModel) SetMode() {
+	// SiteMode setting if not choosen yet
+	if m.SiteMode == "" {
+		if len(m.WorksiteInfos) > 0 {
+			m.SiteMode = "Orange"
+		} else if len(m.RipsiteInfos) > 0 {
+			m.SiteMode = "Rip"
+		}
 	}
 
-	// ActiveMode setting
+	// Set ActiveMode if not set yet
+	if m.ActiveMode != "" {
+		return
+	}
+
 	switch {
 	case m.User.Name == "":
 		m.ActiveMode = ""
@@ -131,12 +153,12 @@ func (m *MainPageModel) SetMode() {
 		m.ActiveMode = "Create"
 	case m.User.Permissions["Invoice"]:
 		m.ActiveMode = "Invoice"
+		m.SiteMode = "Orange"
 	case m.User.Permissions["Review"]:
 		m.ActiveMode = "Review"
 	default:
 		m.ActiveMode = ""
 	}
-	return
 }
 
 func (m *MainPageModel) GetUserSession() {
@@ -277,13 +299,13 @@ func (m *MainPageModel) GetBillableWorksiteNb() int {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (m *MainPageModel) errorMessage(req *xhr.Request) {
-	message.SetDuration(tools.WarningMsgDuration)
-	msg := "Quelquechose c'est mal passé !\n"
-	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
-	message.ErrorMsgStr(m.VM, msg, req.Response, true)
-}
-
+//func (m *MainPageModel) errorMessage(req *xhr.Request) {
+//	message.SetDuration(tools.WarningMsgDuration)
+//	msg := "Quelquechose c'est mal passé !\n"
+//	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
+//	message.ErrorMsgStr(m.VM, msg, req.Response, true)
+//}
+//
 func (m *MainPageModel) callGetUser() {
 	req := xhr.NewRequest("GET", "/api/login")
 	req.Timeout = tools.LongTimeOut
@@ -295,7 +317,7 @@ func (m *MainPageModel) callGetUser() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
+		message.ErrorRequestMessage(m.VM, req)
 		return
 	}
 	m.User.Copy(fm.UserFromJS(req.Response))
@@ -318,13 +340,13 @@ func (m *MainPageModel) callLogout() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
+		message.ErrorRequestMessage(m.VM, req)
 		return
 	}
 	m.User = fm.NewUser()
 	m.User.Connected = false
-	m.WorksiteInfos = []*fm.WorksiteInfo{}
-	m.SetMode()
+	m.ClearSiteInfos()
+	m.ClearModes()
 }
 
 func (m *MainPageModel) callGetWorkSiteInfos() {
@@ -332,7 +354,7 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
 	sites := m.WorksiteInfos
-	m.WorksiteInfos = nil
+	//m.WorksiteInfos = nil
 	defer func() {
 		m.WorksiteInfos = sites
 		m.SetMode()
@@ -344,7 +366,7 @@ func (m *MainPageModel) callGetWorkSiteInfos() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
+		message.ErrorRequestMessage(m.VM, req)
 		return
 	}
 	wsis := []*fm.WorksiteInfo{}
@@ -360,7 +382,7 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
 	sites := m.RipsiteInfos
-	m.RipsiteInfos = nil
+	//m.RipsiteInfos = nil
 	defer func() {
 		m.RipsiteInfos = sites
 		m.SetMode()
@@ -372,7 +394,7 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		m.errorMessage(req)
+		message.ErrorRequestMessage(m.VM, req)
 		return
 	}
 	rsis := []*fm.RipsiteInfo{}

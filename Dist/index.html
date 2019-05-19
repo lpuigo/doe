@@ -68,7 +68,7 @@
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
                     <!-- Select Orange or RIP mode -->
-                    <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini">
+                    <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini" @change="CheckSiteMode">
                         <el-radio-button v-if="worksiteInfos.length > 0" label="Orange">Orange : {{worksiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="ripsiteInfos.length > 0" label="Rip">RIP : {{ripsiteInfos.length}}</el-radio-button>
                     </el-radio-group>

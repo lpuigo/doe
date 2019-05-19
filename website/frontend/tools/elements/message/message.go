@@ -68,7 +68,7 @@ func ErrorMsgFromJS(o *js.Object) *ErrorMsg {
 	return &ErrorMsg{Object: o}
 }
 
-func ErrorMessage(vm *hvue.VM, req *xhr.Request) {
+func ErrorRequestMessage(vm *hvue.VM, req *xhr.Request) {
 	message.SetDuration(tools.WarningMsgDuration)
 	msg := "Quelquechose c'est mal passé !\n"
 	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"

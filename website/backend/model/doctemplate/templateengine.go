@@ -74,7 +74,7 @@ func (te *DocTemplateEngine) GetAttachmentXLS(w io.Writer, ws *worksites.WorkSit
 			xf.SetCellStr(sheetName, coord(line, colFI), ord.Ref)
 			xf.SetCellStr(sheetName, coord(line, colPA), ws.Ref)
 			xf.SetCellStr(sheetName, coord(line, colPB), tr.Pb.Ref)
-			xf.SetCellStr(sheetName, coord(line, colCode), "CEM42")
+			xf.SetCellStr(sheetName, coord(line, colCode), tr.Article)
 			xf.SetCellStr(sheetName, coord(line, colAddr), tr.Pb.Address)
 			xf.SetCellStr(sheetName, coord(line, colCity), ws.City)
 			nbEl := tr.NbRacco

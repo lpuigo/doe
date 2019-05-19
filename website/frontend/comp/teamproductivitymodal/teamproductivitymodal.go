@@ -88,7 +88,7 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(tpmm.VM, req)
+		message.ErrorRequestMessage(tpmm.VM, req)
 		tpmm.Hide()
 		return
 	}

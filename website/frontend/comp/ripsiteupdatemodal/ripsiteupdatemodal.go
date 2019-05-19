@@ -184,7 +184,7 @@ func (rsumm *RipsiteUpdateModalModel) callGetRipsite(id int) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(rsumm.VM, req)
+		message.ErrorRequestMessage(rsumm.VM, req)
 		rsumm.Hide()
 		return
 	}
@@ -205,7 +205,7 @@ func (rsumm *RipsiteUpdateModalModel) callUpdateRipsite(urs *fmrip.Ripsite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(rsumm.VM, req)
+		message.ErrorRequestMessage(rsumm.VM, req)
 		return
 	}
 	rsumm.VM.Emit("update_ripsite")
@@ -224,7 +224,7 @@ func (rsumm *RipsiteUpdateModalModel) callCreateRipsite(urs *fmrip.Ripsite) {
 		return
 	}
 	if req.Status != tools.HttpCreated {
-		message.ErrorMessage(rsumm.VM, req)
+		message.ErrorRequestMessage(rsumm.VM, req)
 		return
 	}
 	rsumm.VM.Emit("update_ripsite")
@@ -243,7 +243,7 @@ func (rsumm *RipsiteUpdateModalModel) callDeleteRipsite(drs *fmrip.Ripsite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(rsumm.VM, req)
+		message.ErrorRequestMessage(rsumm.VM, req)
 	}
 	rsumm.VM.Emit("update_ripsite")
 	message.SuccesStr(rsumm.VM, "Chantier supprimé !")

@@ -184,7 +184,7 @@ func (wemm *WorksiteEditModalModel) callGetWorksite(id int) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(wemm.VM, req)
+		message.ErrorRequestMessage(wemm.VM, req)
 		wemm.Hide()
 		return
 	}
@@ -204,7 +204,7 @@ func (wemm *WorksiteEditModalModel) callUpdateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(wemm.VM, req)
+		message.ErrorRequestMessage(wemm.VM, req)
 		return
 	}
 	wemm.VM.Emit("update_worksite")
@@ -223,7 +223,7 @@ func (wemm *WorksiteEditModalModel) callCreateWorksite(uws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpCreated {
-		message.ErrorMessage(wemm.VM, req)
+		message.ErrorRequestMessage(wemm.VM, req)
 		return
 	}
 	wemm.VM.Emit("update_worksite")
@@ -242,7 +242,7 @@ func (wemm *WorksiteEditModalModel) callDeleteWorksite(dws *fm.Worksite) {
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorMessage(wemm.VM, req)
+		message.ErrorRequestMessage(wemm.VM, req)
 	}
 	wemm.VM.Emit("update_worksite")
 	message.SuccesStr(wemm.VM, "Chantier supprimé !")
