@@ -22,7 +22,11 @@ func (ca CategoryArticles) SortChapters() {
 	}
 }
 
-func (ca CategoryArticles) GetChapterForUnit(category string, unit int) (*Article, error) {
+func (ca CategoryArticles) GetArticles(category string) []*Article {
+	return ca[strings.ToUpper(category)]
+}
+
+func (ca CategoryArticles) GetArticleFor(category string, unit int) (*Article, error) {
 	chapters := ca[strings.ToUpper(category)]
 	if len(chapters) == 0 {
 		return nil, fmt.Errorf("unknown category '%s'", category)

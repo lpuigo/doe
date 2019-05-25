@@ -175,7 +175,7 @@ func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite)
 		}
 		return cr.Client
 	}
-	return m.TemplateEngine.GetAttachmentXLS(writer, ws, getClient)
+	return m.TemplateEngine.GetWorksiteXLSAttachment(writer, ws, getClient)
 }
 
 func (m Manager) WorksitesArchiveName() string {
@@ -235,6 +235,17 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 	}
 
 	return json.NewEncoder(writer).Encode(rsis)
+}
+
+func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
+	getClient := func(clientName string) *clients.Client {
+		cr := m.Clients.GetByName(clientName)
+		if cr == nil {
+			return nil
+		}
+		return cr.Client
+	}
+	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, getClient)
 }
 
 func (m Manager) RipsitesArchiveName() string {

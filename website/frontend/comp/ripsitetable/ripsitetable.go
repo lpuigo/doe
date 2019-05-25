@@ -26,7 +26,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		ripsiteinfo.RegisterComponentRipsiteInfoInfo(),
 		ripprogressbar.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("ripsiteinfos"),
+		hvue.Props("ripsiteinfos", "user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipsiteTableModel(vm)
 		}),
@@ -57,6 +57,7 @@ type RipsiteTableModel struct {
 	*js.Object
 
 	Ripsiteinfos []*fm.RipsiteInfo `js:"ripsiteinfos"`
+	User         *fm.User          `js:"user"`
 	//EnableAddWorksite bool               `js:"enable_add_worksite"`
 	Filter string `js:"filter"`
 
@@ -66,6 +67,7 @@ type RipsiteTableModel struct {
 func NewRipsiteTableModel(vm *hvue.VM) *RipsiteTableModel {
 	rtm := &RipsiteTableModel{Object: tools.O()}
 	rtm.Ripsiteinfos = nil
+	rtm.User = fm.NewUser()
 	//rtm.EnableAddWorksite = false
 	rtm.Filter = ""
 	rtm.VM = vm
@@ -81,6 +83,10 @@ func (rtm *RipsiteTableModel) SetSelectedRipsite(rsi *fm.RipsiteInfo) {
 
 func (rtm *RipsiteTableModel) AddRipsite(vm *hvue.VM) {
 	vm.Emit("new_ripsite")
+}
+
+func (rtm *RipsiteTableModel) AttachmentUrl(id int) string {
+	return "/api/ripsites/" + strconv.Itoa(id) + "/attach"
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -13,6 +13,13 @@ type Bpu struct {
 	Boxes      map[string]map[string]*Box  // map[Category]map[Name]*Box
 }
 
+func NewBpu() *Bpu {
+	return &Bpu{
+		Activities: make(map[string]CategoryArticles),
+		Boxes:      make(map[string]map[string]*Box),
+	}
+}
+
 func (bpu *Bpu) GetCategoryArticles(activity string) CategoryArticles {
 	return bpu.Activities[strings.ToUpper(activity)]
 }
@@ -75,10 +82,7 @@ func NewBpuFromXLS(file string) (bpu *Bpu, err error) {
 		err = fmt.Errorf("could not find '%s' sheet in '%s'", bpuBoxeSheetName, file)
 		return
 	}
-	bpu = &Bpu{
-		Activities: map[string]CategoryArticles{},
-		Boxes:      map[string]map[string]*Box{},
-	}
+	bpu = NewBpu()
 	err = bpu.parseActivities(priceSheet)
 	if err != nil {
 		return

@@ -133,6 +133,7 @@
                 <ripsite-table
                         v-if="ActiveMode == 'Update'"
                         :ripsiteinfos="ripsiteInfos"
+                        :user="User"
                         @selected_ripsite="UpdateRipsite"
                         @new_ripsite=""
                 ></ripsite-table>

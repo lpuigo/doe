@@ -17,10 +17,20 @@ type Pulling struct {
 	State     State
 }
 
-func (p *Pulling) GetTotalDist() int {
+func (p *Pulling) GetTotalAggrDist() int {
 	dist := 0
 	for _, chunk := range p.Chuncks {
 		dist += chunk.LoveDist + chunk.UndergroundDist + chunk.AerialDist + chunk.BuildingDist
 	}
 	return dist
+}
+
+func (p *Pulling) GetTotalDists() (love, underground, aerial, building int) {
+	for _, chunk := range p.Chuncks {
+		love += chunk.LoveDist
+		underground += chunk.UndergroundDist
+		aerial += chunk.AerialDist
+		building += chunk.BuildingDist
+	}
+	return
 }

@@ -45,6 +45,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 				<template slot-scope="scope">
                     <div class="header-menu-container">
                         <span @click="SetSelectedRipsite(scope.row)" class="link">{{scope.row.Ref}}</span>
+						<a v-if="user.Permissions.Invoice" :href="AttachmentUrl(scope.row.Id)"><i class="link fas fa-file-excel"></i></a>
                     </div>
 				</template>
 			</el-table-column>

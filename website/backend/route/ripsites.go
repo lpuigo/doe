@@ -111,6 +111,35 @@ func DeleteRipSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg.AddInfoResponse(fmt.Sprintf("RipSite with id %d (%s) deleted", rsrid, rsr.Ref), http.StatusOK)
 }
 
+// GetRipSiteAttachement
+func GetRipSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetRipSiteAttachement").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	reqRipSiteId := mux.Vars(r)["rsid"]
+	rsrid, err := strconv.Atoi(reqRipSiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted WorkSite id '"+reqRipSiteId+"'", http.StatusBadRequest)
+		return
+	}
+	rsr := mgr.Ripsites.GetById(rsrid)
+	if rsr == nil {
+		AddError(w, logmsg, fmt.Sprintf("ripSite with id %d does not exist", rsrid), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetRipsiteXLSAttachementName(rsr.Site)))
+	w.Header().Set("Content-Type", "application/zip")
+
+	err = mgr.GetRipsiteXLSAttachement(w, rsr.Site)
+	if err != nil {
+		AddError(w, logmsg, "could not generate WorkSite XLS Attachment file. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for ripsite id %d (%s)", rsrid, rsr.Site.Ref), http.StatusOK)
+}
+
 func GetRipsitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetRipsitesArchive").AddUser(mgr.CurrentUser.Name)

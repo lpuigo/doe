@@ -23,7 +23,7 @@ func getAuthentClientFrom(clients []*clients.Client) []authentClient {
 		res = append(res, authentClient{
 			Name:     client.Name,
 			Teams:    client.Teams,
-			Articles: client.GetArticleNames(),
+			Articles: client.GetOrangeArticleNames(),
 		})
 	}
 	return res

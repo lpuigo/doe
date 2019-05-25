@@ -28,3 +28,9 @@ func (s State) Blocked() bool {
 func (s State) Done() bool {
 	return s.Status == ripconst.StateDone
 }
+
+func (s State) GetTodoDone() (todo, done bool) {
+	todo = s.ToDo()
+	done = s.Done()
+	return
+}

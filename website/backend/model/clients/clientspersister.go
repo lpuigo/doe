@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"path/filepath"
 	"sync"
@@ -145,11 +146,11 @@ func (cp *ClientsPersister) CalcPriceByClientArticleGetter() func(clientName, ar
 	cp.RLock()
 	defer cp.RUnlock()
 
-	clts := make(map[string]map[string]Article)
+	clts := make(map[string]map[string]bpu.Article)
 	for _, cr := range cp.clients {
-		articles := make(map[string]Article)
-		for _, article := range cr.Client.Articles {
-			articles[article.Name] = article
+		articles := make(map[string]bpu.Article)
+		for _, article := range cr.Client.GetOrangeArticles() {
+			articles[article.Name] = *article
 		}
 		clts[cr.Client.Name] = articles
 	}

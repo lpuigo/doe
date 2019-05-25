@@ -153,7 +153,7 @@ func GetWorkSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetAttachmentName(wsr.Worksite)))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetWorksiteXLSAttachmentName(wsr.Worksite)))
 	w.Header().Set("Content-Type", "application/vnd.ms-excel")
 
 	err = mgr.GetWorksiteXLSAttachement(w, wsr.Worksite)
