@@ -116,9 +116,18 @@ func (s *Site) GetMeasurementNumbers() (total, blocked, done int) {
 
 func (s *Site) Itemize(bpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
-	pullItems, _ := s.itemizePullings(bpu)
-	junctItems, _ := s.itemizeJunctions(bpu)
-	measItems, _ := s.itemizeMeasurements(bpu)
+	pullItems, err := s.itemizePullings(bpu)
+	if err != nil {
+		return nil, err
+	}
+	junctItems, err := s.itemizeJunctions(bpu)
+	if err != nil {
+		return nil, err
+	}
+	measItems, err := s.itemizeMeasurements(bpu)
+	if err != nil {
+		return nil, err
+	}
 
 	res = append(res, pullItems...)
 	res = append(res, junctItems...)
@@ -135,12 +144,16 @@ const (
 	catPullUnderground string = activityPulling + " Souterain"
 	catPullAerial      string = activityPulling + " Aérien"
 	catPullBuilding    string = activityPulling + " Façade"
+
+	catJuncPM  string = "PM"
+	catJuncBPE string = "BPE"
+	catJuncPBO string = "PBO"
 )
 
-func (s *Site) itemizePullings(bpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 
-	pullingArticles := bpu.GetCategoryArticles(activityPulling)
+	pullingArticles := currentBpu.GetCategoryArticles(activityPulling)
 
 	for _, pulling := range s.Pullings {
 		cableSize, err := getCableSize(pulling.CableName)
@@ -214,12 +227,73 @@ func (s *Site) itemizePullings(bpu *bpu.Bpu) ([]*items.Item, error) {
 	return res, nil
 }
 
-func (s *Site) itemizeJunctions(bpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
+	junctionArticles := currentBpu.GetCategoryArticles(activityJunction)
+
+	var e error
+
+	for _, junction := range s.Junctions {
+		node, nodeFound := s.Nodes[junction.NodeName]
+		todo, done := junction.State.GetTodoDone()
+		if !nodeFound {
+			return nil, fmt.Errorf("unknow node '%s'", junction.NodeName)
+		}
+		if !currentBpu.IsBoxDefined(node.Type, node.BoxType) {
+			return nil, fmt.Errorf("unknow Box Type '%s' for '%s'", node.BoxType, node.Type)
+		}
+		_, nbSplice := junction.GetNbFiberSplice()
+		tronconIn, tronconInFound := s.Troncons[node.TronconInName]
+		var boxSize int
+		if tronconInFound {
+			boxSize = tronconIn.Size
+		}
+
+		var mainArticle, optArticle *bpu.Article
+		var qty1, qty2 int
+
+		switch strings.ToUpper(node.Type) {
+		case catJuncPM:
+			pmArticles := junctionArticles.GetArticles(catJuncPM)
+			mainArticle, optArticle = pmArticles[0], pmArticles[1]
+
+			qty1 = nbSplice / mainArticle.Unit
+			// check for missing modules
+			qty2 = 0
+			if qty1*mainArticle.Unit < nbSplice {
+				qty1++
+				nbMissingSplice := qty1*mainArticle.Unit - nbSplice
+				qty2 = nbMissingSplice / optArticle.Unit
+			}
+		case catJuncBPE, catJuncPBO:
+			mainArticle, optArticle, e = getJunctionBoxArticles(currentBpu, activityJunction, node.Type, node.BoxType)
+			qty1, qty2 = 1, nbSplice
+			if e != nil {
+				return nil, fmt.Errorf("shit hit the fence: %s", e.Error())
+			}
+		default:
+			return nil, fmt.Errorf("unexpected box category '%s'", node.Type)
+		}
+
+		info := fmt.Sprintf("Install. %s: %s", node.Type, node.BoxType)
+		if boxSize > 0 {
+			info += fmt.Sprintf(" (%dFO)", boxSize)
+		}
+
+		res = append(res,
+			items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, junction.State.Team, mainArticle, qty1, qty1, todo, done),
+		)
+		if optArticle != nil {
+			res = append(res,
+				items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, junction.State.Team, optArticle, qty2, qty2, todo, done),
+			)
+		}
+	}
+
 	return res, nil
 }
 
-func (s *Site) itemizeMeasurements(bpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 	return res, nil
 }
@@ -234,4 +308,41 @@ func getCableSize(cableName string) (int, error) {
 		return 0, fmt.Errorf("misformatted cable type: can not get number of fiber in '%'", parts[1])
 	}
 	return int(size), nil
+}
+
+// getJunctionBoxArticles returns Article applicable for given Bpe or Pbo type
+func getJunctionBoxArticles(currentBpu *bpu.Bpu, activity, category, boxType string) (boxArticle, spliceArticle *bpu.Article, err error) {
+	// box lookup
+	box := currentBpu.GetBox(category, boxType)
+	if box == nil {
+		err = fmt.Errorf("unknow box type '%s' for category '%s'", boxType, category)
+		return
+	}
+
+	catArticles := currentBpu.GetCategoryArticles(activity)
+	if catArticles == nil {
+		err = fmt.Errorf("unknow activity '%s'", activity)
+		return
+	}
+
+	switch strings.ToUpper(category) {
+	case catJuncBPE:
+		boxArticle, err = catArticles.GetArticleFor(category, box.Size)
+		if err != nil {
+			return
+		}
+		spliceArticle, err = catArticles.GetArticleFor(category+" Splice", box.Size)
+		if err != nil {
+			return
+		}
+	case catJuncPBO:
+		boxArticle, err = catArticles.GetArticleFor(category+" "+box.Usage, box.Size)
+		if err != nil {
+			return
+		}
+	default:
+		err = fmt.Errorf("category '%s' is not handled", category)
+		return
+	}
+	return
 }

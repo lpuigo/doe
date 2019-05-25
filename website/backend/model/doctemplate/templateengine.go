@@ -199,7 +199,7 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 
 	items, err := site.Itemize(client.Bpu)
 	if err != nil {
-		return fmt.Errorf("unable to extract items: %s", err.Error())
+		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
