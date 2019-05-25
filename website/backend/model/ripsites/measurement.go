@@ -12,3 +12,7 @@ type Measurement struct {
 func (m *Measurement) GetNbMeas() int {
 	return m.NbFiber
 }
+
+func (m *Measurement) NbSplice() int {
+	return len(m.NodeNames)
+}

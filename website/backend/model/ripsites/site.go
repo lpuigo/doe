@@ -148,6 +148,8 @@ const (
 	catJuncPM  string = "PM"
 	catJuncBPE string = "BPE"
 	catJuncPBO string = "PBO"
+
+	catMeasurement string = "Mesure"
 )
 
 func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
@@ -234,8 +236,8 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	var e error
 
 	for _, junction := range s.Junctions {
-		node, nodeFound := s.Nodes[junction.NodeName]
 		todo, done := junction.State.GetTodoDone()
+		node, nodeFound := s.Nodes[junction.NodeName]
 		if !nodeFound {
 			return nil, fmt.Errorf("unknow node '%s'", junction.NodeName)
 		}
@@ -295,6 +297,19 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
+	measurementArticles := currentBpu.GetCategoryArticles(activityMeasurement)
+
+	mainArticle, err := measurementArticles.GetArticleFor(catMeasurement, 1)
+	if err != nil {
+		return nil, err
+	}
+	qty1 := 1
+
+	for _, measurement := range s.Measurements {
+		todo, done := measurement.State.GetTodoDone()
+		info := fmt.Sprintf("Mesure %d fibres - %d epissures", measurement.NbFiber, measurement.NbSplice())
+		res = append(res, items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, measurement.State.Team, mainArticle, qty1, qty1, todo, done))
+	}
 	return res, nil
 }
 
