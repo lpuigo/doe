@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -143,7 +144,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor model.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible model.IsTeamVisible, showTeam bool) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, showTeam bool) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 

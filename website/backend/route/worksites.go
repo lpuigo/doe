@@ -209,7 +209,7 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	case "month":
 		err = mgr.GetWorksitesMonthStats(w)
 	default:
-		AddError(w, logmsg, "mis-formatted stat type '"+freq+"'", http.StatusBadRequest)
+		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
 		return
 	}
 
@@ -217,7 +217,7 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("%s stats produced", freq), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("%s worksites stats produced", freq), http.StatusOK)
 }
 
 func GetWorksitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

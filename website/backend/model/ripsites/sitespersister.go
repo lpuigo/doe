@@ -3,10 +3,15 @@ package ripsites
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
 	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -136,6 +141,114 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 		}
 	}
 	return -1
+}
+
+func sortedSetKeys(set map[string]int) []string {
+	res := []string{}
+	for key, _ := range set {
+		res = append(res, key)
+	}
+	sort.Strings(res)
+	return res
+}
+
+// GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
+func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *fm.WorksiteStats {
+	sp.RLock()
+	defer sp.RUnlock()
+
+	// calc per Team/date/indicator values
+	calcValues := make(map[items.StatKey]float64)
+	for _, sr := range sp.sites {
+		if isRSVisible(sr.Site) {
+			client := clientByName(sr.Site.Client)
+			if client == nil {
+				continue
+			}
+			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu)
+		}
+	}
+
+	ws := fm.NewBEWorksiteStats()
+
+	//create client, team, Series & dates Lists
+	end := date.Today()
+	start := end.String()
+	teamset := make(map[string]int)
+	serieset := make(map[string]int)
+	agrValues := make(map[items.StatKey]float64)
+	for key, val := range calcValues {
+		teamset[key.Team] = 1
+		serieset[key.Serie] = 1
+		if key.Date < start {
+			start = key.Date
+		}
+		agrValues[items.StatKey{
+			Team:    key.Team,
+			Date:    key.Date,
+			Site:    "",
+			Article: "",
+			Serie:   key.Serie,
+		}] += val
+	}
+	teams := []string{}
+	for t, _ := range teamset {
+		// if showTeam is false, only show client sum-up
+		if !(!showTeam && strings.Contains(t, " : ")) {
+			teams = append(teams, t)
+		}
+	}
+	sort.Strings(teams)
+
+	series := sortedSetKeys(serieset)
+
+	dateset := make(map[string]int)
+	curStringDate := dateFor(date.DateFrom(start).String())
+	curDate := date.DateFrom(curStringDate)
+	endStringDate := dateFor(end.String())
+	endReached := false
+	for !endReached {
+		dateset[curStringDate] = 1
+		curDate = curDate.AddDays(7)
+		curStringDate = dateFor(curDate.String())
+		endReached = curStringDate > endStringDate
+	}
+	dates := sortedSetKeys(dateset)
+	// keep maxVal newest data
+	if len(dates) > maxVal {
+		dates = dates[len(dates)-maxVal:]
+	}
+
+	ws.Values = make(map[string][][]int) // map[series][#team][#date]int
+	ws.Dates = dates
+
+	for _, teamName := range teams {
+		teamActivity := 0.0
+		values := make(map[string][]int)
+		for _, serie := range series {
+			values[serie] = make([]int, len(dates))
+			for dateNum, d := range dates {
+				val := agrValues[items.StatKey{
+					Team:    teamName,
+					Date:    d,
+					Site:    "",
+					Article: "",
+					Serie:   serie,
+				}]
+				teamActivity += val
+				values[serie][dateNum] = int(val * 10)
+			}
+		}
+		if teamActivity == 0 {
+			// current team as no activity on the time laps, skip it
+			continue
+		}
+		ws.Teams = append(ws.Teams, teamName)
+		for _, serie := range series {
+			ws.Values[serie] = append(ws.Values[serie], values[serie])
+		}
+	}
+	return ws
 }
 
 // WorksitesArchiveName returns the SiteArchive file name with today's date

@@ -215,7 +215,7 @@ func (m *MainPageModel) UpdateInvoice(id int) {
 }
 
 func (m *MainPageModel) ShowTeamProductivity() {
-	m.VM.Refs("TeamProductivityModal").Call("Show", m.User)
+	m.VM.Refs("TeamProductivityModal").Call("Show", m.User, m.SiteMode)
 }
 
 func (m *MainPageModel) ShowAdmin() {

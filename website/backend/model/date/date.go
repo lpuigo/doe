@@ -4,6 +4,8 @@ import "time"
 
 type Date time.Time
 
+type DateAggreg func(string) string
+
 const (
 	TimeJSLayout string = "2006-01-02"
 	TimeLayout   string = "02/01/2006"

@@ -100,6 +100,60 @@ func (m Manager) Clone() *Manager {
 }
 
 // =====================================================================================================================
+// User related methods
+//
+
+// genGetClient returns a GetClientByName function: func(clientName string) *clients.Client. Returned client is nil if clientName is not found
+func (m *Manager) genGetClient() clients.ClientByName {
+	return func(clientName string) *clients.Client {
+		cr := m.Clients.GetByName(clientName)
+		if cr == nil {
+			return nil
+		}
+		return cr.Client
+	}
+}
+
+// GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
+func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
+	res := []*clients.Client{}
+	if m.CurrentUser == nil {
+		return nil, nil
+	}
+	if len(m.CurrentUser.Clients) == 0 {
+		return m.Clients.GetAllClients(), nil
+	}
+	for _, clientName := range m.CurrentUser.Clients {
+		client := m.Clients.GetByName(clientName)
+		if client == nil {
+			return nil, fmt.Errorf("could not retrieve client '%s' info", clientName)
+		}
+		res = append(res, client.Client)
+	}
+	return res, nil
+}
+
+// genIsTeamVisible returns a IsTeamVisible function: func(ClientTeam) bool, which is true when current user is allowed to see clientteam related activity
+func (m Manager) genIsTeamVisible() (clients.IsTeamVisible, error) {
+	if len(m.CurrentUser.Clients) > 0 {
+		teamVisible := make(map[clients.ClientTeam]bool)
+		clts, err := m.GetCurrentUserClients()
+		if err != nil {
+			return nil, err
+		}
+		for _, client := range clts {
+			for _, team := range client.Teams {
+				teamVisible[clients.ClientTeam{Client: client.Name, Team: team.Members}] = true
+			}
+		}
+		return func(ct clients.ClientTeam) bool {
+			return teamVisible[ct]
+		}, nil
+	}
+	return func(clients.ClientTeam) bool { return true }, nil
+}
+
+// =====================================================================================================================
 // Worksites related methods
 //
 
@@ -145,37 +199,16 @@ func (m Manager) GetWorksitesMonthStats(writer io.Writer) error {
 	return m.getWorksitesStats(writer, 12, df)
 }
 
-func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor model.DateAggreg) error {
-	var isTeamVisible model.IsTeamVisible
-	if len(m.CurrentUser.Clients) > 0 {
-		teamVisible := make(map[model.ClientTeam]bool)
-		clts, err := m.GetCurrentUserClients()
-		if err != nil {
-			return err
-		}
-		for _, client := range clts {
-			for _, team := range client.Teams {
-				teamVisible[model.ClientTeam{Client: client.Name, Team: team.Members}] = true
-			}
-		}
-		isTeamVisible = func(ct model.ClientTeam) bool {
-			return teamVisible[ct]
-		}
-	} else {
-		isTeamVisible = func(model.ClientTeam) bool { return true }
+func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
+	isTeamVisible, err := m.genIsTeamVisible()
+	if err != nil {
+		return err
 	}
 	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, !m.CurrentUser.Permissions["Review"]))
 }
 
 func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite) error {
-	getClient := func(clientName string) *clients.Client {
-		cr := m.Clients.GetByName(clientName)
-		if cr == nil {
-			return nil
-		}
-		return cr.Client
-	}
-	return m.TemplateEngine.GetWorksiteXLSAttachment(writer, ws, getClient)
+	return m.TemplateEngine.GetWorksiteXLSAttachment(writer, ws, m.genGetClient())
 }
 
 func (m Manager) WorksitesArchiveName() string {
@@ -184,29 +217,6 @@ func (m Manager) WorksitesArchiveName() string {
 
 func (m Manager) CreateWorksitesArchive(writer io.Writer) error {
 	return m.Worksites.CreateArchive(writer)
-}
-
-// =====================================================================================================================
-// User related methods
-//
-
-// GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
-func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
-	res := []*clients.Client{}
-	if m.CurrentUser == nil {
-		return nil, nil
-	}
-	if len(m.CurrentUser.Clients) == 0 {
-		return m.Clients.GetAllClients(), nil
-	}
-	for _, clientName := range m.CurrentUser.Clients {
-		client := m.Clients.GetByName(clientName)
-		if client == nil {
-			return nil, fmt.Errorf("could not retrieve client '%s' info", clientName)
-		}
-		res = append(res, client.Client)
-	}
-	return res, nil
 }
 
 // =====================================================================================================================
@@ -238,14 +248,7 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
-	getClient := func(clientName string) *clients.Client {
-		cr := m.Clients.GetByName(clientName)
-		if cr == nil {
-			return nil
-		}
-		return cr.Client
-	}
-	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, getClient)
+	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient())
 }
 
 func (m Manager) RipsitesArchiveName() string {
@@ -254,4 +257,28 @@ func (m Manager) RipsitesArchiveName() string {
 
 func (m Manager) CreateRipsitesArchive(writer io.Writer) error {
 	return m.Ripsites.CreateArchive(writer)
+}
+
+// GetWorksitesWeekStats returns Worksites Stats per Week (JSON in writer) visibles by current user
+func (m Manager) GetRipsitesWeekStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonday(d)
+	}
+	return m.getRipsitesStats(writer, 12, df)
+}
+
+// GetWorksitesWeekStats returns Worksites Stats per Month (JSON in writer) visibles by current user
+func (m Manager) GetRipsitesMonthStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonth(d)
+	}
+	return m.getRipsitesStats(writer, 12, df)
+}
+
+func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
+	isTeamVisible, err := m.genIsTeamVisible()
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(m.Ripsites.GetStats(maxVal, dateFor, m.visibleRipsiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"]))
 }

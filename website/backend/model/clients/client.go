@@ -9,6 +9,14 @@ type Client struct {
 	*bpu.Bpu
 }
 
+type ClientTeam struct {
+	Client string
+	Team   string
+}
+
+type ClientByName func(clientName string) *Client
+type IsTeamVisible func(ClientTeam) bool
+
 func NewClient(name string) *Client {
 	return &Client{
 		Id:    0,

@@ -3,6 +3,8 @@ package ripsites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
@@ -25,8 +27,6 @@ type Site struct {
 	Junctions    []*Junction
 	Measurements []*Measurement
 }
-
-type IsSiteVisible func(s *Site) bool
 
 func (s *Site) GetInfo() *fm.RipsiteInfo {
 	rsi := fm.NewBERipsiteInfo()
@@ -360,4 +360,41 @@ func getJunctionBoxArticles(currentBpu *bpu.Bpu, activity, category, boxType str
 		return
 	}
 	return
+}
+
+type IsSiteVisible func(s *Site) bool
+
+const (
+	RipStatSerieWork string = "Work"
+)
+
+// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
+func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu) {
+	addValue := func(client, site, team, date, article, serie string, val float64) {
+		values[items.StatKey{
+			Team:    client + " : " + team,
+			Date:    dateFor(date),
+			Site:    site,
+			Article: article,
+			Serie:   serie,
+		}] += val
+		values[items.StatKey{
+			Team:    client,
+			Date:    dateFor(date),
+			Site:    site,
+			Article: article,
+			Serie:   serie,
+		}] += val
+	}
+
+	calcItems, err := s.Itemize(currentBpu)
+	if err != nil {
+		panic(fmt.Sprintf("unexpected err on stat itemize for '%s':%s", s.Ref, err.Error()))
+	}
+	for _, item := range calcItems {
+		if !item.Done {
+			continue
+		}
+		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work())
+	}
 }

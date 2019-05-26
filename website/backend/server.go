@@ -99,7 +99,7 @@ func main() {
 	router.HandleFunc("/api/login", withUserManager("Logout", route.Logout)).Methods("DELETE")
 	router.HandleFunc("/api/login", withManager(route.Login)).Methods("POST")
 
-	// Worsite method
+	// Worksites method
 	router.HandleFunc("/api/worksites", withUserManager("GetWorksitesInfo", route.GetWorksitesInfo)).Methods("GET")
 	router.HandleFunc("/api/worksites", withUserManager("CreateWorkSite", route.CreateWorkSite)).Methods("POST")
 	router.HandleFunc("/api/worksites/archive", withUserManager("GetWorksitesArchive", route.GetWorksitesArchive)).Methods("GET")
@@ -114,7 +114,7 @@ func main() {
 	router.HandleFunc("/api/ripsites", withUserManager("GetRipsitesInfo", route.GetRipsitesInfo)).Methods("GET")
 	//router.HandleFunc("/api/ripsites", withUserManager("CreateRipSite", route.CreateRipSite)).Methods("POST")
 	router.HandleFunc("/api/ripsites/archive", withUserManager("GetRipsitesArchive", route.GetRipsitesArchive)).Methods("GET")
-	//router.HandleFunc("/api/ripsites/stat/{freq}", withUserManager("GetRipsitesStats", route.GetRipsitesStats)).Methods("GET")
+	router.HandleFunc("/api/ripsites/stat/{freq}", withUserManager("GetRipsitesStats", route.GetRipsitesStats)).Methods("GET")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("GetRipSite", route.GetRipSite)).Methods("GET")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}/attach", withUserManager("GetRipSiteAttachement", route.GetRipSiteAttachement)).Methods("GET")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("UpdateRipSite", route.UpdateRipSite)).Methods("PUT")

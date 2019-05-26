@@ -36,6 +36,7 @@ type TeamProductivityModalModel struct {
 	*modal.ModalModel
 
 	User       *fm.User          `js:"user"`
+	SiteMode   string            `js:"SiteMode"`
 	Stats      *fm.WorksiteStats `js:"Stats"`
 	TeamStats  []*fm.TeamStats   `js:"TeamStats"`
 	ActiveMode string            `js:"ActiveMode"`
@@ -47,6 +48,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	}
 	tpmm.Stats = fm.NewWorksiteStats()
 	tpmm.User = fm.NewUser()
+	tpmm.SiteMode = ""
 	tpmm.TeamStats = []*fm.TeamStats{}
 	tpmm.ActiveMode = "week"
 	return tpmm
@@ -59,16 +61,16 @@ func TeamProductivityModalModelFromJS(o *js.Object) *TeamProductivityModalModel 
 	return tpmm
 }
 
-func (tpmm *TeamProductivityModalModel) Show(user *fm.User) {
+func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 	tpmm.Stats = fm.NewWorksiteStats()
 	tpmm.TeamStats = []*fm.TeamStats{}
 	tpmm.User = user
+	tpmm.SiteMode = siteMode
 	tpmm.RefreshStat()
 	tpmm.ModalModel.Show()
 }
 
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
-	print(tpmm.ActiveMode)
 	tpmm.Loading = true
 	go tpmm.callGetWorksitesStats()
 }
@@ -78,7 +80,14 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 
 func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 	defer func() { tpmm.Loading = false }()
-	req := xhr.NewRequest("GET", "/api/worksites/stat/"+tpmm.ActiveMode)
+	url := ""
+	switch tpmm.SiteMode {
+	case "Rip":
+		url = "/api/ripsites/stat/"
+	default:
+		url = "/api/worksites/stat/"
+	}
+	req := xhr.NewRequest("GET", url+tpmm.ActiveMode)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)

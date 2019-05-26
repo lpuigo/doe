@@ -140,6 +140,34 @@ func GetRipSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Requ
 	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for ripsite id %d (%s)", rsrid, rsr.Site.Ref), http.StatusOK)
 }
 
+func GetRipsitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetRipsitesStats").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var err error
+
+	vars := mux.Vars(r)
+	freq := vars["freq"]
+	switch freq {
+	case "week":
+		err = mgr.GetRipsitesWeekStats(w)
+	case "month":
+		err = mgr.GetRipsitesMonthStats(w)
+	default:
+		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("%s ripsites stats produced", freq), http.StatusOK)
+}
+
 func GetRipsitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetRipsitesArchive").AddUser(mgr.CurrentUser.Name)

@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 )
 
@@ -122,14 +124,7 @@ type StatKey struct {
 	Mes  string
 }
 
-type ClientTeam struct {
-	Client string
-	Team   string
-}
-
 type IsWSVisible func(ws *Worksite) bool
-type IsTeamVisible func(ClientTeam) bool
-type DateAggreg func(string) string
 
 const (
 	NbElsInstalled string = "Installed"
@@ -139,7 +134,7 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor DateAggreg, isTeamVisible IsTeamVisible) {
+func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible) {
 	nbDOE := 0
 	teamDOE := ""
 
@@ -160,7 +155,7 @@ func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor DateAggreg, isTeamVis
 
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
-			if !isTeamVisible(ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
+			if !isTeamVisible(clients.ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
 				continue
 			}
 			// NbElsInstalled for Team & Client
