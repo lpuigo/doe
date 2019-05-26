@@ -219,9 +219,11 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 	xf.SetCellValue(sheetName, xls.RcToAxis(row, 2), "Code BPU")
 	xf.SetCellValue(sheetName, xls.RcToAxis(row, 3), "Quantité")
 	xf.SetCellValue(sheetName, xls.RcToAxis(row, 4), "Prix")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), "Installé")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), "Equipe")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "Date")
+	xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), "Quant. Tr.")
+	xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), "Travail")
+	xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "Installé")
+	xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), "Equipe")
+	xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), "Date")
 	for _, item := range items {
 		if !(item.Todo && item.Quantity > 0) {
 			continue
@@ -232,14 +234,16 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 		xf.SetCellValue(sheetName, xls.RcToAxis(row, 2), item.Article.Name)
 		xf.SetCellValue(sheetName, xls.RcToAxis(row, 3), item.Quantity)
 		xf.SetCellValue(sheetName, xls.RcToAxis(row, 4), item.Price())
+		xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), item.WorkQuantity)
+		xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), item.Work())
 		if item.Done {
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), "Oui")
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), item.Team)
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), item.Date)
+			xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "Oui")
+			xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), item.Team)
+			xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), item.Date)
 		} else {
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), "")
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), "")
 			xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "")
+			xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), "")
+			xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), "")
 		}
 	}
 	xf.UpdateLinkedValue()

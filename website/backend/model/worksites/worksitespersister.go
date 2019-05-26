@@ -144,7 +144,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, showTeam bool) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *fm.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
@@ -152,7 +152,11 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 	nbEls := make(map[model.StatKey]int)
 	for _, wsr := range wsp.workSites {
 		if isWSVisible(wsr.Worksite) {
-			wsr.AddStat(nbEls, dateFor, isTeamVisible)
+			client := clientByName(wsr.Worksite.Client)
+			if client == nil {
+				continue
+			}
+			wsr.AddStat(nbEls, dateFor, isTeamVisible, client.GenTeamNameByMember())
 		}
 	}
 

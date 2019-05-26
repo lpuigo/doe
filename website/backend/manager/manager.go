@@ -204,7 +204,7 @@ func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor date.Da
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, !m.CurrentUser.Permissions["Review"]))
+	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"]))
 }
 
 func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite) error {

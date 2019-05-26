@@ -165,7 +165,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 			if client == nil {
 				continue
 			}
-			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu)
+			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember())
 		}
 	}
 
@@ -236,7 +236,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 					Serie:   serie,
 				}]
 				teamActivity += val
-				values[serie][dateNum] = int(val * 10)
+				values[serie][dateNum] = int(val + 0.49)
 			}
 		}
 		if teamActivity == 0 {

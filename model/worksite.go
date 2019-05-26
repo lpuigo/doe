@@ -134,14 +134,14 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible) {
+func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, teamName clients.TeamNameByMember) {
 	nbDOE := 0
 	teamDOE := ""
 
 	addNbEls := func(client, team, date, measurement string, nbEl int) {
 		// add client / team info
 		nbels[StatKey{
-			Team: client + " : " + team,
+			Team: client + " : " + "Eq. " + teamName(team),
 			Date: date,
 			Mes:  measurement,
 		}] += nbEl

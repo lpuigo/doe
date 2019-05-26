@@ -365,14 +365,16 @@ func getJunctionBoxArticles(currentBpu *bpu.Bpu, activity, category, boxType str
 type IsSiteVisible func(s *Site) bool
 
 const (
-	RipStatSerieWork string = "Work"
+	RipStatSerieWork  string = "Work"
+	RipStatSeriePrice string = "Price"
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu) {
+func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember) {
 	addValue := func(client, site, team, date, article, serie string, val float64) {
+		teamInfo := "Eq. " + teamName(team)
 		values[items.StatKey{
-			Team:    client + " : " + team,
+			Team:    client + " : " + teamInfo,
 			Date:    dateFor(date),
 			Site:    site,
 			Article: article,
@@ -395,6 +397,7 @@ func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg
 		if !item.Done {
 			continue
 		}
-		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work())
+		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work()*10)
+		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
 	}
 }

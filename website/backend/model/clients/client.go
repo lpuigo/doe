@@ -16,6 +16,7 @@ type ClientTeam struct {
 
 type ClientByName func(clientName string) *Client
 type IsTeamVisible func(ClientTeam) bool
+type TeamNameByMember func(string) string
 
 func NewClient(name string) *Client {
 	return &Client{
@@ -43,4 +44,25 @@ func (c Client) GetOrangeArticles() []*bpu.Article {
 		return []*bpu.Article{}
 	}
 	return ca.GetArticles("El")
+}
+
+func (c Client) GenTeamNameByMember() TeamNameByMember {
+	teamName := map[string]string{}
+	activeMembers := map[string]string{}
+	for _, team := range c.Teams {
+		if team.IsActive {
+			activeMembers[team.Name] = team.Members
+		}
+		teamName[team.Members] = team.Name
+	}
+	for member, team := range teamName {
+		teamName[member] = team + " (" + activeMembers[team] + ")"
+	}
+	return func(member string) string {
+		team, found := teamName[member]
+		if !found {
+			return "Unknown"
+		}
+		return team
+	}
 }

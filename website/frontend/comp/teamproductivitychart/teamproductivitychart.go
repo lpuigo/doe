@@ -165,9 +165,15 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 
 func (tpc *TeamProductivityChart) getSeries() []interface{} {
 	res := []interface{}{}
-	res = append(res, newSerie("column", "Installed", "#51A825", 0, tpc.Stats.Values["Installed"]))
-	res = append(res, newSerie("column", "Measured", "#29d1cb", 0, tpc.Stats.Values["Measured"]))
-	res = append(res, newSerie("column", "Blocked", "#cc2020", 0.2, tpc.Stats.Values["Blocked"]))
-	res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values["DOE"]))
+	switch {
+	case len(tpc.Stats.Values["Work"]) > 0:
+		res = append(res, newSerie("column", "€", "#51A825", 0, tpc.Stats.Values["Price"]))
+		res = append(res, newSerie("line", "Travail", "#389eff", 0, tpc.Stats.Values["Work"]))
+	default:
+		res = append(res, newSerie("column", "Installés", "#51A825", 0, tpc.Stats.Values["Installed"]))
+		res = append(res, newSerie("column", "Mesurés", "#29d1cb", 0, tpc.Stats.Values["Measured"]))
+		res = append(res, newSerie("column", "Bloqués", "#cc2020", 0.2, tpc.Stats.Values["Blocked"]))
+		res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values["DOE"]))
+	}
 	return res
 }
