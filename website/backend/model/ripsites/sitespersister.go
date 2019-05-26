@@ -153,7 +153,7 @@ func sortedSetKeys(set map[string]int) []string {
 }
 
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *fm.WorksiteStats {
+func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) *fm.WorksiteStats {
 	sp.RLock()
 	defer sp.RUnlock()
 
@@ -165,7 +165,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 			if client == nil {
 				continue
 			}
-			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember())
+			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember(), showprice)
 		}
 	}
 

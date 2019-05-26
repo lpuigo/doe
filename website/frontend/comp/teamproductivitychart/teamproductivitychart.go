@@ -167,7 +167,9 @@ func (tpc *TeamProductivityChart) getSeries() []interface{} {
 	res := []interface{}{}
 	switch {
 	case len(tpc.Stats.Values["Work"]) > 0:
-		res = append(res, newSerie("column", "€", "#51A825", 0, tpc.Stats.Values["Price"]))
+		if len(tpc.Stats.Values["Price"]) > 0 {
+			res = append(res, newSerie("column", "€", "#51A825", 0, tpc.Stats.Values["Price"]))
+		}
 		res = append(res, newSerie("line", "Travail", "#389eff", 0, tpc.Stats.Values["Work"]))
 	default:
 		res = append(res, newSerie("column", "Installés", "#51A825", 0, tpc.Stats.Values["Installed"]))
