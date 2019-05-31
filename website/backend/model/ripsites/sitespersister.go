@@ -7,7 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"io"
 	"path/filepath"
 	"sort"
@@ -153,7 +153,7 @@ func sortedSetKeys(set map[string]int) []string {
 }
 
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) *fm.WorksiteStats {
+func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) *rs.RipsiteStats {
 	sp.RLock()
 	defer sp.RUnlock()
 
@@ -169,24 +169,24 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 		}
 	}
 
-	ws := fm.NewBEWorksiteStats()
-
-	//create client, team, Series & dates Lists
+	//create client-team, sites, Series & dates Lists
 	end := date.Today()
 	start := end.String()
 	teamset := make(map[string]int)
 	serieset := make(map[string]int)
+	siteset := make(map[string]int)
 	agrValues := make(map[items.StatKey]float64)
 	for key, val := range calcValues {
 		teamset[key.Team] = 1
 		serieset[key.Serie] = 1
+		siteset[key.Site] = 1
 		if key.Date < start {
 			start = key.Date
 		}
 		agrValues[items.StatKey{
 			Team:    key.Team,
 			Date:    key.Date,
-			Site:    "",
+			Site:    key.Site,
 			Article: "",
 			Serie:   key.Serie,
 		}] += val
@@ -201,6 +201,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 	sort.Strings(teams)
 
 	series := sortedSetKeys(serieset)
+	sites := sortedSetKeys(siteset)
 
 	dateset := make(map[string]int)
 	curStringDate := dateFor(date.DateFrom(start).String())
@@ -219,24 +220,33 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 		dates = dates[len(dates)-maxVal:]
 	}
 
-	ws.Values = make(map[string][][]int) // map[series][#team][#date]int
+	ws := rs.NewBERipsiteStats()
+	//ws.Values : map{series}[#team]{sites}[#date]float64
 	ws.Dates = dates
 
 	for _, teamName := range teams {
 		teamActivity := 0.0
-		values := make(map[string][]int)
+		values := make(map[string]map[string][]float64)
 		for _, serie := range series {
-			values[serie] = make([]int, len(dates))
-			for dateNum, d := range dates {
-				val := agrValues[items.StatKey{
-					Team:    teamName,
-					Date:    d,
-					Site:    "",
-					Article: "",
-					Serie:   serie,
-				}]
-				teamActivity += val
-				values[serie][dateNum] = int(val + 0.49)
+			values[serie] = make(map[string][]float64)
+			for _, site := range sites {
+				siteData := make([]float64, len(dates))
+				siteActivity := 0.0
+				for dateNum, d := range dates {
+					val := agrValues[items.StatKey{
+						Team:    teamName,
+						Date:    d,
+						Site:    site,
+						Article: "",
+						Serie:   serie,
+					}]
+					teamActivity += val
+					siteActivity += val
+					siteData[dateNum] = val
+				}
+				if siteActivity > 0 {
+					values[serie][site] = siteData
+				}
 			}
 		}
 		if teamActivity == 0 {

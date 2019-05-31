@@ -28,11 +28,20 @@ const template string = `
 		style="height: 100%;"		
 	-->
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-		<div v-if="!loading" v-for="(ts, index) in TeamStats" :key="index"
-		>
-			<h3>{{ts.Team}}</h3>
-			<team-productivity-chart :stats="ts"></team-productivity-chart>			
-		</div>	
+		<div v-if="!loading">
+			<div v-if="SiteMode == 'Orange'">
+				<div v-for="(ts, index) in TeamStats" :key="index">
+					<h3>{{ts.Team}}</h3>
+					<team-productivity-chart :stats="ts"></team-productivity-chart>			
+				</div>	
+			</div>
+			<div v-else>
+				<div v-for="(ts, index) in RipTeamStats" :key="index">
+					<h3>{{ts.Team}}-</h3>
+					<ripteam-productivity-chart :stats="ts"></ripteam-productivity-chart>			
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!-- 

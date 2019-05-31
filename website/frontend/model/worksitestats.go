@@ -30,7 +30,7 @@ func WorksiteStatsFromJs(o *js.Object) *WorksiteStats {
 }
 
 func (ws *WorksiteStats) CreateTeamStats() []*TeamStats {
-	res := []*TeamStats{}
+	res := make([]*TeamStats, len(ws.Teams))
 	for i, team := range ws.Teams {
 		ts := NewTeamStats()
 		ts.Team = team
@@ -39,7 +39,7 @@ func (ws *WorksiteStats) CreateTeamStats() []*TeamStats {
 			//ts.Values[mes] = ws.Values[mes][i]
 			ts.Get("Values").Set(mes, ws.Values[mes][i])
 		}
-		res = append(res, ts)
+		res[i] = ts
 	}
 	return res
 }

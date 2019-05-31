@@ -397,7 +397,7 @@ func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg
 		if !item.Done {
 			continue
 		}
-		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work()*10)
+		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work())
 		if showprice {
 			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
 		}

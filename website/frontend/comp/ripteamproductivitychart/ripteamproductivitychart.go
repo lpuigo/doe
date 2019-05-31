@@ -1,9 +1,9 @@
-package teamproductivitychart
+package ripteamproductivitychart
 
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -22,7 +22,7 @@ const template string = `
 // Component Methods
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("team-productivity-chart", componentOption()...)
+	return hvue.Component("ripteam-productivity-chart", componentOption()...)
 }
 
 func componentOption() []hvue.ComponentOption {
@@ -46,65 +46,19 @@ func componentOption() []hvue.ComponentOption {
 type TeamProductivityChart struct {
 	*js.Object
 	VM    *hvue.VM      `js:"VM"`
-	Stats *fm.TeamStats `js:"stats"`
+	Stats *rs.TeamStats `js:"stats"`
 }
 
 func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
 	tpc := &TeamProductivityChart{Object: tools.O()}
 	tpc.VM = vm
-	tpc.Stats = fm.NewTeamStats()
+	tpc.Stats = rs.NewTeamStats()
 	return tpc
 }
 
 func (tpc *TeamProductivityChart) SetStyle() string {
 	return "width:100%; height:250px;"
 }
-
-//func (tpc *TeamProductivityChart) setChart() {
-//	ts := tpc.Stats
-//	startDate := date.JSDate(ts.StartDate)
-//
-//	chartdesc := js.M{
-//		"chart": js.M{
-//			"backgroundColor": "#F7F7F7",
-//			"type":            "line",
-//		},
-//		"title": js.M{
-//			"text": nil,
-//		},
-//		//"xAxis": js.M{
-//		//	"categories": ts.Dates,
-//		//	"tickPixelInterval" : 400,
-//		//},
-//		"xAxis": js.M{
-//			"type": "datetime",
-//			"dateTimeLabelFormats": js.M{
-//				"day": "%e %b",
-//			},
-//		},
-//		"yAxis": js.M{
-//			"title": js.M{
-//				"text": "Nbs.",
-//			},
-//		},
-//		"legend": js.M{
-//			"layout":        "vertical",
-//			"align":         "right",
-//			"verticalAlign": "top",
-//		},
-//		"plotOptions": js.M{
-//			"series": js.M{
-//				"allowPointSelect": false,
-//				"pointStart":       startDate,
-//				"pointInterval":    7 * 24 * 3600 * 1000, // one week
-//				"marker":           js.M{"enabled": false},
-//				"animation":        false,
-//			},
-//		},
-//		"series": tpc.getSeries(),
-//	}
-//	js.Global.Get("Highcharts").Call("chart", tpc.VM.Refs("container"), chartdesc)
-//}
 
 func (tpc *TeamProductivityChart) setColumnChart() {
 	ts := tpc.Stats
@@ -139,7 +93,7 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 			"verticalAlign": "top",
 		},
 		"tooltip": js.M{
-			"shared": true,
+			"shared": false,
 		},
 		"plotOptions": js.M{
 			"series": js.M{
@@ -148,6 +102,8 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 				//"pointInterval":    7 * 24 * 3600 * 1000, // one week
 				"marker":    js.M{"enabled": false},
 				"animation": false,
+				"grouping":  true,
+				"stacking":  "normal",
 			},
 			"column": js.M{
 				//"pointPadding": 0.1,
@@ -155,7 +111,6 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 				//"groupPadding": 0,
 				"borderRadius": 2,
 				"shadow":       false,
-				"grouping":     true,
 			},
 		},
 		"series": tpc.getSeries(),
@@ -163,19 +118,11 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 	js.Global.Get("Highcharts").Call("chart", tpc.VM.Refs("container"), chartdesc)
 }
 
-func (tpc *TeamProductivityChart) getSeries() []interface{} {
-	res := []interface{}{}
-	switch {
-	case len(tpc.Stats.Values["Work"]) > 0:
-		if len(tpc.Stats.Values["Price"]) > 0 {
-			res = append(res, newSerie("column", "€", "#51A825", 0, tpc.Stats.Values["Price"]))
-		}
-		res = append(res, newSerie("line", "Travail", "#389eff", 0, tpc.Stats.Values["Work"]))
-	default:
-		res = append(res, newSerie("column", "Installés", "#51A825", 0, tpc.Stats.Values["Installed"]))
-		res = append(res, newSerie("column", "Mesurés", "#29d1cb", 0, tpc.Stats.Values["Measured"]))
-		res = append(res, newSerie("column", "Bloqués", "#cc2020", 0.2, tpc.Stats.Values["Blocked"]))
-		res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values["DOE"]))
+func (tpc *TeamProductivityChart) getSeries() []js.M {
+	res := []js.M{}
+	if len(tpc.Stats.Values["Price"]) > 0 {
+		res = append(res, newSerie("column", "€", "#51A825", "price", 0, tpc.Stats.Values["Price"])...)
 	}
+	res = append(res, newSerie("line", "Travail", "#389eff", "work", 0, tpc.Stats.Values["Work"])...)
 	return res
 }

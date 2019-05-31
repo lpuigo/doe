@@ -10,7 +10,8 @@ import (
 
 func main() {
 	walk.FocusEffect, _ = walk.NewBorderGlowEffect(walk.RGB(0, 63, 255))
-	tr := model.NewTroncon()
+	pb := model.MakePT("PB-012345", "PT-00-0000", "1 rue de la pompe")
+	tr := model.MakeTroncon("TR123456", pb, 4, 6, false)
 	tr.Ref = "TR123456"
 	tr.NbFiber = 12
 
@@ -20,7 +21,7 @@ func main() {
 	var comp *walk.Composite
 
 	refreshTr := func() {
-		teTr.SetText(fmt.Sprintf("%+v", *tr))
+		teTr.SetText(fmt.Sprintf("%+v", tr))
 	}
 
 	submit := func() {
