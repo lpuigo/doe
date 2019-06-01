@@ -28,7 +28,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOption() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("stats"),
+		hvue.Props("stats", "colors"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewTeamProductivityChart(vm)
 		}),
@@ -45,14 +45,16 @@ func componentOption() []hvue.ComponentOption {
 
 type TeamProductivityChart struct {
 	*js.Object
-	VM    *hvue.VM      `js:"VM"`
-	Stats *rs.TeamStats `js:"stats"`
+	VM     *hvue.VM      `js:"VM"`
+	Stats  *rs.TeamStats `js:"stats"`
+	Colors SiteColorMap  `js:"colors"`
 }
 
 func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
 	tpc := &TeamProductivityChart{Object: tools.O()}
 	tpc.VM = vm
 	tpc.Stats = rs.NewTeamStats()
+	tpc.Colors = nil
 	return tpc
 }
 
@@ -73,37 +75,52 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 			"text": nil,
 		},
 		"xAxis": js.M{
+			//	"type": "datetime",
+			//	"dateTimeLabelFormats": js.M{
+			//		"day": "%e %b",
+			//	},
 			"categories": ts.Dates,
 			//"tickPixelInterval" : 400,
 		},
-		//"xAxis": js.M{
-		//	"type": "datetime",
-		//	"dateTimeLabelFormats": js.M{
-		//		"day": "%e %b",
-		//	},
-		//},
-		"yAxis": js.M{
-			"title": js.M{
-				"text": "Nb. ELs",
+		"yAxis": js.S{
+			js.M{
+				"labels": js.M{
+					"format": "{value} h",
+				},
+				"title": js.M{
+					"text": "Heures",
+				},
+			},
+			js.M{
+				"labels": js.M{
+					"format": "{value}€",
+				},
+				"title": js.M{
+					"text": "Revenus",
+				},
+				"opposite": true,
 			},
 		},
 		"legend": js.M{
-			"layout":        "vertical",
-			"align":         "right",
-			"verticalAlign": "top",
+			"enabled": false,
+			//"layout":        "vertical",
+			//"align":         "right",
+			//"verticalAlign": "top",
 		},
 		"tooltip": js.M{
-			"shared": false,
+			//"shared":      true,
+			//"pointFormat": "<b>{series.name}:</b> {point.y:.1f}",
+			"valueDecimals": 1,
 		},
 		"plotOptions": js.M{
 			"series": js.M{
-				"allowPointSelect": false,
+				"allowPointSelect": true,
 				//"pointStart":       startDate,
 				//"pointInterval":    7 * 24 * 3600 * 1000, // one week
 				"marker":    js.M{"enabled": false},
 				"animation": false,
-				"grouping":  true,
-				"stacking":  "normal",
+				//"grouping":  true,
+				"stacking": "normal",
 			},
 			"column": js.M{
 				//"pointPadding": 0.1,
@@ -121,8 +138,8 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 func (tpc *TeamProductivityChart) getSeries() []js.M {
 	res := []js.M{}
 	if len(tpc.Stats.Values["Price"]) > 0 {
-		res = append(res, newSerie("column", "€", "#51A825", "price", 0, tpc.Stats.Values["Price"])...)
+		res = append(res, newSerie("column", "€", "price", "", " €", tpc.Colors["Price"], 1, 0, tpc.Stats.Values["Price"])...)
 	}
-	res = append(res, newSerie("line", "Travail", "#389eff", "work", 0, tpc.Stats.Values["Work"])...)
+	res = append(res, newSerie("column", "Travail", "work", "", " h", tpc.Colors["Work"], 0, 0.2, tpc.Stats.Values["Work"])...)
 	return res
 }

@@ -10,6 +10,7 @@ type RipsiteStats struct {
 
 	Dates  []string                          `js:"Dates"`
 	Teams  []string                          `js:"Teams"`
+	Sites  map[string]bool                   `js:"Sites"`
 	Values map[string][]map[string][]float64 `js:"Values"` // map[measurement][teamNum][site][dateNum]int{}
 }
 
@@ -34,7 +35,7 @@ func RipsiteStatsFromJs(o *js.Object) *RipsiteStats {
 	return &RipsiteStats{Object: o}
 }
 
-func (rs *RipsiteStats) CreateTeamStats() []*TeamStats {
+func (rs *RipsiteStats) CreateTeamStats(sites map[string]bool) []*TeamStats {
 	res := []*TeamStats{}
 	for i, team := range rs.Teams {
 		ts := NewTeamStats()
@@ -42,7 +43,13 @@ func (rs *RipsiteStats) CreateTeamStats() []*TeamStats {
 		ts.Dates = rs.Dates
 		for mes, _ := range rs.Values {
 			//ts.Values[mes] = rs.Values[mes][i]
-			ts.Get("Values").Set(mes, rs.Values[mes][i])
+			datas := map[string][]float64{}
+			for site, data := range rs.Values[mes][i] {
+				if sites[site] {
+					datas[site] = data
+				}
+			}
+			ts.Get("Values").Set(mes, datas)
 		}
 		res = append(res, ts)
 	}

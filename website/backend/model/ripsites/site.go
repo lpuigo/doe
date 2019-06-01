@@ -307,8 +307,9 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, measurement := range s.Measurements {
 		todo, done := measurement.State.GetTodoDone()
-		info := fmt.Sprintf("Mesure %d fibres - %d epissures", measurement.NbFiber, measurement.NbSplice())
-		res = append(res, items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, measurement.State.Team, mainArticle, qty1, qty1, todo, done))
+		qty2 := measurement.NbFiber
+		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
+		res = append(res, items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, measurement.State.Team, mainArticle, qty1, qty2, todo, done))
 	}
 	return res, nil
 }

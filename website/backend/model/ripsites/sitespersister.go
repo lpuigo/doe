@@ -223,6 +223,11 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 	ws := rs.NewBERipsiteStats()
 	//ws.Values : map{series}[#team]{sites}[#date]float64
 	ws.Dates = dates
+	sitesmap := map[string]bool{}
+	for _, site := range sites {
+		sitesmap[site] = true
+	}
+	ws.Sites = sitesmap
 
 	for _, teamName := range teams {
 		teamActivity := 0.0

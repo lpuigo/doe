@@ -2,9 +2,40 @@ package ripteamproductivitychart
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"strconv"
 )
 
-func newSerie(style, name, color, stack string, pointpadding float64, data map[string][]float64) []js.M {
+type ColorMap struct {
+	HueStart   int
+	HueEnd     int
+	Light      int
+	Saturation int
+}
+
+type siteColors map[string]string
+
+type SiteColorMap map[string]siteColors
+
+func SetColor(sites map[string]bool, workCM, priceCM ColorMap) SiteColorMap {
+	res := SiteColorMap{}
+	wdHue := (workCM.HueEnd - workCM.HueStart) / len(sites)
+	wHue := workCM.HueStart
+	pdHue := (priceCM.HueEnd - priceCM.HueStart) / len(sites)
+	pHue := priceCM.HueStart
+	wSC := siteColors{}
+	pSC := siteColors{}
+	for site, _ := range sites {
+		wSC[site] = hsl(wHue, workCM.Light, workCM.Saturation)
+		pSC[site] = hsl(pHue, priceCM.Light, priceCM.Saturation)
+		wHue += wdHue
+		pHue += pdHue
+	}
+	res["Work"] = wSC
+	res["Price"] = pSC
+	return res
+}
+
+func newSerie(style, name, stack, tooltipPrefix, tooltipSuffix string, colormap siteColors, yAxis int, pointpadding float64, data map[string][]float64) []js.M {
 	//s := &serie{Object: tools.O()}
 	//s.Name = name
 	//s.Color = color
@@ -12,13 +43,23 @@ func newSerie(style, name, color, stack string, pointpadding float64, data map[s
 	res := []js.M{}
 	for key, value := range data {
 		res = append(res, js.M{
+			//"name":         name + " " + key,
+			"name":         key,
 			"type":         style,
-			"name":         name + " " + key,
-			"color":        color,
+			"color":        colormap[key],
+			"yAxis":        yAxis,
 			"data":         value,
 			"pointPadding": pointpadding,
 			"stack":        stack,
+			"tooltip": js.M{
+				"valuePrefix": tooltipPrefix,
+				"valueSuffix": tooltipSuffix,
+			},
 		})
 	}
 	return res
+}
+
+func hsl(hue, light, sat int) string {
+	return "hsl(" + strconv.Itoa(hue) + "," + strconv.Itoa(sat) + "%," + strconv.Itoa(light) + "%)"
 }
