@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	mr "github.com/lpuig/ewin/doe/website/backend/model/ripsites/measurementreport"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
 	"strings"
@@ -403,4 +404,34 @@ func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg
 			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
 		}
 	}
+}
+
+func (s *Site) UpdateMeasurement(measReports map[string]*mr.MeasurementReport) error {
+	for _, meas := range s.Measurements {
+		ptName := strings.ReplaceAll(meas.DestNodeName, " ", "")
+		mr, found := measReports[ptName]
+		if !found {
+			continue
+		}
+		// If KO are reported => set measurement to InProgress
+		if !(mr.FiberKO == 0 && mr.ConnectorKO == 0) {
+			meas.State.SetInProgress()
+			if !(meas.State.DateStart != "" && meas.State.DateStart <= mr.Date) {
+				meas.State.DateStart = mr.Date
+			}
+			meas.State.DateEnd = ""
+		} else { // OK or just warning => set measurement to Done
+			meas.State.SetDone()
+			if !(meas.State.DateStart != "" && meas.State.DateStart <= mr.Date) {
+				meas.State.DateStart = mr.Date
+			}
+			if !(meas.State.DateEnd != "" && meas.State.DateEnd <= mr.Date) {
+				meas.State.DateEnd = mr.Date
+			}
+		}
+		if len(mr.Results) > 0 {
+			meas.State.Comment = mr.Comments()
+		}
+	}
+	return nil
 }

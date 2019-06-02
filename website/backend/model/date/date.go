@@ -1,6 +1,9 @@
 package date
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type Date time.Time
 
@@ -27,7 +30,7 @@ func (d Date) String() string {
 	return time.Time(d).Format(TimeJSLayout)
 }
 
-func (d Date) ToDDMMAAAA() string {
+func (d Date) ToDDMMYYYY() string {
 	return time.Time(d).Format(TimeLayout)
 }
 
@@ -71,4 +74,9 @@ func GetMonday(d string) string {
 
 func GetMonth(d string) string {
 	return DateFrom(d).GetMonth().String()
+}
+
+func ChangeDDMMYYYYtoYYYYMMDD(d string) string {
+	cols := strings.Split(d, "/")
+	return cols[2] + "-" + cols[1] + "-" + cols[0]
 }

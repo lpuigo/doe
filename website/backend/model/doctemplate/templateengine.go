@@ -111,7 +111,7 @@ func (te *DocTemplateEngine) GetWorksiteXLSAttachment(w io.Writer, ws *model.Wor
 			xf.SetCellInt(sheetName, coord(line, colNbEl), nbEl)
 			endDate := ""
 			if tr.MeasureDate != "" {
-				endDate = date.DateFrom(tr.MeasureDate).ToDDMMAAAA()
+				endDate = date.DateFrom(tr.MeasureDate).ToDDMMYYYY()
 			}
 			xf.SetCellStr(sheetName, coord(line, colEndD), endDate)
 			line++

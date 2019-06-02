@@ -34,3 +34,15 @@ func (s State) GetTodoDone() (todo, done bool) {
 	done = s.Done()
 	return
 }
+
+func (s *State) SetDone() {
+	s.Status = ripconst.StateDone
+}
+
+func (s *State) SetRedo() {
+	s.Status = ripconst.StateRedo
+}
+
+func (s *State) SetInProgress() {
+	s.Status = ripconst.StateInProgress
+}
