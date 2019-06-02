@@ -35,22 +35,15 @@ const template string = `
 					<team-productivity-chart :stats="ts"></team-productivity-chart>			
 				</div>	
 			</div>
-<!--			<div v-else>-->
-<!--				<div v-for="(ts, index) in RipTeamStats" :key="index">-->
-<!--					<h3>{{ts.Team}}</h3>-->
-<!--					<ripteam-productivity-chart :stats="ts"></ripteam-productivity-chart>			-->
-<!--				</div>-->
-<!--			</div>-->
 			<el-container v-else style="height: 100%">
                 <el-aside width="200px" style="height: 100%">
-                    <el-checkbox :indeterminate="FewSitesSelected" v-model="AllSites" @change="CheckAllSitesChange">Tous les sîtes</el-checkbox>
-                    <div v-for="(val, site) in RipStats.Sites" :key="site" style="margin-top: 5px">
+                    <div v-for="(val, site) in RipStats.Sites" :key="site" style="margin-top: 8px">
                         <el-checkbox 
-                                border size="small" :label="site" 
+                                border size="small" 
                                 v-model="SelectedSites[site]" 
                                 @change="CheckSitesChange"
                                 style="width: 100%"
-                        ></el-checkbox>
+                        >{{site}}<i class="fas fa-circle icon--right" :style="SiteCircleStyle(site)"></i></el-checkbox>
                     </div>
                 </el-aside>
                 <el-main style="height: 100%">

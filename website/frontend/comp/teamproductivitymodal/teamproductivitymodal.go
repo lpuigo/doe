@@ -48,12 +48,12 @@ type TeamProductivityModalModel struct {
 	Stats     *fm.WorksiteStats `js:"Stats"`
 	TeamStats []*fm.TeamStats   `js:"TeamStats"`
 
-	RipStats         *rs.RipsiteStats                      `js:"RipStats"`
-	RipTeamStats     []*rs.TeamStats                       `js:"RipTeamStats"`
-	AllSites         bool                                  `js:"AllSites"`
-	FewSitesSelected bool                                  `js:"FewSitesSelected"`
-	SelectedSites    map[string]bool                       `js:"SelectedSites"`
-	SiteColors       ripteamproductivitychart.SiteColorMap `js:"SiteColors"`
+	RipStats     *rs.RipsiteStats `js:"RipStats"`
+	RipTeamStats []*rs.TeamStats  `js:"RipTeamStats"`
+	//AllSites         bool                                  `js:"AllSites"`
+	//FewSitesSelected bool                                  `js:"FewSitesSelected"`
+	SelectedSites map[string]bool                       `js:"SelectedSites"`
+	SiteColors    ripteamproductivitychart.SiteColorMap `js:"SiteColors"`
 
 	ActiveMode string `js:"ActiveMode"`
 }
@@ -70,8 +70,8 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 
 	tpmm.RipStats = rs.NewRipsiteStats()
 	tpmm.RipTeamStats = []*rs.TeamStats{}
-	tpmm.AllSites = true
-	tpmm.FewSitesSelected = false
+	//tpmm.AllSites = true
+	//tpmm.FewSitesSelected = false
 	tpmm.SelectedSites = map[string]bool{}
 	tpmm.SiteColors = ripteamproductivitychart.SiteColorMap{}
 
@@ -108,43 +108,47 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 
 func (tpmm *TeamProductivityModalModel) initSitesColors() {
 	workCM := ripteamproductivitychart.ColorMap{
-		HueStart:   180,
-		HueEnd:     300,
+		HueStart:   160,
+		HueEnd:     360,
 		Light:      40,
 		Saturation: 60,
 	}
 	priceCM := ripteamproductivitychart.ColorMap{
-		HueStart:   180,
-		HueEnd:     300,
+		HueStart:   160,
+		HueEnd:     360,
 		Light:      55,
 		Saturation: 70,
 	}
 	tpmm.SiteColors = ripteamproductivitychart.SetColor(tpmm.RipStats.Sites, workCM, priceCM)
 }
 
-func (tpmm *TeamProductivityModalModel) CheckAllSitesChange() {
-	tpmm.FewSitesSelected = false
-	if tpmm.AllSites {
-		for site, _ := range tpmm.SelectedSites {
-			tpmm.Object.Get("SelectedSites").Set(site, true)
-		}
-		return
-	}
-	for site, _ := range tpmm.SelectedSites {
-		tpmm.Object.Get("SelectedSites").Set(site, false)
-	}
+//func (tpmm *TeamProductivityModalModel) CheckAllSitesChange() {
+//	tpmm.FewSitesSelected = false
+//	if tpmm.AllSites {
+//		for site, _ := range tpmm.SelectedSites {
+//			tpmm.Object.Get("SelectedSites").Set(site, true)
+//		}
+//		return
+//	}
+//	for site, _ := range tpmm.SelectedSites {
+//		tpmm.Object.Get("SelectedSites").Set(site, false)
+//	}
+//	tpmm.RipTeamStats = tpmm.RipStats.CreateTeamStats(tpmm.SelectedSites)
+//}
+
+func (tpmm *TeamProductivityModalModel) CheckSitesChange() {
+	//allFalse, allTrue := true, true
+	//for _, value := range tpmm.SelectedSites {
+	//	allFalse = allFalse && !value
+	//	allTrue = allTrue && value
+	//}
+	//tpmm.FewSitesSelected = allFalse == allTrue
+	//tpmm.AllSites = allTrue
 	tpmm.RipTeamStats = tpmm.RipStats.CreateTeamStats(tpmm.SelectedSites)
 }
 
-func (tpmm *TeamProductivityModalModel) CheckSitesChange() {
-	allFalse, allTrue := true, true
-	for _, value := range tpmm.SelectedSites {
-		allFalse = allFalse && !value
-		allTrue = allTrue && value
-	}
-	tpmm.FewSitesSelected = allFalse == allTrue
-	tpmm.AllSites = allTrue
-	tpmm.RipTeamStats = tpmm.RipStats.CreateTeamStats(tpmm.SelectedSites)
+func (tpmm *TeamProductivityModalModel) SiteCircleStyle(site string) string {
+	return "color: " + tpmm.SiteColors.GetWorkColor(site)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

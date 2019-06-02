@@ -16,6 +16,10 @@ type siteColors map[string]string
 
 type SiteColorMap map[string]siteColors
 
+func (s SiteColorMap) GetWorkColor(site string) string {
+	return s["Price"][site]
+}
+
 func SetColor(sites map[string]bool, workCM, priceCM ColorMap) SiteColorMap {
 	res := SiteColorMap{}
 	wdHue := (workCM.HueEnd - workCM.HueStart) / len(sites)
