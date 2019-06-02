@@ -137,9 +137,9 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 
 func (tpc *TeamProductivityChart) getSeries() []js.M {
 	res := []js.M{}
+	res = append(res, newSerie("column", "Travail", "work", "", " h", tpc.Colors["Work"], 0, 0.2, tpc.Stats.Values["Work"])...)
 	if len(tpc.Stats.Values["Price"]) > 0 {
 		res = append(res, newSerie("column", "€", "price", "", " €", tpc.Colors["Price"], 1, 0, tpc.Stats.Values["Price"])...)
 	}
-	res = append(res, newSerie("column", "Travail", "work", "", " h", tpc.Colors["Work"], 0, 0.2, tpc.Stats.Values["Work"])...)
 	return res
 }
