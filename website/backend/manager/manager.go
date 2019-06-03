@@ -82,7 +82,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		TemplateEngine: te,
 	}
 	logger.Entry("Server").LogInfo(
-		fmt.Sprintf("loaded %d Worsites, %d Ripsites, %d Clients and %d users",
+		fmt.Sprintf("loaded %d Worksites, %d Ripsites, %d Clients and %d Users",
 			wsp.NbWorsites(),
 			rsp.NbSites(),
 			cp.NbClients(),
