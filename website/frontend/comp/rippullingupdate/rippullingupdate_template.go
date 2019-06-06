@@ -49,30 +49,6 @@ const template string = `<el-table
             </div>
         </template>
     </el-table-column>
-    <!--                <el-table-column-->
-    <!--                        label="Adresse Départ"-->
-    <!--                        width="240px" :resizable="true" :show-overflow-tooltip=true-->
-    <!--                >-->
-    <!--                    <template slot-scope="scope">-->
-    <!--                        <div>{{GetNode(GetFirstPullingChunk(scope.row).StartingNodeName).Address}}</div>-->
-    <!--                    </template>-->
-    <!--                </el-table-column>-->
-    <!--                <el-table-column-->
-    <!--                        label="PT Arrivée"-->
-    <!--                        width="100px" :resizable="true" :show-overflow-tooltip=true-->
-    <!--                >-->
-    <!--                    <template slot-scope="scope">-->
-    <!--                        <div>{{GetLastPullingChunk(scope.row).EndingNodeName}}</div>-->
-    <!--                    </template>-->
-    <!--                </el-table-column>-->
-    <!--                <el-table-column-->
-    <!--                        label="Adresse Arrivée"-->
-    <!--                        width="240px" :resizable="true" :show-overflow-tooltip=true-->
-    <!--                >-->
-    <!--                    <template slot-scope="scope">-->
-    <!--                        <div>{{GetNode(GetLastPullingChunk(scope.row).EndingNodeName).Address}}</div>-->
-    <!--                    </template>-->
-    <!--                </el-table-column>-->
     <el-table-column
             :resizable="true"
             :show-overflow-tooltip=true label="Distance" width="100px"

@@ -38,8 +38,9 @@ func NewRipsiteUpdateModalModel(vm *hvue.VM) *RipsiteUpdateModalModel {
 	rsumm.ActivityMode = "Pulling"
 	rsumm.User = fm.NewUser()
 	rsumm.Filter = ""
-	rsumm.EditedRipsite = fmrip.NewRisite()
-	rsumm.CurrentRipsite = fmrip.NewRisite()
+	rsumm.initSites()
+	//rsumm.EditedRipsite = fmrip.NewRisite()
+	//rsumm.CurrentRipsite = fmrip.NewRisite()
 
 	rsumm.Saving = false
 	rsumm.ShowConfirmDelete = false
@@ -93,6 +94,11 @@ func componentOption() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
+func (rsumm *RipsiteUpdateModalModel) initSites() {
+	rsumm.EditedRipsite = fmrip.NewRisite()
+	rsumm.CurrentRipsite = fmrip.NewRisite()
+}
+
 func (rsumm *RipsiteUpdateModalModel) HasChanged() bool {
 	if rsumm.EditedRipsite.Object == js.Undefined {
 		return true
@@ -126,6 +132,7 @@ func (rsumm *RipsiteUpdateModalModel) HideWithControl() {
 func (rsumm *RipsiteUpdateModalModel) Hide() {
 	rsumm.ShowConfirmDelete = false
 	rsumm.ModalModel.Hide()
+	rsumm.initSites()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

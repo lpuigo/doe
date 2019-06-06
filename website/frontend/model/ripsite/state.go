@@ -49,6 +49,15 @@ func (s *State) SetInProgress() {
 	}
 }
 
+func (s *State) IsDoable() bool {
+	switch s.Status {
+	case ripconst.StateCanceled:
+		return false
+	default:
+		return true
+	}
+}
+
 func (s *State) SetToDo() {
 	switch s.Status {
 	case ripconst.StateInProgress, ripconst.StateDone:
