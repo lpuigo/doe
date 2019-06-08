@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	duration int    = 2000
+	duration int    = 4000
 	msgclass string = "message"
 )
 

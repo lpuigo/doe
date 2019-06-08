@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+const (
+	dbThresholdWarn1 float64 = 0.200001
+	dbThresholdWarn2 float64 = 0.3
+	dbThresholdKo    float64 = 0.4
+)
+
 func ParseZipMeasurementFiles(r io.ReaderAt, size int64) (map[string]*MeasurementReport, error) {
 	zreader, err := zip.NewReader(r, size)
 	if err != nil {
@@ -40,7 +46,7 @@ func parseZipTxtFile(file *zip.File) (*MeasurementReport, error) {
 
 func parserTxtFile(r io.Reader) (*MeasurementReport, error) {
 	scan := bufio.NewScanner(r)
-	mr := &MeasurementReport{}
+	mr := NewMeasurementReport()
 	var state txtParserState
 	state = getDate
 	for scan.Scan() {
@@ -89,10 +95,10 @@ func getPTName(mr *MeasurementReport, line string) txtParserState {
 	chunks := strings.Split(col[1], "/")
 	for i, dir := range chunks {
 		if i > 3 && strings.HasPrefix(dir, "TR") {
-			mr.Troncon = dir
+			mr.Troncon = "TR " + strings.Trim(strings.TrimPrefix(dir, "TR"), " ")
 		}
 		if i > 4 && strings.HasPrefix(dir, "PT") {
-			mr.PtName = dir
+			mr.PtName = "PT " + strings.Trim(strings.TrimPrefix(dir, "PT"), " ")
 			break
 		}
 	}
@@ -118,13 +124,17 @@ func getMeasurement(mr *MeasurementReport, line string) txtParserState {
 			maxSplice = 0
 		}
 	}
-	if maxSplice > 0.3 {
+	switch {
+	case maxSplice >= dbThresholdKo:
 		mr.FiberKO++
 		msg = append(msg, fmt.Sprintf("KO Max Splice %sdb à %sm", col[7], col[10]))
-	} else if maxSplice > 0.2 {
-		mr.FiberWarning++
-		msg = append(msg, fmt.Sprintf("Warn Max Splice %sdb à %sm", col[7], col[10]))
-	} else {
+	case maxSplice >= dbThresholdWarn2:
+		mr.FiberWarning2++
+		msg = append(msg, fmt.Sprintf("Warn2 Max Splice %sdb à %sm", col[7], col[10]))
+	case maxSplice >= dbThresholdWarn1:
+		mr.FiberWarning1++
+		msg = append(msg, fmt.Sprintf("Warn1 Max Splice %sdb à %sm", col[7], col[10]))
+	default:
 		mr.FiberOK++
 	}
 

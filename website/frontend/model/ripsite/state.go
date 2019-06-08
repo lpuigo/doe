@@ -40,6 +40,18 @@ func (s *State) SetDone() {
 	s.Status = ripconst.StateDone
 }
 
+func (s *State) SetBlocked() {
+	s.Status = ripconst.StateBlocked
+}
+
+func (s *State) SetWarning1() {
+	s.Status = ripconst.StateWarning1
+}
+
+func (s *State) SetWarning2() {
+	s.Status = ripconst.StateWarning2
+}
+
 func (s *State) SetInProgress() {
 	switch s.Status {
 	case ripconst.StateDone, ripconst.StateToDo:
@@ -92,6 +104,20 @@ func GetStateStatusesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
 		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
 		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
+		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
+		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
+		elements.NewValueLabel(ripconst.StateDone, "Fait"),
+		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
+	}
+}
+
+func GetStateStatusesWithWarningValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
+		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
+		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
+		elements.NewValueLabel(ripconst.StateWarning2, "Warning 2"),
+		elements.NewValueLabel(ripconst.StateWarning1, "Warning 1"),
 		elements.NewValueLabel(ripconst.StateDone, "Fait"),
 		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
 	}
@@ -105,6 +131,10 @@ func (s *State) GetRowStyle() string {
 		return "ripactivitystatus-row-inprogress"
 	case ripconst.StateBlocked:
 		return "ripactivitystatus-row-blocked"
+	case ripconst.StateWarning2:
+		return "ripactivitystatus-row-warning2"
+	case ripconst.StateWarning1:
+		return "ripactivitystatus-row-warning1"
 	case ripconst.StateDone:
 		return "ripactivitystatus-row-done"
 	case ripconst.StateCanceled:

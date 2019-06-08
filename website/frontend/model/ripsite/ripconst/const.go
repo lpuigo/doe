@@ -5,6 +5,8 @@ const (
 	StateInProgress string = "10 En cours"
 	StateBlocked    string = "20 Bloqué"
 	StateRedo       string = "30 A reprendre"
+	StateWarning2   string = "40 Warning2"
+	StateWarning1   string = "45 Warning1"
 	StateDone       string = "90 Fait"
 	StateCanceled   string = "99 Annulé"
 )

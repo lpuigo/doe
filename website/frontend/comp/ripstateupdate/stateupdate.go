@@ -124,6 +124,10 @@ func (sum *StateUpdateModel) GetStatuses() []*elements.ValueLabel {
 	return fmrip.GetStateStatusesValueLabel()
 }
 
+func (sum *StateUpdateModel) GetAllStatuses() []*elements.ValueLabel {
+	return fmrip.GetStateStatusesWithWarningValueLabel()
+}
+
 func (sum *StateUpdateModel) UpdateStatus(vm *hvue.VM) {
 	sum = StateUpdateModelFromJS(vm.Object)
 	sum.State.UpdateStatus()

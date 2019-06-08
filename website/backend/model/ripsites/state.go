@@ -26,7 +26,16 @@ func (s State) Blocked() bool {
 }
 
 func (s State) Done() bool {
-	return s.Status == ripconst.StateDone
+	switch s.Status {
+	case ripconst.StateDone:
+		return true
+	case ripconst.StateWarning1:
+		return true
+	case ripconst.StateWarning2:
+		return true
+	default:
+		return false
+	}
 }
 
 func (s State) GetTodoDone() (todo, done bool) {

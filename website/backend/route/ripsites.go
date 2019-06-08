@@ -1,13 +1,16 @@
 package route
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
+	"github.com/lpuig/ewin/doe/website/backend/model/ripsites/measurementreport"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func GetRipsitesInfo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -181,5 +184,42 @@ func GetRipsitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logmsg.Response = http.StatusOK
+}
+
+func MeasurementRipSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("MeasurementRipSite").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// Parse our multipart form, 30 << 20 specifies a maximum
+	// upload of 30 MB files.
+	if r.ParseMultipartForm(30<<20) != nil {
+		AddError(w, logmsg, "file info missing", http.StatusBadRequest)
+		return
+	}
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		AddError(w, logmsg, "error retrieving the file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(strings.ToUpper(handler.Filename), ".ZIP") {
+		AddError(w, logmsg, "uploaded file is not a Zip Archive", http.StatusBadRequest)
+		return
+	}
+
+	mr, err := measurementreport.ParseZipMeasurementFiles(file, handler.Size)
+	if err != nil {
+		AddError(w, logmsg, fmt.Sprintf("error processing measurement Zip archive : %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(mr)
+
 	logmsg.Response = http.StatusOK
 }
