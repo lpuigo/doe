@@ -227,7 +227,7 @@ pre {
 /* Workload Columns */
 .small-font {
     font-size: 0.75em;
-    line-height: 0.9em;
+    line-height: 1.0em;
 }
 
 .el-progress-bar__outer {
@@ -372,4 +372,61 @@ pre {
 .ripactivitystatus-row-canceled {
     background: #e6e8eb;
 }
+
+/* ====================================================================================================================
+    === TwoValues Progress Bar style ===
+ */
+
+.twovalues-progressbar {
+    /*padding-right: 50px;*/
+    display: inline-block;
+    vertical-align: middle;
+    width: 100%;
+    /*margin-right: -55px;*/
+    box-sizing: border-box;
+}
+
+.twovalues-progressbar .outer {
+    height: 5px;
+    border-radius: 100px;
+    background-color: #ebeef5;
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+    vertical-align: middle;
+}
+
+.twovalues-progressbar .inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    text-align: right;
+    line-height: 1;
+    white-space: nowrap;
+    transition: width .6s ease;
+}
+
+.twovalues-progressbar .inprogress {
+    background-color: #409eff;
+}
+
+.twovalues-progressbar .complete {
+    background-color: #67C23A;
+}
+
+.twovalues-progressbar .ko {
+    background-color: #ff4040;
+}
+
+.twovalues-progressbar .begin {
+    border-top-left-radius: 100px;
+    border-bottom-left-radius: 100px;
+}
+
+.twovalues-progressbar .end {
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+}
+
 

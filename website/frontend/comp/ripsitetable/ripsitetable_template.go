@@ -66,26 +66,26 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             ></el-table-column>
 
             <el-table-column
-                    label="Tirage" width="110px" :resizable=true align="center"
+                    label="Tirage" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbPulling - scope.row.NbPullingBlocked" :done="scope.row.NbPullingDone"></ripsiteinfo-progress-bar>
+                    <ripsiteinfo-progress-bar :total="scope.row.NbPulling" :blocked="scope.row.NbPullingBlocked" :done="scope.row.NbPullingDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 
             <el-table-column
-                    label="Raccordement" width="110px" :resizable=true align="center"
+                    label="Raccordement" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbJunction - scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>
+                    <ripsiteinfo-progress-bar :total="scope.row.NbJunction" :blocked="scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 
             <el-table-column
-                    label="Mesure" width="110px" :resizable=true align="center"
+                    label="Mesure" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement - scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
+                    <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement" :blocked="scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 
