@@ -280,5 +280,9 @@ func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.Dat
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(m.Ripsites.GetStats(maxVal, dateFor, m.visibleRipsiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"], m.CurrentUser.Permissions["Invoice"]))
+	ripsiteStats, err := m.Ripsites.GetStats(maxVal, dateFor, m.visibleRipsiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"], m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(ripsiteStats)
 }

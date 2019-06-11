@@ -153,7 +153,7 @@ func sortedSetKeys(set map[string]int) []string {
 }
 
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) *rs.RipsiteStats {
+func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) (*rs.RipsiteStats, error) {
 	sp.RLock()
 	defer sp.RUnlock()
 
@@ -165,7 +165,10 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 			if client == nil {
 				continue
 			}
-			sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember(), showprice)
+			err := sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember(), showprice)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -263,7 +266,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 			ws.Values[serie] = append(ws.Values[serie], values[serie])
 		}
 	}
-	return ws
+	return ws, nil
 }
 
 // WorksitesArchiveName returns the SiteArchive file name with today's date

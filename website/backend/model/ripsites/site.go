@@ -371,7 +371,7 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) {
+func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
 	addValue := func(client, site, team, date, article, serie string, val float64) {
 		teamInfo := "Eq. " + teamName(team)
 		values[items.StatKey{
@@ -392,7 +392,7 @@ func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg
 
 	calcItems, err := s.Itemize(currentBpu)
 	if err != nil {
-		panic(fmt.Sprintf("unexpected err on stat itemize for '%s':%s", s.Ref, err.Error()))
+		return fmt.Errorf("error on stat itemize for '%s':%s", s.Ref, err.Error())
 	}
 	for _, item := range calcItems {
 		if !item.Done {
@@ -403,4 +403,5 @@ func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg
 			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
 		}
 	}
+	return nil
 }
