@@ -141,7 +141,7 @@ const (
 	activityJunction    string = "Racco"
 	activityMeasurement string = "Mesures"
 
-	catPullUnderground string = activityPulling + " Souterain"
+	catPullUnderground string = activityPulling + " Souterrain"
 	catPullAerial      string = activityPulling + " Aérien"
 	catPullBuilding    string = activityPulling + " Façade"
 
