@@ -68,15 +68,15 @@ const template string = `
 
 func Register() {
 	hvue.NewComponent("order-edit",
-		ComponentOptions()...,
+		componentOptions()...,
 	)
 }
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("order-edit", ComponentOptions()...)
+	return hvue.Component("order-edit", componentOptions()...)
 }
 
-func ComponentOptions() []hvue.ComponentOption {
+func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		tronconedit.RegisterComponent(),
 		hvue.Template(template),
