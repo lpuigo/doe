@@ -160,32 +160,72 @@ pre {
     /*color: #ffbf80;*/
 /*}*/
 
+/* disable element ui hover*/
+.el-table--enable-row-hover .el-table__body tr:hover>td {
+    background-color: initial !important;
+}
+
 .el-table .worksite-row-new {
     background: #e1edff;
+}
+
+.el-table .worksite-row-new:hover {
+    background: #d8e3f2;
+    transition: background-color .25s ease;
 }
 
 .el-table .worksite-row-forminprogress {
     background: #e1edff;
 }
 
+.el-table .worksite-row-forminprogress:hover {
+    background: #d8e3f2;
+    transition: background-color .25s ease;
+}
+
 .el-table .worksite-row-inprogress {
     background: #ffffff;
+}
+
+.el-table .worksite-row-inprogress:hover {
+    transition: background-color .25s ease;
+    background: #f2f2f2;
 }
 
 .el-table .worksite-row-doe {
     background: #bbe6b8;
 }
 
+.el-table .worksite-row-doe:hover {
+    transition: background-color .25s ease;
+    background: #b3d9b0;
+}
+
 .el-table .worksite-row-attachment {
     background: #ffe6cc;
+}
+
+.el-table .worksite-row-attachment:hover {
+    transition: background-color .25s ease;
+    background: #f2dac2;
 }
 
 .el-table .worksite-row-invoice {
     background: #ffcc99;
 }
 
+.el-table .worksite-row-invoice:hover {
+    transition: background-color .25s ease;
+    background: #f2c291;
+}
+
 .el-table .worksite-row-payment {
     background: #fff8e6;
+}
+
+.el-table .worksite-row-payment:hover {
+    transition: background-color .25s ease;
+    background: #e6e0d1;
 }
 
 .el-table .worksite-row-rework {
@@ -193,9 +233,19 @@ pre {
     color: #690000;
 }
 
+.el-table .worksite-row-rework:hover {
+    transition: background-color .25s ease;
+    background: #f2c9c2;
+}
+
 .el-table .worksite-row-blocked {
     background: #e6bfb8;
     color: #800d0d;
+}
+
+.el-table .worksite-row-blocked:hover {
+    transition: background-color .25s ease;
+    background: #d9b3ad;
 }
 
 .el-table .worksite-row-canceled {
@@ -203,13 +253,28 @@ pre {
     color: #b3a1a1;
 }
 
+.el-table .worksite-row-canceled:hover {
+    transition: background-color .25s ease;
+    background: #dbd3d3;
+}
+
 .el-table .worksite-row-done {
     background: #f2f2f2;
     color: #b3b3b3;
 }
 
+.el-table .worksite-row-done:hover {
+    transition: background-color .25s ease;
+    background: #dbdbdb;
+}
+
 .el-table .worksite-row-error {
     background: #f77c63;
+}
+
+.el-table .worksite-row-error:hover {
+    transition: background-color .25s ease;
+    background: #de715b;
 }
 
 .rework-green {
