@@ -2,13 +2,13 @@ package polemap
 
 import (
 	"github.com/gopherjs/gopherjs/js"
-	"github.com/lpuig/ewin/mappoc/frontend/leaflet"
-	"github.com/lpuig/ewin/mappoc/frontend/mappoc/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 )
 
 type PoleMarker struct {
 	leaflet.Marker
-	Pole *model.Pole `js:"Pole"`
+	Pole *polesite.Pole `js:"Pole"`
 }
 
 const (
@@ -20,7 +20,7 @@ func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
 	return &PoleMarker{Marker: *leaflet.MarkerFromJs(obj)}
 }
 
-func NewPoleMarker(option *leaflet.MarkerOptions, pole *model.Pole) *PoleMarker {
+func NewPoleMarker(option *leaflet.MarkerOptions, pole *polesite.Pole) *PoleMarker {
 	np := &PoleMarker{Marker: *leaflet.NewMarker(pole.Lat, pole.Long, option)}
 	np.Pole = pole
 	return np
@@ -48,22 +48,22 @@ func (pm *PoleMarker) UpdateFromState() {
 	var html, class string
 
 	switch pm.Pole.State {
-	case model.PoleStateNotSubmitted:
+	case polesite.PoleStateNotSubmitted:
 		html = pmHtmlPin
 		class = ""
-	case model.PoleStateToDo:
+	case polesite.PoleStateToDo:
 		html = pmHtmlPlain
 		class = "blue"
-	case model.PoleStateHoleDone:
+	case polesite.PoleStateHoleDone:
 		html = pmHtmlHole
 		class = "orange"
-	case model.PoleStateIncident:
+	case polesite.PoleStateIncident:
 		html = pmHtmlHole
 		class = "red"
-	case model.PoleStateDone:
+	case polesite.PoleStateDone:
 		html = pmHtmlPlain
 		class = "green"
-	case model.PoleStateCancelled:
+	case polesite.PoleStateCancelled:
 		html = pmHtmlPlain
 		class = ""
 	}

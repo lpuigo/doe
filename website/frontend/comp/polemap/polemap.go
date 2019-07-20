@@ -3,9 +3,9 @@ package polemap
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/mappoc/frontend/leaflet"
-	"github.com/lpuig/ewin/mappoc/frontend/mappoc/comp/leafletmap"
-	"github.com/lpuig/ewin/mappoc/frontend/mappoc/model"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/leafletmap"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 )
 
 const template string = `
@@ -52,7 +52,7 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleMap struct {
 	leafletmap.LeafletMap
-	Poles []*model.Pole `js:"poles"`
+	Poles []*polesite.Pole `js:"poles"`
 	//PoleOverlays map[string]*leaflet.Layer `js:"PoleOverlays"`
 }
 
@@ -70,7 +70,7 @@ func newPoleMap(vm *hvue.VM) *PoleMap {
 	return pm
 }
 
-func (pm *PoleMap) AddPoles(poles []*model.Pole, name string) *leaflet.LayerGroup {
+func (pm *PoleMap) AddPoles(poles []*polesite.Pole, name string) *leaflet.LayerGroup {
 	pm.Poles = poles
 	polesLayer := []*leaflet.Layer{}
 
@@ -112,7 +112,7 @@ func (pm *PoleMap) AddPoles(poles []*model.Pole, name string) *leaflet.LayerGrou
 }
 
 func (pm *PoleMap) CenterOnPoles() {
-	clat, clong, minlat, minlong, maxlat, maxlong := model.GetCenterAndBounds(pm.Poles)
+	clat, clong, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(pm.Poles)
 	pm.LeafletMap.Map.SetView(leaflet.NewLatLng(clat, clong), 12)
 	pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minlat, minlong), leaflet.NewLatLng(maxlat, maxlong))
 }
