@@ -3,6 +3,7 @@ package polemap
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 )
 
@@ -48,22 +49,22 @@ func (pm *PoleMarker) UpdateFromState() {
 	var html, class string
 
 	switch pm.Pole.State {
-	case polesite.PoleStateNotSubmitted:
+	case poleconst.StateNotSubmitted:
 		html = pmHtmlPin
 		class = ""
-	case polesite.PoleStateToDo:
+	case poleconst.StateToDo:
 		html = pmHtmlPlain
 		class = "blue"
-	case polesite.PoleStateHoleDone:
+	case poleconst.StateHoleDone:
 		html = pmHtmlHole
 		class = "orange"
-	case polesite.PoleStateIncident:
+	case poleconst.StateIncident:
 		html = pmHtmlHole
 		class = "red"
-	case polesite.PoleStateDone:
+	case poleconst.StateDone:
 		html = pmHtmlPlain
 		class = "green"
-	case polesite.PoleStateCancelled:
+	case poleconst.StateCancelled:
 		html = pmHtmlPlain
 		class = ""
 	}

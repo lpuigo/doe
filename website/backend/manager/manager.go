@@ -300,3 +300,31 @@ func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.Dat
 	}
 	return json.NewEncoder(writer).Encode(ripsiteStats)
 }
+
+// =====================================================================================================================
+// Ripsites related methods
+//
+
+// visibleRipsiteFilter returns a filtering function on CurrentUser.Clients visibility
+func (m *Manager) visiblePolesiteFilter() ps.IsPolesiteVisible {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(ps *ps.PoleSite) bool { return true }
+	}
+	isVisible := make(map[string]bool)
+	for _, client := range m.CurrentUser.Clients {
+		isVisible[client] = true
+	}
+	return func(ps *ps.PoleSite) bool {
+		return isVisible[ps.Client]
+	}
+}
+
+// GetPolesitesInfo returns array of PolesiteInfos (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesInfo(writer io.Writer) error {
+	psis := []*fm.PolesiteInfo{}
+	for _, psr := range m.Polesites.GetAll(m.visiblePolesiteFilter()) {
+		psis = append(psis, psr.PoleSite.GetInfo())
+	}
+
+	return json.NewEncoder(writer).Encode(psis)
+}

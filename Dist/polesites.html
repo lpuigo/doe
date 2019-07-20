@@ -50,7 +50,7 @@
         <el-container style="height: 100%">
 
             <el-aside v-if="IsPoleSelected" width="400px" style="padding: 0px 5px">
-                <pole-edit :polemarker.sync="SelectedPoleMarker"></pole-edit>
+                <pole-edit :editedpolemarker.sync="SelectedPoleMarker"></pole-edit>
                 <el-button @click="UnSelectPole" size="mini">OK</el-button>
             </el-aside>
 

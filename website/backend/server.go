@@ -123,6 +123,9 @@ func main() {
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("DeleteRipSite", route.DeleteRipSite)).Methods("DELETE")
 	router.HandleFunc("/api/ripsites/measurement", withUserManager("MeasurementRipSite", route.MeasurementRipSite)).Methods("POST")
 
+	// Polesites method
+	router.HandleFunc("/api/polesites", withUserManager("GetPolesitesInfo", route.GetPolesitesInfo)).Methods("GET")
+
 	// Static Files serving
 	router.PathPrefix(conf.AssetsRoot).Handler(http.StripPrefix(conf.AssetsRoot, http.FileServer(http.Dir(conf.AssetsDir))))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir(conf.RootDir)))

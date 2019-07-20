@@ -1,68 +1,18 @@
 package polesite
 
 import (
-	"github.com/gopherjs/gopherjs/js"
-	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-)
-
-const (
-	PoleStateNotSubmitted string = "00 Not Submitted"
-	PoleStateToDo         string = "10 To Do"
-	PoleStateHoleDone     string = "20 Hole Done"
-	PoleStateIncident     string = "25 Incident"
-	PoleStateDone         string = "90 Done"
-	PoleStateCancelled    string = "99 Cancelled"
 )
 
 func GetStatesValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
-		elements.NewValueLabel(PoleStateNotSubmitted, "Non soumis"),
-		elements.NewValueLabel(PoleStateToDo, "A faire"),
-		elements.NewValueLabel(PoleStateHoleDone, "Trou fait"),
-		elements.NewValueLabel(PoleStateIncident, "Incident"),
-		elements.NewValueLabel(PoleStateDone, "Fait"),
-		elements.NewValueLabel(PoleStateCancelled, "Annulé"),
-	}
-}
-
-type Pole struct {
-	*js.Object
-	Ref   string  `js:"Ref"`
-	City  string  `js:"City"`
-	Lat   float64 `js:"Lat"`
-	Long  float64 `js:"Long"`
-	State string  `js:"State"`
-}
-
-func NewPole(pole BePole) *Pole {
-	np := &Pole{
-		Object: tools.O(),
-	}
-
-	np.Ref = pole.Ref
-	np.City = pole.City
-	np.Lat = pole.Lat
-	np.Long = pole.Long
-	np.State = pole.State
-
-	return np
-}
-
-func (p *Pole) SwitchState() {
-	switch p.State {
-	case PoleStateNotSubmitted:
-		p.State = PoleStateToDo
-	case PoleStateToDo:
-		p.State = PoleStateHoleDone
-	case PoleStateHoleDone:
-		p.State = PoleStateIncident
-	case PoleStateIncident:
-		p.State = PoleStateDone
-	case PoleStateDone:
-		p.State = PoleStateCancelled
-	case PoleStateCancelled:
-		p.State = PoleStateNotSubmitted
+		elements.NewValueLabel(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted),
+		elements.NewValueLabel(poleconst.StateToDo, poleconst.LabelToDo),
+		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
+		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
+		elements.NewValueLabel(poleconst.StateDone, poleconst.LabelDone),
+		elements.NewValueLabel(poleconst.StateCancelled, poleconst.LabelCancelled),
 	}
 }
 
