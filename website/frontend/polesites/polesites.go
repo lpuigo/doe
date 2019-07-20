@@ -19,15 +19,13 @@ func main() {
 	hvue.NewVM(
 		polemap.RegisterComponent(),
 		poleedit.RegisterComponent(),
-		hvue.El("#mappoc_app"),
+		hvue.El("#polesites_app"),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.Poles = []*polesite.Pole{}
-			BeforeUnloadConfirmation(mpm.PreventLeave)
-			location := js.Global.Get("location")
-			print("query string:", location.Get("search"))
+			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
 			go mpm.LoadPole()
 		}),
 		//hvue.Computed("IsPoleSelected", func(vm *hvue.VM) interface{} {
@@ -71,23 +69,6 @@ func (mpm *MainPageModel) LoadPole() {
 
 func (mpm *MainPageModel) PreventLeave() bool {
 	return mpm.Dirty
-}
-
-// BeforeUnloadConfirmation activate confirm leave alert if askBeforeLeave func return true
-func BeforeUnloadConfirmation(askBeforeLeave func() bool) {
-	js.Global.Get("window").Call(
-		"addEventListener",
-		"beforeunload",
-		func(event *js.Object) {
-			if !askBeforeLeave() {
-				return
-			}
-			event.Call("preventDefault")
-			event.Set("returnValue", "")
-			//js.Global.Call("confirm", "Sur ?")
-
-		},
-		false)
 }
 
 // UpdateMap updates current Poles Arrays in PoleMap component
