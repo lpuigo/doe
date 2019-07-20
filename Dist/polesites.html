@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>EWIN Poteaux</title>
+    <meta charset="UTF-8">
+    <link rel="icon" href="favicon.png">
+    <!-- LeafLet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.10.1/lib/theme-chalk/index.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
+    <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="polesites.css">
+</head>
+
+<body>
+<div id="mappoc_app" style="height: 100%;">
+    <el-container style="height: 100%;border: 1px solid #eee">
+        <el-header class="ewin" style="height: 40px">
+            <div class="header-menu-container">
+                <el-row :gutter="20" type="flex" align="middle">
+                    <h2 class="content">EWIN Services Poteaux</h2>
+                </el-row>
+                <span></span>
+                <span></span>
+
+                <el-button-group>
+                    <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"></el-button>
+                </el-button-group>
+
+                <el-row :gutter="20" type="flex" align="middle">
+                    <el-input prefix-icon="fas fa-search-location"
+                              v-model="Filter" clearable size="mini"
+                              @input="ApplyFilter"
+                              @clear="ApplyFilter"></el-input>
+                </el-row>
+                <span></span>
+
+                <!--
+                <el-row :gutter="20" type="flex" align="middle">
+                    <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
+                    <el-button v-else type="primary" @click="UserLogout" size="mini">{{User.Name}} Logout</el-button>
+                </el-row>
+                -->
+            </div>
+        </el-header>
+        <el-container style="height: 100%">
+
+            <el-aside v-if="IsPoleSelected" width="400px" style="padding: 0px 5px">
+                <pole-edit :polemarker.sync="SelectedPoleMarker"></pole-edit>
+                <el-button @click="UnSelectPole" size="mini">OK</el-button>
+            </el-aside>
+
+            <el-main style="height:100%; padding: 0px 0px;">
+                <pole-map
+                        ref="MapEwin"
+                        :poles="Poles"
+                        @marker-click="MarkerClick"
+                ></pole-map>
+            </el-main>
+        </el-container>
+    </el-container>
+</div>
+</body>
+
+
+<!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+<script src="/Assets/vue/2.5.17/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.10.1/lib/index.js"></script>
+<!--<script src="/Assets/element-ui/2.6.1/lib/index.js"></script>-->
+<script src="https://unpkg.com/element-ui@2.10.1/lib/umd/locale/fr.js"></script>
+<!--<script src="/Assets/element-ui/2.6.1/lib/umd/locale/fr.js"></script>-->
+<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+        crossorigin=""></script>
+
+<script>
+    ELEMENT.locale(ELEMENT.lang.fr)
+</script>
+<script type="text/javascript" src="mappoc.js"></script>
+
+</html>

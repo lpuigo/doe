@@ -4,7 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -52,8 +52,8 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteStatusTagModel struct {
 	*js.Object
 
-	Worksite   *fm.Worksite `js:"value"`
-	StatusText string       `js:"StatusText"`
+	Worksite   *worksite.Worksite `js:"value"`
+	StatusText string             `js:"StatusText"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -72,21 +72,21 @@ func NewWorksiteStatusTagModel(vm *hvue.VM) *WorksiteStatusTagModel {
 func (wst *WorksiteStatusTagModel) SetStatus() (statusType, statusText string) {
 	statusText = wst.Worksite.WorksiteStatusLabel()
 	switch wst.Worksite.Status {
-	case fm.WsStatusNew:
+	case worksite.WsStatusNew:
 		statusType = "info"
-	case fm.WsStatusFormInProgress:
+	case worksite.WsStatusFormInProgress:
 		statusType = "warning"
-	case fm.WsStatusInProgress:
+	case worksite.WsStatusInProgress:
 		statusType = "warning"
-	case fm.WsStatusDOE:
+	case worksite.WsStatusDOE:
 		statusType = ""
-	case fm.WsStatusAttachment:
+	case worksite.WsStatusAttachment:
 		statusType = "success"
-	case fm.WsStatusPayment:
+	case worksite.WsStatusPayment:
 		statusType = "success"
-	case fm.WsStatusCancelled:
+	case worksite.WsStatusCancelled:
 		statusType = "info"
-	case fm.WsStatusDone:
+	case worksite.WsStatusDone:
 		statusType = "success"
 	default:
 		statusType = "danger"

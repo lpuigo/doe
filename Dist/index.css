@@ -171,7 +171,7 @@ pre {
 
 .el-table .worksite-row-new:hover {
     background: #d8e3f2;
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
 }
 
 .el-table .worksite-row-forminprogress {
@@ -180,7 +180,7 @@ pre {
 
 .el-table .worksite-row-forminprogress:hover {
     background: #d8e3f2;
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
 }
 
 .el-table .worksite-row-inprogress {
@@ -188,7 +188,7 @@ pre {
 }
 
 .el-table .worksite-row-inprogress:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #f2f2f2;
 }
 
@@ -197,7 +197,7 @@ pre {
 }
 
 .el-table .worksite-row-doe:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #b3d9b0;
 }
 
@@ -206,7 +206,7 @@ pre {
 }
 
 .el-table .worksite-row-attachment:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #f2dac2;
 }
 
@@ -215,7 +215,7 @@ pre {
 }
 
 .el-table .worksite-row-invoice:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #f2c291;
 }
 
@@ -224,7 +224,7 @@ pre {
 }
 
 .el-table .worksite-row-payment:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #e6e0d1;
 }
 
@@ -234,7 +234,7 @@ pre {
 }
 
 .el-table .worksite-row-rework:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #f2c9c2;
 }
 
@@ -244,7 +244,7 @@ pre {
 }
 
 .el-table .worksite-row-blocked:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #d9b3ad;
 }
 
@@ -254,7 +254,7 @@ pre {
 }
 
 .el-table .worksite-row-canceled:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #dbd3d3;
 }
 
@@ -264,7 +264,7 @@ pre {
 }
 
 .el-table .worksite-row-done:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #dbdbdb;
 }
 
@@ -273,7 +273,7 @@ pre {
 }
 
 .el-table .worksite-row-error:hover {
-    transition: background-color .25s ease;
+    transition: background-color .15s ease;
     background: #de715b;
 }
 

@@ -7,6 +7,7 @@ type PoleSite struct {
 	Manager    string
 	OrderDate  string
 	UpdateDate string
+	Status     string
 	Comment    string
 
 	Poles []*Pole

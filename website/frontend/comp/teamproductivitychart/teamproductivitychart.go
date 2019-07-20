@@ -3,7 +3,7 @@ package teamproductivitychart
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -45,14 +45,14 @@ func componentOption() []hvue.ComponentOption {
 
 type TeamProductivityChart struct {
 	*js.Object
-	VM    *hvue.VM      `js:"VM"`
-	Stats *fm.TeamStats `js:"stats"`
+	VM    *hvue.VM            `js:"VM"`
+	Stats *worksite.TeamStats `js:"stats"`
 }
 
 func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
 	tpc := &TeamProductivityChart{Object: tools.O()}
 	tpc.VM = vm
-	tpc.Stats = fm.NewTeamStats()
+	tpc.Stats = worksite.NewTeamStats()
 	return tpc
 }
 

@@ -16,6 +16,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
@@ -222,10 +223,14 @@ func (m *MainPageModel) ShowAdmin() {
 	m.VM.Refs("AdminModal").Call("Show", m.User)
 }
 
+func (m *MainPageModel) ShowPoleSites() {
+	js.Global.Get("window").Call("open", "polesites.html")
+}
+
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
+		if worksite.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
 			res = append(res, wsi)
 		}
 	}
@@ -235,7 +240,7 @@ func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetReviewableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsReviewable(wsi.Status) {
+		if worksite.WorksiteIsReviewable(wsi.Status) {
 			res = append(res, wsi)
 		}
 	}
@@ -246,7 +251,7 @@ func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 	res := 0
 	if m.SiteMode == "Orange" {
 		for _, wsi := range m.WorksiteInfos {
-			if fm.WorksiteIsUpdatable(wsi.Status) {
+			if worksite.WorksiteIsUpdatable(wsi.Status) {
 				res += 1
 			}
 		}
@@ -279,7 +284,7 @@ func (m *MainPageModel) GetReworkWorsiteNb() int {
 func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsBillable(wsi.Status) {
+		if worksite.WorksiteIsBillable(wsi.Status) {
 			res = append(res, wsi)
 		}
 	}
@@ -289,7 +294,7 @@ func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetBillableWorksiteNb() int {
 	res := 0
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsBillable(wsi.Status) {
+		if worksite.WorksiteIsBillable(wsi.Status) {
 			res += 1
 		}
 	}

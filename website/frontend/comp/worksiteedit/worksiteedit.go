@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -57,10 +58,10 @@ func ComponentOptions() []hvue.ComponentOption {
 type WorksiteDetailModel struct {
 	*js.Object
 
-	Worksite          *fm.Worksite `js:"worksite"`
-	User              *fm.User     `js:"user"`
-	ReferenceWorksite *fm.Worksite `js:"refWorksite"`
-	ReadOnly          bool         `js:"readonly"`
+	Worksite          *worksite.Worksite `js:"worksite"`
+	User              *fm.User           `js:"user"`
+	ReferenceWorksite *worksite.Worksite `js:"refWorksite"`
+	ReadOnly          bool               `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
 }

@@ -68,11 +68,17 @@
                     <el-row :gutter="20" type="flex" align="middle">
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
+
                     <!-- Select Orange or RIP mode -->
                     <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini" @change="CheckSiteMode">
                         <el-radio-button v-if="worksiteInfos.length > 0" label="Orange">Orange : {{worksiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="ripsiteInfos.length > 0" label="Rip">RIP : {{ripsiteInfos.length}}</el-radio-button>
                     </el-radio-group>
+
+                    <!-- Link to PoleSites -->
+                    <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-map-marked-alt icon--big" @click="ShowPoleSites" size="mini"></el-button>
+                    <!-- <el-link v-if="User.Permissions.Admin" icon="fas fa-map-marked-alt icon--big" href="polesites.html"></el-link>  -->
+
                     <!-- Select Billing / Create / Update / Review modes -->
                     <el-radio-group v-if="SiteMode == 'Orange'" v-model="ActiveMode" size="mini">
                         <el-radio-button v-if="User.Permissions.Invoice" label="Invoice">Factures</el-radio-button>
@@ -81,18 +87,22 @@
                         <el-radio-button v-if="User.Permissions.Update" label="Rework" :disabled="!NbRework">Reprise ({{NbRework}})</el-radio-button>
                         <el-radio-button v-if="User.Permissions.Review" label="Review">Suivi</el-radio-button>
                     </el-radio-group>
+
                     <el-radio-group v-if="SiteMode == 'Rip'" v-model="ActiveMode" size="mini">
                         <el-radio-button v-if="User.Permissions.Update" label="Update" :disabled="!NbUpdate">Mise à jour ({{NbUpdate}})</el-radio-button>
                         <el-radio-button v-if="User.Permissions.Review" label="Review">Suivi</el-radio-button>
                     </el-radio-group>
+
                     <!-- Actions Refresh / Stats / Admin actions -->
                     <el-button-group>
                         <el-button v-if="User.Permissions.Update || User.Permissions.Review" class="icon" icon="fas fa-sync-alt icon--big" @click="GetSiteInfos" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Update || User.Permissions.Review" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-wrench icon--big" @click="ShowAdmin" size="mini"></el-button>
                     </el-button-group>
+
                     <span></span>
                     <span></span>
+
                     <el-row :gutter="20" type="flex" align="middle">
                         <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
                         <el-button v-else type="primary" @click="UserLogout" size="mini">{{User.Name}} Logout</el-button>

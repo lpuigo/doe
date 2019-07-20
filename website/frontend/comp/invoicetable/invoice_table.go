@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/progressbar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -85,7 +86,7 @@ func (itm *InvoiceTableModel) ExpandRow(vm *hvue.VM, ws *fm.WorksiteInfo, others
 
 func (itm *InvoiceTableModel) TableRowClassName(rowInfo *js.Object) string {
 	wsi := &fm.WorksiteInfo{Object: rowInfo.Get("row")}
-	return fm.WorksiteRowClassName(wsi.Status)
+	return worksite.WorksiteRowClassName(wsi.Status)
 }
 
 func (itm *InvoiceTableModel) HeaderCellStyle() string {
@@ -97,12 +98,12 @@ func (itm *InvoiceTableModel) FormatDate(r, c *js.Object, d string) string {
 }
 
 func (itm *InvoiceTableModel) FormatStatus(r, c *js.Object, d string) string {
-	return fm.WorksiteStatusLabel(d)
+	return worksite.WorksiteStatusLabel(d)
 }
 
-func (itm *InvoiceTableModel) SortStatus(a, b *fm.Worksite) int {
-	la := fm.WorksiteStatusLabel(a.Status)
-	lb := fm.WorksiteStatusLabel(b.Status)
+func (itm *InvoiceTableModel) SortStatus(a, b *worksite.Worksite) int {
+	la := worksite.WorksiteStatusLabel(a.Status)
+	lb := worksite.WorksiteStatusLabel(b.Status)
 	if la < lb {
 		return -1
 	}
@@ -129,7 +130,7 @@ func (itm *InvoiceTableModel) FilterList(vm *hvue.VM, prop string) []*elements.V
 	switch prop {
 	case "Status":
 		translate = func(val string) string {
-			return fm.WorksiteStatusLabel(val)
+			return worksite.WorksiteStatusLabel(val)
 		}
 	default:
 		translate = func(val string) string { return val }
@@ -156,9 +157,9 @@ func (itm *InvoiceTableModel) FilterList(vm *hvue.VM, prop string) []*elements.V
 
 func (itm *InvoiceTableModel) FilteredStatusValue() []string {
 	res := []string{
-		fm.WsStatusAttachment,
-		fm.WsStatusInvoice,
-		fm.WsStatusPayment,
+		worksite.WsStatusAttachment,
+		worksite.WsStatusInvoice,
+		worksite.WsStatusPayment,
 		//		fm.WsStatusRework,
 	}
 	return res

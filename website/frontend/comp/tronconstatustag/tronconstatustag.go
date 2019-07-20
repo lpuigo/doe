@@ -4,7 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -51,8 +51,8 @@ func ComponentOptions() []hvue.ComponentOption {
 type TronconStatusTagModel struct {
 	*js.Object
 
-	Troncon    *fm.Troncon `js:"value"`
-	StatusText string      `js:"StatusText"`
+	Troncon    *worksite.Troncon `js:"value"`
+	StatusText string            `js:"StatusText"`
 
 	VM *hvue.VM `js:"VM"`
 }

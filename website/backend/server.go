@@ -33,6 +33,7 @@ const (
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 	RipsitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
+	PolesitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
 	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
 	ClientsDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
 	TemplatesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
@@ -48,6 +49,7 @@ func main() {
 		ManagerConfig: manager.ManagerConfig{
 			WorksitesDir: WorksitesDir,
 			RipsitesDir:  RipsitesDir,
+			PolesitesDir: PolesitesDir,
 			UsersDir:     UsersDir,
 			ClientsDir:   ClientsDir,
 			TemplatesDir: TemplatesDir,

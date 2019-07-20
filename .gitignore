@@ -3,3 +3,5 @@
 *.jpg
 *.json
 Distrib/*
+Dist/*.js
+Dist/*.js.map

@@ -5,7 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ptedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -139,8 +139,8 @@ type TronconEditModel struct {
 	*js.Object
 
 	Articles    []*elements.ValueLabel `js:"articles"`
-	Troncon     *fm.Troncon            `js:"value"`
-	PrevTroncon *fm.Troncon            `js:"previous"`
+	Troncon     *worksite.Troncon      `js:"value"`
+	PrevTroncon *worksite.Troncon      `js:"previous"`
 	Readonly    bool                   `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
@@ -158,7 +158,7 @@ func NewTronconEditModel(vm *hvue.VM) *TronconEditModel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Actions
 
-func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
+func (tem *TronconEditModel) CheckRef(tr *worksite.Troncon) {
 	if strings.HasPrefix(tr.Ref, "TR") && len(tr.Ref) > 3 {
 		tr.Ref = strings.Replace(tr.Ref, " ", "-", -1)
 		return
@@ -168,13 +168,13 @@ func (tem *TronconEditModel) CheckRef(tr *fm.Troncon) {
 	}
 }
 
-func (tem *TronconEditModel) CheckFiber(tr *fm.Troncon) {
+func (tem *TronconEditModel) CheckFiber(tr *worksite.Troncon) {
 	if tr.NbFiber < tr.NbRacco {
 		tr.NbRacco = tr.NbFiber
 	}
 }
 
-func (tem *TronconEditModel) CheckSignature(tr *fm.Troncon) {
+func (tem *TronconEditModel) CheckSignature(tr *worksite.Troncon) {
 	tr.CheckSignature()
 }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
@@ -22,9 +23,9 @@ type WorksiteEditModalModel struct {
 
 	ActiveTabName string `js:"activeTabName"`
 
-	User            *fm.User     `js:"user"`
-	EditedWorksite  *fm.Worksite `js:"edited_worksite"`
-	CurrentWorksite *fm.Worksite `js:"current_worksite"`
+	User            *fm.User           `js:"user"`
+	EditedWorksite  *worksite.Worksite `js:"edited_worksite"`
+	CurrentWorksite *worksite.Worksite `js:"current_worksite"`
 
 	Loading           bool `js:"loading"`
 	Saving            bool `js:"saving"`
@@ -39,8 +40,8 @@ func NewWorksiteEditModalModel(vm *hvue.VM) *WorksiteEditModalModel {
 	wemm.ActiveTabName = "Create"
 
 	wemm.User = fm.NewUser()
-	wemm.EditedWorksite = fm.NewWorkSite()
-	wemm.CurrentWorksite = fm.NewWorkSite()
+	wemm.EditedWorksite = worksite.NewWorkSite()
+	wemm.CurrentWorksite = worksite.NewWorkSite()
 	wemm.Loading = false
 	wemm.Saving = false
 	wemm.ShowConfirmDelete = false
@@ -102,7 +103,7 @@ func (wemm *WorksiteEditModalModel) HasChanged() bool {
 }
 
 func (wemm *WorksiteEditModalModel) Show(id int, user *fm.User) {
-	wemm.EditedWorksite = fm.NewWorkSite()
+	wemm.EditedWorksite = worksite.NewWorkSite()
 	if id < 0 {
 		wemm.EditedWorksite.AddOrder()
 	}
@@ -188,12 +189,12 @@ func (wemm *WorksiteEditModalModel) callGetWorksite(id int) {
 		wemm.Hide()
 		return
 	}
-	wemm.EditedWorksite = fm.WorksiteFromJS(req.Response)
+	wemm.EditedWorksite = worksite.WorksiteFromJS(req.Response)
 	wemm.CurrentWorksite.Copy(wemm.EditedWorksite)
 	return
 }
 
-func (wemm *WorksiteEditModalModel) callUpdateWorksite(uws *fm.Worksite) {
+func (wemm *WorksiteEditModalModel) callUpdateWorksite(uws *worksite.Worksite) {
 	defer func() { wemm.Saving = false }()
 	req := xhr.NewRequest("PUT", "/api/worksites/"+strconv.Itoa(uws.Id))
 	req.Timeout = tools.TimeOut
@@ -212,7 +213,7 @@ func (wemm *WorksiteEditModalModel) callUpdateWorksite(uws *fm.Worksite) {
 	wemm.Hide()
 }
 
-func (wemm *WorksiteEditModalModel) callCreateWorksite(uws *fm.Worksite) {
+func (wemm *WorksiteEditModalModel) callCreateWorksite(uws *worksite.Worksite) {
 	defer func() { wemm.Saving = false }()
 	req := xhr.NewRequest("POST", "/api/worksites")
 	req.Timeout = tools.TimeOut
@@ -231,7 +232,7 @@ func (wemm *WorksiteEditModalModel) callCreateWorksite(uws *fm.Worksite) {
 	wemm.Hide()
 }
 
-func (wemm *WorksiteEditModalModel) callDeleteWorksite(dws *fm.Worksite) {
+func (wemm *WorksiteEditModalModel) callDeleteWorksite(dws *worksite.Worksite) {
 	defer func() { wemm.Saving = false }()
 	req := xhr.NewRequest("DELETE", "/api/worksites/"+strconv.Itoa(dws.Id))
 	req.Timeout = tools.TimeOut

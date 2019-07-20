@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	ps "github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	rs "github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
@@ -19,6 +20,7 @@ import (
 type Manager struct {
 	Worksites      *ws.WorkSitesPersister
 	Ripsites       *rs.SitesPersister
+	Polesites      *ps.PoleSitesPersister
 	Users          *users.UsersPersister
 	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
@@ -45,6 +47,16 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	err = rsp.LoadDirectory()
 	if err != nil {
 		return nil, fmt.Errorf("could not populate Ripsites: %s", err.Error())
+	}
+
+	// Init PoleSites persister
+	psp, err := ps.NewPoleSitesPersist(conf.PolesitesDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create Polesites persister: %s", err.Error())
+	}
+	err = psp.LoadDirectory()
+	if err != nil {
+		return nil, fmt.Errorf("could not populate Polesites: %s", err.Error())
 	}
 
 	// Init Users persister
@@ -77,14 +89,16 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	m := &Manager{
 		Worksites:      wsp,
 		Ripsites:       rsp,
+		Polesites:      psp,
 		Users:          up,
 		Clients:        cp,
 		TemplateEngine: te,
 	}
 	logger.Entry("Server").LogInfo(
-		fmt.Sprintf("loaded %d Worksites, %d Ripsites, %d Clients and %d Users",
+		fmt.Sprintf("loaded %d Worksites, %d Ripsites, %d Polesites, %d Clients and %d Users",
 			wsp.NbWorsites(),
 			rsp.NbSites(),
+			psp.NbSites(),
 			cp.NbClients(),
 			up.NbUsers(),
 		))

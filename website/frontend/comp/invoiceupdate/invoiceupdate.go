@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconstatustag"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -35,10 +36,10 @@ func componentOptions() []hvue.ComponentOption {
 type InvoiceUpdateModel struct {
 	*js.Object
 
-	Worksite          *fm.Worksite `js:"worksite"`
-	ReferenceWorksite *fm.Worksite `js:"refWorksite"`
-	User              *fm.User     `js:"user"`
-	Filter            string       `js:"filter"`
+	Worksite          *worksite.Worksite `js:"worksite"`
+	ReferenceWorksite *worksite.Worksite `js:"refWorksite"`
+	User              *fm.User           `js:"user"`
+	Filter            string             `js:"filter"`
 
 	VM *hvue.VM `js:"VM"`
 }

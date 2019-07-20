@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
@@ -46,10 +47,10 @@ func componentOptions() []hvue.ComponentOption {
 type ReworkUpdateModel struct {
 	*js.Object
 
-	Worksite *fm.Worksite `js:"worksite"`
+	Worksite *worksite.Worksite `js:"worksite"`
 	//ReferenceWorksite *fm.Worksite `js:"refWorksite"`
-	User *fm.User               `js:"user"`
-	Pts  map[string]*fm.Troncon `js:"Pts"`
+	User *fm.User                     `js:"user"`
+	Pts  map[string]*worksite.Troncon `js:"Pts"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -57,10 +58,10 @@ type ReworkUpdateModel struct {
 func NewReworkUpdateModel(vm *hvue.VM) *ReworkUpdateModel {
 	rum := &ReworkUpdateModel{Object: tools.O()}
 	rum.VM = vm
-	rum.Worksite = fm.NewWorkSite()
+	rum.Worksite = worksite.NewWorkSite()
 	//rum.ReferenceWorksite = nil
 	rum.User = fm.NewUser()
-	rum.Pts = make(map[string]*fm.Troncon)
+	rum.Pts = make(map[string]*worksite.Troncon)
 
 	return rum
 }
@@ -77,9 +78,9 @@ func ReworkUpdateModelFromJS(o *js.Object) *ReworkUpdateModel {
 //	return ""
 //}
 
-func (rum *ReworkUpdateModel) GetReworks() []*fm.Defect {
-	res := []*fm.Defect{}
-	rum.Pts = make(map[string]*fm.Troncon)
+func (rum *ReworkUpdateModel) GetReworks() []*worksite.Defect {
+	res := []*worksite.Defect{}
+	rum.Pts = make(map[string]*worksite.Troncon)
 	for _, defect := range rum.Worksite.Rework.Defects {
 		if defect.ToBeFixed {
 			res = append(res, defect)
