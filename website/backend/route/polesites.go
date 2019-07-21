@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
+	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	"net/http"
 	"strconv"
 )
@@ -47,4 +48,42 @@ func GetPolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("Polesite Id %d (%s) returned", psr.Id, psr.Ref), http.StatusOK)
+}
+
+func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("UpdatePolesite").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	if r.Body == nil {
+		AddError(w, logmsg, "request Polesite missing", http.StatusBadRequest)
+		return
+	}
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+	psr, err = polesites.NewPoleSiteRecordFrom(r.Body)
+	if err != nil {
+		AddError(w, logmsg, "malformed Polesite: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if psr.Id != rpsid {
+		AddError(w, logmsg, fmt.Sprintf("inconsitent Polesite id between request (%d) and body (%d)", rpsid, psr.Id), http.StatusBadRequest)
+		return
+	}
+	err = mgr.Polesites.Update(psr)
+	if err != nil {
+		AddError(w, logmsg, fmt.Sprintf("could not update Polesite with id %d: %v", rpsid, err), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Polesite with id %d (%s) updated", rpsid, psr.Ref), http.StatusOK)
+
 }

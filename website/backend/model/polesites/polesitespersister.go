@@ -55,7 +55,7 @@ func (psp *PoleSitesPersister) LoadDirectory() error {
 	return nil
 }
 
-// GetAll returns all contained SiteRecords for which keep(sr.Site) == true
+// GetAll returns all contained PoleSiteRecord for which keep(sr.Site) == true
 func (psp PoleSitesPersister) GetAll(keep func(s *PoleSite) bool) []*PoleSiteRecord {
 	psp.RLock()
 	defer psp.RUnlock()
@@ -69,7 +69,7 @@ func (psp PoleSitesPersister) GetAll(keep func(s *PoleSite) bool) []*PoleSiteRec
 	return srs
 }
 
-// GetById returns the SiteRecord with given Id (or nil if Id not found)
+// GetById returns the PoleSiteRecord with given Id (or nil if Id not found)
 func (psp *PoleSitesPersister) GetById(id int) *PoleSiteRecord {
 	psp.RLock()
 	defer psp.RUnlock()
@@ -82,7 +82,7 @@ func (psp *PoleSitesPersister) GetById(id int) *PoleSiteRecord {
 	return nil
 }
 
-// Add adds the given SiteRecord to the SitesPersister and return its (new) SiteRecord
+// Add adds the given PoleSiteRecord to the PoleSitesPersister and return its (new) SiteRecord
 func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 	psp.Lock()
 	defer psp.Unlock()
@@ -97,7 +97,7 @@ func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 	return psr
 }
 
-// Update updates the given WorkSiteRecord
+// Update updates the given PoleSiteRecord
 func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
 	psp.RLock()
 	defer psp.RUnlock()
@@ -112,7 +112,7 @@ func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
 	return nil
 }
 
-// Remove removes the given SiteRecord from the SitesPersister (pertaining file is moved to deleted dir)
+// Remove removes the given PoleSiteRecord from the PoleSitesPersister (pertaining file is moved to deleted dir)
 func (psp *PoleSitesPersister) Remove(psr *PoleSiteRecord) error {
 	psp.Lock()
 	defer psp.Unlock()

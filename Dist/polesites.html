@@ -24,6 +24,7 @@
                 <el-row :gutter="20" type="flex" align="middle">
                     <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span></h2>
                 </el-row>
+                <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
                 <span></span>
                 <span></span>
 

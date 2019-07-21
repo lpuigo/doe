@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 	"honnef.co/go/js/xhr"
 	"strconv"
@@ -29,7 +30,7 @@ func main() {
 			mpm := &MainPageModel{Object: vm.Object}
 			//mpm.Poles = []*polesite.Pole{}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
-			mpm.LoadPole()
+			mpm.LoadPolesite()
 		}),
 		hvue.Computed("Title", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -41,6 +42,11 @@ func main() {
 			}
 			return mpm.Polesite.Client + " / " + mpm.Polesite.Ref
 		}),
+		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			mpm.Dirty = (mpm.Reference != json.Stringify(mpm.Polesite))
+			return mpm.Dirty
+		}),
 	)
 
 	js.Global.Set("mpm", mpm)
@@ -49,13 +55,13 @@ func main() {
 type MainPageModel struct {
 	*js.Object
 
-	VM       *hvue.VM           `js:"VM"`
-	Filter   string             `js:"Filter"`
-	Polesite *polesite.Polesite `js:"Polesite"`
-	//Poles              []*polesite.Pole    `js:"Poles"`
+	VM                 *hvue.VM            `js:"VM"`
+	Filter             string              `js:"Filter"`
+	Polesite           *polesite.Polesite  `js:"Polesite"`
 	PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
+	Reference          string              `js:"Reference"`
 	Dirty              bool                `js:"Dirty"`
 }
 
@@ -64,15 +70,15 @@ func NewMainPageModel() *MainPageModel {
 	mpm.VM = nil
 	mpm.Filter = ""
 	mpm.Polesite = polesite.NewPolesite()
-	//mpm.Poles = []*polesite.Pole{}
 	mpm.PolesGroup = nil
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
+	mpm.Reference = ""
 	mpm.Dirty = false
 	return mpm
 }
 
-func (mpm *MainPageModel) LoadPole() {
+func (mpm *MainPageModel) LoadPolesite() {
 	opsid := tools.GetURLSearchParam("psid")
 	if opsid == nil {
 		print("psid undefined")
@@ -83,6 +89,11 @@ func (mpm *MainPageModel) LoadPole() {
 		return
 	}
 	go mpm.callGetPolesite(opsid.Int())
+}
+
+func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
+	mpm = &MainPageModel{Object: vm.Object}
+	go mpm.callUpdatePolesite(mpm.Polesite)
 }
 
 func (mpm *MainPageModel) PreventLeave() bool {
@@ -141,7 +152,6 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 			pm := polemap.PoleMarkerFromJS(l.Object)
 			pm.SetOpacity(0.50)
 		})
-		//mpm.CenterMapOnPoles()
 		return
 	}
 
@@ -211,4 +221,23 @@ func (mpm *MainPageModel) callGetPolesite(psid int) {
 		return
 	}
 	mpm.Polesite = polesite.PolesiteFromJS(req.Response)
+	mpm.Reference = json.Stringify(req.Response)
+}
+
+func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite) {
+	//defer func() {}()
+	req := xhr.NewRequest("PUT", "/api/polesites/"+strconv.Itoa(ups.Id))
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(json.Stringify(ups))
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	message.SuccesStr(mpm.VM, "Chantier sauvegardé")
+	mpm.Reference = json.Stringify(ups)
 }
