@@ -224,7 +224,7 @@ func (m *MainPageModel) ShowAdmin() {
 }
 
 func (m *MainPageModel) ShowPoleSites() {
-	js.Global.Get("window").Call("open", "polesites.html")
+	js.Global.Get("window").Call("open", "polesites.html?psid=0")
 }
 
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {

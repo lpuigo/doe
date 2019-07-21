@@ -64,7 +64,6 @@ func newPoleMap(vm *hvue.VM) *PoleMap {
 	pm := PoleMapFromJS(vm.Object)
 	pm.LeafletMap.VM = vm
 	pm.LeafletMap.Init()
-	pm.LeafletMap.SetView(leaflet.NewLatLng(48, 6), 5)
 	pm.Poles = nil
 	//pm.PoleOverlays = make(map[string]*leaflet.Layer)
 	return pm
@@ -87,7 +86,6 @@ func (pm *PoleMap) AddPoles(poles []*polesite.Pole, name string) *leaflet.LayerG
 		mOption.Opacity = 0.5
 		mOption.Title = pole.Ref
 
-		//poleMarker := leaflet.NewMarker(pole.Lat, pole.Long, mOption)
 		poleMarker := NewPoleMarker(mOption, pole)
 		//poleMarker.BindPopup(pole.Ref)
 		poleMarker.UpdateFromState()
@@ -113,10 +111,12 @@ func (pm *PoleMap) AddPoles(poles []*polesite.Pole, name string) *leaflet.LayerG
 
 func (pm *PoleMap) CenterOnPoles() {
 	clat, clong, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(pm.Poles)
+	pm.LeafletMap.Map.Stop()
 	pm.LeafletMap.Map.SetView(leaflet.NewLatLng(clat, clong), 12)
 	pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minlat, minlong), leaflet.NewLatLng(maxlat, maxlong))
 }
 
 func (pm *PoleMap) CenterOn(lat, long float64, zoom int) {
+	pm.LeafletMap.Map.Stop()
 	pm.LeafletMap.Map.SetView(leaflet.NewLatLng(lat, long), zoom)
 }

@@ -67,7 +67,9 @@ func (llm *LeafletMap) Init() {
 
 	llm.ControlLayers = leaflet.NewControlLayers(baseMaps, js.M{})
 	llm.ControlLayers.AddTo(llm.Map)
-	llm.SetView(leaflet.NewLatLng(0, 0), 3)
+	//llm.SetView(leaflet.NewLatLng(0, 0), 3)
+	llm.SetView(leaflet.NewLatLng(48, 5), 6)
+
 }
 
 func (llm *LeafletMap) SetView(center *leaflet.LatLng, zoom int) {

@@ -7,7 +7,10 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polemap"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
+	"honnef.co/go/js/xhr"
+	"strconv"
 	"strings"
 )
 
@@ -24,15 +27,20 @@ func main() {
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
-			mpm.Poles = []*polesite.Pole{}
+			//mpm.Poles = []*polesite.Pole{}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
-			go mpm.LoadPole()
+			mpm.LoadPole()
 		}),
-		//hvue.Computed("IsPoleSelected", func(vm *hvue.VM) interface{} {
-		//	mpm := &MainPageModel{Object: vm.Object}
-		//	print("IsPoleSelected", mpm.SelectedPoleMarker)
-		//	return mpm.SelectedPoleMarker != js.Undefined
-		//}),
+		hvue.Computed("Title", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			if mpm.Polesite.Object == js.Undefined {
+				return ""
+			}
+			if tools.Empty(mpm.Polesite.Client) && tools.Empty(mpm.Polesite.Ref) {
+				return ""
+			}
+			return mpm.Polesite.Client + " / " + mpm.Polesite.Ref
+		}),
 	)
 
 	js.Global.Set("mpm", mpm)
@@ -41,9 +49,10 @@ func main() {
 type MainPageModel struct {
 	*js.Object
 
-	VM                 *hvue.VM            `js:"VM"`
-	Filter             string              `js:"Filter"`
-	Poles              []*polesite.Pole    `js:"Poles"`
+	VM       *hvue.VM           `js:"VM"`
+	Filter   string             `js:"Filter"`
+	Polesite *polesite.Polesite `js:"Polesite"`
+	//Poles              []*polesite.Pole    `js:"Poles"`
 	PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
@@ -54,7 +63,8 @@ func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
 	mpm.Filter = ""
-	mpm.Poles = []*polesite.Pole{}
+	mpm.Polesite = polesite.NewPolesite()
+	//mpm.Poles = []*polesite.Pole{}
 	mpm.PolesGroup = nil
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
@@ -63,8 +73,16 @@ func NewMainPageModel() *MainPageModel {
 }
 
 func (mpm *MainPageModel) LoadPole() {
-	mpm.Poles = polesite.GenPoles(polesite.Poles)
-	mpm.UpdateMap()
+	opsid := tools.GetURLSearchParam("psid")
+	if opsid == nil {
+		print("psid undefined")
+		return
+	}
+	if opsid.String() == "" {
+		print("psid empty")
+		return
+	}
+	go mpm.callGetPolesite(opsid.Int())
 }
 
 func (mpm *MainPageModel) PreventLeave() bool {
@@ -74,7 +92,7 @@ func (mpm *MainPageModel) PreventLeave() bool {
 // UpdateMap updates current Poles Arrays in PoleMap component
 func (mpm *MainPageModel) UpdateMap() {
 	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	mpm.PolesGroup = pm.AddPoles(mpm.Poles, "Poteaux")
+	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles, "Poteaux")
 }
 
 // CenterMapOnPoles centers PoleMap component to show all poles
@@ -164,11 +182,33 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 			pm.SetOpacity(0.80)
 			found = true
 		} else {
-			pm.SetOpacity(0.10)
+			pm.SetOpacity(0.20)
 		}
 	})
 	if found {
 		pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
 		pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minLat, minLong), leaflet.NewLatLng(maxLat, maxLong))
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WS call Methods
+
+func (mpm *MainPageModel) callGetPolesite(psid int) {
+	req := xhr.NewRequest("GET", "/api/polesites/"+strconv.Itoa(psid))
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	defer func() {
+		mpm.UpdateMap()
+	}()
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	mpm.Polesite = polesite.PolesiteFromJS(req.Response)
 }

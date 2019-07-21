@@ -22,7 +22,7 @@
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
                 <el-row :gutter="20" type="flex" align="middle">
-                    <h2 class="content">EWIN Services Poteaux</h2>
+                    <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span></h2>
                 </el-row>
                 <span></span>
                 <span></span>
@@ -35,7 +35,8 @@
                     <el-input prefix-icon="fas fa-search-location"
                               v-model="Filter" clearable size="mini"
                               @input="ApplyFilter"
-                              @clear="ApplyFilter"></el-input>
+                              @clear="ApplyFilter">
+                    </el-input>
                 </el-row>
                 <span></span>
 
@@ -57,7 +58,7 @@
             <el-main style="height:100%; padding: 0px 0px;">
                 <pole-map
                         ref="MapEwin"
-                        :poles="Poles"
+                        :poles="Polesite.Poles"
                         @marker-click="MarkerClick"
                 ></pole-map>
             </el-main>
@@ -68,7 +69,7 @@
 
 
 <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
-<script src="/Assets/vue/2.5.17/vue.js"></script>
+<script src="/Assets/vue/2.5.17/vue.min.js"></script>
 <script src="https://unpkg.com/element-ui@2.10.1/lib/index.js"></script>
 <!--<script src="/Assets/element-ui/2.6.1/lib/index.js"></script>-->
 <script src="https://unpkg.com/element-ui@2.10.1/lib/umd/locale/fr.js"></script>

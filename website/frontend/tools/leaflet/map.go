@@ -44,6 +44,11 @@ func (m *Map) FitBounds(min, max *LatLng) {
 	m.Object.Call("fitBounds", NewLatLngBounds(min, max))
 }
 
+// Stop stops the currently running panTo or flyTo animation, if any.
+func (m *Map) Stop() {
+	m.Object.Call("stop")
+}
+
 // CreatePane creates a new Pane with the given name:
 // http://leafletjs.com/reference-1.0.2.html#map-createpane
 func (m *Map) CreatePane(name string) *Pane {

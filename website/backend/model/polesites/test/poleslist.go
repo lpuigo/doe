@@ -1,6 +1,23 @@
-package polesite
+package test
 
 import "github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
+
+type BePole struct {
+	Ref   string
+	City  string
+	Lat   float64
+	Long  float64
+	State string
+
+	//DtRef string
+	//DictRef string
+	//
+	//Height int
+	//
+	//Product map[string]int
+	//
+	//DictInfo map[string]string
+}
 
 var Poles = []BePole{
 	//{"MF22A01", "Maizières-lès-Vic", 48.68398083, 6.767729722,poleconst.StateToDo},

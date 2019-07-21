@@ -53,11 +53,11 @@ func GetCenterAndBounds(poles []*Pole) (clat, clong, blat1, blong1, blat2, blong
 	return
 }
 
-func GenPoles(poles []BePole) []*Pole {
-	res := make([]*Pole, len(poles))
-
-	for i, pole := range poles {
-		res[i] = NewPole(pole)
-	}
-	return res
-}
+//func GenPoles(poles []BePole) []*Pole {
+//	res := make([]*Pole, len(poles))
+//
+//	for i, pole := range poles {
+//		res[i] = NewPole(pole)
+//	}
+//	return res
+//}

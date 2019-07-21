@@ -23,3 +23,8 @@ func GetLocationQueryString() string {
 	location := js.Global.Get("location")
 	return location.Get("search").String()
 }
+
+func GetURLSearchParam(param string) *js.Object {
+	usp := js.Global.Get("URLSearchParams").New(GetLocationQueryString())
+	return usp.Call("get", param)
+}
