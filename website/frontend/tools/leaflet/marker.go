@@ -51,6 +51,16 @@ func (m *Marker) SetOpacity(op float64) {
 	m.Object.Get("options").Set("opacity", op)
 }
 
+// SetLatLng returns the current geographical position of the marker.
+func (m *Marker) GetLatLng() *LatLng {
+	return LatLngFromJS(m.Call("getLatLng"))
+}
+
+// SetLatLng changes the marker geographical position to the given point.
+func (m *Marker) SetLatLng(latlng *LatLng) {
+	m.Call("setLatLng", latlng)
+}
+
 type MarkerOptions struct {
 	*js.Object
 	Icon                *Icon   `js:"icon"`

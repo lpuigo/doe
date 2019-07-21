@@ -27,6 +27,13 @@ func NewPoleMarker(option *leaflet.MarkerOptions, pole *polesite.Pole) *PoleMark
 	return np
 }
 
+func DefaultPoleMarker() *PoleMarker {
+	opt := leaflet.DefaultMarkerOption()
+	np := &PoleMarker{Marker: *leaflet.NewMarker(0.0, 0.0, opt)}
+	np.Pole = polesite.NewPole()
+	return np
+}
+
 func (pm *PoleMarker) StartEditMode() {
 	pm.SetOpacity(MarkerOpacitySelected)
 	pm.SetDraggable(true)
@@ -52,6 +59,9 @@ func (pm *PoleMarker) UpdateFromState() {
 	case poleconst.StateNotSubmitted:
 		html = pmHtmlPin
 		class = ""
+	case poleconst.StateNoGo:
+		html = pmHtmlPlain
+		class = "red"
 	case poleconst.StateToDo:
 		html = pmHtmlPlain
 		class = "blue"
@@ -67,6 +77,9 @@ func (pm *PoleMarker) UpdateFromState() {
 	case poleconst.StateCancelled:
 		html = pmHtmlPlain
 		class = ""
+	default:
+		html = pmHtmlPin
+		class = "red"
 	}
 
 	pm.UpdateDivIconClassname(class)
@@ -75,4 +88,9 @@ func (pm *PoleMarker) UpdateFromState() {
 
 func (pm *PoleMarker) UpdateTitle() {
 	pm.Marker.UpdateToolTip(pm.Pole.Ref)
+}
+
+func (pm *PoleMarker) SetLatLng(latlng *leaflet.LatLng) {
+	pm.Pole.Lat, pm.Pole.Long = latlng.ToFloats()
+	pm.Marker.SetLatLng(latlng)
 }

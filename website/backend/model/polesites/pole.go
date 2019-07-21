@@ -16,6 +16,7 @@ type Pole struct {
 	DtRef    string
 	DictRef  string
 	Height   int
+	Material string
 	Product  map[string]int
 	DictInfo map[string]string
 }
@@ -28,6 +29,7 @@ func (p *Pole) SearchString() string {
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "DtRef", strings.ToUpper(p.DtRef))
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "DictRef", strings.ToUpper(p.DictRef))
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "Height", strconv.Itoa(p.Height)+"M")
+	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "Material", strings.ToUpper(p.Material))
 	for key, _ := range p.Product {
 		fmt.Fprintf(&searchBuilder, "poleProduct:%s,", strings.ToUpper(key))
 	}

@@ -7,6 +7,10 @@ type LatLng struct {
 	*js.Object
 }
 
+func LatLngFromJS(o *js.Object) *LatLng {
+	return &LatLng{Object: o}
+}
+
 // NewLatLng returns a new LatLng object.
 func NewLatLng(lat, lng float64) *LatLng {
 	return &LatLng{

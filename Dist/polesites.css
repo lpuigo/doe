@@ -7,82 +7,18 @@ html, body {
     padding: 0;
 }
 
-
-/*!* Track *!*/
-/*::-webkit-scrollbar-track {*/
-/*    background: #f1f1f1;*/
-/*}*/
-
-/*!* Handle *!*/
-/*::-webkit-scrollbar-thumb {*/
-/*    background: #888;*/
-/*    border-radius: 5px;*/
-/*}*/
-
-/*!* Handle on hover *!*/
-/*::-webkit-scrollbar-thumb:hover {*/
-/*    background: #555;*/
-/*}*/
-
-
-
-/* =====================================================================================================================
-   === Menu Header style
- */
-/*.ewin {*/
-/*    background: #2e4e8a;*/
-/*    color: white;*/
-/*}*/
-
-/*.ewin_light {*/
-/*    background: #3877be;*/
-/*    color: white;*/
-/*}*/
-
-/*.ewin_xlight {*/
-/*    background: #73b6e6;*/
-/*    color: white;*/
-/*}*/
-
-/*.aside-menu-container {*/
-/*    padding: 5px;*/
-/*}*/
-
-/*.header-menu-container {*/
-/*    height: 100%;*/
-/*    display: flex;*/
-/*    justify-content: space-between;*/
-/*    align-items: center;*/
-/*}*/
-
-/*.header-menu-container .content {*/
-/*    margin: 0px 5px;*/
-/*}*/
-
-/*.header-menu-container .icon {*/
-/*    padding: 4px 10px;*/
-/*}*/
-
-/*.el-row.spaced {*/
-/*    margin-bottom: 5px;*/
-/*}*/
-
-/*.icon--big {*/
-/*    font-size: 1.5em*/
-/*}*/
-
-/*.icon--right {*/
-/*    margin-left: .3em*/
-/*}*/
-
-/*.icon--left {*/
-/*    margin-right: .3em*/
-/*}*/
-
-
 /* =====================================================================================================================
    === Map Marker Style
  */
+
+.el-row.spaced {
+    margin-bottom: 5px;
+}
+
+.el-row.doublespaced {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
 
 .blue {
     color: #0060ff;

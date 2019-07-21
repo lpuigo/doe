@@ -7,12 +7,19 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
+	"strconv"
+	"strings"
 )
 
 const template string = `<div>
-    <h1>
-        Poteau: {{editedpolemarker.Pole.Ref}}
-    </h1>
+	<div class="header-menu-container">
+		<h1>
+			Poteau: {{editedpolemarker.Pole.Ref}}
+		</h1>
+		<el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
+	</div>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Référence:</el-col>
         <el-col :span="18">
@@ -24,13 +31,8 @@ const template string = `<div>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Lat / Long:</el-col>
-        <el-col :span="9">
-            <el-input-number v-model="editedpolemarker.Pole.Lat" size="mini" :precision="8" :controls="false" style="width: 100%"
-            ></el-input-number>
-        </el-col>
-        <el-col :span="9">
-            <el-input-number v-model="editedpolemarker.Pole.Long" size="mini" :precision="8" :controls="false" style="width: 100%"
-            ></el-input-number>
+        <el-col :span="18">
+            <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
         </el-col>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -42,6 +44,78 @@ const template string = `<div>
         </el-col>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Adresse:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Adresse"
+                      v-model="editedpolemarker.Pole.Address" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">Matériau:</el-col>
+        <el-col :span="18">
+            <el-select v-model="editedpolemarker.Pole.Material" filterable size="mini" style="width: 100%"
+                       @clear=""
+            >
+                <el-option
+                        v-for="item in GetMaterials()"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                ></el-option>
+            </el-select>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Hauteur:</el-col>
+        <el-col :span="18">
+            <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="7" :max="12" style="width: 100%"
+            ></el-input-number>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">DT:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Référence DT"
+                      v-model="editedpolemarker.Pole.DtRef" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">DICT:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Référence DICT"
+                      v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">Produits:</el-col>
+        <el-col :span="18">
+            <el-select v-model="Product" filterable size="mini" style="width: 100%"
+                       @clear=""
+                       @change="UpdateProduct()"
+            >
+                <el-option
+                        v-for="item in GetProducts()"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                ></el-option>
+            </el-select>
+        </el-col>
+    </el-row>
+    <el-row v-for="(nb, prd) in editedpolemarker.Pole.Product" :key="prd" :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="3" :offset="3">
+			<el-button type="danger" icon="el-icon-delete" plain circle size="mini" @click="RemoveProduct(prd)"></el-button>
+		</el-col>
+        <el-col :span="6">{{prd}}</el-col>
+        <el-col :span="12">
+            <el-input-number v-model="editedpolemarker.Pole.Product[prd]" size="mini" controls-position="right" :precision="0" :min="0" :max="1" style="width: 100%"
+            ></el-input-number>
+        </el-col>
+    </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6">Status:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
@@ -74,7 +148,20 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleEditModel(vm)
 		}),
+		//hvue.Mounted(func(vm *hvue.VM) {
+		//	pem := PoleEditModelFromJS(vm.Object)
+		//	pem.Editedlatlong = strconv.FormatFloat(pem.EditedPoleMarker.Pole.Lat, 'f', 8, 64) + ", " +
+		//		strconv.FormatFloat(pem.EditedPoleMarker.Pole.Long, 'f', 8, 64)
+		//}),
 		hvue.MethodsOf(&PoleEditModel{}),
+		hvue.Computed(
+			"editedlatlong",
+			func(vm *hvue.VM) interface{} {
+				pem := PoleEditModelFromJS(vm.Object)
+				return strconv.FormatFloat(pem.EditedPoleMarker.Pole.Lat, 'f', 8, 64) +
+					", " +
+					strconv.FormatFloat(pem.EditedPoleMarker.Pole.Long, 'f', 8, 64)
+			}),
 	}
 }
 
@@ -84,6 +171,7 @@ func componentOptions() []hvue.ComponentOption {
 type PoleEditModel struct {
 	*js.Object
 	EditedPoleMarker *polemap.PoleMarker `js:"editedpolemarker"`
+	Product          string              `js:"Product"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -94,8 +182,9 @@ func PoleEditModelFromJS(obj *js.Object) *PoleEditModel {
 
 func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem := &PoleEditModel{Object: tools.O()}
+	pem.Product = ""
 	pem.VM = vm
-	pem.EditedPoleMarker = nil
+	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
 }
 
@@ -109,8 +198,63 @@ func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem.EditedPoleMarker.Refresh()
 }
 
+func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {
+	return polesite.GetMaterialsValueLabel()
+}
+
+func (pem *PoleEditModel) GetProducts() []*elements.ValueLabel {
+	return polesite.GetProductsValueLabel()
+}
+
+func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.Pole.Get("Product").Set(pem.Product, 1)
+	pem.Product = ""
+}
+
+func (pem *PoleEditModel) RemoveProduct(vm *hvue.VM, prd string) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.Pole.Get("Product").Set(prd, 0)
+	pem.EditedPoleMarker.Pole.Get("Product").Delete(prd)
+}
+
 func (pem *PoleEditModel) UpdateTooltip(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	pem.EditedPoleMarker.UpdateTitle()
 	pem.EditedPoleMarker.Refresh()
+}
+
+func (pem *PoleEditModel) UpdatePoleLatLong(vm *hvue.VM, value string) {
+	pem = PoleEditModelFromJS(vm.Object)
+	lls := strings.Split(value, ",")
+
+	errmsg := func() {
+		msg := "impossible de lire la latitude/longitude: '" + value + "'\n\n"
+		msg += "format attendu: 12.123456, 12.123456"
+		message.ErrorStr(pem.VM, msg, true)
+	}
+
+	if len(lls) < 2 {
+		errmsg()
+		return
+	}
+	slat := strings.Trim(lls[0], " ")
+	slong := strings.Trim(lls[1], " ")
+	lat, err := strconv.ParseFloat(slat, 64)
+	if err != nil {
+		errmsg()
+		return
+	}
+	long, err := strconv.ParseFloat(slong, 64)
+	if err != nil {
+		errmsg()
+		return
+	}
+	pem.EditedPoleMarker.SetLatLng(leaflet.NewLatLng(lat, long))
+	pem.EditedPoleMarker.CenterOnMap(20)
+}
+
+func (pem *PoleEditModel) CenterOnEdited(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.CenterOnMap(20)
 }

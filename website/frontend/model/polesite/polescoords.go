@@ -8,11 +8,29 @@ import (
 func GetStatesValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted),
+		elements.NewValueLabel(poleconst.StateNoGo, poleconst.LabelNoGo),
 		elements.NewValueLabel(poleconst.StateToDo, poleconst.LabelToDo),
 		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
 		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
 		elements.NewValueLabel(poleconst.StateDone, poleconst.LabelDone),
 		elements.NewValueLabel(poleconst.StateCancelled, poleconst.LabelCancelled),
+	}
+}
+
+func GetMaterialsValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.MaterialWood, poleconst.MaterialWood),
+		elements.NewValueLabel(poleconst.MaterialMetal, poleconst.MaterialMetal),
+		elements.NewValueLabel(poleconst.MaterialComp, poleconst.MaterialComp),
+	}
+}
+
+func GetProductsValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
+		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
+		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
+		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
 	}
 }
 
@@ -52,12 +70,3 @@ func GetCenterAndBounds(poles []*Pole) (clat, clong, blat1, blong1, blat2, blong
 	clong /= nb
 	return
 }
-
-//func GenPoles(poles []BePole) []*Pole {
-//	res := make([]*Pole, len(poles))
-//
-//	for i, pole := range poles {
-//		res[i] = NewPole(pole)
-//	}
-//	return res
-//}
