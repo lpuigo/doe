@@ -47,7 +47,10 @@ func (cp *ClientsPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create client from '%s': %v", filepath.Base(file), err)
 		}
-		cp.persister.Load(ur)
+		err = cp.persister.Load(ur)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		cp.clients = append(cp.clients, ur)
 	}
 	return nil

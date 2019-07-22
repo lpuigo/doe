@@ -49,7 +49,10 @@ func (psp *PoleSitesPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not instantiate polesite from '%s': %v", filepath.Base(file), err)
 		}
-		psp.persister.Load(psr)
+		err = psp.persister.Load(psr)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		psp.polesites = append(psp.polesites, psr)
 	}
 	return nil

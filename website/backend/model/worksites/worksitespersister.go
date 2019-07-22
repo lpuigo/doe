@@ -54,7 +54,10 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create worksite from '%s': %v", filepath.Base(file), err)
 		}
-		wsp.persister.Load(wsr)
+		err = wsp.persister.Load(wsr)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		wsp.workSites = append(wsp.workSites, wsr)
 	}
 	return nil

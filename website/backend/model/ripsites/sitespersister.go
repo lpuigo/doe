@@ -54,7 +54,10 @@ func (sp *SitesPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create site from '%s': %v", filepath.Base(file), err)
 		}
-		sp.persister.Load(wsr)
+		err = sp.persister.Load(wsr)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		sp.sites = append(sp.sites, wsr)
 	}
 	return nil

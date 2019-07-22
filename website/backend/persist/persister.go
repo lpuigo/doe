@@ -105,9 +105,9 @@ func (p *Persister) Add(r Recorder) int {
 }
 
 // Load adds the given Record to the Persister
-func (p *Persister) Load(r Recorder) {
+func (p *Persister) Load(r Recorder) error {
 	if _, ok := p.records[r.GetId()]; ok {
-		panic(fmt.Sprintf("persister already contains given record with GetId %d", r.GetId()))
+		return fmt.Errorf("persister already contains a record with GetId %d", r.GetId())
 	}
 	p.mut.Lock()
 	defer p.mut.Unlock()
@@ -115,6 +115,7 @@ func (p *Persister) Load(r Recorder) {
 	if p.nextId <= r.GetId() {
 		p.nextId = r.GetId() + 1
 	}
+	return nil
 }
 
 // markDirty marks the given recorder as dirty and triggers the persistence mechanism

@@ -46,7 +46,10 @@ func (up *UsersPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create user from '%s': %v", filepath.Base(file), err)
 		}
-		up.persister.Load(ur)
+		err = up.persister.Load(ur)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		up.users = append(up.users, ur)
 	}
 	return nil

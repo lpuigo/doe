@@ -52,7 +52,10 @@ func (c *Container) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create record from '%s': %v", filepath.Base(file), err)
 		}
-		c.persister.Load(nr)
+		err = c.persister.Load(nr)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		c.records = append(c.records, nr)
 	}
 	return nil
