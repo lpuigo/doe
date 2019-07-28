@@ -2,10 +2,12 @@ package polesites
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites/test"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
-	"os"
-	"testing"
 )
 
 func TestPoleSiteEncode(t *testing.T) {
@@ -88,11 +90,11 @@ func TestPoleSiteEncode(t *testing.T) {
 			DictRef:  "",
 			Height:   8,
 			Material: poleconst.MaterialWood,
-			Product:  map[string]int{},
-			DictInfo: map[string]string{},
+			Product:  []string{},
+			DictInfo: "",
 		}
 		if pole_Enrobe[p.Ref] {
-			p.Product[poleconst.ProductCoated] = 1
+			p.Product = append(p.Product, poleconst.ProductCoated)
 		}
 		if pole_9m[p.Ref] {
 			p.Height = 9
@@ -101,4 +103,51 @@ func TestPoleSiteEncode(t *testing.T) {
 	}
 
 	json.NewEncoder(os.Stdout).Encode(ps)
+}
+
+func LoadPolesiteFromJSON(t *testing.T, jsonFile string) *PoleSite {
+	psf, err := os.Open(jsonFile)
+	if err != nil {
+		t.Fatalf("could not open file '%s':%s", jsonFile, err.Error())
+	}
+	defer psf.Close()
+	var ps PoleSite
+	err = json.NewDecoder(psf).Decode(&ps)
+	if err != nil {
+		t.Fatalf("could not unmarshall Polesite file '%s':%s", jsonFile, err.Error())
+	}
+
+	return &ps
+}
+
+func Test_ToXLS(t *testing.T) {
+	psfile := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites\000000.json`
+	ps := LoadPolesiteFromJSON(t, psfile)
+
+	resultPsFile := filepath.Join("test", ps.Ref+".xlsx")
+	oxf, err := os.Create(resultPsFile)
+	if err != nil {
+		t.Fatalf("could not create result xlsx file '%s':%s", resultPsFile, err.Error())
+	}
+
+	err = ToXLS(oxf, ps)
+	if err != nil {
+		t.Fatalf("could not save xlsx file '%s':%s", resultPsFile, err.Error())
+	}
+}
+
+func TestPolesiteFromXLS(t *testing.T) {
+	psXlsfile := `test/Rechicourt.xlsx`
+	xf, err := os.Open(psXlsfile)
+	if err != nil {
+		t.Fatalf("could not open file: %s", err.Error())
+	}
+
+	ps, err := FromXLS(xf)
+	if err != nil {
+		t.Fatalf("FromXLS return unexpected: %s", err.Error())
+	}
+	je := json.NewEncoder(os.Stdout)
+	je.SetIndent("", "\t")
+	je.Encode(ps)
 }

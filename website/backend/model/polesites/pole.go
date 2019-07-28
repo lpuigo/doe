@@ -13,12 +13,14 @@ type Pole struct {
 	Lat      float64
 	Long     float64
 	State    string
+	Date     string
+	Actors   []string
 	DtRef    string
 	DictRef  string
+	DictInfo string
 	Height   int
 	Material string
-	Product  map[string]int
-	DictInfo map[string]string
+	Product  []string
 }
 
 func (p *Pole) SearchString() string {
@@ -30,11 +32,12 @@ func (p *Pole) SearchString() string {
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "DictRef", strings.ToUpper(p.DictRef))
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "Height", strconv.Itoa(p.Height)+"M")
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "Material", strings.ToUpper(p.Material))
-	for key, _ := range p.Product {
+	for _, key := range p.Product {
 		fmt.Fprintf(&searchBuilder, "poleProduct:%s,", strings.ToUpper(key))
 	}
-	for key, value := range p.DictInfo {
-		fmt.Fprintf(&searchBuilder, "poleDict%s:%s,", strings.ToUpper(key), strings.ToUpper(value))
+	for _, actor := range p.Actors {
+		fmt.Fprintf(&searchBuilder, "poleActor:%s,", strings.ToUpper(actor))
 	}
+	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "DictInfo", strings.ToUpper(p.DictInfo))
 	return searchBuilder.String()
 }
