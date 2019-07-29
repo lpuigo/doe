@@ -148,6 +148,6 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
 	je := json.NewEncoder(os.Stdout)
-	je.SetIndent("", "\t")
+	//je.SetIndent("", "\t")
 	je.Encode(ps)
 }

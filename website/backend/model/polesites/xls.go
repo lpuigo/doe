@@ -54,15 +54,20 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 6), "State")
 	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 7), "Actors")
 	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 8), "Date")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 9), "DtRef")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 10), "DictRef")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 11), "DictInfo")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 12), "Height")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 13), "Material")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 14), poleconst.ProductCoated)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 15), poleconst.ProductMoise)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 16), poleconst.ProductReplace)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 17), poleconst.ProductRemove)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 9), "AttachmentDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 10), "AttachmentDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 11), "DtRef")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 12), "DictRef")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 13), "DictInfo")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 14), "Height")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 15), "Material")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 16), "AspiDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 17), "Kizeo")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 18), "Comment")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 19), poleconst.ProductCoated)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 20), poleconst.ProductMoise)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 21), poleconst.ProductReplace)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 22), poleconst.ProductRemove)
 
 	for i, pole := range ps.Poles {
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 0), "pole")
@@ -74,19 +79,24 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 6), pole.State)
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 7), "") // Actor ("Pierre, Paul, Jacques")
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 8), "") // Date
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 9), pole.DtRef)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 10), pole.DictRef)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 11), pole.DictInfo)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 12), pole.Height)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 13), pole.Material)
-		products := map[string]int{}
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 9), pole.AttachmentDate)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 10), pole.Sticker)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 11), pole.DtRef)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 12), pole.DictRef)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 13), pole.DictInfo)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 14), pole.Height)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 15), pole.Material)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 16), pole.AspiDate)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 17), pole.Kizeo)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 18), pole.Comment)
+		products := map[string]string{}
 		for _, product := range pole.Product {
-			products[product] = 1
+			products[product] = "1"
 		}
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 14), products[poleconst.ProductCoated])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 15), products[poleconst.ProductMoise])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 16), products[poleconst.ProductReplace])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 17), products[poleconst.ProductRemove])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 19), products[poleconst.ProductCoated])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 20), products[poleconst.ProductMoise])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 21), products[poleconst.ProductReplace])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 22), products[poleconst.ProductRemove])
 	}
 
 	err := xf.Write(w)
@@ -130,7 +140,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return nil, err
 	}
 	productKeys := map[int]string{}
-	for _, col := range []int{14, 15, 16, 17} {
+	for _, col := range []int{19, 20, 21, 22} {
 		productKeys[col] = xf.GetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, col))
 	}
 	if err := checkValue(xf, sheetName, doctemplate.RcToAxis(rowPoleInfo, 0), "pole"); err != nil {
@@ -153,20 +163,21 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if err != nil {
 			return nil, fmt.Errorf("could not parse longitude '%s' row %d: %s", row[5], line+1, err.Error())
 		}
-		height, err := strconv.Atoi(row[12])
+		height, err := strconv.Atoi(row[14])
 		if err != nil {
 			return nil, fmt.Errorf("could not parse height '%s' row %d: %s", row[12], line+1, err.Error())
 		}
-		pdate := ""
-		if row[8] != "" {
-			tdate, err := time.Parse("01-02-06", row[8])
-			if err != nil {
-				tdate, err = time.Parse("1/2/06 15:04", row[8])
-				if err != nil {
-					return nil, fmt.Errorf("could not parse date '%s' row %d: %s", row[8], line+1, err.Error())
-				}
-			}
-			pdate = date.Date(tdate).String()
+		pdate, err := parseDate(row[8], line)
+		if err != nil {
+			return nil, err
+		}
+		adate, err := parseDate(row[9], line)
+		if err != nil {
+			return nil, err
+		}
+		aspdate, err := parseDate(row[16], line)
+		if err != nil {
+			return nil, err
 		}
 		actors := []string{}
 		if row[7] != "" {
@@ -175,27 +186,33 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 				actors[i] = strings.Trim(actor, " ")
 			}
 		}
+		products := []string{}
+		for _, col := range []int{19, 20, 21, 22} {
+			if row[col] == "1" {
+				products = append(products, productKeys[col])
+			}
+		}
 
 		pole := &Pole{
-			Ref:      row[1],
-			City:     row[2],
-			Address:  row[3],
-			Lat:      lat,
-			Long:     long,
-			State:    row[6],
-			Date:     pdate,
-			Actors:   actors,
-			DtRef:    row[9],
-			DictRef:  row[10],
-			DictInfo: row[11],
-			Height:   height,     // row 12
-			Material: row[13],    // row 13
-			Product:  []string{}, // row 10
-		}
-		for _, col := range []int{14, 15, 16, 17} {
-			if row[col] == "1" {
-				pole.Product = append(pole.Product, productKeys[col])
-			}
+			Ref:            row[1],   // row 1
+			City:           row[2],   // row 2
+			Address:        row[3],   // row 3
+			Lat:            lat,      // row 4
+			Long:           long,     // row 5
+			State:          row[6],   // row 6
+			Actors:         actors,   // row 7
+			Date:           pdate,    // row 8
+			AttachmentDate: adate,    // row 9
+			Sticker:        row[10],  // row 10
+			DtRef:          row[11],  // row 11
+			DictRef:        row[12],  // row 12
+			DictInfo:       row[13],  // row 13
+			Height:         height,   // row 14
+			Material:       row[15],  // row 15
+			AspiDate:       aspdate,  // row 16
+			Kizeo:          row[17],  // row 17
+			Comment:        row[18],  // row 18
+			Product:        products, // row 19-22
 		}
 
 		ps.Poles = append(ps.Poles, pole)
@@ -241,4 +258,19 @@ func getCellDate(xf *excelize.File, sheetname, axis string) (string, error) {
 		}
 	}
 	return date.Date(foundDate).String(), nil
+}
+
+func parseDate(source string, line int) (string, error) {
+	pdate := ""
+	if source != "" {
+		tdate, err := time.Parse("01-02-06", source)
+		if err != nil {
+			tdate, err = time.Parse("1/2/06 15:04", source)
+			if err != nil {
+				return "", fmt.Errorf("could not parse date '%s' row %d: %s", source, line+1, err.Error())
+			}
+		}
+		pdate = date.Date(tdate).String()
+	}
+	return pdate, nil
 }

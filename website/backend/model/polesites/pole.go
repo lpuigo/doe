@@ -7,20 +7,25 @@ import (
 )
 
 type Pole struct {
-	Ref      string
-	City     string
-	Address  string
-	Lat      float64
-	Long     float64
-	State    string
-	Date     string
-	Actors   []string
-	DtRef    string
-	DictRef  string
-	DictInfo string
-	Height   int
-	Material string
-	Product  []string
+	Ref            string
+	City           string
+	Address        string
+	Sticker        string
+	Lat            float64
+	Long           float64
+	State          string
+	Date           string
+	Actors         []string
+	DtRef          string
+	DictRef        string
+	DictInfo       string
+	Height         int
+	Material       string
+	AspiDate       string
+	Kizeo          string
+	Comment        string
+	Product        []string
+	AttachmentDate string
 }
 
 func (p *Pole) SearchString() string {
@@ -39,5 +44,8 @@ func (p *Pole) SearchString() string {
 		fmt.Fprintf(&searchBuilder, "poleActor:%s,", strings.ToUpper(actor))
 	}
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "DictInfo", strings.ToUpper(p.DictInfo))
+	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "Date", strings.ToUpper(p.Date))
+	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "AspiDate", strings.ToUpper(p.AspiDate))
+	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "AttachDate", strings.ToUpper(p.AttachmentDate))
 	return searchBuilder.String()
 }
