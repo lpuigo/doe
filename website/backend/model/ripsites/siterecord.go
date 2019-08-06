@@ -44,6 +44,7 @@ func NewSiteRecordFromFile(file string) (sr *SiteRecord, err error) {
 	sr, err = NewSiteRecordFrom(f)
 	if err != nil {
 		sr = nil
+		return
 	}
 	if sr.Site.UpdateDate != "" {
 		return

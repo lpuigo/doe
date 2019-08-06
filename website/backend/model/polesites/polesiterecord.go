@@ -44,6 +44,7 @@ func NewPoleSiteRecordFromFile(file string) (psr *PoleSiteRecord, err error) {
 	psr, err = NewPoleSiteRecordFrom(f)
 	if err != nil {
 		psr = nil
+		return
 	}
 	if psr.PoleSite.UpdateDate != "" {
 		return
