@@ -20,6 +20,7 @@ const template string = `<div>
 		</h1>
 		<el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
 	</div>
+    <!-- Référence -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Référence:</el-col>
         <el-col :span="18">
@@ -29,12 +30,16 @@ const template string = `<div>
             ></el-input>
         </el-col>
     </el-row>
+    
+    <!-- Lat / Long -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Lat / Long:</el-col>
         <el-col :span="18">
             <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
         </el-col>
     </el-row>
+    
+    <!-- Ville -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Ville:</el-col>
         <el-col :span="18">
@@ -43,6 +48,8 @@ const template string = `<div>
             ></el-input>
         </el-col>
     </el-row>
+
+    <!-- Adresse -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Adresse:</el-col>
         <el-col :span="18">
@@ -51,6 +58,18 @@ const template string = `<div>
             ></el-input>
         </el-col>
     </el-row>
+
+    <!-- Etiquette -->
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">Etiquette:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Etiquette"
+                      v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Matériau -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6">Matériau:</el-col>
         <el-col :span="18">
@@ -66,6 +85,8 @@ const template string = `<div>
             </el-select>
         </el-col>
     </el-row>
+
+    <!-- Hauteur -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Hauteur:</el-col>
         <el-col :span="18">
@@ -73,6 +94,8 @@ const template string = `<div>
             ></el-input-number>
         </el-col>
     </el-row>
+
+    <!-- DT DICT -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6">DT:</el-col>
         <el-col :span="18">
@@ -89,12 +112,32 @@ const template string = `<div>
             ></el-input>
         </el-col>
     </el-row>
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Info DICT:</el-col>
+        <el-col :span="18">
+            <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 4}" placeholder="Information DICT"
+                      v-model="editedpolemarker.Pole.DictInfo" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Kizeo -->
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Kizeo:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Référence Kizeo"
+                      v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Produits -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6">Produits:</el-col>
         <el-col :span="18">
-            <el-select v-model="Product" filterable size="mini" style="width: 100%"
+            <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
                        @clear=""
-                       @change="UpdateProduct()"
+                       @change=""
             >
                 <el-option
                         v-for="item in GetProducts()"
@@ -105,16 +148,8 @@ const template string = `<div>
             </el-select>
         </el-col>
     </el-row>
-    <el-row v-for="(nb, prd) in editedpolemarker.Pole.Product" :key="prd" :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="3" :offset="3">
-			<el-button type="danger" icon="el-icon-delete" plain circle size="mini" @click="RemoveProduct(prd)"></el-button>
-		</el-col>
-        <el-col :span="6">{{prd}}</el-col>
-        <el-col :span="12">
-            <el-input-number v-model="editedpolemarker.Pole.Product[prd]" size="mini" controls-position="right" :precision="0" :min="0" :max="1" style="width: 100%"
-            ></el-input-number>
-        </el-col>
-    </el-row>
+    
+    <!-- Status -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6">Status:</el-col>
         <el-col :span="18">
@@ -131,6 +166,7 @@ const template string = `<div>
             </el-select>
         </el-col>
     </el-row>
+
 </div>
 `
 
@@ -150,8 +186,6 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		//hvue.Mounted(func(vm *hvue.VM) {
 		//	pem := PoleEditModelFromJS(vm.Object)
-		//	pem.Editedlatlong = strconv.FormatFloat(pem.EditedPoleMarker.Pole.Lat, 'f', 8, 64) + ", " +
-		//		strconv.FormatFloat(pem.EditedPoleMarker.Pole.Long, 'f', 8, 64)
 		//}),
 		hvue.MethodsOf(&PoleEditModel{}),
 		hvue.Computed(

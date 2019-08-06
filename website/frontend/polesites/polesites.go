@@ -6,7 +6,9 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/poleedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polemap"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
@@ -30,7 +32,7 @@ func main() {
 			mpm := &MainPageModel{Object: vm.Object}
 			//mpm.Poles = []*polesite.Pole{}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
-			mpm.LoadPolesite()
+			mpm.LoadPolesite(false)
 		}),
 		hvue.Computed("Title", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -57,6 +59,7 @@ type MainPageModel struct {
 
 	VM                 *hvue.VM            `js:"VM"`
 	Filter             string              `js:"Filter"`
+	FilterType         string              `js:"FilterType"`
 	Polesite           *polesite.Polesite  `js:"Polesite"`
 	PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
@@ -69,6 +72,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
 	mpm.Filter = ""
+	mpm.FilterType = poleconst.FilterValueAll
 	mpm.Polesite = polesite.NewPolesite()
 	mpm.PolesGroup = nil
 	mpm.SelectedPoleMarker = nil
@@ -78,7 +82,7 @@ func NewMainPageModel() *MainPageModel {
 	return mpm
 }
 
-func (mpm *MainPageModel) LoadPolesite() {
+func (mpm *MainPageModel) LoadPolesite(update bool) {
 	opsid := tools.GetURLSearchParam("psid")
 	if opsid == nil {
 		print("psid undefined")
@@ -88,7 +92,13 @@ func (mpm *MainPageModel) LoadPolesite() {
 		print("psid empty")
 		return
 	}
-	go mpm.callGetPolesite(opsid.Int())
+
+	callback := mpm.UpdateMap
+	if update {
+		mpm.UnSelectPole()
+		callback = mpm.RefreshMap
+	}
+	go mpm.callGetPolesite(opsid.Int(), callback)
 }
 
 func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
@@ -100,10 +110,17 @@ func (mpm *MainPageModel) PreventLeave() bool {
 	return mpm.Dirty
 }
 
-// UpdateMap updates current Poles Arrays in PoleMap component
+// UpdateMap updates current Poles Array in PoleMap component
 func (mpm *MainPageModel) UpdateMap() {
 	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles, "Poteaux")
+	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles)
+	pm.CenterOnPoles()
+}
+
+// RefreshMap refreshes current Poles Array in PoleMap component
+func (mpm *MainPageModel) RefreshMap() {
+	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
+	mpm.PolesGroup = pm.RefreshPoles(mpm.Polesite.Poles, mpm.PolesGroup)
 }
 
 // CenterMapOnPoles centers PoleMap component to show all poles
@@ -131,8 +148,8 @@ func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
 
 func (mpm *MainPageModel) UnSelectPole() {
 	mpm.SelectedPoleMarker.EndEditMode()
-	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
+	//mpm.SelectedPoleMarker = nil
 }
 
 //
@@ -142,15 +159,19 @@ func (mpm *MainPageModel) SwitchPoleState(pm *polemap.PoleMarker) {
 	pm.Refresh()
 }
 
+func (mpm *MainPageModel) GetFilterType() []*elements.ValueLabel {
+	return polesite.GetFilterTypeValueLabel()
+}
+
 //
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
 	defer mpm.PolesGroup.Refresh()
 
-	if mpm.Filter == "" {
+	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
 		mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
 			pm := polemap.PoleMarkerFromJS(l.Object)
-			pm.SetOpacity(0.50)
+			pm.SetOpacity(poleconst.OpacityNormal)
 		})
 		return
 	}
@@ -182,17 +203,21 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 
 	expected := strings.ToUpper(mpm.Filter)
 	filter := func(pm *polemap.PoleMarker) bool {
-		return strings.Contains(strings.ToUpper(pm.Pole.Ref), expected)
+		sis := pm.Pole.SearchString(mpm.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
 	}
 	found := false
 	mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
 		pm := polemap.PoleMarkerFromJS(l.Object)
 		if filter(pm) {
 			minmax(pm)
-			pm.SetOpacity(0.80)
+			pm.SetOpacity(poleconst.OpacityFiltered)
 			found = true
 		} else {
-			pm.SetOpacity(0.20)
+			pm.SetOpacity(poleconst.OpacityBlur)
 		}
 	})
 	if found {
@@ -204,12 +229,12 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (mpm *MainPageModel) callGetPolesite(psid int) {
+func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 	req := xhr.NewRequest("GET", "/api/polesites/"+strconv.Itoa(psid))
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
 	defer func() {
-		mpm.UpdateMap()
+		callback()
 	}()
 	err := req.Send(nil)
 	if err != nil {

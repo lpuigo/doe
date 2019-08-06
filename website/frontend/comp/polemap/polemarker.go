@@ -12,11 +12,6 @@ type PoleMarker struct {
 	Pole *polesite.Pole `js:"Pole"`
 }
 
-const (
-	MarkerOpacityDefault  float64 = 0.5
-	MarkerOpacitySelected float64 = 1
-)
-
 func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
 	return &PoleMarker{Marker: *leaflet.MarkerFromJs(obj)}
 }
@@ -35,13 +30,13 @@ func DefaultPoleMarker() *PoleMarker {
 }
 
 func (pm *PoleMarker) StartEditMode() {
-	pm.SetOpacity(MarkerOpacitySelected)
+	pm.SetOpacity(poleconst.OpacitySelected)
 	pm.SetDraggable(true)
 	pm.Refresh()
 }
 
 func (pm *PoleMarker) EndEditMode() {
-	pm.SetOpacity(MarkerOpacityDefault)
+	pm.SetOpacity(poleconst.OpacityNormal)
 	pm.SetDraggable(false)
 	pm.Refresh()
 }

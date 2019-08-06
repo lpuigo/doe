@@ -24,7 +24,10 @@
                 <el-row :gutter="20" type="flex" align="middle">
                     <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span></h2>
                 </el-row>
-                <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
+                <el-button-group>
+                    <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
+                    <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)" :disabled="!IsDirty" size="mini"></el-button>
+                </el-button-group>
                 <span></span>
                 <span></span>
 
@@ -32,15 +35,30 @@
                     <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"></el-button>
                 </el-button-group>
 
-                <el-row :gutter="20" type="flex" align="middle">
-                    <el-input prefix-icon="fas fa-search-location"
-                              v-model="Filter" clearable size="mini"
+                <!--
+                <el-row :gutter="0" type="flex" align="middle">
+                -->
+                <div style="width: 20vw">
+                    <el-input v-model="Filter" clearable size="mini" suffix-icon="fas fa-search-location"
                               @input="ApplyFilter"
                               @clear="ApplyFilter">
+                        <el-select v-model="FilterType"
+                                   @change="ApplyFilter"
+                                   slot="prepend" placeholder="Tous"
+                                   style="width: 130px; margin: -10px">
+                            <el-option
+                                    v-for="item in GetFilterType()"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                            ></el-option>
+                        </el-select>
+                        <!-- <el-button slot="append"  icon></el-button> -->
                     </el-input>
+                </div>
+                <!--
                 </el-row>
-                <span></span>
-
+                -->
                 <!--
                 <el-row :gutter="20" type="flex" align="middle">
                     <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" size="mini">Login</el-button>
@@ -50,10 +68,11 @@
             </div>
         </el-header>
         <el-container style="height: 100%">
-
-            <el-aside v-if="IsPoleSelected" width="400px" style="padding: 0px 5px">
-                <pole-edit :editedpolemarker.sync="SelectedPoleMarker"></pole-edit>
-                <el-button @click="UnSelectPole" size="mini">OK</el-button>
+            <el-aside :width="IsPoleSelected?'400px':'0px'" style="transition: width .15s ease;">
+                <div v-if="IsPoleSelected" style="padding: 0px 5px">
+                    <pole-edit :editedpolemarker.sync="SelectedPoleMarker"></pole-edit>
+                    <el-button @click="UnSelectPole" size="mini">OK</el-button>
+                </div>
             </el-aside>
 
             <el-main style="height:100%; padding: 0px 0px;">

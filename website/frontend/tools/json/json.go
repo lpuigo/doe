@@ -14,3 +14,8 @@ func Parse(jsonStr string) *js.Object {
 	json := js.Global.Get("JSON")
 	return json.Call("parse", jsonStr)
 }
+
+func Clone(obj *js.Object) *js.Object {
+	json := js.Global.Get("JSON")
+	return json.Call("parse", json.Call("stringify", obj).String())
+}

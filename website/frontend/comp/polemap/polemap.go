@@ -32,7 +32,7 @@ func componentOptions() []hvue.ComponentOption {
 			pm := newPoleMap(vm)
 			pm.VM = vm
 			if len(pm.Poles) > 0 {
-				pm.AddPoles(pm.Poles, "Poteaux")
+				pm.AddPoles(pm.Poles)
 			}
 		}),
 		hvue.BeforeUpdate(func(vm *hvue.VM) {
@@ -69,7 +69,14 @@ func newPoleMap(vm *hvue.VM) *PoleMap {
 	return pm
 }
 
-func (pm *PoleMap) AddPoles(poles []*polesite.Pole, name string) *leaflet.LayerGroup {
+func (pm *PoleMap) RefreshPoles(poles []*polesite.Pole, group *leaflet.LayerGroup) *leaflet.LayerGroup {
+	pm.LeafletMap.ControlLayers.RemoveLayer(&group.Layer)
+	group.Remove()
+
+	return pm.AddPoles(poles)
+}
+
+func (pm *PoleMap) AddPoles(poles []*polesite.Pole) *leaflet.LayerGroup {
 	pm.Poles = poles
 	polesLayer := []*leaflet.Layer{}
 
@@ -102,10 +109,9 @@ func (pm *PoleMap) AddPoles(poles []*polesite.Pole, name string) *leaflet.LayerG
 
 	polesGroup := leaflet.NewLayerGroup(polesLayer)
 	polesGroup.AddTo(pm.LeafletMap.Map)
-	pm.LeafletMap.ControlLayers.AddOverlay(&polesGroup.Layer, name)
+	pm.LeafletMap.ControlLayers.AddOverlay(&polesGroup.Layer, "Poteaux")
 	//pm.PoleOverlays[name] = &polesGroup.Layer
 
-	pm.CenterOnPoles()
 	return polesGroup
 }
 

@@ -17,6 +17,26 @@ const (
 	LabelDone         string = "Fait"
 	LabelCancelled    string = "Annulé"
 
+	FilterValueAll      string = ""
+	FilterValueRef      string = "REF:"
+	FilterValueCity     string = "CTY:"
+	FilterValueComment  string = "CMT:"
+	FilterValueHeigth   string = "HGT:"
+	FilterValueProduct  string = "PRD:"
+	FilterValueDt       string = "DT:"
+	FilterValueDict     string = "DCT:"
+	FilterValueDictInfo string = "DCI:"
+
+	FilterLabelAll      string = "Tout"
+	FilterLabelRef      string = "Référence"
+	FilterLabelCity     string = "Ville"
+	FilterLabelComment  string = "Commentaire"
+	FilterLabelHeigth   string = "Hauteur"
+	FilterLabelProduct  string = "Produit"
+	FilterLabelDt       string = "DT"
+	FilterLabelDict     string = "DICT"
+	FilterLabelDictInfo string = "DICT Info"
+
 	MaterialWood  string = "Bois"
 	MaterialMetal string = "Métal"
 	MaterialComp  string = "Composite"
@@ -25,4 +45,9 @@ const (
 	ProductMoise   string = "Moisé"
 	ProductReplace string = "Remplacement"
 	ProductRemove  string = "Retrait"
+
+	OpacityBlur     float64 = 0.2
+	OpacityNormal   float64 = 0.5
+	OpacityFiltered float64 = 0.8
+	OpacitySelected float64 = 0.9
 )

@@ -68,7 +68,7 @@ func (l *Layer) Refresh() {
 	l.AddTo(curMap)
 }
 
-// Refresh refreshes the receiver by removing and adding it on its current map.
+// CenterOnMap centers layer in its map, with given zoom level.
 func (l *Layer) CenterOnMap(zoom int) {
 	curMap := &Map{Object: l.Get("_map")}
 	curMap.SetView(l.GetLatLong(), zoom)
@@ -93,6 +93,12 @@ func NewLayerGroup(layers []*Layer) *LayerGroup {
 	}
 }
 
+// ClearLayers removes all the layers from the group
+func (lg *LayerGroup) ClearLayers() {
+	lg.Call("clearLayers")
+}
+
+// ForEach iterates over the layers of the group
 func (lg *LayerGroup) ForEach(f func(l *Layer)) {
 	lg.Call("eachLayer", f)
 }
