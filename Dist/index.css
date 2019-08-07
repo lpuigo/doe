@@ -110,6 +110,7 @@ pre {
 .el-input-group__append, .el-input-group__prepend {
     padding: 0 5px
 }
+
 /* ====================================================================================================================
     === Worksite Table style ===
  */
@@ -156,12 +157,12 @@ pre {
 }
 
 /*.el-table .worksite-row-need-save {*/
-    /*background: #f8f8f8;*/
-    /*color: #ffbf80;*/
+/*background: #f8f8f8;*/
+/*color: #ffbf80;*/
 /*}*/
 
 /* disable element ui hover*/
-.el-table--enable-row-hover .el-table__body tr:hover>td {
+.el-table--enable-row-hover .el-table__body tr:hover > td {
     background-color: initial !important;
 }
 
@@ -300,7 +301,7 @@ pre {
 }
 
 /*.el-progress-bar__inner {*/
-    /*background-color: #51a825;*/
+/*background-color: #51a825;*/
 /*}*/
 
 .progress-bar {
@@ -494,4 +495,18 @@ pre {
     border-bottom-right-radius: 100px;
 }
 
+/* ====================================================================================================================
+    === Block ===
+ */
+
+.warning-block {
+    color: #eb7500;
+    background-color: #ffdfbf;
+    border-color: #ff9f40;
+    border-width: 0 0 0 5px;
+    border-style: solid;
+    border-radius: 5px;
+    margin: 5px 0;
+    padding: 5px;
+}
 

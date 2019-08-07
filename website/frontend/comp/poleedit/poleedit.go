@@ -5,7 +5,9 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polemap"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	date "github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
@@ -18,6 +20,16 @@ const template string = `<div>
 		<h1>
 			Poteau: {{editedpolemarker.Pole.Ref}}
 		</h1>
+        <span></span>
+        <el-popover placement="bottom" width="360" title="Suppression du poteau"
+                    v-model="VisibleDeletePole">
+            <p>Confirmez la suppression du poteau {{editedpolemarker.Pole.Ref}} ?</p>
+            <div style="text-align: right; margin: 0; margin-top: 10px">
+                <el-button size="mini" @click="VisibleDeletePole = false">Annuler</el-button>
+                <el-button type="danger" plain size="mini" @click="DeletePole">Confirmer</el-button>
+            </div>
+            <el-button slot="reference" type="danger" plain class="icon" icon="far fa-trash-alt icon--big" size="mini"></el-button>
+        </el-popover>
 		<el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
 	</div>
     <!-- Référence -->
@@ -115,7 +127,7 @@ const template string = `<div>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Info DICT:</el-col>
         <el-col :span="18">
-            <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 4}" placeholder="Information DICT"
+            <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Information DICT"
                       v-model="editedpolemarker.Pole.DictInfo" clearable size="mini"
             ></el-input>
         </el-col>
@@ -131,8 +143,22 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Produits -->
+    <!-- Date Aspiratrice -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">Aspiratrice:</el-col>
+        <el-col :span="18">
+            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="editedpolemarker.Pole.AspiDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+            ></el-date-picker>
+        </el-col>
+    </el-row>
+
+    <!-- Produits -->
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Produits:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
@@ -148,9 +174,19 @@ const template string = `<div>
             </el-select>
         </el-col>
     </el-row>
-    
-    <!-- Status -->
+
+    <!-- Commentaire -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
+        <el-col :span="6">Commentaire:</el-col>
+        <el-col :span="18">
+            <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Commentaire"
+                      v-model="editedpolemarker.Pole.Comment" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Status -->
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Status:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
@@ -166,6 +202,21 @@ const template string = `<div>
             </el-select>
         </el-col>
     </el-row>
+
+    <!-- Date Status -->
+    <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Date:</el-col>
+        <el-col :span="18">
+            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="editedpolemarker.Pole.Date"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+            ></el-date-picker>
+        </el-col>
+    </el-row>
+
 
 </div>
 `
@@ -196,6 +247,12 @@ func componentOptions() []hvue.ComponentOption {
 					", " +
 					strconv.FormatFloat(pem.EditedPoleMarker.Pole.Long, 'f', 8, 64)
 			}),
+		hvue.Computed(
+			"ShowDate",
+			func(vm *hvue.VM) interface{} {
+				pem := PoleEditModelFromJS(vm.Object)
+				return pem.EditedPoleMarker.Pole.State == poleconst.StateDone
+			}),
 	}
 }
 
@@ -204,8 +261,8 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleEditModel struct {
 	*js.Object
-	EditedPoleMarker *polemap.PoleMarker `js:"editedpolemarker"`
-	Product          string              `js:"Product"`
+	EditedPoleMarker  *polemap.PoleMarker `js:"editedpolemarker"`
+	VisibleDeletePole bool                `js:"VisibleDeletePole"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -216,7 +273,7 @@ func PoleEditModelFromJS(obj *js.Object) *PoleEditModel {
 
 func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem := &PoleEditModel{Object: tools.O()}
-	pem.Product = ""
+	pem.VisibleDeletePole = false
 	pem.VM = vm
 	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
@@ -228,8 +285,12 @@ func (pem *PoleEditModel) GetStates() []*elements.ValueLabel {
 
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
-	pem.EditedPoleMarker.UpdateFromState()
-	pem.EditedPoleMarker.Refresh()
+	ep := pem.EditedPoleMarker
+	ep.UpdateFromState()
+	ep.Refresh()
+	if ep.Pole.State == poleconst.StateDone {
+		ep.Pole.Date = date.TodayAfter(0)
+	}
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {
@@ -238,18 +299,6 @@ func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {
 
 func (pem *PoleEditModel) GetProducts() []*elements.ValueLabel {
 	return polesite.GetProductsValueLabel()
-}
-
-func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
-	pem = PoleEditModelFromJS(vm.Object)
-	pem.EditedPoleMarker.Pole.Get("Product").Set(pem.Product, 1)
-	pem.Product = ""
-}
-
-func (pem *PoleEditModel) RemoveProduct(vm *hvue.VM, prd string) {
-	pem = PoleEditModelFromJS(vm.Object)
-	pem.EditedPoleMarker.Pole.Get("Product").Set(prd, 0)
-	pem.EditedPoleMarker.Pole.Get("Product").Delete(prd)
 }
 
 func (pem *PoleEditModel) UpdateTooltip(vm *hvue.VM) {
@@ -291,4 +340,10 @@ func (pem *PoleEditModel) UpdatePoleLatLong(vm *hvue.VM, value string) {
 func (pem *PoleEditModel) CenterOnEdited(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	pem.EditedPoleMarker.CenterOnMap(20)
+}
+
+func (pem *PoleEditModel) DeletePole(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.VM.Emit("deletepole", pem.EditedPoleMarker)
+	pem.VisibleDeletePole = false
 }

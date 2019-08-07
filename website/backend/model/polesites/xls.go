@@ -77,8 +77,8 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 4), pole.Lat)
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 5), pole.Long)
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 6), pole.State)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 7), "") // Actor ("Pierre, Paul, Jacques")
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 8), "") // Date
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 7), "")        // Actor ("Pierre, Paul, Jacques")
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 8), pole.Date) // Date
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 9), pole.AttachmentDate)
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 10), pole.Sticker)
 		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 11), pole.DtRef)
@@ -147,6 +147,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return ps, nil
 	}
 
+	id := 0
 	for line, row := range xf.GetRows(sheetName) {
 		if line < rowPoleInfo {
 			continue
@@ -194,6 +195,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		}
 
 		pole := &Pole{
+			Id:             id,
 			Ref:            row[1],   // row 1
 			City:           row[2],   // row 2
 			Address:        row[3],   // row 3
@@ -216,6 +218,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		}
 
 		ps.Poles = append(ps.Poles, pole)
+		id++
 	}
 
 	return ps, nil
@@ -263,11 +266,14 @@ func getCellDate(xf *excelize.File, sheetname, axis string) (string, error) {
 func parseDate(source string, line int) (string, error) {
 	pdate := ""
 	if source != "" {
-		tdate, err := time.Parse("01-02-06", source)
+		tdate, err := time.Parse("2006-01-02", source)
 		if err != nil {
-			tdate, err = time.Parse("1/2/06 15:04", source)
+			tdate, err = time.Parse("01-02-06", source)
 			if err != nil {
-				return "", fmt.Errorf("could not parse date '%s' row %d: %s", source, line+1, err.Error())
+				tdate, err = time.Parse("1/2/06 15:04", source)
+				if err != nil {
+					return "", fmt.Errorf("could not parse date '%s' row %d: %s", source, line+1, err.Error())
+				}
 			}
 		}
 		pdate = date.Date(tdate).String()

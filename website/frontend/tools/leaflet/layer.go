@@ -103,6 +103,16 @@ func (lg *LayerGroup) ForEach(f func(l *Layer)) {
 	lg.Call("eachLayer", f)
 }
 
+// GetLayers returns an array of all the layers added to the group ([]*Layer)
+func (lg *LayerGroup) GetLayers() *js.Object {
+	return lg.Call("getLayers")
+}
+
+// GetLayerId returns an array of all the layers added to the group ([]*Layer)
+func (lg *LayerGroup) GetLayerId(l *Layer) int {
+	return lg.Call("getLayerId").Int()
+}
+
 // GridLayer is a leaflet GridLayer: http://leafletjs.com/reference-1.0.2.html#gridlayer.
 type GridLayer struct {
 	Layer

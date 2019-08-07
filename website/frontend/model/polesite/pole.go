@@ -11,6 +11,7 @@ import (
 // type Pole reflects backend/model/polesites.pole struct
 type Pole struct {
 	*js.Object
+	Id             int      `js:"Id"`
 	Ref            string   `js:"Ref"`
 	City           string   `js:"City"`
 	Address        string   `js:"Address"`
@@ -37,6 +38,7 @@ func NewPole() *Pole {
 		Object: tools.O(),
 	}
 
+	np.Id = 0
 	np.Ref = ""
 	np.City = ""
 	np.Address = ""

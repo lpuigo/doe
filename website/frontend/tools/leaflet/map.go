@@ -29,6 +29,11 @@ type MapOptions struct {
 	PreferCanvas bool `js:"preferCanvas"`
 }
 
+// GetCenter returns the geographical center of the map view
+func (m *Map) GetCenter() *LatLng {
+	return LatLngFromJS(m.Object.Call("getCenter"))
+}
+
 // SetView sets the center and zoom level of the map.
 func (m *Map) SetView(center *LatLng, zoom int) {
 	m.Object.Call("setView", center, zoom)

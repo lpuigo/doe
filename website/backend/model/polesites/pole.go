@@ -7,6 +7,7 @@ import (
 )
 
 type Pole struct {
+	Id             int
 	Ref            string
 	City           string
 	Address        string
