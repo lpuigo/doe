@@ -137,7 +137,7 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `test/Rechicourt.xlsx`
+	psXlsfile := `test/Pange.xlsx`
 	xf, err := os.Open(psXlsfile)
 	if err != nil {
 		t.Fatalf("could not open file: %s", err.Error())

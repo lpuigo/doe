@@ -19,6 +19,7 @@ type Pole struct {
 	Actors         []string
 	DtRef          string
 	DictRef        string
+	DictDate       string
 	DictInfo       string
 	Height         int
 	Material       string

@@ -118,10 +118,19 @@ const template string = `<div>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">DICT:</el-col>
-        <el-col :span="18">
+        <el-col :span="10">
             <el-input placeholder="Référence DICT"
                       v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
             ></el-input>
+        </el-col>
+        <el-col :span="8">
+            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="editedpolemarker.Pole.DictDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+            ></el-date-picker>
         </el-col>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">

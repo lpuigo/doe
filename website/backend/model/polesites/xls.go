@@ -2,6 +2,7 @@ package polesites
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/nominatim"
 	"io"
 	"strconv"
 	"strings"
@@ -18,6 +19,30 @@ const (
 	rowPolesiteInfo   int = 1
 	rowPoleHeader     int = 3
 	rowPoleInfo       int = 4
+)
+
+const (
+	colPoleId int = iota
+	colPoleRef
+	colPoleCity
+	colPoleAddress
+	colPoleLat
+	colPoleLong
+	colPoleState
+	colPoleActors
+	colPoleDate
+	colPoleAttachmentDate
+	colPoleSticker
+	colPoleDtRef
+	colPoleDictRef
+	colPoleDictDate
+	colPoleDictInfo
+	colPoleHeight
+	colPoleMaterial
+	colPoleAspiDate
+	colPoleKizeo
+	colPoleComment
+	colPoleProduct
 )
 
 func ToXLS(w io.Writer, ps *PoleSite) error {
@@ -45,58 +70,61 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPolesiteInfo, 7), ps.Comment)
 
 	// Set Poles infos
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 0), "pole")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 1), "Ref")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 2), "City")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 3), "Address")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 4), "Lat")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 5), "Long")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 6), "State")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 7), "Actors")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 8), "Date")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 9), "AttachmentDate")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 10), "AttachmentDate")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 11), "DtRef")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 12), "DictRef")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 13), "DictInfo")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 14), "Height")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 15), "Material")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 16), "AspiDate")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 17), "Kizeo")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 18), "Comment")
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 19), poleconst.ProductCoated)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 20), poleconst.ProductMoise)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 21), poleconst.ProductReplace)
-	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, 22), poleconst.ProductRemove)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleId), "pole")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleRef), "Ref")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleCity), "City")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleAddress), "Address")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleLat), "Lat")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleLong), "Long")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleState), "State")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleActors), "Actors")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleDate), "Date")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleAttachmentDate), "AttachmentDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleSticker), "Sticker")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleDtRef), "DtRef")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleDictRef), "DictRef")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleDictDate), "DictDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleDictInfo), "DictInfo")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleHeight), "Height")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleMaterial), "Material")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleAspiDate), "AspiDate")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleKizeo), "Kizeo")
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleComment), "Comment")
+
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleProduct+0), poleconst.ProductCoated)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleProduct+1), poleconst.ProductMoise)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleProduct+2), poleconst.ProductReplace)
+	xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, colPoleProduct+3), poleconst.ProductRemove)
 
 	for i, pole := range ps.Poles {
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 0), "pole")
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 1), pole.Ref)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 2), pole.City)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 3), pole.Address)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 4), pole.Lat)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 5), pole.Long)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 6), pole.State)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 7), "")        // Actor ("Pierre, Paul, Jacques")
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 8), pole.Date) // Date
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 9), pole.AttachmentDate)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 10), pole.Sticker)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 11), pole.DtRef)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 12), pole.DictRef)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 13), pole.DictInfo)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 14), pole.Height)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 15), pole.Material)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 16), pole.AspiDate)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 17), pole.Kizeo)
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 18), pole.Comment)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleId), "pole")
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleRef), pole.Ref)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleCity), pole.City)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleAddress), pole.Address)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleLat), pole.Lat)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleLong), pole.Long)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleState), pole.State)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleActors), "")      // Actor ("Pierre, Paul, Jacques")
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleDate), pole.Date) // Date
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleAttachmentDate), pole.AttachmentDate)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleSticker), pole.Sticker)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleDtRef), pole.DtRef)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleDictRef), pole.DictRef)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleDictDate), pole.DictDate)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleDictInfo), pole.DictInfo)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleHeight), pole.Height)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleMaterial), pole.Material)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleAspiDate), pole.AspiDate)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleKizeo), pole.Kizeo)
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleComment), pole.Comment)
 		products := map[string]string{}
 		for _, product := range pole.Product {
 			products[product] = "1"
 		}
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 19), products[poleconst.ProductCoated])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 20), products[poleconst.ProductMoise])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 21), products[poleconst.ProductReplace])
-		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, 22), products[poleconst.ProductRemove])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleProduct+0), products[poleconst.ProductCoated])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleProduct+1), products[poleconst.ProductMoise])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductReplace])
+		xf.SetCellValue(sheetName, doctemplate.RcToAxis(rowPoleInfo+i, colPoleProduct+3), products[poleconst.ProductRemove])
 	}
 
 	err := xf.Write(w)
@@ -112,7 +140,9 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return nil, err
 	}
 	sheetName := xf.GetSheetName(1)
+	//
 	// Read PoleSite Header & Info
+	//
 	if err := checkValue(xf, sheetName, doctemplate.RcToAxis(rowPolesiteHeader, 0), "polesite"); err != nil {
 		return nil, err
 	}
@@ -135,15 +165,17 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	ps.Status = xf.GetCellValue(sheetName, doctemplate.RcToAxis(rowPolesiteInfo, 6))
 	ps.Comment = xf.GetCellValue(sheetName, doctemplate.RcToAxis(rowPolesiteInfo, 7))
 
+	//
 	// Read Poles Header & Info
+	//
 	if err := checkValue(xf, sheetName, doctemplate.RcToAxis(rowPoleHeader, 0), "pole"); err != nil {
 		return nil, err
 	}
 	productKeys := map[int]string{}
-	for _, col := range []int{19, 20, 21, 22} {
+	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3} {
 		productKeys[col] = xf.GetCellValue(sheetName, doctemplate.RcToAxis(rowPoleHeader, col))
 	}
-	if err := checkValue(xf, sheetName, doctemplate.RcToAxis(rowPoleInfo, 0), "pole"); err != nil {
+	if err := checkValue(xf, sheetName, doctemplate.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
 		return ps, nil
 	}
 
@@ -152,69 +184,106 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if line < rowPoleInfo {
 			continue
 		}
-		if row[0] != "pole" {
+		if row[colPoleId] != "pole" {
 			continue
 		}
 
-		lat, err := strconv.ParseFloat(row[4], 64)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse latitude '%s' row %d: %s", row[4], line+1, err.Error())
+		lat, errlat := strconv.ParseFloat(row[colPoleLat], 64)
+		long, errlong := strconv.ParseFloat(row[colPoleLong], 64)
+		geomsg := ""
+		if errlat != nil && errlong != nil {
+			// Perform Geoloc Search
+			addr := row[colPoleAddress]
+			res := []nominatim.Geoloc{}
+			if addr == "" {
+				goto GeolocDone
+			}
+			res, err = nominatim.GeolocSearch(addr)
+			if err != nil {
+				geomsg = "ERR Geoloc:" + err.Error()
+			}
+			if len(res) == 0 {
+				geomsg = "Geoloc not found"
+				goto GeolocDone
+			}
+			lat, long, err = res[0].GetLatLong()
+			if err != nil {
+				geomsg = "ERR Geoloc:" + err.Error()
+			}
+		GeolocDone:
+		} else {
+			if errlat != nil {
+				return nil, fmt.Errorf("could not parse latitude '%s' row %d: %s", row[4], line+1, errlat.Error())
+			}
+			if errlong != nil {
+				return nil, fmt.Errorf("could not parse longitude '%s' row %d: %s", row[5], line+1, errlong.Error())
+			}
 		}
-		long, err := strconv.ParseFloat(row[5], 64)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse longitude '%s' row %d: %s", row[5], line+1, err.Error())
+		state := row[colPoleState]
+		if state == "" {
+			state = poleconst.StateNotSubmitted
 		}
-		height, err := strconv.Atoi(row[14])
+		height, err := strconv.Atoi(row[colPoleHeight])
 		if err != nil {
 			return nil, fmt.Errorf("could not parse height '%s' row %d: %s", row[12], line+1, err.Error())
 		}
-		pdate, err := parseDate(row[8], line)
+		pdate, err := parseDate(row[colPoleDate], line)
 		if err != nil {
 			return nil, err
 		}
-		adate, err := parseDate(row[9], line)
+		adate, err := parseDate(row[colPoleAttachmentDate], line)
 		if err != nil {
 			return nil, err
 		}
-		aspdate, err := parseDate(row[16], line)
+		aspdate, err := parseDate(row[colPoleAspiDate], line)
+		if err != nil {
+			return nil, err
+		}
+		dddate, err := parseDate(row[colPoleDictDate], line)
 		if err != nil {
 			return nil, err
 		}
 		actors := []string{}
-		if row[7] != "" {
-			actors = strings.Split(row[7], ",")
+		if row[colPoleActors] != "" {
+			actors = strings.Split(row[colPoleActors], ",")
 			for i, actor := range actors {
 				actors[i] = strings.Trim(actor, " ")
 			}
 		}
 		products := []string{}
-		for _, col := range []int{19, 20, 21, 22} {
+		for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3} {
 			if row[col] == "1" {
 				products = append(products, productKeys[col])
 			}
 		}
 
+		comment := row[colPoleComment]
+		if geomsg != "" {
+			comment += "\n" + geomsg
+		}
+
 		pole := &Pole{
 			Id:             id,
-			Ref:            row[1],   // row 1
-			City:           row[2],   // row 2
-			Address:        row[3],   // row 3
-			Lat:            lat,      // row 4
-			Long:           long,     // row 5
-			State:          row[6],   // row 6
-			Actors:         actors,   // row 7
-			Date:           pdate,    // row 8
-			AttachmentDate: adate,    // row 9
-			Sticker:        row[10],  // row 10
-			DtRef:          row[11],  // row 11
-			DictRef:        row[12],  // row 12
-			DictInfo:       row[13],  // row 13
-			Height:         height,   // row 14
-			Material:       row[15],  // row 15
-			AspiDate:       aspdate,  // row 16
-			Kizeo:          row[17],  // row 17
-			Comment:        row[18],  // row 18
-			Product:        products, // row 19-22
+			Ref:            row[colPoleRef],
+			City:           row[colPoleCity],
+			Address:        row[colPoleAddress],
+			Lat:            lat,
+			Long:           long,
+			State:          state,
+			Actors:         actors,
+			Date:           pdate,
+			AttachmentDate: adate,
+			Sticker:        row[colPoleSticker],
+			DtRef:          row[colPoleDtRef],
+			DictRef:        row[colPoleDictRef],
+			DictDate:       dddate,
+			DictInfo:       row[colPoleDictInfo],
+			Height:         height,
+			Material:       row[colPoleMaterial],
+			AspiDate:       aspdate,
+			Kizeo:          row[colPoleKizeo],
+			Comment:        comment,
+			Product:        products,
 		}
 
 		ps.Poles = append(ps.Poles, pole)

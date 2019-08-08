@@ -23,6 +23,7 @@ type Pole struct {
 	Actors         []string `js:"Actors"`
 	DtRef          string   `js:"DtRef"`
 	DictRef        string   `js:"DictRef"`
+	DictDate       string   `js:"DictDate"`
 	DictInfo       string   `js:"DictInfo"`
 	Height         int      `js:"Height"`
 	Material       string   `js:"Material"`
@@ -50,6 +51,7 @@ func NewPole() *Pole {
 	np.Actors = []string{}
 	np.DtRef = ""
 	np.DictRef = ""
+	np.DictDate = ""
 	np.DictInfo = ""
 	np.Height = 0
 	np.Material = ""
