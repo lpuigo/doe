@@ -5,6 +5,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
 )
 
@@ -109,6 +110,10 @@ func (p *Pole) SearchString(filter string) string {
 	res += searchItem(",", poleconst.FilterValueDict, p.DictRef)
 	res += searchItem(",", poleconst.FilterValueDictInfo, p.DictInfo)
 	return res
+}
+
+func (p *Pole) Clone() *Pole {
+	return &Pole{Object: json.Parse(json.Stringify(p))}
 }
 
 func GetFilterTypeValueLabel() []*elements.ValueLabel {

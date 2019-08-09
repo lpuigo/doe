@@ -69,15 +69,12 @@
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
 
-                    <!-- Select Orange or RIP mode -->
+                    <!-- Select Orange / RIP / Poles mode -->
                     <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini" @change="CheckSiteMode">
                         <el-radio-button v-if="worksiteInfos.length > 0" label="Orange">Orange : {{worksiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="ripsiteInfos.length > 0" label="Rip">RIP : {{ripsiteInfos.length}}</el-radio-button>
+                        <el-radio-button v-if="polesiteInfos.length > 0" label="Poles">Poteaux : {{polesiteInfos.length}}</el-radio-button>
                     </el-radio-group>
-
-                    <!-- Link to PoleSites -->
-                    <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-map-marked-alt icon--big" @click="ShowPoleSites" size="mini"></el-button>
-                    <!-- <el-link v-if="User.Permissions.Admin" icon="fas fa-map-marked-alt icon--big" href="polesites.html"></el-link>  -->
 
                     <!-- Select Billing / Create / Update / Review modes -->
                     <el-radio-group v-if="SiteMode == 'Orange'" v-model="ActiveMode" size="mini">
@@ -93,9 +90,11 @@
                         <el-radio-button v-if="User.Permissions.Review" label="Review">Suivi</el-radio-button>
                     </el-radio-group>
 
+                    <span v-if="SiteMode == 'Poles'"></span>
+
                     <!-- Actions Refresh / Stats / Admin actions -->
                     <el-button-group>
-                        <el-button v-if="User.Permissions.Update || User.Permissions.Review" class="icon" icon="fas fa-sync-alt icon--big" @click="GetSiteInfos" size="mini"></el-button>
+                        <el-button v-if="User.Permissions.Update || User.Permissions.Review" class="icon" icon="fas fa-sync-alt icon--big" @click="GetActiveSiteInfos" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Update || User.Permissions.Review" class="icon" icon="fas fa-chart-line icon--big" @click="ShowTeamProductivity" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Admin" class="icon" icon="fas fa-wrench icon--big" @click="ShowAdmin" size="mini"></el-button>
                     </el-button-group>
@@ -148,6 +147,17 @@
                         @selected_ripsite="UpdateRipsite"
                         @new_ripsite=""
                 ></ripsite-table>
+            </el-main>
+            <el-main v-if="SiteMode == 'Poles'" style="height:100%; padding: 0px 0px;">
+<!--
+                <pre>{{polesiteInfos}}</pre>
+-->
+                <polesite-table
+                        :polesiteinfos="polesiteInfos"
+                        :user="User"
+                        @selected_polesite=""
+                        @new_polesite=""
+                ></polesite-table>
             </el-main>
             <!--<el-footer>Footer</el-footer>-->
         </el-container>

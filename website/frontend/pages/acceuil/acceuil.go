@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/adminmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoiceupdatemodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/polesitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsitetable"
@@ -38,6 +39,7 @@ func main() {
 		ripsiteupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		ripsitetable.RegisterComponent(),
+		polesitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
 		adminmodal.RegisterComponent(),
@@ -97,6 +99,7 @@ type MainPageModel struct {
 
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
 	RipsiteInfos  []*fm.RipsiteInfo  `js:"ripsiteInfos"`
+	PolesiteInfos []*fm.PolesiteInfo `js:"polesiteInfos"`
 }
 
 func NewMainPageModel() *MainPageModel {
@@ -117,6 +120,7 @@ func (m *MainPageModel) ClearModes() {
 func (m *MainPageModel) ClearSiteInfos() {
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
 	m.RipsiteInfos = []*fm.RipsiteInfo{}
+	m.PolesiteInfos = []*fm.PolesiteInfo{}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,6 +141,8 @@ func (m *MainPageModel) SetMode() {
 			m.SiteMode = "Orange"
 		} else if len(m.RipsiteInfos) > 0 {
 			m.SiteMode = "Rip"
+		} else if len(m.PolesiteInfos) > 0 {
+			m.SiteMode = "Poles"
 		}
 	}
 
@@ -177,6 +183,18 @@ func (m *MainPageModel) UserLogout() {
 func (m *MainPageModel) GetSiteInfos() {
 	go m.callGetWorkSiteInfos()
 	go m.callGetRipSiteInfos()
+	go m.callGetPoleSiteInfos()
+}
+
+func (m *MainPageModel) GetActiveSiteInfos() {
+	switch m.SiteMode {
+	case "Orange":
+		go m.callGetWorkSiteInfos()
+	case "Rip":
+		go m.callGetRipSiteInfos()
+	case "Poles":
+		go m.callGetPoleSiteInfos()
+	}
 }
 
 func (m *MainPageModel) GetWorkSiteInfos() {
@@ -185,6 +203,10 @@ func (m *MainPageModel) GetWorkSiteInfos() {
 
 func (m *MainPageModel) GetRipSiteInfos() {
 	go m.callGetRipSiteInfos()
+}
+
+func (m *MainPageModel) GetPoleSiteInfos() {
+	go m.callGetPoleSiteInfos()
 }
 
 func (m *MainPageModel) EditWorksite(id int) {
@@ -221,10 +243,6 @@ func (m *MainPageModel) ShowTeamProductivity() {
 
 func (m *MainPageModel) ShowAdmin() {
 	m.VM.Refs("AdminModal").Call("Show", m.User)
-}
-
-func (m *MainPageModel) ShowPoleSites() {
-	js.Global.Get("window").Call("open", "polesites.html?psid=0")
 }
 
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
@@ -405,6 +423,34 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 	rsis := []*fm.RipsiteInfo{}
 	req.Response.Call("forEach", func(item *js.Object) {
 		rs := fm.NewRipsiteInfoFromJS(item)
+		rsis = append(rsis, rs)
+	})
+	sites = rsis
+}
+
+func (m *MainPageModel) callGetPoleSiteInfos() {
+	req := xhr.NewRequest("GET", "/api/polesites")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	sites := m.PolesiteInfos
+	//m.RipsiteInfos = nil
+	defer func() {
+		m.PolesiteInfos = sites
+		m.SetMode()
+	}()
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(m.VM, req)
+		return
+	}
+	rsis := []*fm.PolesiteInfo{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		rs := fm.NewPolesiteInfoFromJS(item)
 		rsis = append(rsis, rs)
 	})
 	sites = rsis

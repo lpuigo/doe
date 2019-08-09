@@ -1,4 +1,4 @@
-package ripsitetable
+package polesitetable
 
 const template string = `<!--header-row-class-name="prjptf-light"-->
 <!--:default-sort = "{prop: 'client', order: 'ascending'}"-->
@@ -17,12 +17,12 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 	</el-header>
 	<el-main  style="height: 100%; padding: 0px">
 		<el-table
-				:data="filteredRipsites"
+				:data="filteredPolesites"
 				:row-class-name="TableRowClassName"
 				:default-sort = "{prop: 'OrderDate', order: 'descending'}"
 				height="100%"
 				:border=true size="mini"
-				@row-dblclick="SetSelectedRipsite"
+				@row-dblclick="SetSelectedPolesite"
 		>
             <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
 			<el-table-column
@@ -44,7 +44,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 			>        
 				<template slot-scope="scope">
                     <div class="header-menu-container">
-                        <span @click="SetSelectedRipsite(scope.row)" class="link">{{scope.row.Ref}}</span>
+                        <span @click="OpenPolesite(scope.row.Id)" class="link">{{scope.row.Ref}}</span>
 						<a v-if="user.Permissions.Invoice" :href="AttachmentUrl(scope.row.Id)"><i class="link fas fa-file-excel"></i></a>
                     </div>
 				</template>
@@ -56,15 +56,6 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
                     :filters="FilterList('Manager')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
 
-			<el-table-column
-					label="Info"
-					width="240px" :resizable=true :show-overflow-tooltip=true
-			>
-				<template slot-scope="scope">
-					<ripsiteinfo-info v-model="scope.row"></ripsiteinfo-info>
-				</template>
-			</el-table-column>
-
             <el-table-column
                     label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
                     width="110px" :resizable=true :show-overflow-tooltip=true
@@ -72,26 +63,10 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             ></el-table-column>
 
             <el-table-column
-                    label="Tirage" width="130px" :resizable=true align="center"
+                    label="Avancement" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbPulling" :blocked="scope.row.NbPullingBlocked" :done="scope.row.NbPullingDone"></ripsiteinfo-progress-bar>
-                </template>
-            </el-table-column>
-
-            <el-table-column
-                    label="Raccordement" width="130px" :resizable=true align="center"
-            >
-                <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbJunction" :blocked="scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>
-                </template>
-            </el-table-column>
-
-            <el-table-column
-                    label="Mesure" width="130px" :resizable=true align="center"
-            >
-                <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement" :blocked="scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
+                    <ripsiteinfo-progress-bar :total="scope.row.NbPole" :blocked="scope.row.NbPoleBlocked" :done="scope.row.NbPoleDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 
