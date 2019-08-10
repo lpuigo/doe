@@ -4,27 +4,49 @@ import (
 	"encoding/json"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	"net/http"
 )
 
 // Facade structs dedicated to expose User & Client info to FrontEnd
+type authentActor struct {
+	LastName  string
+	FirstName string
+	Role      string
+}
+
+func authentActorsFrom(acs []*actors.Actor) []authentActor {
+	res := make([]authentActor, len(acs))
+	for i, actor := range acs {
+		res[i] = authentActor{
+			LastName:  actor.LastName,
+			FirstName: actor.FirstName,
+			Role:      actor.Role,
+		}
+	}
+	return res
+}
 
 type authentClient struct {
 	Name     string
 	Teams    []clients.Team
+	Actors   []authentActor
 	Articles []string
 }
 
-func getAuthentClientFrom(clients []*clients.Client) []authentClient {
+func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
 	for _, client := range clients {
-		res = append(res, authentClient{
+		actors := mgr.Actors.GetActiveActorsByClient(client.Name)
+		authentActors := authentActorsFrom(actors)
+		authClient := authentClient{
 			Name:     client.Name,
 			Teams:    client.Teams,
+			Actors:   authentActors,
 			Articles: client.GetOrangeArticleNames(),
-		})
+		}
+		res = append(res, authClient)
 	}
 	return res
 }
@@ -43,10 +65,10 @@ func newAuthentUser() authentUser {
 	}
 }
 
-func (au *authentUser) SetFrom(ur *users.UserRecord, clients []*clients.Client) {
-	au.Name = ur.Name
-	au.Clients = getAuthentClientFrom(clients)
-	au.Permissions = ur.Permissions
+func (au *authentUser) SetFrom(mgr *mgr.Manager, clients []*clients.Client) {
+	au.Name = mgr.CurrentUser.Name
+	au.Clients = getAuthentClientFrom(mgr, clients)
+	au.Permissions = mgr.CurrentUser.Permissions
 }
 
 // GetUser checks for session cookie, and return pertaining user
@@ -68,8 +90,8 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 			AddError(w, logmsg, "could not remove session info", http.StatusInternalServerError)
 			return
 		}
-		logmsg.Info = "not authenticated"
-
+		AddError(w, logmsg, "user not authorized", http.StatusUnauthorized)
+		return
 		// Todo Exit
 	}
 
@@ -80,7 +102,7 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	user.SetFrom(mgr.CurrentUser, clts)
+	user.SetFrom(mgr, clts)
 
 	// refresh session cookie
 	err = mgr.SessionStore.RefreshSessionCookie(w, r)

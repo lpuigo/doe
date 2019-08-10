@@ -2,6 +2,7 @@ package actors
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"path/filepath"
 	"sync"
@@ -141,6 +142,21 @@ func (ap *ActorsPersister) GetAllActors() []*Actor {
 	res := []*Actor{}
 	for _, ar := range ap.actors {
 		res = append(res, ar.Actor)
+	}
+	return res
+}
+
+// GetActiveActorsByClient returns in activity Actor, acting for given client
+func (ap *ActorsPersister) GetActiveActorsByClient(client string) []*Actor {
+	ap.RLock()
+	defer ap.RUnlock()
+
+	res := []*Actor{}
+	today := date.Today().String()
+	for _, ar := range ap.actors {
+		if ar.Actor.Client == client && ar.IsActiveOn(today) {
+			res = append(res, ar.Actor)
+		}
 	}
 	return res
 }

@@ -159,22 +159,23 @@ func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 
 // genIsTeamVisible returns a IsTeamVisible function: func(ClientTeam) bool, which is true when current user is allowed to see clientteam related activity
 func (m Manager) genIsTeamVisible() (clients.IsTeamVisible, error) {
-	if len(m.CurrentUser.Clients) > 0 {
-		teamVisible := make(map[clients.ClientTeam]bool)
-		clts, err := m.GetCurrentUserClients()
-		if err != nil {
-			return nil, err
-		}
-		for _, client := range clts {
-			for _, team := range client.Teams {
-				teamVisible[clients.ClientTeam{Client: client.Name, Team: team.Members}] = true
-			}
-		}
-		return func(ct clients.ClientTeam) bool {
-			return teamVisible[ct]
-		}, nil
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(clients.ClientTeam) bool { return true }, nil
 	}
-	return func(clients.ClientTeam) bool { return true }, nil
+
+	teamVisible := make(map[clients.ClientTeam]bool)
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return nil, err
+	}
+	for _, client := range clts {
+		for _, team := range client.Teams {
+			teamVisible[clients.ClientTeam{Client: client.Name, Team: team.Members}] = true
+		}
+	}
+	return func(ct clients.ClientTeam) bool {
+		return teamVisible[ct]
+	}, nil
 }
 
 // =====================================================================================================================

@@ -7,5 +7,6 @@ type Client struct {
 
 	Name     string   `js:"Name"`
 	Teams    []*Team  `js:"Teams"`
+	Actors   []*Actor `js:"Actors"`
 	Articles []string `js:"Articles"`
 }

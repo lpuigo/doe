@@ -29,3 +29,10 @@ func NewActor(firstName, lastName, company string) *Actor {
 		Client:    "",
 	}
 }
+
+func (a *Actor) IsActiveOn(date string) bool {
+	if a.Period.End == "" {
+		return true
+	}
+	return date < a.Period.End
+}
