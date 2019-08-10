@@ -61,17 +61,7 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 	user := newAuthentUser()
 	// check for session cookie
-	if mgr.CheckSessionUser(r) {
-		// found a correct one, set user
-		logmsg.AddUser(mgr.CurrentUser.Name)
-		clts, err := mgr.GetCurrentUserClients()
-		if err != nil {
-			AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		user.SetFrom(mgr.CurrentUser, clts)
-		logmsg.Info = "authenticated"
-	} else {
+	if !mgr.CheckSessionUser(r) {
 		// user cookie not found or improper, remove it first
 		err := mgr.SessionStore.RemoveSessionCookie(w, r)
 		if err != nil {
@@ -79,12 +69,33 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logmsg.Info = "not authenticated"
+
+		// Todo Exit
 	}
-	err := json.NewEncoder(w).Encode(user)
+
+	// found a correct one, set user
+	logmsg.AddUser(mgr.CurrentUser.Name)
+	clts, err := mgr.GetCurrentUserClients()
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	user.SetFrom(mgr.CurrentUser, clts)
+
+	// refresh session cookie
+	err = mgr.SessionStore.RefreshSessionCookie(w, r)
+	if err != nil {
+		AddError(w, logmsg, "could not refresh session cookie", http.StatusInternalServerError)
+		return
+	}
+
+	// write response
+	err = json.NewEncoder(w).Encode(user)
 	if err != nil {
 		AddError(w, logmsg, "could not encode authent user", http.StatusInternalServerError)
 		return
 	}
+	logmsg.Info = "authenticated"
 	logmsg.Response = http.StatusOK
 }
 
