@@ -5,6 +5,7 @@ type ManagerConfig struct {
 	RipsitesDir  string
 	PolesitesDir string
 	UsersDir     string
+	ActorsDir    string
 	ClientsDir   string
 	TemplatesDir string
 	SessionKey   string

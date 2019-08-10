@@ -121,7 +121,7 @@ func (cp *ClientsPersister) GetById(id int) *ClientRecord {
 	return nil
 }
 
-// GetByName returns the ClientRecord with given Name (or nil if Id not found)
+// GetByRef returns the ClientRecord with given Name (or nil if Id not found)
 func (cp *ClientsPersister) GetByName(name string) *ClientRecord {
 	cp.RLock()
 	defer cp.RUnlock()

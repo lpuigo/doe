@@ -117,7 +117,7 @@ func (up *UsersPersister) GetById(id int) *UserRecord {
 	return nil
 }
 
-// GetByName returns the UserRecord with given Name (or nil if Id not found)
+// GetByRef returns the UserRecord with given Name (or nil if Id not found)
 func (up *UsersPersister) GetByName(name string) *UserRecord {
 	for _, ur := range up.users {
 		if ur.Name == name {

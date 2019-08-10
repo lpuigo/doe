@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
@@ -22,6 +23,7 @@ type Manager struct {
 	Ripsites       *rs.SitesPersister
 	Polesites      *ps.PoleSitesPersister
 	Users          *users.UsersPersister
+	Actors         *actors.ActorsPersister
 	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
@@ -38,6 +40,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate worksites: %s", err.Error())
 	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", wsp.NbWorsites()))
 
 	// Init RipSites persister
 	rsp, err := rs.NewSitesPersit(conf.RipsitesDir)
@@ -48,6 +51,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate Ripsites: %s", err.Error())
 	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Ripsites", rsp.NbSites()))
 
 	// Init PoleSites persister
 	psp, err := ps.NewPoleSitesPersist(conf.PolesitesDir)
@@ -58,6 +62,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate Polesites: %s", err.Error())
 	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", psp.NbSites()))
 
 	// Init Users persister
 	up, err := users.NewUsersPersister(conf.UsersDir)
@@ -68,6 +73,18 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate user: %s", err.Error())
 	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Users", up.NbUsers()))
+
+	// Init Actors persister
+	ap, err := actors.NewActorsPersister(conf.ActorsDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create actors: %s", err.Error())
+	}
+	err = ap.LoadDirectory()
+	if err != nil {
+		return nil, fmt.Errorf("could not populate actor: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Actors", ap.NbActors()))
 
 	// Init Clients persister
 	cp, err := clients.NewClientsPersister(conf.ClientsDir)
@@ -78,6 +95,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not populate client: %s", err.Error())
 	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Clients", cp.NbClients()))
 
 	// Init DocTemplate engine
 	te, err := doc.NewDocTemplateEngine(conf.TemplatesDir)
@@ -91,20 +109,12 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		Ripsites:       rsp,
 		Polesites:      psp,
 		Users:          up,
+		Actors:         ap,
 		Clients:        cp,
 		TemplateEngine: te,
+		SessionStore:   session.NewSessionStore(conf.SessionKey),
+		//CurrentUser: is set during session control transaction
 	}
-	logger.Entry("Server").LogInfo(
-		fmt.Sprintf("loaded %d Worksites, %d Ripsites, %d Polesites, %d Clients and %d Users",
-			wsp.NbWorsites(),
-			rsp.NbSites(),
-			psp.NbSites(),
-			cp.NbClients(),
-			up.NbUsers(),
-		))
-
-	m.SessionStore = session.NewSessionStore(conf.SessionKey)
-	// m.CurrentUser is set during session control transaction
 
 	return m, nil
 }
