@@ -17,3 +17,7 @@ type Actor struct {
 	FirstName string `js:"FirstName"`
 	Role      string `js:"Role"`
 }
+
+func (a *Actor) GetRef() string {
+	return a.LastName + " " + a.FirstName
+}

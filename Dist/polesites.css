@@ -35,3 +35,74 @@ html, body {
 .green {
     color: #2ee62e;
 }
+
+/* =====================================================================================================================
+   === Pole Row Style
+ */
+
+.el-table .pole-row-todo {
+    background: #ffffff;
+}
+
+.el-table .pole-row-todo:hover {
+    background: #e6e6e6;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-hole-done {
+    background: #e5f5e1;
+}
+
+.el-table .pole-row-hole-done:hover {
+    background: #cedbca;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-incident {
+    background: #ff9580;
+}
+
+.el-table .pole-row-incident:hover {
+    background: #e68675;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-done {
+    background: #d7f5d0;
+}
+
+.el-table .pole-row-done:hover {
+    background: #bad4b4;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-cancelled {
+    background: #e6e1e1;
+    color: #999696;
+}
+
+.el-table .pole-row-cancelled:hover {
+    background: #ccc8c8;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-not-submitted {
+    background: #ede8e8;
+    color: #b3b1b1;
+}
+
+.el-table .pole-row-not-submitted:hover {
+    background: #d1cdcd;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-nogo {
+    background: #f2c079;
+}
+
+.el-table .pole-row-nogo:hover {
+    background: #d9ac6c;
+    transition: background-color .15s ease;
+}
+
+

@@ -129,3 +129,77 @@ func GetFilterTypeValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.FilterValueDictInfo, poleconst.FilterLabelDictInfo),
 	}
 }
+
+func PoleStateLabel(state string) string {
+	switch state {
+	case poleconst.StateNotSubmitted:
+		return poleconst.LabelNotSubmitted
+	case poleconst.StateNoGo:
+		return poleconst.LabelNoGo
+	case poleconst.StateToDo:
+		return poleconst.LabelToDo
+	case poleconst.StateHoleDone:
+		return poleconst.LabelHoleDone
+	case poleconst.StateIncident:
+		return poleconst.LabelIncident
+	case poleconst.StateDone:
+		return poleconst.LabelDone
+	case poleconst.StateCancelled:
+		return poleconst.LabelCancelled
+	default:
+		return "<" + state + ">"
+	}
+}
+
+func GetStatesValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted),
+		elements.NewValueLabel(poleconst.StateNoGo, poleconst.LabelNoGo),
+		elements.NewValueLabel(poleconst.StateToDo, poleconst.LabelToDo),
+		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
+		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
+		elements.NewValueLabel(poleconst.StateDone, poleconst.LabelDone),
+		elements.NewValueLabel(poleconst.StateCancelled, poleconst.LabelCancelled),
+	}
+}
+
+func GetMaterialsValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.MaterialWood, poleconst.MaterialWood),
+		elements.NewValueLabel(poleconst.MaterialMetal, poleconst.MaterialMetal),
+		elements.NewValueLabel(poleconst.MaterialComp, poleconst.MaterialComp),
+	}
+}
+
+func GetProductsValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
+		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
+		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
+		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
+	}
+}
+
+func PoleRowClassName(status string) string {
+	var res string = ""
+	switch status {
+	case poleconst.StateNotSubmitted:
+		return "pole-row-not-submitted"
+	case poleconst.StateNoGo:
+		return "pole-row-nogo"
+	case poleconst.StateToDo:
+		return "pole-row-todo"
+	case poleconst.StateHoleDone:
+		return "pole-row-hole-done"
+	case poleconst.StateIncident:
+		return "pole-row-incident"
+	case poleconst.StateDone:
+		return "pole-row-done"
+	case poleconst.StateCancelled:
+		return "pole-row-cancelled"
+
+	default:
+		res = "worksite-row-error"
+	}
+	return res
+}

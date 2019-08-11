@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polemap"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -194,6 +195,30 @@ const template string = `<div>
         </el-col>
     </el-row>
 
+    <!-- Actors -->
+    <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6">Acteurs:</el-col>
+        <el-col :span="18">
+            <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
+                       @clear=""
+                       @change=""
+            >
+                <el-option
+                        v-for="item in GetActors()"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                >
+                    <!--
+                    <span style="float: left">{{ item.value }}</span>
+                    <span style="float: right; color: #8492a6; font-size: 0.9em; margin-right: 15px">{{ item.label }}</span>
+                    -->
+                </el-option>
+            </el-select>
+        </el-col>
+    </el-row>
+    
+
     <!-- Status -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6">Status:</el-col>
@@ -240,7 +265,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("editedpolemarker"),
+		hvue.Props("editedpolemarker", "user", "polesite"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleEditModel(vm)
 		}),
@@ -272,6 +297,8 @@ type PoleEditModel struct {
 	*js.Object
 	EditedPoleMarker  *polemap.PoleMarker `js:"editedpolemarker"`
 	VisibleDeletePole bool                `js:"VisibleDeletePole"`
+	User              *fm.User            `js:"user"`
+	Polesite          *polesite.Polesite  `js:"polesite"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -283,9 +310,25 @@ func PoleEditModelFromJS(obj *js.Object) *PoleEditModel {
 func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem := &PoleEditModel{Object: tools.O()}
 	pem.VisibleDeletePole = false
+	pem.User = fm.NewUser()
+	pem.Polesite = nil
 	pem.VM = vm
 	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
+}
+
+func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
+	pem = PoleEditModelFromJS(vm.Object)
+	client := pem.User.GetClientByName(pem.Polesite.Client)
+	if client == nil {
+		return nil
+	}
+	res := []*elements.ValueLabel{}
+	for _, actor := range client.Actors {
+		ref := actor.GetRef()
+		res = append(res, elements.NewValueLabel(ref, ref))
+	}
+	return res
 }
 
 func (pem *PoleEditModel) GetStates() []*elements.ValueLabel {
@@ -348,7 +391,8 @@ func (pem *PoleEditModel) UpdatePoleLatLong(vm *hvue.VM, value string) {
 
 func (pem *PoleEditModel) CenterOnEdited(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
-	pem.EditedPoleMarker.CenterOnMap(20)
+	vm.Emit("center-on-pole", pem.EditedPoleMarker.Pole)
+	//pem.EditedPoleMarker.CenterOnMap(20)
 }
 
 func (pem *PoleEditModel) DeletePole(vm *hvue.VM) {

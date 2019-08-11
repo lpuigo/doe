@@ -5,6 +5,8 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/poleedit"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polemap"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/poletable"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -26,14 +28,16 @@ func main() {
 	hvue.NewVM(
 		polemap.RegisterComponent(),
 		poleedit.RegisterComponent(),
+		poletable.RegisterComponent(),
 		hvue.El("#polesites_app"),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
-			//mpm.Poles = []*polesite.Pole{}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
-			mpm.LoadPolesite(false)
+			mpm.GetUserSession(func() {
+				mpm.LoadPolesite(false)
+			})
 		}),
 		hvue.Computed("Title", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
@@ -50,6 +54,20 @@ func main() {
 			mpm.Dirty = (mpm.Reference != json.Stringify(mpm.Polesite))
 			return mpm.Dirty
 		}),
+		hvue.Computed("ShowMap", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			if mpm.ActiveMode != "Map" {
+				return "display: none;"
+			}
+			return ""
+		}),
+		hvue.Computed("ShowTable", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			if mpm.ActiveMode != "Table" {
+				return "display: none;"
+			}
+			return ""
+		}),
 		hvue.Computed("IsSearchAddressMsg", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.SearchAddressMsg != ""
@@ -62,7 +80,10 @@ func main() {
 type MainPageModel struct {
 	*js.Object
 
-	VM                 *hvue.VM            `js:"VM"`
+	VM   *hvue.VM `js:"VM"`
+	User *fm.User `js:"User"`
+
+	ActiveMode         string              `js:"ActiveMode"`
 	Filter             string              `js:"Filter"`
 	FilterType         string              `js:"FilterType"`
 	Polesite           *polesite.Polesite  `js:"Polesite"`
@@ -79,6 +100,8 @@ type MainPageModel struct {
 func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
+	mpm.User = fm.NewUser()
+	mpm.ActiveMode = "Map"
 	mpm.Filter = ""
 	mpm.FilterType = poleconst.FilterValueAll
 	mpm.Polesite = polesite.NewPolesite()
@@ -91,6 +114,20 @@ func NewMainPageModel() *MainPageModel {
 	mpm.Reference = ""
 	mpm.Dirty = false
 	return mpm
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// User Management Methods
+
+func (mpm *MainPageModel) GetUserSession(callback func()) {
+	go mpm.callGetUser(callback)
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action Methods
+
+func (mpm *MainPageModel) PreventLeave() bool {
+	return mpm.Dirty
 }
 
 func (mpm *MainPageModel) LoadPolesite(update bool) {
@@ -117,15 +154,20 @@ func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
 	go mpm.callUpdatePolesite(mpm.Polesite)
 }
 
-func (mpm *MainPageModel) PreventLeave() bool {
-	return mpm.Dirty
+// initMap init Poles Array in PoleMap component
+func (mpm *MainPageModel) initMap() {
+	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
+	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles)
 }
 
 // UpdateMap updates current Poles Array in PoleMap component
 func (mpm *MainPageModel) UpdateMap() {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles)
-	pm.CenterOnPoles()
+	mpm.initMap()
+	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
+		mpm.CenterMapOnPoles()
+		return
+	}
+	mpm.ApplyFilter(mpm.VM)
 }
 
 // RefreshMap refreshes current Poles Array in PoleMap component
@@ -156,6 +198,34 @@ func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
 func (mpm *MainPageModel) MarkerClick(poleMarkerObj, event *js.Object) {
 	pm := polemap.PoleMarkerFromJS(poleMarkerObj)
 	mpm.SelectPole(pm)
+}
+
+// TablePoleSelected handles selected pole via PoleTable Component
+func (mpm *MainPageModel) TablePoleSelected(p *polesite.Pole) {
+	pm := mpm.GetPoleMarker(p)
+	mpm.SelectPole(pm)
+}
+
+// CenterOnPole handles center-on-pole via PoleTable Component
+func (mpm *MainPageModel) CenterOnPole(p *polesite.Pole) {
+	if mpm.ActiveMode != "Map" {
+		mpm.ActiveMode = "Map"
+		//TODO Map Display None
+		//mpm.initMap()
+	}
+	pm := mpm.GetPoleMarker(p)
+	mpm.SelectPole(pm)
+}
+
+// SwitchActiveMode handles ActiveMode change
+func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
+	// TODO Map Display None
+	//mpm = &MainPageModel{Object: vm.Object}
+	//switch mpm.ActiveMode {
+	//case "Map":
+	//	mpm.UpdateMap()
+	//default:
+	//}
 }
 
 func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
@@ -267,6 +337,11 @@ func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 //
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
+	// TODO Map Display None
+	//if mpm.ActiveMode != "Map" {
+	//	return
+	//}
+
 	defer mpm.PolesGroup.Refresh()
 
 	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
@@ -330,6 +405,28 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
+func (mpm *MainPageModel) callGetUser(callback func()) {
+	req := xhr.NewRequest("GET", "/api/login")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	mpm.User.Copy(fm.UserFromJS(req.Response))
+	if mpm.User.Name == "" {
+		mpm.User = fm.NewUser()
+		return
+	}
+	mpm.User.Connected = true
+	callback()
+}
+
 func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 	req := xhr.NewRequest("GET", "/api/polesites/"+strconv.Itoa(psid))
 	req.Timeout = tools.LongTimeOut
@@ -348,7 +445,7 @@ func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 	}
 	mpm.Polesite = polesite.PolesiteFromJS(req.Response)
 	mpm.Reference = json.Stringify(req.Response)
-	newTitle := "EWIN Poteaux: " + mpm.Polesite.Ref + " - " + mpm.Polesite.Client
+	newTitle := mpm.Polesite.Ref + " - " + mpm.Polesite.Client
 	js.Global.Get("document").Set("title", newTitle)
 }
 

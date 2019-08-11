@@ -118,6 +118,10 @@ pre {
     font-size: 1.5em
 }
 
+.icon--medium {
+    font-size: 1.25em
+}
+
 .icon--right {
     margin-left: .3em
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"net/http"
+	"sort"
 )
 
 // Facade structs dedicated to expose User & Client info to FrontEnd
@@ -25,6 +26,11 @@ func authentActorsFrom(acs []*actors.Actor) []authentActor {
 			Role:      actor.Role,
 		}
 	}
+	sort.Slice(res, func(i, j int) bool {
+		si := res[i].Role + " " + res[i].LastName + " " + res[i].FirstName
+		sj := res[j].Role + " " + res[j].LastName + " " + res[j].FirstName
+		return si < sj
+	})
 	return res
 }
 
