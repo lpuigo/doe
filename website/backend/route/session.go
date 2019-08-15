@@ -12,6 +12,7 @@ import (
 
 // Facade structs dedicated to expose User & Client info to FrontEnd
 type authentActor struct {
+	Id        int
 	LastName  string
 	FirstName string
 	Role      string
@@ -21,6 +22,7 @@ func authentActorsFrom(acs []*actors.Actor) []authentActor {
 	res := make([]authentActor, len(acs))
 	for i, actor := range acs {
 		res[i] = authentActor{
+			Id:        actor.Id,
 			LastName:  actor.LastName,
 			FirstName: actor.FirstName,
 			Role:      actor.Role,
