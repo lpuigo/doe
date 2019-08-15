@@ -39,6 +39,9 @@ func (psp *PoleSitesPersister) LoadDirectory() error {
 	psp.Lock()
 	defer psp.Unlock()
 
+	psp.persister.Reinit()
+	psp.polesites = []*PoleSiteRecord{}
+
 	files, err := psp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from polesites persister: %v", err)

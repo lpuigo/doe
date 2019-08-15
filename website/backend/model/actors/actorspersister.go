@@ -37,6 +37,9 @@ func (ap *ActorsPersister) LoadDirectory() error {
 	ap.Lock()
 	defer ap.Unlock()
 
+	ap.persister.Reinit()
+	ap.actors = []*ActorRecord{}
+
 	files, err := ap.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from actors persister: %v", err)

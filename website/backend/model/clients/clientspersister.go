@@ -37,6 +37,9 @@ func (cp *ClientsPersister) LoadDirectory() error {
 	cp.Lock()
 	defer cp.Unlock()
 
+	cp.persister.Reinit()
+	cp.clients = []*ClientRecord{}
+
 	files, err := cp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from ClientsPersister: %v", err)

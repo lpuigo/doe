@@ -36,66 +36,36 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create worksites: %s", err.Error())
 	}
-	err = wsp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate worksites: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", wsp.NbWorsites()))
 
 	// Init RipSites persister
 	rsp, err := rs.NewSitesPersit(conf.RipsitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create Ripsites persister: %s", err.Error())
 	}
-	err = rsp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate Ripsites: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Ripsites", rsp.NbSites()))
 
 	// Init PoleSites persister
 	psp, err := ps.NewPoleSitesPersist(conf.PolesitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create Polesites persister: %s", err.Error())
 	}
-	err = psp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate Polesites: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", psp.NbSites()))
 
 	// Init Users persister
 	up, err := users.NewUsersPersister(conf.UsersDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create users: %s", err.Error())
 	}
-	err = up.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate user: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Users", up.NbUsers()))
 
 	// Init Actors persister
 	ap, err := actors.NewActorsPersister(conf.ActorsDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create actors: %s", err.Error())
 	}
-	err = ap.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate actor: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Actors", ap.NbActors()))
 
 	// Init Clients persister
 	cp, err := clients.NewClientsPersister(conf.ClientsDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create clients: %s", err.Error())
 	}
-	err = cp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate client: %s", err.Error())
-	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Clients", cp.NbClients()))
 
 	// Init DocTemplate engine
 	te, err := doc.NewDocTemplateEngine(conf.TemplatesDir)
@@ -116,11 +86,56 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		//CurrentUser: is set during session control transaction
 	}
 
+	err = m.Reload()
+	if err != nil {
+		return nil, err
+	}
+
 	return m, nil
 }
 
 func (m Manager) Clone() *Manager {
 	return &m
+}
+
+func (m *Manager) Reload() error {
+	err := m.Worksites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate worksites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", m.Worksites.NbWorsites()))
+
+	err = m.Ripsites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate Ripsites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Ripsites", m.Ripsites.NbSites()))
+
+	err = m.Polesites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate Polesites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", m.Polesites.NbSites()))
+
+	err = m.Users.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate user: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Users", m.Users.NbUsers()))
+
+	err = m.Actors.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate actor: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Actors", m.Actors.NbActors()))
+
+	err = m.Clients.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate client: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Clients", m.Clients.NbClients()))
+
+	return nil
 }
 
 // =====================================================================================================================
@@ -313,7 +328,7 @@ func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.Dat
 }
 
 // =====================================================================================================================
-// Ripsites related methods
+// Polesites related methods
 //
 
 // visibleRipsiteFilter returns a filtering function on CurrentUser.Clients visibility
@@ -338,4 +353,12 @@ func (m Manager) GetPolesitesInfo(writer io.Writer) error {
 	}
 
 	return json.NewEncoder(writer).Encode(psis)
+}
+
+func (m Manager) PolesitesArchiveName() string {
+	return m.Polesites.ArchiveName()
+}
+
+func (m Manager) CreatePolesitesArchive(writer io.Writer) error {
+	return m.Polesites.CreateArchive(writer)
 }

@@ -44,6 +44,9 @@ func (sp *SitesPersister) LoadDirectory() error {
 	sp.Lock()
 	defer sp.Unlock()
 
+	sp.persister.Reinit()
+	sp.sites = []*SiteRecord{}
+
 	files, err := sp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from sites persister: %v", err)

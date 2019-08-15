@@ -125,12 +125,30 @@ func TestNewPersister(t *testing.T) {
 	}
 }
 
+func TestPersister_WaitPersistDone(t *testing.T) {
+	cleanTest(t)
+	numrec := 30
+	trp, _ := genTestPersister(t, numrec, 10*time.Millisecond)
+
+	if len(trp.dirtyIds) != numrec {
+		t.Errorf("Persister dirtyIds has unexpected length before persisting (expected %d): %d", numrec, len(trp.records))
+	}
+	// test WaitPersistDone with active Persister
+	trp.WaitPersistDone()
+	if len(trp.dirtyIds) != 0 {
+		t.Errorf("Persister dirtyIds has unexpected length after persisting (expected 0): %d", len(trp.records))
+	}
+
+	// test WaitPersistDone with inactive Persister
+	trp.WaitPersistDone()
+}
+
 func TestPersister_GetFilesList(t *testing.T) {
 	cleanTest(t)
-	numrec := 10
+	numrec := 30
 	trp, index := genTestPersister(t, numrec, 10*time.Millisecond)
 	time.Sleep(100 * time.Millisecond)
-	files, err := trp.GetFilesList()
+	files, err := trp.GetFilesList("deleted")
 	if err != nil {
 		t.Fatal("GetFilesList returns unexpected error:", err)
 	}
@@ -173,8 +191,8 @@ func TestPersister_LoadRecordFromFileList(t *testing.T) {
 	cleanTest(t)
 	numrec := 10
 	trp, index := genTestPersister(t, numrec, 10*time.Millisecond)
-	time.Sleep(100 * time.Millisecond)
-	files, err := trp.GetFilesList()
+	trp.WaitPersistDone()
+	files, err := trp.GetFilesList("")
 	if err != nil {
 		t.Fatal("GetFilesList returns unexpected error:", err)
 	}

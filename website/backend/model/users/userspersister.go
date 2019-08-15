@@ -36,6 +36,9 @@ func (up *UsersPersister) LoadDirectory() error {
 	up.Lock()
 	defer up.Unlock()
 
+	up.persister.Reinit()
+	up.users = []*UserRecord{}
+
 	files, err := up.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from UsersPersister: %v", err)
