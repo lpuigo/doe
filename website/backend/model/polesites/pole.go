@@ -3,6 +3,8 @@ package polesites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"sort"
@@ -94,18 +96,24 @@ const (
 	catPoleCreation string = "Création"
 )
 
-func (p *Pole) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	poleArticles := currentBpu.GetCategoryArticles(activityPole)
 
 	todo, done := p.IsTodo(), p.IsDone()
-	actors := p.Actors
+
+	actors := []string{}
+	for _, actorId := range p.Actors {
+		actors = append(actors, actorById(actorId))
+	}
+	sort.Strings(actors)
+
 	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
 	if err != nil {
 		return nil, fmt.Errorf("can not define pole creation Item: %s", err.Error())
 	}
-	sort.Strings(actors)
+
 	it := items.NewItem(
 		activityPole,
 		p.Ref,
@@ -118,9 +126,39 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 		todo,
 		done,
 	)
-	//it.Actors = p.Actors
-
-	// TODO Manage other item (enrobé, ...)
+	it.Actors = actors
 	res = append(res, it)
+
+	for _, product := range p.Product {
+		article, err := poleArticles.GetArticleFor(product, p.Height)
+		if err != nil {
+			return nil, fmt.Errorf("can not define pole product Item: %s", err.Error())
+		}
+
+		it := items.NewItem(
+			activityPole,
+			p.Ref,
+			fmt.Sprintf("prestation complémentaire %s pour %s", product, p.Ref),
+			p.Date,
+			strings.Join(actors, ", "),
+			article,
+			1,
+			1,
+			todo,
+			done,
+		)
+		it.Actors = actors
+		res = append(res, it)
+	}
+
 	return res, nil
+}
+
+// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
+func (p *Pole) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isActorVisible clients.IsTeamVisible,
+	currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
+
+	//TODO to implement
+
+	return nil
 }
