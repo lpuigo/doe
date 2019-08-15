@@ -38,6 +38,7 @@ func (u *User) Copy(ou *User) {
 	u.Permissions = ou.Permissions
 }
 
+// GetClientByName returns the client with given name (nil if not found)
 func (u *User) GetClientByName(clientName string) *Client {
 	for _, c := range u.Clients {
 		if c.Name == clientName {

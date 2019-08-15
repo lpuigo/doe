@@ -101,8 +101,17 @@ func (ptm *PoleTableModel) FormatProduct(p *ps.Pole) string {
 	return strings.Join(p.Product, ", ")
 }
 
-func (ptm *PoleTableModel) FormatActors(p *ps.Pole) string {
-	return strings.Join(p.Actors, "\n")
+func (ptm *PoleTableModel) FormatActors(vm *hvue.VM, p *ps.Pole) string {
+	ptm = &PoleTableModel{Object: vm.Object}
+	client := ptm.User.GetClientByName(ptm.Polesite.Client)
+	actors := []string{}
+	for _, actId := range p.Actors {
+		actor := client.GetActorBy(actId)
+		if actor != nil {
+			actors = append(actors, actor.LastName)
+		}
+	}
+	return strings.Join(actors, "\n")
 }
 
 func (ptm *PoleTableModel) SortState(a, b *ps.Pole) int {
