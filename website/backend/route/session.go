@@ -6,6 +6,7 @@ import (
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 	"sort"
 )
@@ -16,9 +17,11 @@ type authentActor struct {
 	LastName  string
 	FirstName string
 	Role      string
+	Active    bool
 }
 
 func authentActorsFrom(acs []*actors.Actor) []authentActor {
+	today := date.Today().String()
 	res := make([]authentActor, len(acs))
 	for i, actor := range acs {
 		res[i] = authentActor{
@@ -26,6 +29,7 @@ func authentActorsFrom(acs []*actors.Actor) []authentActor {
 			LastName:  actor.LastName,
 			FirstName: actor.FirstName,
 			Role:      actor.Role,
+			Active:    actor.IsActiveOn(today),
 		}
 	}
 	sort.Slice(res, func(i, j int) bool {
@@ -46,7 +50,7 @@ type authentClient struct {
 func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
 	for _, client := range clients {
-		actors := mgr.Actors.GetActiveActorsByClient(client.Name)
+		actors := mgr.Actors.GetActorsByClient(client.Name, false)
 		authentActors := authentActorsFrom(actors)
 		authClient := authentClient{
 			Name:     client.Name,

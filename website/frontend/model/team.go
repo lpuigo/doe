@@ -17,6 +17,7 @@ type Actor struct {
 	LastName  string `js:"LastName"`
 	FirstName string `js:"FirstName"`
 	Role      string `js:"Role"`
+	Active    bool   `js:"Active"`
 }
 
 func (a *Actor) GetRef() string {

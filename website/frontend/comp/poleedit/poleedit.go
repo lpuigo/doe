@@ -325,6 +325,10 @@ func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
 	}
 	res := []*elements.ValueLabel{}
 	for _, actor := range client.Actors {
+		if !actor.Active {
+			// skip inactive actors
+			continue
+		}
 		ref := actor.GetRef()
 		res = append(res, elements.NewValueLabel(strconv.Itoa(actor.Id), ref))
 	}
