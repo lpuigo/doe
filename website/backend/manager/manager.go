@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	ps "github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	rs "github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
@@ -210,6 +211,29 @@ func (m Manager) genIsTeamVisible() (clients.IsTeamVisible, error) {
 	}, nil
 }
 
+// genIsActorVisible returns a IsTeamVisible function: func(ClientTeam) bool, which is true when current user is allowed to see clientteam (by actorId) related activity
+func (m Manager) genIsActorVisible() (clients.IsTeamVisible, error) {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(clients.ClientTeam) bool { return true }, nil
+	}
+
+	actorVisible := make(map[clients.ClientTeam]bool)
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return nil, err
+	}
+	for _, client := range clts {
+		allowedActors := m.Actors.GetActorsByClient(client.Name, false)
+		for _, actor := range allowedActors {
+			actorVisible[clients.ClientTeam{Client: client.Name, Team: strconv.Itoa(actor.Id)}] = true
+			actorVisible[clients.ClientTeam{Client: client.Name, Team: actor.LastName}] = true
+		}
+	}
+	return func(ct clients.ClientTeam) bool {
+		return actorVisible[ct]
+	}, nil
+}
+
 // =====================================================================================================================
 // Worksites related methods
 //
@@ -382,4 +406,40 @@ func (m Manager) PolesitesArchiveName() string {
 
 func (m Manager) CreatePolesitesArchive(writer io.Writer) error {
 	return m.Polesites.CreateArchive(writer)
+}
+
+// GetPolesitesWeekStats returns Polesites Stats per Week (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesWeekStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonday(d)
+	}
+	return m.getPolesitesStats(writer, 12, df)
+}
+
+// GetPolesitesMonthStats returns Polesites Stats per Month (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesMonthStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonth(d)
+	}
+	return m.getPolesitesStats(writer, 12, df)
+}
+
+func (m Manager) getPolesitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
+	isActorVisible, err := m.genIsActorVisible()
+	if err != nil {
+		return err
+	}
+
+	statContext := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isActorVisible,
+		ShowTeam:      !m.CurrentUser.Permissions["Review"],
+	}
+
+	polesiteStats, err := m.Polesites.GetStats(statContext, m.visiblePolesiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(polesiteStats)
 }

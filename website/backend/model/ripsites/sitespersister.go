@@ -10,7 +10,6 @@ import (
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"io"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -149,15 +148,15 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 	return -1
 }
 
-func sortedSetKeys(set map[string]int) []string {
-	res := []string{}
-	for key, _ := range set {
-		res = append(res, key)
-	}
-	sort.Strings(res)
-	return res
-}
-
+//func sortedSetKeys(set map[string]int) []string {
+//	res := []string{}
+//	for key, _ := range set {
+//		res = append(res, key)
+//	}
+//	sort.Strings(res)
+//	return res
+//}
+//
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
 func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) (*rs.RipsiteStats, error) {
 	sp.RLock()
@@ -178,101 +177,19 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 		}
 	}
 
-	//create client-team, sites, Series & dates Lists
-	end := date.Today()
-	start := end.String()
-	teamset := make(map[string]int)
-	serieset := make(map[string]int)
-	siteset := make(map[string]int)
-	agrValues := make(map[items.StatKey]float64)
-	for key, val := range calcValues {
-		teamset[key.Team] = 1
-		serieset[key.Serie] = 1
-		siteset[key.Site] = 1
-		if key.Date < start {
-			start = key.Date
-		}
-		agrValues[items.StatKey{
-			Team:    key.Team,
-			Date:    key.Date,
-			Site:    key.Site,
-			Article: "",
-			Serie:   key.Serie,
-		}] += val
+	sc := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isTeamVisible,
+		ShowTeam:      showTeam,
 	}
-	teams := []string{}
-	for t, _ := range teamset {
-		// if showTeam is false, only show client sum-up
-		if !(!showTeam && strings.Contains(t, " : ")) {
-			teams = append(teams, t)
-		}
-	}
-	sort.Strings(teams)
-
-	series := sortedSetKeys(serieset)
-	sites := sortedSetKeys(siteset)
-
-	dateset := make(map[string]int)
-	curStringDate := dateFor(date.DateFrom(start).String())
-	curDate := date.DateFrom(curStringDate)
-	endStringDate := dateFor(end.String())
-	endReached := false
-	for !endReached {
-		dateset[curStringDate] = 1
-		curDate = curDate.AddDays(7)
-		curStringDate = dateFor(curDate.String())
-		endReached = curStringDate > endStringDate
-	}
-	dates := sortedSetKeys(dateset)
-	// keep maxVal newest data
-	if len(dates) > maxVal {
-		dates = dates[len(dates)-maxVal:]
-	}
-
-	ws := rs.NewBERipsiteStats()
-	//ws.Values : map{series}[#team]{sites}[#date]float64
-	ws.Dates = dates
-	sitesmap := map[string]bool{}
-	for _, site := range sites {
-		sitesmap[site] = true
-	}
-	ws.Sites = sitesmap
-
-	for _, teamName := range teams {
-		teamActivity := 0.0
-		values := make(map[string]map[string][]float64)
-		for _, serie := range series {
-			values[serie] = make(map[string][]float64)
-			for _, site := range sites {
-				siteData := make([]float64, len(dates))
-				siteActivity := 0.0
-				for dateNum, d := range dates {
-					val := agrValues[items.StatKey{
-						Team:    teamName,
-						Date:    d,
-						Site:    site,
-						Article: "",
-						Serie:   serie,
-					}]
-					teamActivity += val
-					siteActivity += val
-					siteData[dateNum] = val
-				}
-				if siteActivity > 0 {
-					values[serie][site] = siteData
-				}
-			}
-		}
-		if teamActivity == 0 {
-			// current team as no activity on the time laps, skip it
-			continue
-		}
-		ws.Teams = append(ws.Teams, teamName)
-		for _, serie := range series {
-			ws.Values[serie] = append(ws.Values[serie], values[serie])
-		}
-	}
-	return ws, nil
+	d1 := func(s items.StatKey) string { return s.Serie }
+	d2 := func(s items.StatKey) string { return s.Team }
+	d3 := func(s items.StatKey) string { return s.Site }
+	f1 := items.KeepAll
+	f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
+	f3 := items.KeepAll
+	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }
 
 // WorksitesArchiveName returns the SiteArchive file name with today's date

@@ -149,7 +149,7 @@ func (ap *ActorsPersister) GetAllActors() []*Actor {
 	return res
 }
 
-// GetActorsByClient returns in Actor (active as today if activeOnly is true), acting for given client
+// GetActorsByClient returns all Actors (active as today if activeOnly is true), acting for given client
 func (ap *ActorsPersister) GetActorsByClient(client string, activeOnly bool) []*Actor {
 	ap.RLock()
 	defer ap.RUnlock()

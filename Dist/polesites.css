@@ -40,6 +40,15 @@ html, body {
    === Pole Row Style
  */
 
+/* disable element ui hover*/
+.el-table--enable-row-transition .el-table__body tr:hover > td {
+    background-color: initial !important;
+}
+
+.el-table--enable-row-transition .el-table__body tr:hover > td {
+    background-color: initial !important;
+}
+
 .el-table .pole-row-todo {
     background: #ffffff;
 }

@@ -14,16 +14,17 @@ type ClientTeam struct {
 	Team   string
 }
 
-type ClientActor struct {
-	Client string
-	Actor  string
-}
+//type ClientActor struct {
+//	Client string
+//	Actor  string
+//}
 
 type ClientByName func(clientName string) *Client
 type IsTeamVisible func(ClientTeam) bool
 type TeamNameByMember func(string) string
 type ActorById func(id string) string
-type IsActorVisible func(ClientActor) string
+
+//type IsActorVisible func(ClientActor) string
 
 func NewClient(name string) *Client {
 	return &Client{

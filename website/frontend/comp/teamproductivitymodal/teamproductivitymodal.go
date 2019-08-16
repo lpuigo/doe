@@ -101,7 +101,11 @@ func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
 	if tpmm.SiteMode == "Rip" {
-		go tpmm.callGetRipsitesStats()
+		go tpmm.callGetRipsitesStats("/api/ripsites/stat/")
+		return
+	}
+	if tpmm.SiteMode == "Poles" {
+		go tpmm.callGetRipsitesStats("/api/polesites/stat/")
 		return
 	}
 	go tpmm.callGetWorksitesStats()
@@ -177,9 +181,8 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 	return
 }
 
-func (tpmm *TeamProductivityModalModel) callGetRipsitesStats() {
+func (tpmm *TeamProductivityModalModel) callGetRipsitesStats(url string) {
 	defer func() { tpmm.Loading = false }()
-	url := "/api/ripsites/stat/"
 	req := xhr.NewRequest("GET", url+tpmm.ActiveMode)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON

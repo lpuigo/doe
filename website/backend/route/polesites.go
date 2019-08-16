@@ -88,6 +88,34 @@ func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesitesStats").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var err error
+
+	vars := mux.Vars(r)
+	freq := vars["freq"]
+	switch freq {
+	case "week":
+		err = mgr.GetPolesitesWeekStats(w)
+	case "month":
+		err = mgr.GetPolesitesMonthStats(w)
+	default:
+		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("%s polesite stats produced", freq), http.StatusOK)
+}
+
 func GetPolesitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesitesArchive").AddUser(mgr.CurrentUser.Name)

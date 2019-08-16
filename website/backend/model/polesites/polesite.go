@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
@@ -93,13 +92,12 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([
 }
 
 // AddStat adds Stats into values for given Polesite
-func (ps *PoleSite) AddStat(stats items.Stats, dateFor date.DateAggreg,
-	isActorVisible clients.IsTeamVisible, actorById clients.ActorById,
-	currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
+func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
+	actorById clients.ActorById, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
 
 	addValue := func(client, site, team, date, article, serie string, val float64) {
 		teamInfo := "Eq. " + teamName(team)
-		stats.AddStatValue(site, client+" : "+teamInfo, dateFor(date), article, serie, val)
+		stats.AddStatValue(site, client+" : "+teamInfo, sc.DateFor(date), article, serie, val)
 		//values[items.StatKey{
 		//	Team:    client + " : " + teamInfo,
 		//	Date:    dateFor(date),
@@ -107,7 +105,7 @@ func (ps *PoleSite) AddStat(stats items.Stats, dateFor date.DateAggreg,
 		//	Article: article,
 		//	Serie:   serie,
 		//}] += val
-		stats.AddStatValue(site, client, dateFor(date), article, serie, val)
+		stats.AddStatValue(site, client, sc.DateFor(date), article, serie, val)
 		//values[items.StatKey{
 		//	Team:    client,
 		//	Date:    dateFor(date),
