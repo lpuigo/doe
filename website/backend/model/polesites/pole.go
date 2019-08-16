@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"sort"
@@ -114,10 +113,16 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 		return nil, fmt.Errorf("can not define pole creation Item: %s", err.Error())
 	}
 
+	info := fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
+	if p.Comment != "" {
+		info += fmt.Sprintf("\nCmt: %s", p.Comment)
+		//strings.ReplaceAll(info, "\n", "\r\n")
+	}
+
 	it := items.NewItem(
 		activityPole,
 		p.Ref,
-		fmt.Sprintf("Création poteau %s", p.Ref),
+		info,
 		p.Date,
 		strings.Join(actors, ", "),
 		article,
@@ -152,13 +157,4 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 	}
 
 	return res, nil
-}
-
-// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (p *Pole) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isActorVisible clients.IsTeamVisible,
-	currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
-
-	//TODO to implement
-
-	return nil
 }

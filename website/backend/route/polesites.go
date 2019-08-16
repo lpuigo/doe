@@ -103,3 +103,32 @@ func GetPolesitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 	}
 	logmsg.Response = http.StatusOK
 }
+
+// GetPolesiteAttachement
+func GetPolesiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesiteAttachement").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetPolesiteXLSAttachementName(psr.PoleSite)))
+	w.Header().Set("Content-Type", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+	err = mgr.GetPolesiteXLSAttachement(w, psr.PoleSite)
+	if err != nil {
+		AddError(w, logmsg, "could not generate Polesite XLS Attachment file. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
+}

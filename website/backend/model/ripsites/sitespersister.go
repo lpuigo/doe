@@ -164,7 +164,7 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 	defer sp.RUnlock()
 
 	// calc per Team/date/indicator values
-	calcValues := make(map[items.StatKey]float64)
+	calcValues := make(items.Stats)
 	for _, sr := range sp.sites {
 		if isRSVisible(sr.Site) {
 			client := clientByName(sr.Site.Client)

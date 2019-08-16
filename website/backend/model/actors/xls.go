@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
-	"github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
 	"strconv"
 	"strings"
@@ -43,7 +43,7 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 			continue
 		}
 
-		id, err := getCellInt(xf, sheetName, doctemplate.RcToAxis(line, colActorId))
+		id, err := getCellInt(xf, sheetName, xlsx.RcToAxis(line, colActorId))
 		if err != nil {
 			return nil, err
 		}

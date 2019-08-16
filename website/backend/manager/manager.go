@@ -16,6 +16,7 @@ import (
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
+	"strconv"
 )
 
 type Manager struct {
@@ -150,6 +151,22 @@ func (m *Manager) genGetClient() clients.ClientByName {
 			return nil
 		}
 		return cr.Client
+	}
+}
+
+// genActorById returns a ActorById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
+func (m *Manager) genActorById() clients.ActorById {
+	return func(actorId string) string {
+		var ar *actors.ActorRecord
+		if actId, err := strconv.Atoi(actorId); err == nil {
+			ar = m.Actors.GetById(actId)
+		} else {
+			ar = m.Actors.GetByRef(actorId)
+		}
+		if ar == nil {
+			return ""
+		}
+		return ar.Actor.Ref
 	}
 }
 
@@ -353,6 +370,10 @@ func (m Manager) GetPolesitesInfo(writer io.Writer) error {
 	}
 
 	return json.NewEncoder(writer).Encode(psis)
+}
+
+func (m Manager) GetPolesiteXLSAttachement(writer io.Writer, ps *ps.PoleSite) error {
+	return m.TemplateEngine.GetPolesiteXLSAttachement(writer, ps, m.genGetClient(), m.genActorById())
 }
 
 func (m Manager) PolesitesArchiveName() string {
