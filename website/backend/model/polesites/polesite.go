@@ -97,7 +97,7 @@ func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
 
 	addValue := func(date, serie string, actors []string, value float64) {
 		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)
-		if len(actors) > 0 {
+		if sc.ShowTeam && len(actors) > 0 {
 			value /= float64(len(actors))
 			for _, actName := range actors {
 				stats.AddStatValue(ps.Ref, ps.Client+" : "+actName, date, "", serie, value)
