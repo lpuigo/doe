@@ -93,26 +93,16 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([
 
 // AddStat adds Stats into values for given Polesite
 func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
-	actorById clients.ActorById, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
+	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
 
-	addValue := func(client, site, team, date, article, serie string, val float64) {
-		teamInfo := "Eq. " + teamName(team)
-		stats.AddStatValue(site, client+" : "+teamInfo, sc.DateFor(date), article, serie, val)
-		//values[items.StatKey{
-		//	Team:    client + " : " + teamInfo,
-		//	Date:    dateFor(date),
-		//	Site:    site,
-		//	Article: article,
-		//	Serie:   serie,
-		//}] += val
-		stats.AddStatValue(site, client, sc.DateFor(date), article, serie, val)
-		//values[items.StatKey{
-		//	Team:    client,
-		//	Date:    dateFor(date),
-		//	Site:    site,
-		//	Article: article,
-		//	Serie:   serie,
-		//}] += val
+	addValue := func(date, serie string, actors []string, value float64) {
+		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)
+		if len(actors) > 0 {
+			value /= float64(len(actors))
+			for _, actName := range actors {
+				stats.AddStatValue(ps.Ref, ps.Client+" : "+actName, date, "", serie, value)
+			}
+		}
 	}
 
 	calcItems, err := ps.Itemize(currentBpu, actorById)
@@ -123,11 +113,13 @@ func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
 		if !item.Done {
 			continue
 		}
-		work := item.Work()
-		addValue(ps.Client, ps.Ref, item.Team, item.Date, item.Article.Name, items.StatSerieWork, work)
+		actorsName := make([]string, len(item.Actors))
+		for i, actId := range item.Actors {
+			actorsName[i] = actorById(actId)
+		}
+		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
 		if showprice {
-			price := item.Price()
-			addValue(ps.Client, ps.Ref, item.Team, item.Date, item.Article.Name, items.StatSeriePrice, price)
+			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
 		}
 	}
 	return nil

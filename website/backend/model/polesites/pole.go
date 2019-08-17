@@ -131,19 +131,19 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 		todo,
 		done,
 	)
-	it.Actors = actors
+	it.Actors = p.Actors
 	res = append(res, it)
 
 	for _, product := range p.Product {
 		article, err := poleArticles.GetArticleFor(product, p.Height)
 		if err != nil {
-			return nil, fmt.Errorf("can not define pole product Item: %s", err.Error())
+			return nil, fmt.Errorf("can not define pole product item: %s", err.Error())
 		}
 
 		it := items.NewItem(
 			activityPole,
 			p.Ref,
-			fmt.Sprintf("prestation complémentaire %s pour %s", product, p.Ref),
+			fmt.Sprintf("prestation complémentaire %s", product),
 			p.Date,
 			strings.Join(actors, ", "),
 			article,
@@ -152,7 +152,7 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 			todo,
 			done,
 		)
-		it.Actors = actors
+		it.Actors = p.Actors
 		res = append(res, it)
 	}
 

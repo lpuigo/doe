@@ -186,7 +186,7 @@ func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPole
 			if client == nil {
 				continue
 			}
-			err := pr.AddStat(calcValues, sc, actorById, client.Bpu, client.GenTeamNameByMember(), showprice)
+			err := pr.AddStat(calcValues, sc, actorById, client.Bpu, showprice)
 			if err != nil {
 				return nil, err
 			}
