@@ -2,6 +2,11 @@ package polesites
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -50,4 +55,106 @@ func (p *Pole) SearchString() string {
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "AspiDate", strings.ToUpper(p.AspiDate))
 	fmt.Fprintf(&searchBuilder, "pole%s:%s,", "AttachDate", strings.ToUpper(p.AttachmentDate))
 	return searchBuilder.String()
+}
+
+func (p *Pole) IsTodo() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	//case poleconst.StateNoGo:
+	case poleconst.StateToDo:
+		return true
+	case poleconst.StateHoleDone:
+		return true
+	case poleconst.StateIncident:
+		return true
+	case poleconst.StateDone:
+		return true
+	//case poleconst.StateCancelled:
+	default:
+		return false
+	}
+}
+
+func (p *Pole) IsDone() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	//case poleconst.StateNoGo:
+	//case poleconst.StateToDo:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	case poleconst.StateDone:
+		return true
+	//case poleconst.StateCancelled:
+	default:
+		return false
+	}
+}
+
+const (
+	activityPole    string = "Poteaux"
+	catPoleCreation string = "Création"
+)
+
+func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+	res := []*items.Item{}
+
+	poleArticles := currentBpu.GetCategoryArticles(activityPole)
+
+	todo, done := p.IsTodo(), p.IsDone()
+
+	actors := []string{}
+	for _, actorId := range p.Actors {
+		actors = append(actors, actorById(actorId))
+	}
+	sort.Strings(actors)
+
+	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
+	if err != nil {
+		return nil, fmt.Errorf("can not define pole creation Item: %s", err.Error())
+	}
+
+	info := fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
+	if p.Comment != "" {
+		info += fmt.Sprintf("\nCmt: %s", p.Comment)
+		//strings.ReplaceAll(info, "\n", "\r\n")
+	}
+
+	it := items.NewItem(
+		activityPole,
+		p.Ref,
+		info,
+		p.Date,
+		strings.Join(actors, ", "),
+		article,
+		1,
+		1,
+		todo,
+		done,
+	)
+	it.Actors = p.Actors
+	res = append(res, it)
+
+	for _, product := range p.Product {
+		article, err := poleArticles.GetArticleFor(product, p.Height)
+		if err != nil {
+			return nil, fmt.Errorf("can not define pole product item: %s", err.Error())
+		}
+
+		it := items.NewItem(
+			activityPole,
+			p.Ref,
+			fmt.Sprintf("prestation complémentaire %s", product),
+			p.Date,
+			strings.Join(actors, ", "),
+			article,
+			1,
+			1,
+			todo,
+			done,
+		)
+		it.Actors = p.Actors
+		res = append(res, it)
+	}
+
+	return res, nil
 }

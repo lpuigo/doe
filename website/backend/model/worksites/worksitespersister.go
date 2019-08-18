@@ -44,6 +44,9 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 	wsp.Lock()
 	defer wsp.Unlock()
 
+	wsp.persister.Reinit()
+	wsp.workSites = []*WorkSiteRecord{}
+
 	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from worksites persister: %v", err)

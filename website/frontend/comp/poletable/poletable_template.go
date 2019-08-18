@@ -1,15 +1,14 @@
 package poletable
 
-const template string = `<!--header-row-class-name="prjptf-light"-->
-<!--:default-sort = "{prop: 'client', order: 'ascending'}"-->
-<el-main  style="height: 100%; padding: 0px">
+const template string = `<el-main  style="height: 100%; padding: 0px">
     <el-table
             :data="filteredPoles"
             :row-class-name="TableRowClassName"
             :default-sort = "{prop: 'Ref', order: 'ascending'}"
             height="100%"
             :border=true size="mini"
-            @row-dblclick="SetSelectedPole"
+			highlight-current-row
+			@current-change="SetSelectedPole"
     >
         <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
         <el-table-column

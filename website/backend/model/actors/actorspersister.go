@@ -37,6 +37,9 @@ func (ap *ActorsPersister) LoadDirectory() error {
 	ap.Lock()
 	defer ap.Unlock()
 
+	ap.persister.Reinit()
+	ap.actors = []*ActorRecord{}
+
 	files, err := ap.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from actors persister: %v", err)
@@ -146,15 +149,15 @@ func (ap *ActorsPersister) GetAllActors() []*Actor {
 	return res
 }
 
-// GetActiveActorsByClient returns in activity Actor, acting for given client
-func (ap *ActorsPersister) GetActiveActorsByClient(client string) []*Actor {
+// GetActorsByClient returns all Actors (active as today if activeOnly is true), acting for given client
+func (ap *ActorsPersister) GetActorsByClient(client string, activeOnly bool) []*Actor {
 	ap.RLock()
 	defer ap.RUnlock()
 
 	res := []*Actor{}
 	today := date.Today().String()
 	for _, ar := range ap.actors {
-		if ar.Actor.Client == client && ar.IsActiveOn(today) {
+		if ar.Actor.Client == client && (!activeOnly || ar.IsActiveOn(today)) {
 			res = append(res, ar.Actor)
 		}
 	}

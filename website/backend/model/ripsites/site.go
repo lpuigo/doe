@@ -371,36 +371,38 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
+func (s *Site) AddStat(values items.Stats, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
 	addValue := func(client, site, team, date, article, serie string, val float64) {
 		teamInfo := "Eq. " + teamName(team)
-		values[items.StatKey{
-			Team:    client + " : " + teamInfo,
-			Date:    dateFor(date),
-			Site:    site,
-			Article: article,
-			Serie:   serie,
-		}] += val
-		values[items.StatKey{
-			Team:    client,
-			Date:    dateFor(date),
-			Site:    site,
-			Article: article,
-			Serie:   serie,
-		}] += val
+		values.AddStatValue(site, client+" : "+teamInfo, dateFor(date), article, serie, val)
+		//values[items.StatKey{
+		//	Team:    client + " : " + teamInfo,
+		//	Date:    dateFor(date),
+		//	Site:    site,
+		//	Article: article,
+		//	Serie:   serie,
+		//}] += val
+		values.AddStatValue(site, client, dateFor(date), article, serie, val)
+		//values[items.StatKey{
+		//	Team:    client,
+		//	Date:    dateFor(date),
+		//	Site:    site,
+		//	Article: article,
+		//	Serie:   serie,
+		//}] += val
 	}
 
 	calcItems, err := s.Itemize(currentBpu)
 	if err != nil {
-		return fmt.Errorf("error on stat itemize for '%s':%s", s.Ref, err.Error())
+		return fmt.Errorf("error on ripsite stat itemize for '%s':%s", s.Ref, err.Error())
 	}
 	for _, item := range calcItems {
 		if !item.Done {
 			continue
 		}
-		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work())
+		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, items.StatSerieWork, item.Work())
 		if showprice {
-			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
+			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, items.StatSeriePrice, item.Price())
 		}
 	}
 	return nil

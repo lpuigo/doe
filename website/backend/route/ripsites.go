@@ -123,7 +123,7 @@ func GetRipSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Requ
 	reqRipSiteId := mux.Vars(r)["rsid"]
 	rsrid, err := strconv.Atoi(reqRipSiteId)
 	if err != nil {
-		AddError(w, logmsg, "mis-formatted WorkSite id '"+reqRipSiteId+"'", http.StatusBadRequest)
+		AddError(w, logmsg, "mis-formatted RipSite id '"+reqRipSiteId+"'", http.StatusBadRequest)
 		return
 	}
 	rsr := mgr.Ripsites.GetById(rsrid)
@@ -133,14 +133,14 @@ func GetRipSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetRipsiteXLSAttachementName(rsr.Site)))
-	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 	err = mgr.GetRipsiteXLSAttachement(w, rsr.Site)
 	if err != nil {
-		AddError(w, logmsg, "could not generate WorkSite XLS Attachment file. "+err.Error(), http.StatusInternalServerError)
+		AddError(w, logmsg, "could not generate RipSite XLS Attachment file. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for ripsite id %d (%s)", rsrid, rsr.Site.Ref), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for RipSite id %d (%s)", rsrid, rsr.Site.Ref), http.StatusOK)
 }
 
 func GetRipsitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

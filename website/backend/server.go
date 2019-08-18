@@ -127,8 +127,14 @@ func main() {
 
 	// Polesites methods
 	router.HandleFunc("/api/polesites", withUserManager("GetPolesitesInfo", route.GetPolesitesInfo)).Methods("GET")
+	router.HandleFunc("/api/polesites/archive", withUserManager("GetPolesitesArchive", route.GetPolesitesArchive)).Methods("GET")
+	router.HandleFunc("/api/polesites/stat/{freq}", withUserManager("GetPolesitesStats", route.GetPolesitesStats)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("GetPolesite", route.GetPolesite)).Methods("GET")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}/attach", withUserManager("GetPolesiteAttachement", route.GetPolesiteAttachement)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("UpdatePolesite", route.UpdatePolesite)).Methods("PUT")
+
+	// Administration methods
+	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")
 
 	// Static Files serving
 	router.PathPrefix(conf.AssetsRoot).Handler(http.StripPrefix(conf.AssetsRoot, http.FileServer(http.Dir(conf.AssetsDir))))

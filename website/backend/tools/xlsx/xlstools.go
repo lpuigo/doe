@@ -1,4 +1,4 @@
-package doctemplate
+package xlsx
 
 import (
 	"strconv"
