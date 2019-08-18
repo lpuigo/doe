@@ -39,7 +39,7 @@ const (
 )
 
 func (n *Nominatim) SearchAdress(addr string, callback func()) {
-	adr := strings.ReplaceAll(strings.Trim(addr, " "), " ", "+")
+	adr := strings.Replace(strings.Trim(addr, " "), " ", "+", -1)
 	uri := nominatimUrl + adr + nominatimFormatJson
 
 	go n.callSearchAdress(uri, callback)

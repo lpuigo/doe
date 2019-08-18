@@ -34,7 +34,7 @@ func (g Geoloc) GetLatLong() (float64, float64, error) {
 }
 
 func GeolocSearch(address string) ([]Geoloc, error) {
-	adr := strings.ReplaceAll(strings.Trim(address, " "), " ", "+")
+	adr := strings.Replace(strings.Trim(address, " "), " ", "+", -1)
 	uri := nominatimUrl + adr + nominatimFormatJson
 
 	response, err := http.Get(uri)
