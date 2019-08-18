@@ -5,3 +5,4 @@
 Distrib/*
 Dist/*.js
 Dist/*.js.map
+/Ressources/*.zip
