@@ -179,6 +179,10 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return ps, nil
 	}
 
+	cellCoord := func(col, row int) string {
+		return sheetName + "!" + xlsx.RcToAxis(row, col)
+	}
+
 	id := 0
 	for line, row := range xf.GetRows(sheetName) {
 		if line < rowPoleInfo {
@@ -213,35 +217,38 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		GeolocDone:
 		} else {
 			if errlat != nil {
-				return nil, fmt.Errorf("could not parse latitude '%s' row %d: %s", row[4], line+1, errlat.Error())
+				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), row[colPoleLat], errlat.Error())
 			}
 			if errlong != nil {
-				return nil, fmt.Errorf("could not parse longitude '%s' row %d: %s", row[5], line+1, errlong.Error())
+				return nil, fmt.Errorf("%s: could not parse longitude '%s': %s", cellCoord(colPoleLong, line), row[colPoleLong], errlong.Error())
 			}
 		}
 		state := row[colPoleState]
 		if state == "" {
 			state = poleconst.StateNotSubmitted
 		}
-		height, err := strconv.Atoi(row[colPoleHeight])
-		if err != nil {
-			return nil, fmt.Errorf("could not parse height '%s' row %d: %s", row[12], line+1, err.Error())
+		height := 8
+		if row[colPoleHeight] != "" {
+			height, err = strconv.Atoi(row[colPoleHeight])
+			if err != nil {
+				return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), row[colPoleHeight], err.Error())
+			}
 		}
-		pdate, err := parseDate(row[colPoleDate], line)
+		pdate, err := parseDate(row[colPoleDate])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleDate, line), err.Error())
 		}
-		adate, err := parseDate(row[colPoleAttachmentDate], line)
+		adate, err := parseDate(row[colPoleAttachmentDate])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleAttachmentDate, line), err.Error())
 		}
-		aspdate, err := parseDate(row[colPoleAspiDate], line)
+		aspdate, err := parseDate(row[colPoleAspiDate])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleAspiDate, line), err.Error())
 		}
-		dddate, err := parseDate(row[colPoleDictDate], line)
+		dddate, err := parseDate(row[colPoleDictDate])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleDictDate, line), err.Error())
 		}
 		actors := []string{}
 		if row[colPoleActors] != "" {
@@ -332,7 +339,7 @@ func getCellDate(xf *excelize.File, sheetname, axis string) (string, error) {
 	return date.Date(foundDate).String(), nil
 }
 
-func parseDate(source string, line int) (string, error) {
+func parseDate(source string) (string, error) {
 	pdate := ""
 	if source != "" {
 		tdate, err := time.Parse("2006-01-02", source)
@@ -341,7 +348,7 @@ func parseDate(source string, line int) (string, error) {
 			if err != nil {
 				tdate, err = time.Parse("1/2/06 15:04", source)
 				if err != nil {
-					return "", fmt.Errorf("could not parse date '%s' row %d: %s", source, line+1, err.Error())
+					return "", fmt.Errorf("could not parse date '%s': %s", source, err.Error())
 				}
 			}
 		}

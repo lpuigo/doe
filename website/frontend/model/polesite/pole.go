@@ -136,6 +136,8 @@ func PoleStateLabel(state string) string {
 		return poleconst.LabelNotSubmitted
 	case poleconst.StateNoGo:
 		return poleconst.LabelNoGo
+	case poleconst.StateDictToDo:
+		return poleconst.LabelDictToDo
 	case poleconst.StateToDo:
 		return poleconst.LabelToDo
 	case poleconst.StateHoleDone:
@@ -155,6 +157,7 @@ func GetStatesValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted),
 		elements.NewValueLabel(poleconst.StateNoGo, poleconst.LabelNoGo),
+		elements.NewValueLabel(poleconst.StateDictToDo, poleconst.LabelDictToDo),
 		elements.NewValueLabel(poleconst.StateToDo, poleconst.LabelToDo),
 		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
 		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
@@ -186,6 +189,8 @@ func PoleRowClassName(status string) string {
 	case poleconst.StateNotSubmitted:
 		return "pole-row-not-submitted"
 	case poleconst.StateNoGo:
+		return "pole-row-nogo"
+	case poleconst.StateDictToDo:
 		return "pole-row-nogo"
 	case poleconst.StateToDo:
 		return "pole-row-todo"

@@ -59,6 +59,9 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done int) {
 		case poleconst.StateNoGo:
 			total++
 			blocked++
+		case poleconst.StateDictToDo:
+			total++
+			blocked++
 		case poleconst.StateToDo:
 			total++
 		case poleconst.StateHoleDone:

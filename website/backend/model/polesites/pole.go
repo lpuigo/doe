@@ -61,6 +61,8 @@ func (p *Pole) IsTodo() bool {
 	switch p.State {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
+	case poleconst.StateDictToDo:
+		return true
 	case poleconst.StateToDo:
 		return true
 	case poleconst.StateHoleDone:
@@ -79,6 +81,7 @@ func (p *Pole) IsDone() bool {
 	switch p.State {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
 	//case poleconst.StateToDo:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:

@@ -17,6 +17,7 @@ const (
 const (
 	StateNotSubmitted string = "00 Not Submitted"
 	StateNoGo         string = "05 NoGo"
+	StateDictToDo     string = "08 DICT To Do"
 	StateToDo         string = "10 To Do"
 	StateHoleDone     string = "20 Hole Done"
 	StateIncident     string = "25 Incident"
@@ -25,6 +26,7 @@ const (
 
 	LabelNotSubmitted string = "Non soumis"
 	LabelNoGo         string = "NoGo Client"
+	LabelDictToDo     string = "DICT à faire"
 	LabelToDo         string = "A faire"
 	LabelHoleDone     string = "Trou fait"
 	LabelIncident     string = "Incident"
