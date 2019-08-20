@@ -42,9 +42,10 @@ func (pm *PoleMarker) EndEditMode() {
 }
 
 const (
-	pmHtmlPin   string = `<i class="fas fa-map-pin fa-3x"></i>`
-	pmHtmlPlain string = `<i class="fas fa-map-marker fa-3x"></i>`
-	pmHtmlHole  string = `<i class="fas fa-map-marker-alt fa-3x"></i>`
+	pmHtmlPin     string = `<i class="fas fa-map-pin fa-3x"></i>`
+	pmHtmlPlain   string = `<i class="fas fa-map-marker fa-3x"></i>`
+	pmHtmlHole    string = `<i class="fas fa-map-marker-alt fa-3x"></i>`
+	pmHtmlOutline string = `<i class="el-icon-location-outline" style="font-size: 3.3em"></i>`
 )
 
 func (pm *PoleMarker) UpdateFromState() {
@@ -55,7 +56,7 @@ func (pm *PoleMarker) UpdateFromState() {
 		html = pmHtmlPin
 		class = ""
 	case poleconst.StateNoGo:
-		html = pmHtmlPlain
+		html = pmHtmlOutline
 		class = "red"
 	case poleconst.StateToDo:
 		html = pmHtmlPlain
