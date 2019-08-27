@@ -10,17 +10,19 @@ import (
 type State struct {
 	*js.Object
 
-	Status    string `js:"Status"`
-	Team      string `js:"Team"`
-	DateStart string `js:"DateStart"`
-	DateEnd   string `js:"DateEnd"`
-	Comment   string `js:"Comment"`
+	Status    string   `js:"Status"`
+	Team      string   `js:"Team"`
+	Actors    []string `js:"Actors"`
+	DateStart string   `js:"DateStart"`
+	DateEnd   string   `js:"DateEnd"`
+	Comment   string   `js:"Comment"`
 }
 
 func NewState() *State {
 	s := &State{Object: tools.O()}
 	s.Status = ripconst.StateToDo
 	s.Team = ""
+	s.Actors = []string{}
 	s.DateStart = ""
 	s.DateEnd = ""
 	s.Comment = ""
@@ -80,7 +82,7 @@ func (s *State) SetToDo() {
 }
 
 func (s *State) UpdateStatus() {
-	if tools.Empty(s.Team) {
+	if tools.Empty(s.Team) && len(s.Actors) == 0 {
 		s.SetToDo()
 		return
 	}

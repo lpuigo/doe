@@ -5,6 +5,7 @@ import "github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 type State struct {
 	Status    string
 	Team      string
+	Actors    []string
 	DateStart string
 	DateEnd   string
 	Comment   string
