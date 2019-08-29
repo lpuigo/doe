@@ -2,14 +2,15 @@ package migrate
 
 import (
 	"fmt"
-	"github.com/lpuig/ewin/doe/website/backend/model/actors"
-	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
-	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
 const (
@@ -48,37 +49,93 @@ func Test_MigrateRipSiteWithActors(t *testing.T) {
 	}
 }
 
-type ActorsDict map[string]string
+type ActorsDict map[string][]*actors.Actor
 
 func genActorsDict(t *testing.T, ap *actors.ActorsPersister) ActorsDict {
 	res := make(ActorsDict)
 
 	for _, actor := range ap.GetAllActors() {
-		res[strings.Trim(strings.ToUpper(actor.LastName), " ")] = strconv.Itoa(actor.Id)
+		luName := strings.Trim(strings.ToUpper(actor.LastName), " ")
+		if res[luName] == nil {
+			res[luName] = []*actors.Actor{actor}
+			continue
+		}
+		res[luName] = append(res[luName], actor)
 	}
 	return res
 }
 
 // Match returns actors id if name match, empty string otherwise
-func (ad ActorsDict) Match(name string) string {
-	return ad[strings.Trim(strings.ToUpper(name), " ")]
+func (ad ActorsDict) Match(name string, state *ripsites.State) string {
+	luName := strings.Trim(strings.ToUpper(name), " ")
+	matchActor := ad[luName]
+	if matchActor == nil {
+		return ""
+	}
+	if len(matchActor) == 1 {
+		return strconv.Itoa(matchActor[0].Id)
+	}
+	checkDate := state.DateEnd
+	if checkDate == "" {
+		checkDate = state.DateStart
+	}
+	for _, actor := range matchActor {
+		if actor.Period.Begin > checkDate || (actor.Period.End != "" && actor.Period.End < checkDate) {
+			continue
+		}
+		return strconv.Itoa(actor.Id)
+	}
+	return ""
+}
+
+func migrateState(t *testing.T, ref1, ref2 string, state *ripsites.State, actorsDict ActorsDict) {
+	names := strings.Split(state.Team, ",")
+	actors := []string{}
+	for _, name := range names {
+		if id := actorsDict.Match(name, state); id != "" {
+			actors = append(actors, id)
+		}
+	}
+	t.Logf("%s.%s: %s => %v", ref1, ref2, state.Team, actors)
+	state.Actors = actors
+}
+
+func initState(state *ripsites.State) {
+	state.Actors = []string{}
 }
 
 func migrateRipsite(t *testing.T, ripsite *ripsites.SiteRecord, actorsDict ActorsDict) {
-	// migrate pulling
+	// migrate measurement
 	for _, pulling := range ripsite.Pullings {
+		initState(&pulling.State)
+		for i, _ := range pulling.Chuncks {
+			initState(&pulling.Chuncks[i].State)
+		}
 		if tools.Empty(pulling.State.Team) {
 			continue
 		}
-		names := strings.Split(pulling.State.Team, ",")
-		actors := []string{}
-		for _, name := range names {
-			if id := actorsDict.Match(name); id != "" {
-				actors = append(actors, id)
-			}
+		migrateState(t, "pull "+ripsite.Ref, pulling.Chuncks[0].EndingNodeName, &pulling.State, actorsDict)
+	}
+
+	// migrate Junctions
+	for _, junction := range ripsite.Junctions {
+		initState(&junction.State)
+		for i, _ := range junction.Operations {
+			initState(&junction.Operations[i].State)
 		}
-		t.Logf("%s: pulling %s => %s => %v", ripsite.Ref, pulling.CableName, pulling.State.Team, actors)
-		pulling.State.Actors = actors
+		if tools.Empty(junction.State.Team) {
+			continue
+		}
+		migrateState(t, "junc "+ripsite.Ref, junction.NodeName, &junction.State, actorsDict)
+	}
+
+	// migrate Junctions
+	for _, measurement := range ripsite.Measurements {
+		initState(&measurement.State)
+		if tools.Empty(measurement.State.Team) {
+			continue
+		}
+		migrateState(t, "meas "+ripsite.Ref, measurement.DestNodeName, &measurement.State, actorsDict)
 	}
 
 	fname := filepath.Join(migrated_ripsite_dir, fmt.Sprintf("%06d.json", ripsite.Id))
