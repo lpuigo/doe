@@ -21,6 +21,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
+	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -219,6 +220,10 @@ func (m *MainPageModel) UpdateWorksite(id int) {
 
 func (m *MainPageModel) UpdateRipsite(id int) {
 	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
+}
+
+func (m *MainPageModel) OpenRipsite(id int) {
+	js.Global.Get("window").Call("open", "ripsite.html?rsid="+strconv.Itoa(id))
 }
 
 func (m *MainPageModel) CreateNewWorksite() {

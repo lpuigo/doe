@@ -403,43 +403,19 @@ pre {
     background: #d7edd5;
 }
 
+.el-table .ripactivitystatus-row-warning1  {
+    background: #f0e4aa;
+}
+
+.el-table .ripactivitystatus-row-warning2 {
+    background: #f0cdaa;
+}
+
 .el-table .ripactivitystatus-row-blocked {
     background: #f0b0aa;
 }
 
-.el-table .ripactivitystatus-row-warning {
-    background: #f2deb6;
-}
-
 .el-table .ripactivitystatus-row-canceled {
-    background: #e6e8eb;
-}
-
-.ripactivitystatus-row-todo {
-    background: #ffffff;
-}
-
-.ripactivitystatus-row-inprogress {
-    background: #ebf2eb;
-}
-
-.ripactivitystatus-row-done {
-    background: #d7edd5;
-}
-
-.ripactivitystatus-row-warning1 {
-    background: #f0e4aa;
-}
-
-.ripactivitystatus-row-warning2 {
-    background: #f0cdaa;
-}
-
-.ripactivitystatus-row-blocked {
-    background: #f0b0aa;
-}
-
-.ripactivitystatus-row-canceled {
     background: #e6e8eb;
 }
 

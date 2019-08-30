@@ -110,12 +110,12 @@ func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measur
 }
 
 func (rmum *RipMeasurementUpdateModel) TableRowClassName(rowInfo *js.Object) string {
-	junction := &fmrip.Measurement{Object: rowInfo.Get("row")}
-	return junction.State.GetRowStyle()
+	meas := &fmrip.Measurement{Object: rowInfo.Get("row")}
+	return rmum.MeasurementClassName(meas)
 }
 
-func (rmum *RipMeasurementUpdateModel) JunctionClassName(junction *fmrip.Measurement) string {
-	return junction.State.GetRowStyle()
+func (rmum *RipMeasurementUpdateModel) MeasurementClassName(meas *fmrip.Measurement) string {
+	return meas.State.GetRowStyle()
 }
 
 func (rmum *RipMeasurementUpdateModel) GetNode(vm *hvue.VM, name string) *fmrip.Node {

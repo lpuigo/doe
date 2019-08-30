@@ -57,10 +57,11 @@ const template string = `<el-container style="height: 100%">
         </el-row>
     </el-header>
     <div style="height: 100%;overflow-x: hidden;overflow-y: auto;padding: 0px 0px; margin-top: 8px">
+		<!--
         <el-row v-for="(meas, index) in filteredMeasurements" :key="meas" 
                 style="margin-top: 2px; padding: 2px 5px; border-radius: 4px" 
                 type="flex" align="middle"
-                :class="JunctionClassName(meas)"
+                :class="MeasurementClassName(meas)"
         >
             <el-col :span="2">
                 <el-popover placement="bottom-start" title="Evenements de mesure:"
@@ -94,6 +95,64 @@ const template string = `<el-container style="height: 100%">
                 <rip-state-update :client="value.Client" :user="user" v-model="meas.State"></rip-state-update>
             </el-col>
         </el-row>
+		-->
+		<el-table
+				:data="filteredMeasurements"
+				:row-class-name="TableRowClassName"
+				height="100%" :border=true size="mini"
+		>
+			<el-table-column
+					label="Pbo"
+					width="200px" :resizable="true" :show-overflow-tooltip=true
+			>
+				<template slot-scope="scope">
+					<el-popover placement="bottom-start" title="Evenements de mesure:"
+								trigger="hover"
+								width="600"
+								open-delay="400"
+					>
+						<el-row :gutter="5" v-for="(nodename, index) in scope.row.NodeNames" :key="index" >
+							<el-col :span="7">
+								<div>{{index+1}} - {{nodename}}</div>
+							</el-col>
+							<el-col :span="3">
+								<span>{{GetNode(nodename).DistFromPm}} m</span>
+							</el-col>
+							<el-col :span="14">
+								<span>{{GetNode(nodename).Address}}</span>
+							</el-col>
+						</el-row>
+						<span slot="reference">{{scope.row.DestNodeName}}</span>
+					</el-popover>
+				</template>
+			</el-table-column>
+			<el-table-column
+					label="Info"
+					width="200px" :resizable="true" :show-overflow-tooltip=true
+			>
+				<template slot-scope="scope">
+					<el-row :gutter="5">
+						<el-col :span="8">
+							<span>{{scope.row.NbFiber}} fibres</span>
+						</el-col>
+						<el-col :span="8">
+							<span>{{scope.row.NodeNames.length}} épi.</span>
+						</el-col>
+						<el-col :span="8">
+							<span>{{GetDestNodeDist(scope.row)}}m</span>
+						</el-col>
+					</el-row>
+				</template>
+			</el-table-column>
+			<el-table-column
+					label="Etat"
+			>
+				<template slot-scope="scope">
+					<rip-state-update v-model="scope.row.State" :user="user" :client="value.Client"></rip-state-update>
+				</template>
+			</el-table-column>
+		</el-table>
+
     </div>
 </el-container>
 `
