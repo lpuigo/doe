@@ -87,7 +87,7 @@ func (ptm *PolesiteTableModel) AttachmentUrl(id int) string {
 }
 
 func (ptm *PolesiteTableModel) OpenPolesite(id int) {
-	js.Global.Get("window").Call("open", "polesites.html?psid="+strconv.Itoa(id))
+	js.Global.Get("window").Call("open", "polesite.html?psid="+strconv.Itoa(id))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
