@@ -40,9 +40,9 @@ func (m *Measurement) Clone() *Measurement {
 	return &Measurement{Object: json.Parse(json.Stringify(m))}
 }
 
-func (m *Measurement) UpdateWith(mr *MeasurementReport, team string) {
+func (m *Measurement) UpdateWith(mr *MeasurementReport, actors []string) {
 	// If KO are reported => set measurement to InProgress
-	m.State.Team = team
+	m.State.Actors = actors[:]
 	m.NbOK = mr.FiberOK
 	m.NbKO = mr.FiberKO
 	m.NbWarn1 = mr.FiberWarning1

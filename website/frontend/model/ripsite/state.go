@@ -82,7 +82,7 @@ func (s *State) SetToDo() {
 }
 
 func (s *State) UpdateStatus() {
-	if tools.Empty(s.Team) && len(s.Actors) == 0 {
+	if len(s.Actors) == 0 {
 		s.SetToDo()
 		return
 	}
@@ -106,8 +106,6 @@ func GetStateStatusesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
 		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
 		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
-		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
-		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
 		elements.NewValueLabel(ripconst.StateDone, "Fait"),
 		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
 	}
@@ -118,8 +116,8 @@ func GetStateStatusesWithWarningValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
 		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
 		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
-		elements.NewValueLabel(ripconst.StateWarning2, "Warning 2"),
-		elements.NewValueLabel(ripconst.StateWarning1, "Warning 1"),
+		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
+		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
 		elements.NewValueLabel(ripconst.StateDone, "Fait"),
 		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
 	}

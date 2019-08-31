@@ -218,10 +218,10 @@ func (m *MainPageModel) UpdateWorksite(id int) {
 	m.VM.Refs("WorksiteUpdateModal").Call("Show", id, m.User)
 }
 
-func (m *MainPageModel) UpdateRipsite(id int) {
-	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
-}
-
+//func (m *MainPageModel) UpdateRipsite(id int) {
+//	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
+//}
+//
 func (m *MainPageModel) OpenRipsite(id int) {
 	js.Global.Get("window").Call("open", "ripsite.html?rsid="+strconv.Itoa(id))
 }

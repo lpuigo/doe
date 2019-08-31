@@ -33,6 +33,12 @@ func authentActorsFrom(acs []*actors.Actor) []authentActor {
 		}
 	}
 	sort.Slice(res, func(i, j int) bool {
+		if res[i].Active != res[j].Active {
+			if res[i].Active {
+				return true
+			}
+			return false
+		}
 		si := res[i].Role + " " + res[i].LastName + " " + res[i].FirstName
 		sj := res[j].Role + " " + res[j].LastName + " " + res[j].FirstName
 		return si < sj

@@ -21,5 +21,11 @@ type Actor struct {
 }
 
 func (a *Actor) GetRef() string {
-	return a.LastName + " " + a.FirstName
+	ext := ""
+	if !a.Active {
+		ext = " (parti)"
+	} else {
+		ext = " (" + a.Role + ")"
+	}
+	return a.LastName + " " + a.FirstName + ext
 }
