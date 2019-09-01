@@ -7,8 +7,8 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripstateupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strings"
 )
 
@@ -21,7 +21,7 @@ func componentOptions() []hvue.ComponentOption {
 		rippullingdistinfo.RegisterComponent(),
 		ripstateupdate.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter"),
+		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipPullingUpdateModel(vm)
 		}),
@@ -46,8 +46,9 @@ type RipPullingUpdateModel struct {
 
 	Ripsite *fmrip.Ripsite `js:"value"`
 	//ReferenceRipsite *fmrip.Ripsite `js:"refRipsite"`
-	User   *fm.User `js:"user"`
-	Filter string   `js:"filter"`
+	User       *fm.User `js:"user"`
+	Filter     string   `js:"filter"`
+	FilterType string   `js:"filtertype"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -59,6 +60,7 @@ func NewRipPullingUpdateModel(vm *hvue.VM) *RipPullingUpdateModel {
 	//rpum.ReferenceWorksite = nil
 	rpum.User = nil
 	rpum.Filter = ""
+	rpum.FilterType = ripconst.FilterValueAll
 	return rpum
 }
 
@@ -67,13 +69,21 @@ func RipPullingUpdateModelFromJS(o *js.Object) *RipPullingUpdateModel {
 }
 
 func (rpum *RipPullingUpdateModel) GetFilteredPullings() []*fmrip.Pulling {
-	if rpum.Filter == "" {
+	if rpum.FilterType == ripconst.FilterValueAll && rpum.Filter == "" {
 		return rpum.Ripsite.Pullings
 	}
 	res := []*fmrip.Pulling{}
-	filter := strings.ToLower(rpum.Filter)
+	expected := strings.ToUpper(rpum.Filter)
+	filter := func(p *fmrip.Pulling) bool {
+		sis := p.SearchString(rpum.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+
 	for _, pulling := range rpum.Ripsite.Pullings {
-		if strings.Contains(strings.ToLower(json.Stringify(pulling)), filter) {
+		if filter(pulling) {
 			res = append(res, pulling)
 		}
 	}

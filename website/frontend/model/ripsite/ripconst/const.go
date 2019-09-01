@@ -18,3 +18,17 @@ const (
 	RsStatusCancelled  string = "98 Canceled"
 	RsStatusDone       string = "99 Done"
 )
+
+const (
+	FilterValueAll     string = ""
+	FilterValuePtRef   string = "PT:"
+	FilterValueTrRef   string = "TR:"
+	FilterValueOpe     string = "OPE:"
+	FilterValueComment string = "CMT:"
+
+	FilterLabelAll     string = "Tous"
+	FilterLabelPtRef   string = "PT"
+	FilterLabelTrRef   string = "TR"
+	FilterLabelOpe     string = "Opération"
+	FilterLabelComment string = "Commentaire"
+)

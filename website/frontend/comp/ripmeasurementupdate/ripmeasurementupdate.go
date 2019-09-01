@@ -6,10 +6,10 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripstateupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripstateupdate.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter"),
+		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipMeasurementUpdateModel(vm)
 		}),
@@ -47,9 +47,10 @@ func componentOptions() []hvue.ComponentOption {
 type RipMeasurementUpdateModel struct {
 	*js.Object
 
-	Ripsite *fmrip.Ripsite `js:"value"`
-	User    *fm.User       `js:"user"`
-	Filter  string         `js:"filter"`
+	Ripsite    *fmrip.Ripsite `js:"value"`
+	User       *fm.User       `js:"user"`
+	Filter     string         `js:"filter"`
+	FilterType string         `js:"filtertype"`
 
 	UploadVisible      bool               `js:"uploadVisible"`
 	MeasurementActors  []string           `js:"measurementActors"`
@@ -64,6 +65,7 @@ func NewRipMeasurementUpdateModel(vm *hvue.VM) *RipMeasurementUpdateModel {
 	rmum.Ripsite = fmrip.NewRisite()
 	rmum.User = nil
 	rmum.Filter = ""
+	rmum.FilterType = ripconst.FilterValueAll
 	rmum.UploadVisible = false
 	rmum.MeasurementActors = []string{}
 	rmum.MeasurementSummary = fmrip.NewMeasurement()
@@ -94,13 +96,21 @@ func (rmum *RipMeasurementUpdateModel) GetPct(vm *hvue.VM, value int) string {
 }
 
 func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measurement {
-	if rmum.Filter == "" {
+	if rmum.FilterType == ripconst.FilterValueAll && rmum.Filter == "" {
 		return rmum.Ripsite.Measurements
 	}
 	res := []*fmrip.Measurement{}
-	filter := strings.ToLower(rmum.Filter)
+	expected := strings.ToUpper(rmum.Filter)
+	filter := func(p *fmrip.Measurement) bool {
+		sis := p.SearchString(rmum.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+
 	for _, meas := range rmum.Ripsite.Measurements {
-		if strings.Contains(strings.ToLower(json.Stringify(meas)), filter) {
+		if filter(meas) {
 			res = append(res, meas)
 		}
 	}

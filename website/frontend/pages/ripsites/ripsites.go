@@ -8,10 +8,9 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
-	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
-	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
@@ -87,7 +86,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.User = fm.NewUser()
 	mpm.ActivityMode = "Pulling"
 	mpm.Filter = ""
-	mpm.FilterType = poleconst.FilterValueAll
+	mpm.FilterType = ripconst.FilterValueAll
 	mpm.Ripsite = fmrip.NewRisite()
 	mpm.Reference = ""
 	mpm.Dirty = false
@@ -143,15 +142,24 @@ func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
 	//}
 }
 
-func (mpm *MainPageModel) GetFilterType() []*elements.ValueLabel {
-	return polesite.GetFilterTypeValueLabel()
+func (mpm *MainPageModel) GetFilterType(am string) []*elements.ValueLabel {
+	switch am {
+	//case "Pulling":
+	//	return fmrip.GetPullingFilterTypeValueLabel()
+	case "Junction":
+		return fmrip.GetJunctionFilterTypeValueLabel()
+	case "Measurement":
+		return fmrip.GetMeasurementFilterTypeValueLabel()
+	default: // Pulling
+		return fmrip.GetPullingFilterTypeValueLabel()
+	}
 }
 
 //
 func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
 	mpm.Filter = ""
-	mpm.FilterType = ""
+	mpm.FilterType = ripconst.FilterValueAll
 	mpm.ApplyFilter(vm)
 }
 

@@ -2,6 +2,7 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -75,4 +76,23 @@ func (m *Measurement) UpdateWith(mr *MeasurementReport, actors []string) {
 	if mr.Results != nil && len(mr.Results) > 0 {
 		m.State.Comment = mr.Comments()
 	}
+}
+
+func (m *Measurement) SearchString(filter string) string {
+	searchItem := func(prefix, typ, value string) string {
+		if value == "" {
+			return ""
+		}
+		if filter != ripconst.FilterValueAll && filter != typ {
+			return ""
+		}
+		return prefix + typ + value
+	}
+
+	res := searchItem("", ripconst.FilterValueComment, m.State.Comment)
+	res += searchItem(",", ripconst.FilterValuePtRef, m.DestNodeName)
+	for _, nodename := range m.NodeNames {
+		res += searchItem(",", ripconst.FilterValuePtRef, nodename)
+	}
+	return res
 }

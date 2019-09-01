@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
@@ -158,4 +159,31 @@ func RipsiteRowClassName(status string) string {
 		res = "worksite-row-error"
 	}
 	return res
+}
+
+func GetPullingFilterTypeValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.FilterValueAll, ripconst.FilterLabelAll),
+		elements.NewValueLabel(ripconst.FilterValuePtRef, ripconst.FilterLabelPtRef),
+		elements.NewValueLabel(ripconst.FilterValueTrRef, ripconst.FilterLabelTrRef),
+		elements.NewValueLabel(ripconst.FilterValueComment, ripconst.FilterLabelComment),
+	}
+}
+
+func GetJunctionFilterTypeValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.FilterValueAll, ripconst.FilterLabelAll),
+		elements.NewValueLabel(ripconst.FilterValuePtRef, ripconst.FilterLabelPtRef),
+		elements.NewValueLabel(ripconst.FilterValueTrRef, ripconst.FilterLabelTrRef),
+		elements.NewValueLabel(ripconst.FilterValueOpe, ripconst.FilterLabelOpe),
+		elements.NewValueLabel(ripconst.FilterValueComment, ripconst.FilterLabelComment),
+	}
+}
+
+func GetMeasurementFilterTypeValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.FilterValueAll, ripconst.FilterLabelAll),
+		elements.NewValueLabel(ripconst.FilterValuePtRef, ripconst.FilterLabelPtRef),
+		elements.NewValueLabel(ripconst.FilterValueComment, ripconst.FilterLabelComment),
+	}
 }

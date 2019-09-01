@@ -7,8 +7,8 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripstateupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ func componentOptions() []hvue.ComponentOption {
 		rippullingdistinfo.RegisterComponent(),
 		ripstateupdate.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter"),
+		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipJunctionUpdateModel(vm)
 		}),
@@ -47,8 +47,9 @@ type RipJunctionUpdateModel struct {
 
 	Ripsite *fmrip.Ripsite `js:"value"`
 	//ReferenceRipsite *fmrip.Ripsite `js:"refRipsite"`
-	User   *fm.User `js:"user"`
-	Filter string   `js:"filter"`
+	User       *fm.User `js:"user"`
+	Filter     string   `js:"filter"`
+	FilterType string   `js:"filtertype"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -60,6 +61,7 @@ func NewRipJunctionUpdateModel(vm *hvue.VM) *RipJunctionUpdateModel {
 	//rpum.ReferenceWorksite = nil
 	rpum.User = nil
 	rpum.Filter = ""
+	rpum.FilterType = ripconst.FilterValueAll
 	return rpum
 }
 
@@ -68,13 +70,21 @@ func RipJunctionUpdateModelFromJS(o *js.Object) *RipJunctionUpdateModel {
 }
 
 func (rjum *RipJunctionUpdateModel) GetFilteredJunctions() []*fmrip.Junction {
-	if rjum.Filter == "" {
+	if rjum.FilterType == ripconst.FilterValueAll && rjum.Filter == "" {
 		return rjum.Ripsite.Junctions
 	}
 	res := []*fmrip.Junction{}
-	filter := strings.ToLower(rjum.Filter)
+	expected := strings.ToUpper(rjum.Filter)
+	filter := func(p *fmrip.Junction) bool {
+		sis := p.SearchString(rjum.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+
 	for _, junction := range rjum.Ripsite.Junctions {
-		if strings.Contains(strings.ToLower(json.Stringify(junction)), filter) {
+		if filter(junction) {
 			res = append(res, junction)
 		}
 	}
