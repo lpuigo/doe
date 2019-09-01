@@ -13,7 +13,7 @@ type Actor struct {
 	Role      string
 	Vacation  []date.DateRange
 
-	Client string
+	Client []string
 }
 
 func NewActor(firstName, lastName, company string) *Actor {
@@ -26,7 +26,7 @@ func NewActor(firstName, lastName, company string) *Actor {
 		Company:   company,
 		Role:      "",
 		Vacation:  []date.DateRange{},
-		Client:    "",
+		Client:    []string{},
 	}
 }
 
@@ -35,4 +35,13 @@ func (a *Actor) IsActiveOn(date string) bool {
 		return true
 	}
 	return date < a.Period.End
+}
+
+func (a *Actor) WorksForClient(client string) bool {
+	for _, clt := range a.Client {
+		if clt == client {
+			return true
+		}
+	}
+	return false
 }

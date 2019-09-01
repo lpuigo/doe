@@ -57,6 +57,10 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 
 		fName := strings.Title(getValue(colActorFirstName))
 		lName := strings.ToUpper(getValue(colActorLastName))
+		clients := strings.Split(getValue(colActorClient), ",")
+		for i, clt := range clients {
+			clients[i] = strings.Trim(clt, " \t")
+		}
 
 		vacs := []date.DateRange{}
 		for c := colActorVacation; c < len(row); c += 2 {
@@ -83,7 +87,7 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 			Contract: getValue(colActorContract),
 			Role:     getValue(colActorRole),
 			Vacation: vacs,
-			Client:   getValue(colActorClient),
+			Client:   clients,
 		}
 
 		actors = append(actors, actor)

@@ -52,4 +52,6 @@ func TestXLStoJSON(t *testing.T) {
 
 		ap.Add(ar)
 	}
+
+	ap.persister.WaitPersistDone()
 }

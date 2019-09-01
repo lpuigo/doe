@@ -157,7 +157,7 @@ func (ap *ActorsPersister) GetActorsByClient(client string, activeOnly bool) []*
 	res := []*Actor{}
 	today := date.Today().String()
 	for _, ar := range ap.actors {
-		if ar.Actor.Client == client && (!activeOnly || ar.IsActiveOn(today)) {
+		if ar.Actor.WorksForClient(client) && (!activeOnly || ar.IsActiveOn(today)) {
 			res = append(res, ar.Actor)
 		}
 	}

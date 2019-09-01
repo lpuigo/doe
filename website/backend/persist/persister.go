@@ -199,8 +199,8 @@ func (p *Persister) PersistAll(r Recorder) {
 
 func (p *Persister) triggerPersist() {
 	if p.delay == 0 {
-		p.mut.Lock()
-		defer p.mut.Unlock()
+		//p.mut.Lock()
+		//defer p.mut.Unlock()
 		if p.persistTimer != nil {
 			p.persistTimer.Stop()
 			p.persistTimer = nil
