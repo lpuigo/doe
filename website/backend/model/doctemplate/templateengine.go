@@ -194,13 +194,13 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachementName(site *ripsites.Site) s
 }
 
 // GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
-func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsites.Site, getClient clients.ClientByName) error {
+func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsites.Site, getClient clients.ClientByName, actorById clients.ActorById) error {
 	client := getClient(site.Client)
 	if client == nil {
 		return fmt.Errorf("unknown client '%s'", site.Client)
 	}
 
-	its, err := site.Itemize(client.Bpu)
+	its, err := site.Itemize(client.Bpu, actorById)
 	if err != nil {
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}

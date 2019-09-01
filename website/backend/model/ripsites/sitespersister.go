@@ -10,7 +10,6 @@ import (
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"io"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 )
@@ -158,7 +157,7 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 //}
 //
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisible IsSiteVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool, showprice bool) (*rs.RipsiteStats, error) {
+func (sp *SitesPersister) GetStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
 	sp.RLock()
 	defer sp.RUnlock()
 
@@ -170,24 +169,19 @@ func (sp *SitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isRSVisi
 			if client == nil {
 				continue
 			}
-			err := sr.AddStat(calcValues, dateFor, isTeamVisible, client.Bpu, client.GenTeamNameByMember(), showprice)
+			err := sr.AddStat(calcValues, sc, actorById, client.Bpu, showprice)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	sc := items.StatContext{
-		MaxVal:        maxVal,
-		DateFor:       dateFor,
-		IsTeamVisible: isTeamVisible,
-		ShowTeam:      showTeam,
-	}
 	d1 := func(s items.StatKey) string { return s.Serie }
 	d2 := func(s items.StatKey) string { return s.Team }
 	d3 := func(s items.StatKey) string { return s.Site }
 	f1 := items.KeepAll
-	f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
+	f2 := items.KeepAll
+	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
 	f3 := items.KeepAll
 	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }

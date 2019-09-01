@@ -329,7 +329,7 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
-	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient())
+	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient(), m.genActorById())
 }
 
 func (m Manager) RipsitesArchiveName() string {
@@ -357,11 +357,19 @@ func (m Manager) GetRipsitesMonthStats(writer io.Writer) error {
 }
 
 func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
-	isTeamVisible, err := m.genIsTeamVisible()
+	isActorVisible, err := m.genIsActorVisible()
 	if err != nil {
 		return err
 	}
-	ripsiteStats, err := m.Ripsites.GetStats(maxVal, dateFor, m.visibleRipsiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"], m.CurrentUser.Permissions["Invoice"])
+
+	statContext := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isActorVisible,
+		ShowTeam:      !m.CurrentUser.Permissions["Review"],
+	}
+
+	ripsiteStats, err := m.Ripsites.GetStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err
 	}
