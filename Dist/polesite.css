@@ -11,15 +11,6 @@ html, body {
    === Map Marker Style
  */
 
-.el-row.spaced {
-    margin-bottom: 5px;
-}
-
-.el-row.doublespaced {
-    margin-top: 20px;
-    margin-bottom: 5px;
-}
-
 .blue {
     color: #0060ff;
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripinfoupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripjunctionupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripmeasurementupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
@@ -26,6 +27,7 @@ func main() {
 
 	hvue.NewVM(
 		ripsiteinfo.RegisterComponent(),
+		ripinfoupdate.RegisterComponent(),
 		rippullingupdate.RegisterComponent(),
 		ripjunctionupdate.RegisterComponent(),
 		ripmeasurementupdate.RegisterComponent(),
@@ -84,7 +86,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
 	mpm.User = fm.NewUser()
-	mpm.ActivityMode = "Pulling"
+	mpm.ActivityMode = "Info"
 	mpm.Filter = ""
 	mpm.FilterType = ripconst.FilterValueAll
 	mpm.Ripsite = fmrip.NewRisite()
@@ -171,6 +173,8 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 
 //
 func (mpm *MainPageModel) SetActivityMode() {
+	mpm.ActivityMode = "Info"
+	return
 	if len(mpm.Ripsite.Pullings) > 0 {
 		mpm.ActivityMode = "Pulling"
 		return

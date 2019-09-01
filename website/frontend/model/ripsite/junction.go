@@ -57,6 +57,14 @@ func (j *Junction) GetNbFiber() int {
 	return nb
 }
 
+func (j *Junction) GetNbFiberSplice() (fiber, splice int) {
+	for _, op := range j.Operations {
+		fiber += op.NbFiber
+		splice += op.NbSplice
+	}
+	return
+}
+
 func (j *Junction) SearchString(filter string) string {
 	searchItem := func(prefix, typ, value string) string {
 		if value == "" {

@@ -125,6 +125,59 @@ func (rs *Ripsite) GetInfo() (nbAvailPulling, nbPulling, nbAvailJunction, nbJunc
 	return
 }
 
+type Progress struct {
+	Total, Done, Blocked int
+}
+
+func (rs *Ripsite) GetPullingProgresses() (total, under, aerial, building Progress) {
+	for _, pulling := range rs.Pullings {
+		if !pulling.State.IsDoable() {
+			continue
+		}
+		tot, lov, und, aer, build := pulling.GetDists()
+		total.Total += tot
+		under.Total += und + lov
+		aerial.Total += aer
+		building.Total += build
+		if pulling.State.IsDone() {
+			total.Done += tot
+			under.Done += und + lov
+			aerial.Done += aer
+			building.Done += build
+		}
+		if pulling.State.IsBlocked() {
+			total.Blocked += tot
+			under.Blocked += und + lov
+			aerial.Blocked += aer
+			building.Blocked += build
+		}
+	}
+	return
+}
+
+func (rs *Ripsite) GetJunctionProgresses() (fibers, nodes, splices Progress) {
+	for _, junction := range rs.Junctions {
+		if !junction.State.IsDoable() {
+			continue
+		}
+		nbFiber, nbSplice := junction.GetNbFiberSplice()
+		nodes.Total += 1
+		fibers.Total += nbFiber
+		splices.Total += nbSplice
+		if junction.State.IsDone() {
+			nodes.Done += 1
+			fibers.Done += nbFiber
+			splices.Done += nbSplice
+		}
+		if junction.State.IsBlocked() {
+			nodes.Blocked += 1
+			fibers.Blocked += nbFiber
+			splices.Blocked += nbSplice
+		}
+	}
+	return
+}
+
 func RipsiteStatusLabel(status string) string {
 	switch status {
 	case ripconst.RsStatusNew:

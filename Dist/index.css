@@ -98,6 +98,19 @@ pre {
     padding: 4px 10px;
 }
 
+.el-col.align-right {
+    text-align: right;
+}
+
+.el-row.spaced {
+    margin-bottom: 5px;
+}
+
+.el-row.doublespaced {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
 /* =====================================================================================================================
    === Message Box style
  */

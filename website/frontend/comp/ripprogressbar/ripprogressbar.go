@@ -12,7 +12,7 @@ const template = `
 <div>
     <div v-if="showProgressBar" class="small-font">
 		<twovalues-progressbar 
-			height="5px"
+			:height="height"
 			:pct1="progressPct"
 			:pct2="progress2"
 		></twovalues-progressbar>
@@ -40,7 +40,7 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		tvprogressbar.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("total", "done", "blocked"),
+		hvue.Props("total", "done", "blocked", "height"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewWorksiteProgressBarModel(vm)
 		}),
@@ -71,6 +71,7 @@ type RipsiteProgressBarModel struct {
 	Blocked   int     `js:"blocked"`
 	Progress1 float64 `js:"progress1"`
 	Progress2 float64 `js:"progress2"`
+	Height    string  `js:"height"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -82,6 +83,7 @@ func NewWorksiteProgressBarModel(vm *hvue.VM) *RipsiteProgressBarModel {
 	rpbm.Blocked = 0
 	rpbm.Progress1 = 0
 	rpbm.Progress2 = 0
+	rpbm.Height = "5px"
 	rpbm.VM = vm
 	return rpbm
 }

@@ -35,7 +35,7 @@ const template string = `<div>
 	</div>
     <!-- Référence -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Référence:</el-col>
+        <el-col :span="6" class="align-right">Référence:</el-col>
         <el-col :span="18">
             <el-input placeholder="Référence"
                       v-model="editedpolemarker.Pole.Ref" clearable size="mini"
@@ -46,7 +46,7 @@ const template string = `<div>
     
     <!-- Lat / Long -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Lat / Long:</el-col>
+        <el-col :span="6" class="align-right">Lat / Long:</el-col>
         <el-col :span="18">
             <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
         </el-col>
@@ -54,7 +54,7 @@ const template string = `<div>
     
     <!-- Ville -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Ville:</el-col>
+        <el-col :span="6" class="align-right">Ville:</el-col>
         <el-col :span="18">
             <el-input placeholder="Ville"
                       v-model="editedpolemarker.Pole.City" clearable size="mini"
@@ -64,7 +64,7 @@ const template string = `<div>
 
     <!-- Adresse -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Adresse:</el-col>
+        <el-col :span="6" class="align-right">Adresse:</el-col>
         <el-col :span="18">
             <el-input placeholder="Adresse"
                       v-model="editedpolemarker.Pole.Address" clearable size="mini"
@@ -74,7 +74,7 @@ const template string = `<div>
 
     <!-- Etiquette -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6">Etiquette:</el-col>
+        <el-col :span="6" class="align-right">Etiquette:</el-col>
         <el-col :span="18">
             <el-input placeholder="Etiquette"
                       v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
@@ -84,7 +84,7 @@ const template string = `<div>
 
     <!-- Matériau -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6">Matériau:</el-col>
+        <el-col :span="6" class="align-right">Matériau:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.Material" filterable size="mini" style="width: 100%"
                        @clear=""
@@ -101,7 +101,7 @@ const template string = `<div>
 
     <!-- Hauteur -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Hauteur:</el-col>
+        <el-col :span="6" class="align-right">Hauteur:</el-col>
         <el-col :span="18">
             <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="7" :max="12" style="width: 100%"
             ></el-input-number>
@@ -110,7 +110,7 @@ const template string = `<div>
 
     <!-- DT DICT -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6">DT:</el-col>
+        <el-col :span="6" class="align-right">DT:</el-col>
         <el-col :span="18">
             <el-input placeholder="Référence DT"
                       v-model="editedpolemarker.Pole.DtRef" clearable size="mini"
@@ -118,7 +118,7 @@ const template string = `<div>
         </el-col>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">DICT:</el-col>
+        <el-col :span="6" class="align-right">DICT:</el-col>
         <el-col :span="10">
             <el-input placeholder="Référence DICT"
                       v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
@@ -135,7 +135,7 @@ const template string = `<div>
         </el-col>
     </el-row>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Info DICT:</el-col>
+        <el-col :span="6" class="align-right">Info DICT:</el-col>
         <el-col :span="18">
             <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Information DICT"
                       v-model="editedpolemarker.Pole.DictInfo" clearable size="mini"
@@ -145,7 +145,7 @@ const template string = `<div>
 
     <!-- Kizeo -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Kizeo:</el-col>
+        <el-col :span="6" class="align-right">Kizeo:</el-col>
         <el-col :span="18">
             <el-input placeholder="Référence Kizeo"
                       v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
@@ -155,7 +155,7 @@ const template string = `<div>
 
     <!-- Date Aspiratrice -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6">Aspiratrice:</el-col>
+        <el-col :span="6" class="align-right">Aspiratrice:</el-col>
         <el-col :span="18">
             <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
                             style="width: 100%" type="date"
@@ -169,7 +169,7 @@ const template string = `<div>
 
     <!-- Produits -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Produits:</el-col>
+        <el-col :span="6" class="align-right">Produits:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
                        @clear=""
@@ -187,7 +187,7 @@ const template string = `<div>
 
     <!-- Commentaire -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6">Commentaire:</el-col>
+        <el-col :span="6" class="align-right">Commentaire:</el-col>
         <el-col :span="18">
             <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Commentaire"
                       v-model="editedpolemarker.Pole.Comment" clearable size="mini"
@@ -197,7 +197,7 @@ const template string = `<div>
 
     <!-- Actors -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Acteurs:</el-col>
+        <el-col :span="6" class="align-right">Acteurs:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
                        @clear=""
@@ -221,7 +221,7 @@ const template string = `<div>
 
     <!-- Status -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Status:</el-col>
+        <el-col :span="6" class="align-right">Status:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
                        @clear=""
@@ -239,7 +239,7 @@ const template string = `<div>
 
     <!-- Date Status -->
     <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6">Date:</el-col>
+        <el-col :span="6" class="align-right">Date:</el-col>
         <el-col :span="18">
             <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
                             style="width: 100%" type="date"

@@ -30,6 +30,10 @@ func NewState() *State {
 	return s
 }
 
+func (s *State) IsDone() bool {
+	return s.Status == ripconst.StateDone
+}
+
 func (s *State) IsBlocked() bool {
 	return s.Status == ripconst.StateBlocked
 }
