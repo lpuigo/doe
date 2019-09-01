@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -59,10 +60,10 @@ func ComponentWorksiteOptions() []hvue.ComponentOption {
 type WorksiteInfoModel struct {
 	*js.Object
 
-	Worksite        *fm.Worksite `js:"worksite"`
-	NbTroncon       int          `js:"NbTroncon"`
-	NbLogement      int          `js:"NbLogement"`
-	NbAvailLogement int          `js:"NbAvailLogement"`
+	Worksite        *worksite.Worksite `js:"worksite"`
+	NbTroncon       int                `js:"NbTroncon"`
+	NbLogement      int                `js:"NbLogement"`
+	NbAvailLogement int                `js:"NbAvailLogement"`
 
 	VM *hvue.VM `js:"VM"`
 }

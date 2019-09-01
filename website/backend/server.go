@@ -33,7 +33,9 @@ const (
 
 	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 	RipsitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
+	PolesitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
 	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
+	ActorsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
 	ClientsDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
 	TemplatesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
@@ -48,7 +50,9 @@ func main() {
 		ManagerConfig: manager.ManagerConfig{
 			WorksitesDir: WorksitesDir,
 			RipsitesDir:  RipsitesDir,
+			PolesitesDir: PolesitesDir,
 			UsersDir:     UsersDir,
+			ActorsDir:    ActorsDir,
 			ClientsDir:   ClientsDir,
 			TemplatesDir: TemplatesDir,
 			SessionKey:   SessionKey,
@@ -99,7 +103,7 @@ func main() {
 	router.HandleFunc("/api/login", withUserManager("Logout", route.Logout)).Methods("DELETE")
 	router.HandleFunc("/api/login", withManager(route.Login)).Methods("POST")
 
-	// Worksites method
+	// Worksites methods
 	router.HandleFunc("/api/worksites", withUserManager("GetWorksitesInfo", route.GetWorksitesInfo)).Methods("GET")
 	router.HandleFunc("/api/worksites", withUserManager("CreateWorkSite", route.CreateWorkSite)).Methods("POST")
 	router.HandleFunc("/api/worksites/archive", withUserManager("GetWorksitesArchive", route.GetWorksitesArchive)).Methods("GET")
@@ -110,7 +114,7 @@ func main() {
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("UpdateWorkSite", route.UpdateWorkSite)).Methods("PUT")
 	router.HandleFunc("/api/worksites/{wsid:[0-9]+}", withUserManager("DeleteWorkSite", route.DeleteWorkSite)).Methods("DELETE")
 
-	// Ripsites method
+	// Ripsites methods
 	router.HandleFunc("/api/ripsites", withUserManager("GetRipsitesInfo", route.GetRipsitesInfo)).Methods("GET")
 	//router.HandleFunc("/api/ripsites", withUserManager("CreateRipSite", route.CreateRipSite)).Methods("POST")
 	router.HandleFunc("/api/ripsites/archive", withUserManager("GetRipsitesArchive", route.GetRipsitesArchive)).Methods("GET")
@@ -120,6 +124,17 @@ func main() {
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("UpdateRipSite", route.UpdateRipSite)).Methods("PUT")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("DeleteRipSite", route.DeleteRipSite)).Methods("DELETE")
 	router.HandleFunc("/api/ripsites/measurement", withUserManager("MeasurementRipSite", route.MeasurementRipSite)).Methods("POST")
+
+	// Polesites methods
+	router.HandleFunc("/api/polesites", withUserManager("GetPolesitesInfo", route.GetPolesitesInfo)).Methods("GET")
+	router.HandleFunc("/api/polesites/archive", withUserManager("GetPolesitesArchive", route.GetPolesitesArchive)).Methods("GET")
+	router.HandleFunc("/api/polesites/stat/{freq}", withUserManager("GetPolesitesStats", route.GetPolesitesStats)).Methods("GET")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("GetPolesite", route.GetPolesite)).Methods("GET")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}/attach", withUserManager("GetPolesiteAttachement", route.GetPolesiteAttachement)).Methods("GET")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("UpdatePolesite", route.UpdatePolesite)).Methods("PUT")
+
+	// Administration methods
+	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")
 
 	// Static Files serving
 	router.PathPrefix(conf.AssetsRoot).Handler(http.StripPrefix(conf.AssetsRoot, http.FileServer(http.Dir(conf.AssetsDir))))

@@ -37,6 +37,9 @@ func (cp *ClientsPersister) LoadDirectory() error {
 	cp.Lock()
 	defer cp.Unlock()
 
+	cp.persister.Reinit()
+	cp.clients = []*ClientRecord{}
+
 	files, err := cp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from ClientsPersister: %v", err)
@@ -47,7 +50,10 @@ func (cp *ClientsPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create client from '%s': %v", filepath.Base(file), err)
 		}
-		cp.persister.Load(ur)
+		err = cp.persister.Load(ur)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		cp.clients = append(cp.clients, ur)
 	}
 	return nil
@@ -118,7 +124,7 @@ func (cp *ClientsPersister) GetById(id int) *ClientRecord {
 	return nil
 }
 
-// GetByName returns the ClientRecord with given Name (or nil if Id not found)
+// GetByRef returns the ClientRecord with given Name (or nil if Id not found)
 func (cp *ClientsPersister) GetByName(name string) *ClientRecord {
 	cp.RLock()
 	defer cp.RUnlock()

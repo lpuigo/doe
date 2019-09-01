@@ -50,6 +50,12 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 				</template>
 			</el-table-column>
 
+            <el-table-column
+                    label="CAff" prop="Manager" sortable :sort-by="['Manager', 'Ref']"
+                    width="120px" :resizable=true :show-overflow-tooltip=true
+                    :filters="FilterList('Manager')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
+            ></el-table-column>
+
 			<el-table-column
 					label="Info"
 					width="240px" :resizable=true :show-overflow-tooltip=true

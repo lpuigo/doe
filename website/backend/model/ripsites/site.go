@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
@@ -45,15 +44,15 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 	rsi.NbMeasurement, rsi.NbMeasurementBlocked, rsi.NbMeasurementDone = s.GetMeasurementNumbers()
 
 	var searchBuilder strings.Builder
-	fmt.Fprintf(&searchBuilder, "%s:%s,", "Client", s.Client)
-	fmt.Fprintf(&searchBuilder, "%s:%s,", "Ref", s.Ref)
-	fmt.Fprintf(&searchBuilder, "%s:%s,", "Manager", s.Manager)
-	fmt.Fprintf(&searchBuilder, "%s:%s,", "OrderDate", s.OrderDate)
-	fmt.Fprintf(&searchBuilder, "%s:%s,", "Comment", s.Comment)
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Client", strings.ToUpper(s.Client))
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Ref", strings.ToUpper(s.Ref))
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Manager", strings.ToUpper(s.Manager))
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "OrderDate", strings.ToUpper(s.OrderDate))
+	fmt.Fprintf(&searchBuilder, "%s:%s,", "Comment", strings.ToUpper(s.Comment))
 	for _, node := range s.Nodes {
-		fmt.Fprintf(&searchBuilder, "nRef:%s,", node.Ref)
-		fmt.Fprintf(&searchBuilder, "nName:%s,", node.Name)
-		fmt.Fprintf(&searchBuilder, "nAddr:%s,", node.Address)
+		fmt.Fprintf(&searchBuilder, "nRef:%s,", strings.ToUpper(node.Ref))
+		fmt.Fprintf(&searchBuilder, "nName:%s,", strings.ToUpper(node.Name))
+		fmt.Fprintf(&searchBuilder, "nAddr:%s,", strings.ToUpper(node.Address))
 	}
 	rsi.Search = searchBuilder.String()
 
@@ -114,17 +113,17 @@ func (s *Site) GetMeasurementNumbers() (total, blocked, done int) {
 	return
 }
 
-func (s *Site) Itemize(bpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) Itemize(bpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
-	pullItems, err := s.itemizePullings(bpu)
+	pullItems, err := s.itemizePullings(bpu, actorById)
 	if err != nil {
 		return nil, err
 	}
-	junctItems, err := s.itemizeJunctions(bpu)
+	junctItems, err := s.itemizeJunctions(bpu, actorById)
 	if err != nil {
 		return nil, err
 	}
-	measItems, err := s.itemizeMeasurements(bpu)
+	measItems, err := s.itemizeMeasurements(bpu, actorById)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +151,7 @@ const (
 	catMeasurement string = "Mesure"
 )
 
-func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	pullingArticles := currentBpu.GetCategoryArticles(activityPulling)
@@ -163,6 +162,12 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			return nil, err
 		}
 		todo, done := pulling.State.GetTodoDone()
+		actors := []string{}
+		for _, actorId := range pulling.State.Actors {
+			actors = append(actors, actorById(actorId))
+		}
+		actorsString := strings.Join(actors, ", ")
+
 		l, u, a, b := pulling.GetTotalDists()
 		// Item for underground cable pulling
 		if l+u > 0 {
@@ -170,18 +175,20 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			if err != nil {
 				return nil, fmt.Errorf("can not define Underground Pulling Item: %s", err.Error())
 			}
-			res = append(res, items.NewItem(
+			item := items.NewItem(
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, l+u),
 				pulling.State.DateEnd,
-				pulling.State.Team,
+				actorsString,
 				article,
 				l+u,
 				l+u,
 				todo,
 				done,
-			))
+			)
+			item.Actors = pulling.State.Actors
+			res = append(res, item)
 		}
 
 		// Item for aerial cable pulling
@@ -190,18 +197,20 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			if err != nil {
 				return nil, fmt.Errorf("can not define Aerial Pulling Item: %s", err.Error())
 			}
-			res = append(res, items.NewItem(
+			item := items.NewItem(
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, a+b),
 				pulling.State.DateEnd,
-				pulling.State.Team,
+				actorsString,
 				article,
 				a+b,
 				a+b,
 				todo,
 				done,
-			))
+			)
+			item.Actors = pulling.State.Actors
+			res = append(res, item)
 		}
 
 		// Item for building cable pulling
@@ -210,18 +219,20 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			if err != nil {
 				return nil, fmt.Errorf("can not define Building Pulling Item: %s", err.Error())
 			}
-			res = append(res, items.NewItem(
+			item := items.NewItem(
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, b),
 				pulling.State.DateEnd,
-				pulling.State.Team,
+				actorsString,
 				article,
 				b,
 				b,
 				todo,
 				done,
-			))
+			)
+			item.Actors = pulling.State.Actors
+			res = append(res, item)
 		}
 
 	}
@@ -229,7 +240,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	return res, nil
 }
 
-func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
 	junctionArticles := currentBpu.GetCategoryArticles(activityJunction)
 
@@ -237,6 +248,12 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, junction := range s.Junctions {
 		todo, done := junction.State.GetTodoDone()
+		actors := []string{}
+		for _, actorId := range junction.State.Actors {
+			actors = append(actors, actorById(actorId))
+		}
+		actorsString := strings.Join(actors, ", ")
+
 		node, nodeFound := s.Nodes[junction.NodeName]
 		if !nodeFound {
 			return nil, fmt.Errorf("unknow node '%s'", junction.NodeName)
@@ -282,20 +299,21 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			info += fmt.Sprintf(" (%dFO)", boxSize)
 		}
 
-		res = append(res,
-			items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, junction.State.Team, mainArticle, qty1, qty1, todo, done),
-		)
+		item := items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, mainArticle, qty1, qty1, todo, done)
+		item.Actors = junction.State.Actors
+		res = append(res, item)
+
 		if optArticle != nil {
-			res = append(res,
-				items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, junction.State.Team, optArticle, qty2, qty2, todo, done),
-			)
+			item2 := items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, optArticle, qty2, qty2, todo, done)
+			item2.Actors = junction.State.Actors
+			res = append(res, item2)
 		}
 	}
 
 	return res, nil
 }
 
-func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
 	measurementArticles := currentBpu.GetCategoryArticles(activityMeasurement)
 
@@ -307,9 +325,17 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, measurement := range s.Measurements {
 		todo, done := measurement.State.GetTodoDone()
+		actors := []string{}
+		for _, actorId := range measurement.State.Actors {
+			actors = append(actors, actorById(actorId))
+		}
+		actorsString := strings.Join(actors, ", ")
+
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
-		res = append(res, items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, measurement.State.Team, mainArticle, qty1, qty2, todo, done))
+		item := items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, actorsString, mainArticle, qty1, qty2, todo, done)
+		item.Actors = measurement.State.Actors
+		res = append(res, item)
 	}
 	return res, nil
 }
@@ -371,36 +397,34 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (s *Site) AddStat(values map[items.StatKey]float64, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, currentBpu *bpu.Bpu, teamName clients.TeamNameByMember, showprice bool) error {
-	addValue := func(client, site, team, date, article, serie string, val float64) {
-		teamInfo := "Eq. " + teamName(team)
-		values[items.StatKey{
-			Team:    client + " : " + teamInfo,
-			Date:    dateFor(date),
-			Site:    site,
-			Article: article,
-			Serie:   serie,
-		}] += val
-		values[items.StatKey{
-			Team:    client,
-			Date:    dateFor(date),
-			Site:    site,
-			Article: article,
-			Serie:   serie,
-		}] += val
+func (s *Site) AddStat(stats items.Stats, sc items.StatContext,
+	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
+
+	addValue := func(date, serie string, actors []string, value float64) {
+		stats.AddStatValue(s.Ref, s.Client, date, "", serie, value)
+		if sc.ShowTeam && len(actors) > 0 {
+			value /= float64(len(actors))
+			for _, actName := range actors {
+				stats.AddStatValue(s.Ref, s.Client+" : "+actName, date, "", serie, value)
+			}
+		}
 	}
 
-	calcItems, err := s.Itemize(currentBpu)
+	calcItems, err := s.Itemize(currentBpu, actorById)
 	if err != nil {
-		return fmt.Errorf("error on stat itemize for '%s':%s", s.Ref, err.Error())
+		return fmt.Errorf("error on ripsite stat itemize for '%s':%s", s.Ref, err.Error())
 	}
 	for _, item := range calcItems {
 		if !item.Done {
 			continue
 		}
-		addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSerieWork, item.Work())
+		actorsName := make([]string, len(item.Actors))
+		for i, actId := range item.Actors {
+			actorsName[i] = actorById(actId)
+		}
+		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
 		if showprice {
-			addValue(s.Client, s.Ref, item.Team, item.Date, item.Article.Name, RipStatSeriePrice, item.Price())
+			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
 		}
 	}
 	return nil

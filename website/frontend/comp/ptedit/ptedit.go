@@ -3,7 +3,7 @@ package ptedit
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"strings"
@@ -94,9 +94,9 @@ func ComponentOptions() []hvue.ComponentOption {
 type PtEditModel struct {
 	*js.Object
 
-	Pt       *fm.PT `js:"value"`
-	Readonly bool   `js:"readonly"`
-	Title    string `js:"title"`
+	Pt       *worksite.PT `js:"value"`
+	Readonly bool         `js:"readonly"`
+	Title    string       `js:"title"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -110,7 +110,7 @@ func NewPtEditModel(vm *hvue.VM) *PtEditModel {
 	return pem
 }
 
-func (pem *PtEditModel) CheckRef(vm *hvue.VM, pt *fm.PT) {
+func (pem *PtEditModel) CheckRef(vm *hvue.VM, pt *worksite.PT) {
 	pem = &PtEditModel{Object: vm.Object}
 	prefix := pem.Title + "-"
 	if pt.Ref == "" {
@@ -135,7 +135,7 @@ func (pem *PtEditModel) CheckRef(vm *hvue.VM, pt *fm.PT) {
 	print("remove2", va, "=>", pt.Ref)
 }
 
-func (pem *PtEditModel) CheckRefPt(vm *hvue.VM, pt *fm.PT) {
+func (pem *PtEditModel) CheckRefPt(vm *hvue.VM, pt *worksite.PT) {
 	if !strings.HasPrefix(pt.RefPt, "PT-") {
 		if pt.RefPt >= "0" && pt.RefPt <= "999999999" {
 			pt.RefPt = "PT-" + pt.RefPt

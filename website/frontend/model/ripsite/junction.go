@@ -2,6 +2,7 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -54,4 +55,32 @@ func (j *Junction) GetNbFiber() int {
 		nb += op.NbFiber
 	}
 	return nb
+}
+
+func (j *Junction) GetNbFiberSplice() (fiber, splice int) {
+	for _, op := range j.Operations {
+		fiber += op.NbFiber
+		splice += op.NbSplice
+	}
+	return
+}
+
+func (j *Junction) SearchString(filter string) string {
+	searchItem := func(prefix, typ, value string) string {
+		if value == "" {
+			return ""
+		}
+		if filter != ripconst.FilterValueAll && filter != typ {
+			return ""
+		}
+		return prefix + typ + value
+	}
+
+	res := searchItem("", ripconst.FilterValueComment, j.State.Comment)
+	res += searchItem(",", ripconst.FilterValuePtRef, j.NodeName)
+	for _, ope := range j.Operations {
+		res += searchItem(",", ripconst.FilterValueTrRef, ope.TronconName)
+		res += searchItem(",", ripconst.FilterValueOpe, ope.Type)
+	}
+	return res
 }

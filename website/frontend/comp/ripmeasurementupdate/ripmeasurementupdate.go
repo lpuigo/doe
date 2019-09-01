@@ -6,10 +6,10 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripstateupdate"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripstateupdate.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter"),
+		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewRipMeasurementUpdateModel(vm)
 		}),
@@ -47,13 +47,13 @@ func componentOptions() []hvue.ComponentOption {
 type RipMeasurementUpdateModel struct {
 	*js.Object
 
-	Ripsite *fmrip.Ripsite `js:"value"`
-	//ReferenceRipsite *fmrip.Ripsite `js:"refRipsite"`
-	User   *fm.User `js:"user"`
-	Filter string   `js:"filter"`
+	Ripsite    *fmrip.Ripsite `js:"value"`
+	User       *fm.User       `js:"user"`
+	Filter     string         `js:"filter"`
+	FilterType string         `js:"filtertype"`
 
 	UploadVisible      bool               `js:"uploadVisible"`
-	MeasurementTeam    string             `js:"measurementTeam"`
+	MeasurementActors  []string           `js:"measurementActors"`
 	MeasurementSummary *fmrip.Measurement `js:"measurementSummary"`
 
 	VM *hvue.VM `js:"VM"`
@@ -63,11 +63,11 @@ func NewRipMeasurementUpdateModel(vm *hvue.VM) *RipMeasurementUpdateModel {
 	rmum := &RipMeasurementUpdateModel{Object: tools.O()}
 	rmum.VM = vm
 	rmum.Ripsite = fmrip.NewRisite()
-	//rmum.ReferenceWorksite = nil
 	rmum.User = nil
 	rmum.Filter = ""
+	rmum.FilterType = ripconst.FilterValueAll
 	rmum.UploadVisible = false
-	rmum.MeasurementTeam = ""
+	rmum.MeasurementActors = []string{}
 	rmum.MeasurementSummary = fmrip.NewMeasurement()
 	return rmum
 }
@@ -96,13 +96,21 @@ func (rmum *RipMeasurementUpdateModel) GetPct(vm *hvue.VM, value int) string {
 }
 
 func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measurement {
-	if rmum.Filter == "" {
+	if rmum.FilterType == ripconst.FilterValueAll && rmum.Filter == "" {
 		return rmum.Ripsite.Measurements
 	}
 	res := []*fmrip.Measurement{}
-	filter := strings.ToLower(rmum.Filter)
+	expected := strings.ToUpper(rmum.Filter)
+	filter := func(p *fmrip.Measurement) bool {
+		sis := p.SearchString(rmum.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+
 	for _, meas := range rmum.Ripsite.Measurements {
-		if strings.Contains(strings.ToLower(json.Stringify(meas)), filter) {
+		if filter(meas) {
 			res = append(res, meas)
 		}
 	}
@@ -110,12 +118,12 @@ func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measur
 }
 
 func (rmum *RipMeasurementUpdateModel) TableRowClassName(rowInfo *js.Object) string {
-	junction := &fmrip.Measurement{Object: rowInfo.Get("row")}
-	return junction.State.GetRowStyle()
+	meas := &fmrip.Measurement{Object: rowInfo.Get("row")}
+	return rmum.MeasurementClassName(meas)
 }
 
-func (rmum *RipMeasurementUpdateModel) JunctionClassName(junction *fmrip.Measurement) string {
-	return junction.State.GetRowStyle()
+func (rmum *RipMeasurementUpdateModel) MeasurementClassName(meas *fmrip.Measurement) string {
+	return meas.State.GetRowStyle()
 }
 
 func (rmum *RipMeasurementUpdateModel) GetNode(vm *hvue.VM, name string) *fmrip.Node {
@@ -132,9 +140,24 @@ func (rmum *RipMeasurementUpdateModel) GetDestNodeDist(vm *hvue.VM, meas *fmrip.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Upload Methods
 
-func (rmum *RipMeasurementUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
+//func (rmum *RipMeasurementUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
+//	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
+//	return rmum.User.GetTeamValueLabelsFor(rmum.Ripsite.Client)
+//}
+//
+
+func (rmum *RipMeasurementUpdateModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabled {
 	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
-	return rmum.User.GetTeamValueLabelsFor(rmum.Ripsite.Client)
+	client := rmum.User.GetClientByName(rmum.Ripsite.Client)
+	if client == nil {
+		return nil
+	}
+
+	res := []*elements.ValueLabelDisabled{}
+	for _, actor := range client.Actors {
+		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), actor.GetRef(), !actor.Active))
+	}
+	return res
 }
 
 func (rmum *RipMeasurementUpdateModel) UploadError(vm *hvue.VM, err, file *js.Object) {
@@ -146,14 +169,18 @@ func (rmum *RipMeasurementUpdateModel) UploadSuccess(vm *hvue.VM, response, file
 	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
 	rmum.UploadVisible = false
 
+	nbOk, nbKo := 0, 0
 	for _, meas := range rmum.Ripsite.Measurements {
 		omr := response.Get(meas.DestNodeName)
 		if omr == js.Undefined {
+			nbKo++
 			continue
 		}
+		nbOk++
 		mr := &fmrip.MeasurementReport{Object: omr}
-		meas.UpdateWith(mr, rmum.MeasurementTeam)
+		meas.UpdateWith(mr, rmum.MeasurementActors)
 	}
+	message.SuccesStr(vm, "Mise à jour des mesures :\n"+strconv.Itoa(nbOk)+" mesures mises à jour\n"+strconv.Itoa(nbKo)+" mesures inchangées")
 	rmum.CalcStats()
 }
 

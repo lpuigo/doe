@@ -2,6 +2,7 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -62,4 +63,24 @@ func (p *Pulling) GetDists() (total, love, under, aerial, building int) {
 		total += chunk.LoveDist + chunk.UndergroundDist + chunk.AerialDist + chunk.BuildingDist
 	}
 	return
+}
+
+func (p *Pulling) SearchString(filter string) string {
+	searchItem := func(prefix, typ, value string) string {
+		if value == "" {
+			return ""
+		}
+		if filter != ripconst.FilterValueAll && filter != typ {
+			return ""
+		}
+		return prefix + typ + value
+	}
+
+	res := searchItem("", ripconst.FilterValueComment, p.State.Comment)
+	for _, chunck := range p.Chuncks {
+		res += searchItem(",", ripconst.FilterValuePtRef, chunck.StartingNodeName)
+		res += searchItem(",", ripconst.FilterValuePtRef, chunck.EndingNodeName)
+		res += searchItem(",", ripconst.FilterValueTrRef, chunck.TronconName)
+	}
+	return res
 }

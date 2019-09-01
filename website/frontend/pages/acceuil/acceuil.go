@@ -6,19 +6,21 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/adminmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoiceupdatemodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/polesitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsitetable"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitymodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/userloginmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
+	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -34,9 +36,10 @@ func main() {
 		reworkeditmodal.RegisterComponent(),
 		reworkupdatemodal.RegisterComponent(),
 		invoiceupdatemodal.RegisterComponent(),
-		ripsiteupdatemodal.RegisterComponent(),
+		//ripsiteupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		ripsitetable.RegisterComponent(),
+		polesitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
 		adminmodal.RegisterComponent(),
@@ -96,6 +99,7 @@ type MainPageModel struct {
 
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
 	RipsiteInfos  []*fm.RipsiteInfo  `js:"ripsiteInfos"`
+	PolesiteInfos []*fm.PolesiteInfo `js:"polesiteInfos"`
 }
 
 func NewMainPageModel() *MainPageModel {
@@ -116,16 +120,17 @@ func (m *MainPageModel) ClearModes() {
 func (m *MainPageModel) ClearSiteInfos() {
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
 	m.RipsiteInfos = []*fm.RipsiteInfo{}
+	m.PolesiteInfos = []*fm.PolesiteInfo{}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
 func (m *MainPageModel) CheckSiteMode() {
-	if m.SiteMode == "Rip" && m.User.Permissions["Create"] {
-		m.ActiveMode = "Update"
-	} else {
+	if m.SiteMode == "Orange" && m.User.Permissions["Create"] {
 		m.ActiveMode = "Create"
+	} else {
+		m.ActiveMode = "Update"
 	}
 }
 
@@ -136,6 +141,8 @@ func (m *MainPageModel) SetMode() {
 			m.SiteMode = "Orange"
 		} else if len(m.RipsiteInfos) > 0 {
 			m.SiteMode = "Rip"
+		} else if len(m.PolesiteInfos) > 0 {
+			m.SiteMode = "Poles"
 		}
 	}
 
@@ -176,6 +183,18 @@ func (m *MainPageModel) UserLogout() {
 func (m *MainPageModel) GetSiteInfos() {
 	go m.callGetWorkSiteInfos()
 	go m.callGetRipSiteInfos()
+	go m.callGetPoleSiteInfos()
+}
+
+func (m *MainPageModel) GetActiveSiteInfos() {
+	switch m.SiteMode {
+	case "Orange":
+		go m.callGetWorkSiteInfos()
+	case "Rip":
+		go m.callGetRipSiteInfos()
+	case "Poles":
+		go m.callGetPoleSiteInfos()
+	}
 }
 
 func (m *MainPageModel) GetWorkSiteInfos() {
@@ -186,6 +205,10 @@ func (m *MainPageModel) GetRipSiteInfos() {
 	go m.callGetRipSiteInfos()
 }
 
+func (m *MainPageModel) GetPoleSiteInfos() {
+	go m.callGetPoleSiteInfos()
+}
+
 func (m *MainPageModel) EditWorksite(id int) {
 	m.VM.Refs("WorksiteEditModal").Call("Show", id, m.User)
 }
@@ -194,8 +217,12 @@ func (m *MainPageModel) UpdateWorksite(id int) {
 	m.VM.Refs("WorksiteUpdateModal").Call("Show", id, m.User)
 }
 
-func (m *MainPageModel) UpdateRipsite(id int) {
-	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
+//func (m *MainPageModel) UpdateRipsite(id int) {
+//	m.VM.Refs("RipsiteUpdateModal").Call("Show", id, m.User)
+//}
+//
+func (m *MainPageModel) OpenRipsite(id int) {
+	js.Global.Get("window").Call("open", "ripsite.html?rsid="+strconv.Itoa(id))
 }
 
 func (m *MainPageModel) CreateNewWorksite() {
@@ -225,7 +252,7 @@ func (m *MainPageModel) ShowAdmin() {
 func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
+		if worksite.WorksiteIsUpdatable(wsi.Status) || wsi.NeedRework() {
 			res = append(res, wsi)
 		}
 	}
@@ -235,7 +262,7 @@ func (m *MainPageModel) GetUpdatableWorsiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetReviewableWorsiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsReviewable(wsi.Status) {
+		if worksite.WorksiteIsReviewable(wsi.Status) {
 			res = append(res, wsi)
 		}
 	}
@@ -246,7 +273,7 @@ func (m *MainPageModel) GetUpdatableWorsiteNb() int {
 	res := 0
 	if m.SiteMode == "Orange" {
 		for _, wsi := range m.WorksiteInfos {
-			if fm.WorksiteIsUpdatable(wsi.Status) {
+			if worksite.WorksiteIsUpdatable(wsi.Status) {
 				res += 1
 			}
 		}
@@ -279,7 +306,7 @@ func (m *MainPageModel) GetReworkWorsiteNb() int {
 func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
 	res := []*fm.WorksiteInfo{}
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsBillable(wsi.Status) {
+		if worksite.WorksiteIsBillable(wsi.Status) {
 			res = append(res, wsi)
 		}
 	}
@@ -289,7 +316,7 @@ func (m *MainPageModel) GetBillableWorksiteInfos() []*fm.WorksiteInfo {
 func (m *MainPageModel) GetBillableWorksiteNb() int {
 	res := 0
 	for _, wsi := range m.WorksiteInfos {
-		if fm.WorksiteIsBillable(wsi.Status) {
+		if worksite.WorksiteIsBillable(wsi.Status) {
 			res += 1
 		}
 	}
@@ -400,6 +427,34 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 	rsis := []*fm.RipsiteInfo{}
 	req.Response.Call("forEach", func(item *js.Object) {
 		rs := fm.NewRipsiteInfoFromJS(item)
+		rsis = append(rsis, rs)
+	})
+	sites = rsis
+}
+
+func (m *MainPageModel) callGetPoleSiteInfos() {
+	req := xhr.NewRequest("GET", "/api/polesites")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	sites := m.PolesiteInfos
+	//m.RipsiteInfos = nil
+	defer func() {
+		m.PolesiteInfos = sites
+		m.SetMode()
+	}()
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(m.VM, req)
+		return
+	}
+	rsis := []*fm.PolesiteInfo{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		rs := fm.NewPolesiteInfoFromJS(item)
 		rsis = append(rsis, rs)
 	})
 	sites = rsis

@@ -48,5 +48,5 @@ func (rsi *RipsiteInfo) TextFiltered(filter string) bool {
 		expected = false
 		filter = filter[1:]
 	}
-	return strings.Contains(rsi.Search, filter) == expected
+	return strings.Contains(rsi.Search, strings.ToUpper(filter)) == expected
 }

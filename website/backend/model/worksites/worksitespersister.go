@@ -7,7 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"io"
 	"path/filepath"
 	"sort"
@@ -44,6 +44,9 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 	wsp.Lock()
 	defer wsp.Unlock()
 
+	wsp.persister.Reinit()
+	wsp.workSites = []*WorkSiteRecord{}
+
 	files, err := wsp.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from worksites persister: %v", err)
@@ -54,7 +57,10 @@ func (wsp *WorkSitesPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create worksite from '%s': %v", filepath.Base(file), err)
 		}
-		wsp.persister.Load(wsr)
+		err = wsp.persister.Load(wsr)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		wsp.workSites = append(wsp.workSites, wsr)
 	}
 	return nil
@@ -144,7 +150,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 }
 
 // GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *fm.WorksiteStats {
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *worksite.WorksiteStats {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
@@ -160,7 +166,7 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 		}
 	}
 
-	ws := fm.NewBEWorksiteStats()
+	ws := worksite.NewBEWorksiteStats()
 
 	//create client, team, measurments & dates Lists
 	end := date.Today()

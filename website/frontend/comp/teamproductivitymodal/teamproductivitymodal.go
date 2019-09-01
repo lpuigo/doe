@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/teamproductivitychart"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
@@ -45,8 +46,8 @@ type TeamProductivityModalModel struct {
 	User     *fm.User `js:"user"`
 	SiteMode string   `js:"SiteMode"`
 
-	Stats     *fm.WorksiteStats `js:"Stats"`
-	TeamStats []*fm.TeamStats   `js:"TeamStats"`
+	Stats     *worksite.WorksiteStats `js:"Stats"`
+	TeamStats []*worksite.TeamStats   `js:"TeamStats"`
 
 	RipStats     *rs.RipsiteStats `js:"RipStats"`
 	RipTeamStats []*rs.TeamStats  `js:"RipTeamStats"`
@@ -65,8 +66,8 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	tpmm.User = fm.NewUser()
 	tpmm.SiteMode = ""
 
-	tpmm.Stats = fm.NewWorksiteStats()
-	tpmm.TeamStats = []*fm.TeamStats{}
+	tpmm.Stats = worksite.NewWorksiteStats()
+	tpmm.TeamStats = []*worksite.TeamStats{}
 
 	tpmm.RipStats = rs.NewRipsiteStats()
 	tpmm.RipTeamStats = []*rs.TeamStats{}
@@ -87,9 +88,9 @@ func TeamProductivityModalModelFromJS(o *js.Object) *TeamProductivityModalModel 
 }
 
 func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
-	tpmm.Stats = fm.NewWorksiteStats()
+	tpmm.Stats = worksite.NewWorksiteStats()
 	tpmm.RipStats = rs.NewRipsiteStats()
-	tpmm.TeamStats = []*fm.TeamStats{}
+	tpmm.TeamStats = []*worksite.TeamStats{}
 	tpmm.RipTeamStats = []*rs.TeamStats{}
 	tpmm.User = user
 	tpmm.SiteMode = siteMode
@@ -100,7 +101,11 @@ func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
 	if tpmm.SiteMode == "Rip" {
-		go tpmm.callGetRipsitesStats()
+		go tpmm.callGetRipsitesStats("/api/ripsites/stat/")
+		return
+	}
+	if tpmm.SiteMode == "Poles" {
+		go tpmm.callGetRipsitesStats("/api/polesites/stat/")
 		return
 	}
 	go tpmm.callGetWorksitesStats()
@@ -171,14 +176,13 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 		tpmm.Hide()
 		return
 	}
-	tpmm.Stats = fm.WorksiteStatsFromJs(req.Response)
+	tpmm.Stats = worksite.WorksiteStatsFromJs(req.Response)
 	tpmm.TeamStats = tpmm.Stats.CreateTeamStats()
 	return
 }
 
-func (tpmm *TeamProductivityModalModel) callGetRipsitesStats() {
+func (tpmm *TeamProductivityModalModel) callGetRipsitesStats(url string) {
 	defer func() { tpmm.Loading = false }()
-	url := "/api/ripsites/stat/"
 	req := xhr.NewRequest("GET", url+tpmm.ActiveMode)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON

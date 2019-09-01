@@ -48,3 +48,18 @@ func NewValueLabel(value, label string) *ValueLabel {
 	vl.Label = label
 	return vl
 }
+
+type ValueLabelDisabled struct {
+	*js.Object
+	Value    string `js:"value"`
+	Label    string `js:"label"`
+	Disabled bool   `js:"disabled"`
+}
+
+func NewValueLabelDisabled(value, label string, disabled bool) *ValueLabelDisabled {
+	vl := &ValueLabelDisabled{Object: tools.O()}
+	vl.Value = value
+	vl.Label = label
+	vl.Disabled = disabled
+	return vl
+}

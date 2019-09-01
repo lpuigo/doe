@@ -4,7 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/tronconedit"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
@@ -68,15 +68,15 @@ const template string = `
 
 func Register() {
 	hvue.NewComponent("order-edit",
-		ComponentOptions()...,
+		componentOptions()...,
 	)
 }
 
 func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("order-edit", ComponentOptions()...)
+	return hvue.Component("order-edit", componentOptions()...)
 }
 
-func ComponentOptions() []hvue.ComponentOption {
+func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		tronconedit.RegisterComponent(),
 		hvue.Template(template),
@@ -99,7 +99,7 @@ type OrderEditModel struct {
 	*js.Object
 
 	Articles []*elements.ValueLabel `js:"articles"`
-	Order    *fm.Order              `js:"value"`
+	Order    *worksite.Order        `js:"value"`
 	Readonly bool                   `js:"readonly"`
 
 	VM *hvue.VM `js:"VM"`
@@ -124,7 +124,7 @@ func (oem *OrderEditModel) DeleteTroncon(vm *hvue.VM, i int) {
 	oem.Order.DeleteTroncon(i)
 }
 
-func (oem *OrderEditModel) PreviousTroncon(vm *hvue.VM, i int) *fm.Troncon {
+func (oem *OrderEditModel) PreviousTroncon(vm *hvue.VM, i int) *worksite.Troncon {
 	oem = &OrderEditModel{Object: vm.Object}
 	if len(oem.Order.Troncons) <= 1 || i == 0 {
 		return nil

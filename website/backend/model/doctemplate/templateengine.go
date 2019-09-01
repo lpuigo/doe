@@ -3,17 +3,20 @@ package doctemplate
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/360EntSecGroup-Skylar/excelize"
-	"github.com/lpuig/ewin/chantiersalsace/parsesuivi/xls"
-	"github.com/lpuig/ewin/doe/model"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
-	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
+	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 )
 
 const (
@@ -191,17 +194,42 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachementName(site *ripsites.Site) s
 }
 
 // GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
-func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsites.Site, getClient func(clientName string) *clients.Client) error {
+func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsites.Site, getClient clients.ClientByName, actorById clients.ActorById) error {
 	client := getClient(site.Client)
 	if client == nil {
 		return fmt.Errorf("unknown client '%s'", site.Client)
 	}
 
-	items, err := site.Itemize(client.Bpu)
+	its, err := site.Itemize(client.Bpu, actorById)
 	if err != nil {
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
+	return te.getItemsXLSAttachement(w, its)
+}
+
+// GetRipsiteXLSAttachementName returns the name of the XLSx file pertaining to given Ripsite
+func (te *DocTemplateEngine) GetPolesiteXLSAttachementName(site *polesites.PoleSite) string {
+	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.Ref)
+}
+
+// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
+func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesites.PoleSite, getClient clients.ClientByName, actorById clients.ActorById) error {
+	client := getClient(site.Client)
+	if client == nil {
+		return fmt.Errorf("unknown client '%s'", site.Client)
+	}
+
+	its, err := site.Itemize(client.Bpu, actorById)
+	if err != nil {
+		return fmt.Errorf("unable to create items: %s", err.Error())
+	}
+
+	return te.getItemsXLSAttachement(w, its)
+}
+
+// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
+func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.Item) error {
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {
@@ -214,36 +242,36 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 	}
 
 	row := rowRipHeader
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 0), "Item")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 1), "Info")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 2), "Code BPU")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 3), "Quantité")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 4), "Prix")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), "Quant. Tr.")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), "Travail")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "Installé")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), "Equipe")
-	xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), "Date")
-	for _, item := range items {
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), "Item")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), "Info")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), "Code BPU")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), "Quantité")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), "Prix")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), "Quant. Tr.")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), "Travail")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Installé")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "Equipe")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "Date")
+	for _, item := range its {
 		if !(item.Todo && item.Quantity > 0) {
 			continue
 		}
 		row++
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 0), item.Name)
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 1), item.Info)
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 2), item.Article.Name)
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 3), item.Quantity)
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 4), item.Price())
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 5), item.WorkQuantity)
-		xf.SetCellValue(sheetName, xls.RcToAxis(row, 6), item.Work())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), item.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Info)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Article.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Quantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), item.Price())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), item.WorkQuantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Work())
 		if item.Done {
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "Oui")
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), item.Team)
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), item.Date)
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Oui")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.Team)
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.Date)
 		} else {
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 7), "")
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 8), "")
-			xf.SetCellValue(sheetName, xls.RcToAxis(row, 9), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "")
 		}
 	}
 	xf.UpdateLinkedValue()

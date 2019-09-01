@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/progressbar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -97,7 +98,7 @@ func (wtm *WorksiteTableModel) AddWorksite(vm *hvue.VM) {
 }
 
 func (wtm *WorksiteTableModel) IsReworkable(status string) bool {
-	return fm.WorksiteIsReworkable(status)
+	return worksite.WorksiteIsReworkable(status)
 }
 
 func (wtm *WorksiteTableModel) ReworkIconColor(wsi *fm.WorksiteInfo) string {
@@ -122,7 +123,7 @@ func (wtm *WorksiteTableModel) CreateRework(vm *hvue.VM, wsi *fm.WorksiteInfo) {
 
 func (wtm *WorksiteTableModel) TableRowClassName(rowInfo *js.Object) string {
 	wsi := &fm.WorksiteInfo{Object: rowInfo.Get("row")}
-	return fm.WorksiteRowClassName(wsi.Status)
+	return worksite.WorksiteRowClassName(wsi.Status)
 }
 
 func (wtm *WorksiteTableModel) HeaderCellStyle() string {
@@ -134,12 +135,12 @@ func (wtm *WorksiteTableModel) FormatDate(r, c *js.Object, d string) string {
 }
 
 func (wtm *WorksiteTableModel) FormatStatus(r, c *js.Object, d string) string {
-	return fm.WorksiteStatusLabel(d)
+	return worksite.WorksiteStatusLabel(d)
 }
 
-func (wtm *WorksiteTableModel) SortStatus(a, b *fm.Worksite) int {
-	la := fm.WorksiteStatusLabel(a.Status)
-	lb := fm.WorksiteStatusLabel(b.Status)
+func (wtm *WorksiteTableModel) SortStatus(a, b *worksite.Worksite) int {
+	la := worksite.WorksiteStatusLabel(a.Status)
+	lb := worksite.WorksiteStatusLabel(b.Status)
 	if la < lb {
 		return -1
 	}
@@ -166,7 +167,7 @@ func (wtm *WorksiteTableModel) FilterList(vm *hvue.VM, prop string) []*elements.
 	switch prop {
 	case "Status":
 		translate = func(val string) string {
-			return fm.WorksiteStatusLabel(val)
+			return worksite.WorksiteStatusLabel(val)
 		}
 	default:
 		translate = func(val string) string { return val }

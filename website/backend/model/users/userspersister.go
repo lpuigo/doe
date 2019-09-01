@@ -36,6 +36,9 @@ func (up *UsersPersister) LoadDirectory() error {
 	up.Lock()
 	defer up.Unlock()
 
+	up.persister.Reinit()
+	up.users = []*UserRecord{}
+
 	files, err := up.persister.GetFilesList("deleted")
 	if err != nil {
 		return fmt.Errorf("could not get files from UsersPersister: %v", err)
@@ -46,7 +49,10 @@ func (up *UsersPersister) LoadDirectory() error {
 		if err != nil {
 			return fmt.Errorf("could not create user from '%s': %v", filepath.Base(file), err)
 		}
-		up.persister.Load(ur)
+		err = up.persister.Load(ur)
+		if err != nil {
+			return fmt.Errorf("error while loading %s: %s", file, err.Error())
+		}
 		up.users = append(up.users, ur)
 	}
 	return nil
@@ -114,7 +120,7 @@ func (up *UsersPersister) GetById(id int) *UserRecord {
 	return nil
 }
 
-// GetByName returns the UserRecord with given Name (or nil if Id not found)
+// GetByRef returns the UserRecord with given Name (or nil if Id not found)
 func (up *UsersPersister) GetByName(name string) *UserRecord {
 	for _, ur := range up.users {
 		if ur.Name == name {

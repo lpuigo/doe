@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksitestatustag"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
@@ -44,8 +45,8 @@ func componentOptions() []hvue.ComponentOption {
 type ReworkEditModel struct {
 	*js.Object
 
-	Worksite *fm.Worksite `js:"worksite"`
-	User     *fm.User     `js:"user"`
+	Worksite *worksite.Worksite `js:"worksite"`
+	User     *fm.User           `js:"user"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -53,7 +54,7 @@ type ReworkEditModel struct {
 func NewReworkEditModel(vm *hvue.VM) *ReworkEditModel {
 	wum := &ReworkEditModel{Object: tools.O()}
 	wum.VM = vm
-	wum.Worksite = fm.NewWorkSite()
+	wum.Worksite = worksite.NewWorkSite()
 	wum.User = fm.NewUser()
 	return wum
 }
@@ -70,7 +71,7 @@ func ReworkEditModelFromJS(o *js.Object) *ReworkEditModel {
 //	return ""
 //}
 
-func (rem *ReworkEditModel) GetReworks() []*fm.Defect {
+func (rem *ReworkEditModel) GetReworks() []*worksite.Defect {
 	return rem.Worksite.Rework.Defects
 }
 
@@ -95,7 +96,7 @@ func (rem *ReworkEditModel) AddAllDefect(vm *hvue.VM) {
 
 func (rem *ReworkEditModel) addDefect(ptName string) {
 	r := rem.Worksite.Rework
-	d := fm.NewDefect()
+	d := worksite.NewDefect()
 	d.PT = ptName
 	d.SubmissionDate = r.ControlDate
 	r.Defects = append(r.Defects, d)

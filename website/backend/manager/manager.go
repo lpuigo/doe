@@ -5,21 +5,27 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	ps "github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	rs "github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
+	"strconv"
 )
 
 type Manager struct {
 	Worksites      *ws.WorkSitesPersister
 	Ripsites       *rs.SitesPersister
+	Polesites      *ps.PoleSitesPersister
 	Users          *users.UsersPersister
+	Actors         *actors.ActorsPersister
 	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
@@ -32,19 +38,17 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create worksites: %s", err.Error())
 	}
-	err = wsp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate worksites: %s", err.Error())
-	}
 
 	// Init RipSites persister
 	rsp, err := rs.NewSitesPersit(conf.RipsitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create Ripsites persister: %s", err.Error())
 	}
-	err = rsp.LoadDirectory()
+
+	// Init PoleSites persister
+	psp, err := ps.NewPoleSitesPersist(conf.PolesitesDir)
 	if err != nil {
-		return nil, fmt.Errorf("could not populate Ripsites: %s", err.Error())
+		return nil, fmt.Errorf("could not create Polesites persister: %s", err.Error())
 	}
 
 	// Init Users persister
@@ -52,19 +56,17 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create users: %s", err.Error())
 	}
-	err = up.LoadDirectory()
+
+	// Init Actors persister
+	ap, err := actors.NewActorsPersister(conf.ActorsDir)
 	if err != nil {
-		return nil, fmt.Errorf("could not populate user: %s", err.Error())
+		return nil, fmt.Errorf("could not create actors: %s", err.Error())
 	}
 
 	// Init Clients persister
 	cp, err := clients.NewClientsPersister(conf.ClientsDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create clients: %s", err.Error())
-	}
-	err = cp.LoadDirectory()
-	if err != nil {
-		return nil, fmt.Errorf("could not populate client: %s", err.Error())
 	}
 
 	// Init DocTemplate engine
@@ -77,26 +79,65 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	m := &Manager{
 		Worksites:      wsp,
 		Ripsites:       rsp,
+		Polesites:      psp,
 		Users:          up,
+		Actors:         ap,
 		Clients:        cp,
 		TemplateEngine: te,
+		SessionStore:   session.NewSessionStore(conf.SessionKey),
+		//CurrentUser: is set during session control transaction
 	}
-	logger.Entry("Server").LogInfo(
-		fmt.Sprintf("loaded %d Worksites, %d Ripsites, %d Clients and %d Users",
-			wsp.NbWorsites(),
-			rsp.NbSites(),
-			cp.NbClients(),
-			up.NbUsers(),
-		))
 
-	m.SessionStore = session.NewSessionStore(conf.SessionKey)
-	// m.CurrentUser is set during session control transaction
+	err = m.Reload()
+	if err != nil {
+		return nil, err
+	}
 
 	return m, nil
 }
 
 func (m Manager) Clone() *Manager {
 	return &m
+}
+
+func (m *Manager) Reload() error {
+	err := m.Worksites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate worksites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", m.Worksites.NbWorsites()))
+
+	err = m.Ripsites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate Ripsites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Ripsites", m.Ripsites.NbSites()))
+
+	err = m.Polesites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate Polesites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", m.Polesites.NbSites()))
+
+	err = m.Users.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate user: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Users", m.Users.NbUsers()))
+
+	err = m.Actors.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate actor: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Actors", m.Actors.NbActors()))
+
+	err = m.Clients.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate client: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Clients", m.Clients.NbClients()))
+
+	return nil
 }
 
 // =====================================================================================================================
@@ -111,6 +152,22 @@ func (m *Manager) genGetClient() clients.ClientByName {
 			return nil
 		}
 		return cr.Client
+	}
+}
+
+// genActorById returns a ActorById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
+func (m *Manager) genActorById() clients.ActorById {
+	return func(actorId string) string {
+		var ar *actors.ActorRecord
+		if actId, err := strconv.Atoi(actorId); err == nil {
+			ar = m.Actors.GetById(actId)
+		} else {
+			ar = m.Actors.GetByRef(actorId)
+		}
+		if ar == nil {
+			return ""
+		}
+		return ar.Actor.Ref
 	}
 }
 
@@ -135,22 +192,46 @@ func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 
 // genIsTeamVisible returns a IsTeamVisible function: func(ClientTeam) bool, which is true when current user is allowed to see clientteam related activity
 func (m Manager) genIsTeamVisible() (clients.IsTeamVisible, error) {
-	if len(m.CurrentUser.Clients) > 0 {
-		teamVisible := make(map[clients.ClientTeam]bool)
-		clts, err := m.GetCurrentUserClients()
-		if err != nil {
-			return nil, err
-		}
-		for _, client := range clts {
-			for _, team := range client.Teams {
-				teamVisible[clients.ClientTeam{Client: client.Name, Team: team.Members}] = true
-			}
-		}
-		return func(ct clients.ClientTeam) bool {
-			return teamVisible[ct]
-		}, nil
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(clients.ClientTeam) bool { return true }, nil
 	}
-	return func(clients.ClientTeam) bool { return true }, nil
+
+	teamVisible := make(map[clients.ClientTeam]bool)
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return nil, err
+	}
+	for _, client := range clts {
+		for _, team := range client.Teams {
+			teamVisible[clients.ClientTeam{Client: client.Name, Team: team.Members}] = true
+		}
+	}
+	return func(ct clients.ClientTeam) bool {
+		return teamVisible[ct]
+	}, nil
+}
+
+// genIsActorVisible returns a IsTeamVisible function: func(ClientTeam) bool, which is true when current user is allowed to see clientteam (by actorId) related activity
+func (m Manager) genIsActorVisible() (clients.IsTeamVisible, error) {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(clients.ClientTeam) bool { return true }, nil
+	}
+
+	actorVisible := make(map[clients.ClientTeam]bool)
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return nil, err
+	}
+	for _, client := range clts {
+		allowedActors := m.Actors.GetActorsByClient(client.Name, false)
+		for _, actor := range allowedActors {
+			actorVisible[clients.ClientTeam{Client: client.Name, Team: strconv.Itoa(actor.Id)}] = true
+			actorVisible[clients.ClientTeam{Client: client.Name, Team: actor.LastName}] = true
+		}
+	}
+	return func(ct clients.ClientTeam) bool {
+		return actorVisible[ct]
+	}, nil
 }
 
 // =====================================================================================================================
@@ -248,7 +329,7 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
-	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient())
+	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient(), m.genActorById())
 }
 
 func (m Manager) RipsitesArchiveName() string {
@@ -276,13 +357,97 @@ func (m Manager) GetRipsitesMonthStats(writer io.Writer) error {
 }
 
 func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
-	isTeamVisible, err := m.genIsTeamVisible()
+	isActorVisible, err := m.genIsActorVisible()
 	if err != nil {
 		return err
 	}
-	ripsiteStats, err := m.Ripsites.GetStats(maxVal, dateFor, m.visibleRipsiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"], m.CurrentUser.Permissions["Invoice"])
+
+	statContext := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isActorVisible,
+		ShowTeam:      !m.CurrentUser.Permissions["Review"],
+	}
+
+	ripsiteStats, err := m.Ripsites.GetStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err
 	}
 	return json.NewEncoder(writer).Encode(ripsiteStats)
+}
+
+// =====================================================================================================================
+// Polesites related methods
+//
+
+// visibleRipsiteFilter returns a filtering function on CurrentUser.Clients visibility
+func (m *Manager) visiblePolesiteFilter() ps.IsPolesiteVisible {
+	if len(m.CurrentUser.Clients) == 0 {
+		return func(ps *ps.PoleSite) bool { return true }
+	}
+	isVisible := make(map[string]bool)
+	for _, client := range m.CurrentUser.Clients {
+		isVisible[client] = true
+	}
+	return func(ps *ps.PoleSite) bool {
+		return isVisible[ps.Client]
+	}
+}
+
+// GetPolesitesInfo returns array of PolesiteInfos (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesInfo(writer io.Writer) error {
+	psis := []*fm.PolesiteInfo{}
+	for _, psr := range m.Polesites.GetAll(m.visiblePolesiteFilter()) {
+		psis = append(psis, psr.PoleSite.GetInfo())
+	}
+
+	return json.NewEncoder(writer).Encode(psis)
+}
+
+func (m Manager) GetPolesiteXLSAttachement(writer io.Writer, ps *ps.PoleSite) error {
+	return m.TemplateEngine.GetPolesiteXLSAttachement(writer, ps, m.genGetClient(), m.genActorById())
+}
+
+func (m Manager) PolesitesArchiveName() string {
+	return m.Polesites.ArchiveName()
+}
+
+func (m Manager) CreatePolesitesArchive(writer io.Writer) error {
+	return m.Polesites.CreateArchive(writer)
+}
+
+// GetPolesitesWeekStats returns Polesites Stats per Week (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesWeekStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonday(d)
+	}
+	return m.getPolesitesStats(writer, 12, df)
+}
+
+// GetPolesitesMonthStats returns Polesites Stats per Month (JSON in writer) visibles by current user
+func (m Manager) GetPolesitesMonthStats(writer io.Writer) error {
+	df := func(d string) string {
+		return date.GetMonth(d)
+	}
+	return m.getPolesitesStats(writer, 12, df)
+}
+
+func (m Manager) getPolesitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
+	isActorVisible, err := m.genIsActorVisible()
+	if err != nil {
+		return err
+	}
+
+	statContext := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isActorVisible,
+		ShowTeam:      !m.CurrentUser.Permissions["Review"],
+	}
+
+	polesiteStats, err := m.Polesites.GetStats(statContext, m.visiblePolesiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(polesiteStats)
 }

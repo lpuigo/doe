@@ -9,6 +9,8 @@ import (
 const (
 	sessionName string = "EWin-Session"
 	userId      string = "userid"
+
+	sessionMaxAge int = 86400 * 7
 )
 
 type SessionStore struct {
@@ -36,6 +38,17 @@ func (ss *SessionStore) CheckUser(r *http.Request) int {
 	return user
 }
 
+func (ss *SessionStore) RefreshSessionCookie(w http.ResponseWriter, r *http.Request) error {
+	session, err := ss.Get(r, ss.SessionName)
+	if err != nil {
+		return err
+	}
+	// update session MaxAge
+	session.Options.MaxAge = sessionMaxAge
+	// Save it before we write to the response/return from the handler.
+	return session.Save(r, w)
+}
+
 func (ss *SessionStore) AddSessionCookie(u *users.UserRecord, w http.ResponseWriter, r *http.Request) error {
 	session, err := ss.Get(r, ss.SessionName)
 	if err != nil {
@@ -44,7 +57,7 @@ func (ss *SessionStore) AddSessionCookie(u *users.UserRecord, w http.ResponseWri
 	// Set some session values.
 	session.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 7,
+		MaxAge:   sessionMaxAge,
 		HttpOnly: true,
 	}
 	session.Values[userId] = u.Id
@@ -57,10 +70,11 @@ func (ss *SessionStore) RemoveSessionCookie(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	session.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	}
+	//session.Options = &sessions.Options{
+	//	Path:     "/",
+	//	MaxAge:   -1,
+	//	HttpOnly: true,
+	//}
+	session.Options.MaxAge = -1
 	return session.Save(r, w)
 }

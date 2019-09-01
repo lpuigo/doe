@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>EWIN Rip Site</title>
+    <meta charset="UTF-8">
+    <link rel="icon" href="favicon.png">
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.12.0/lib/theme-chalk/index.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
+    <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+    <!--
+    <link rel="stylesheet" href="ripsite.css">
+    -->
+
+</head>
+<body>
+<div id="ripsites_app" style="height: 100%;">
+    <el-container style="height: 100%;border: 1px solid #eee">
+        <el-header class="ewin" style="height: 40px">
+            <div class="header-menu-container">
+                <el-row :gutter="20" type="flex" align="middle">
+                    <h2 class="content"><i class="fas fa-project-diagram icon--left"></i>EWIN Services RIP : <span
+                                style="color: #ccebff">{{Title}}</span></h2>
+                </el-row>
+
+                <span></span>
+
+                <el-button-group>
+                    <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SaveRipsite"
+                               :disabled="!IsDirty" size="mini"></el-button>
+                    <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadRipsite(true)"
+                               :disabled="!IsDirty" size="mini"></el-button>
+                </el-button-group>
+
+                <span></span>
+
+                <el-radio-group v-model="ActivityMode" size="mini">
+                    <el-radio-button label="Info">Info</el-radio-button>
+                    <el-radio-button v-if="Ripsite.Pullings.length > 0" label="Pulling">Tirage: {{Ripsite.Pullings.length}}</el-radio-button>
+                    <el-radio-button v-if="Ripsite.Junctions.length > 0" label="Junction">Racco: {{Ripsite.Junctions.length}}</el-radio-button>
+                    <el-radio-button v-if="Ripsite.Measurements.length > 0" label="Measurement">Mesure: {{Ripsite.Measurements.length}}</el-radio-button>
+                </el-radio-group>
+
+                <span></span>
+
+                <ripsite-info :ripsite="Ripsite"></ripsite-info>
+
+                <span></span>
+                <!--
+                <el-col :offset="1" :span="1">
+                    <h2 style="margin: 0 0"><a :href="Attachment()"><i class="link fas fa-file-excel"></i></a></h2>
+                </el-col>
+                -->
+
+                <div style="width: 20vw">
+                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location"
+                              @input="ApplyFilter">
+                        <el-select v-model="FilterType"
+                                   @change="ApplyFilter"
+                                   slot="prepend" placeholder="Tous"
+                                   style="width: 130px; margin-right: -10px">
+                            <el-option
+                                    v-for="item in GetFilterType(ActivityMode)"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                            ></el-option>
+                        </el-select>
+                        <el-button slot="append" icon="far fa-times-circle" @click="ClearFilter"></el-button>
+                    </el-input>
+                </div>
+
+                <span></span>
+
+                <el-row :gutter="20" type="flex" align="middle">
+                    <span v-if="!User.Connected"><i
+                                class="far fa-user-circle icon--left icon--medium"></i>Not logged</span>
+                    <span v-else><i class="fas fa-user-circle icon--left icon--medium"></i>{{User.Name}}</span>
+                </el-row>
+            </div>
+
+        </el-header>
+        <el-main style="height: 100%; padding: 5px 0px 0px 0px">
+            <rip-info-update v-if="ActivityMode == 'Info'" v-model="Ripsite" :user="User"></rip-info-update>
+            <rip-pulling-update v-if="ActivityMode == 'Pulling'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-pulling-update>
+            <rip-junction-update v-if="ActivityMode == 'Junction'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-junction-update>
+            <rip-measurement-update v-if="ActivityMode == 'Measurement'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-measurement-update>
+        </el-main>
+    </el-container>
+</div>
+</body>
+
+
+<!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
+<script src="/Assets/vue/2.5.17/vue.min.js"></script>
+<script src="https://unpkg.com/element-ui@2.12.0/lib/index.js"></script>
+<!--<script src="/Assets/element-ui/2.6.1/lib/index.js"></script>-->
+<script src="https://unpkg.com/element-ui@2.12.0/lib/umd/locale/fr.js"></script>
+<!--<script src="/Assets/element-ui/2.6.1/lib/umd/locale/fr.js"></script>-->
+
+<script>
+    ELEMENT.locale(ELEMENT.lang.fr)
+</script>
+<script type="text/javascript" src="ripsites.js"></script>
+
+</html>

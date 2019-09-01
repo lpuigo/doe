@@ -1,4 +1,4 @@
-package model
+package worksite
 
 import (
 	"github.com/gopherjs/gopherjs/js"

@@ -6,7 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/reworkupdate"
 	wem "github.com/lpuig/ewin/doe/website/frontend/comp/worksiteeditmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/worksiteinfo"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 )
 
 type ReworkUpdateModalModel struct {
@@ -41,13 +41,13 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.MethodsOf(&ReworkUpdateModalModel{}),
 		hvue.Computed("HasRework", func(vm *hvue.VM) interface{} {
 			m := NewReworkUpdateModalModelFromJS(vm.Object)
-			if m.Loading || !fm.WorksiteIsReworkable(m.CurrentWorksite.Status) {
+			if m.Loading || !worksite.WorksiteIsReworkable(m.CurrentWorksite.Status) {
 				return false
 			}
 			if m.CurrentWorksite.Rework != nil && m.CurrentWorksite.Rework.Object != js.Undefined {
 				return true
 			}
-			m.CurrentWorksite.Rework = fm.NewRework()
+			m.CurrentWorksite.Rework = worksite.NewRework()
 			return true
 		}),
 		hvue.Computed("hasChanged", func(vm *hvue.VM) interface{} {

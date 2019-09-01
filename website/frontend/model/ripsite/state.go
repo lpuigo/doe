@@ -10,22 +10,28 @@ import (
 type State struct {
 	*js.Object
 
-	Status    string `js:"Status"`
-	Team      string `js:"Team"`
-	DateStart string `js:"DateStart"`
-	DateEnd   string `js:"DateEnd"`
-	Comment   string `js:"Comment"`
+	Status    string   `js:"Status"`
+	Team      string   `js:"Team"`
+	Actors    []string `js:"Actors"`
+	DateStart string   `js:"DateStart"`
+	DateEnd   string   `js:"DateEnd"`
+	Comment   string   `js:"Comment"`
 }
 
 func NewState() *State {
 	s := &State{Object: tools.O()}
 	s.Status = ripconst.StateToDo
 	s.Team = ""
+	s.Actors = []string{}
 	s.DateStart = ""
 	s.DateEnd = ""
 	s.Comment = ""
 
 	return s
+}
+
+func (s *State) IsDone() bool {
+	return s.Status == ripconst.StateDone
 }
 
 func (s *State) IsBlocked() bool {
@@ -80,7 +86,7 @@ func (s *State) SetToDo() {
 }
 
 func (s *State) UpdateStatus() {
-	if tools.Empty(s.Team) {
+	if len(s.Actors) == 0 {
 		s.SetToDo()
 		return
 	}
@@ -104,8 +110,6 @@ func GetStateStatusesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
 		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
 		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
-		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
-		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
 		elements.NewValueLabel(ripconst.StateDone, "Fait"),
 		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
 	}
@@ -116,8 +120,8 @@ func GetStateStatusesWithWarningValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
 		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
 		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
-		elements.NewValueLabel(ripconst.StateWarning2, "Warning 2"),
-		elements.NewValueLabel(ripconst.StateWarning1, "Warning 1"),
+		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
+		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
 		elements.NewValueLabel(ripconst.StateDone, "Fait"),
 		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
 	}

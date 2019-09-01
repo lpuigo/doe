@@ -7,11 +7,14 @@ import (
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"strconv"
 )
 
 const template string = `
 	<el-row type="flex" align="middle" :gutter="10">
+	    <!-- Actors -->
 		<el-col :span="5">
+			<!--
 			<el-select v-model="value.Team" clearable filterable
 					   size="mini" style="width: 100%"
 					   placeholder="Equipe"
@@ -26,7 +29,24 @@ const template string = `
 						:value="item.value">
 				</el-option>
 			</el-select>
+			-->
+            <el-select v-model="value.Actors" filterable multiple placeholder="Acteurs" size="mini" style="width: 100%"
+                       @clear="UpdateStatus()"
+                       @change="UpdateStatus()"
+                       :disabled="DisableTeam()"
+            >
+                <el-option
+                        v-for="item in GetActors()"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        :disabled="item.disabled"
+                >
+                </el-option>
+            </el-select>
 		</el-col>
+	
+	    <!-- Date Start -->
 		<el-col :span="3">
 			<el-date-picker format="dd/MM/yyyy" placeholder="Début" size="mini"
 							style="width: 100%" type="date"
@@ -37,6 +57,8 @@ const template string = `
                             @change="UpdateStatus()"
 			></el-date-picker>
 		</el-col>
+	
+	    <!-- Date End -->
 		<el-col :span="3">
 			<el-date-picker format="dd/MM/yyyy" placeholder="Fin" size="mini"
 							style="width: 100%" type="date"
@@ -47,6 +69,8 @@ const template string = `
                             @change="UpdateStatus()"
 			></el-date-picker>
 		</el-col>
+    
+	    <!-- Status -->
         <el-col :span="3">
             <el-select v-model="value.Status" filterable
                        size="mini" style="width: 100%"
@@ -62,6 +86,8 @@ const template string = `
                 </el-option>
             </el-select>
         </el-col>
+	
+	    <!-- Comment -->
 		<el-col :span="10">
 			<el-input type="textarea" autosize placeholder="Commentaire" size="mini"
 					  v-model="value.Comment"
@@ -80,7 +106,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("value", "user", "client"),
+		hvue.Props("value", "user", "client", "measurement"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewStateUpdateModel(vm)
 		}),
@@ -94,9 +120,10 @@ func componentOptions() []hvue.ComponentOption {
 type StateUpdateModel struct {
 	*js.Object
 
-	State  *fmrip.State `js:"value"`
-	User   *fm.User     `js:"user"`
-	Client string       `js:"client"`
+	State       *fmrip.State `js:"value"`
+	User        *fm.User     `js:"user"`
+	Client      string       `js:"client"`
+	Measurement bool         `js:"measurement"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -107,6 +134,7 @@ func NewStateUpdateModel(vm *hvue.VM) *StateUpdateModel {
 	sum.State = fmrip.NewState()
 	sum.User = fm.NewUser()
 	sum.Client = ""
+	sum.Measurement = false
 
 	return sum
 }
@@ -120,12 +148,26 @@ func (sum *StateUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
 	return sum.User.GetTeamValueLabelsFor(sum.Client)
 }
 
-func (sum *StateUpdateModel) GetStatuses() []*elements.ValueLabel {
-	return fmrip.GetStateStatusesValueLabel()
+func (sum *StateUpdateModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabled {
+	sum = StateUpdateModelFromJS(vm.Object)
+	client := sum.User.GetClientByName(sum.Client)
+	if client == nil {
+		return nil
+	}
+
+	res := []*elements.ValueLabelDisabled{}
+	for _, actor := range client.Actors {
+		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), actor.GetRef(), !actor.Active))
+	}
+	return res
 }
 
-func (sum *StateUpdateModel) GetAllStatuses() []*elements.ValueLabel {
-	return fmrip.GetStateStatusesWithWarningValueLabel()
+func (sum *StateUpdateModel) GetStatuses(vm *hvue.VM) []*elements.ValueLabel {
+	sum = StateUpdateModelFromJS(vm.Object)
+	if sum.Measurement {
+		return fmrip.GetStateStatusesWithWarningValueLabel()
+	}
+	return fmrip.GetStateStatusesValueLabel()
 }
 
 func (sum *StateUpdateModel) UpdateStatus(vm *hvue.VM) {
@@ -135,7 +177,7 @@ func (sum *StateUpdateModel) UpdateStatus(vm *hvue.VM) {
 
 func (sum *StateUpdateModel) DisableDates(vm *hvue.VM) bool {
 	sum = StateUpdateModelFromJS(vm.Object)
-	if !sum.State.IsCanceled() && !tools.Empty(sum.State.Team) {
+	if !sum.State.IsCanceled() && len(sum.State.Actors) > 0 {
 		return false
 	}
 	return true

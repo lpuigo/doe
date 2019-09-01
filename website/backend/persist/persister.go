@@ -29,16 +29,28 @@ type Persister struct {
 	nextId    int
 
 	mut          sync.Mutex
+	persistDone  *sync.Cond
 	dirtyIds     []int
 	persistTimer *time.Timer
 }
 
 func NewPersister(dir string) *Persister {
-	return &Persister{
+	p := &Persister{
 		directory: dir,
-		records:   make(map[int]Recorder),
 		delay:     DefaultPersistDelay,
 	}
+	p.persistDone = sync.NewCond(&p.mut)
+	p.Reinit()
+	return p
+}
+
+// Reinit waits pesister mechanism to finish (if any) and reset the persister (empty record and id counter reset to 0)
+func (p *Persister) Reinit() {
+	p.WaitPersistDone()
+	p.mut.Lock()
+	defer p.mut.Unlock()
+	p.records = make(map[int]Recorder)
+	p.nextId = 0
 }
 
 // SetPersistDelay sets the Pesistance Delay of the Persister
@@ -105,9 +117,9 @@ func (p *Persister) Add(r Recorder) int {
 }
 
 // Load adds the given Record to the Persister
-func (p *Persister) Load(r Recorder) {
+func (p *Persister) Load(r Recorder) error {
 	if _, ok := p.records[r.GetId()]; ok {
-		panic(fmt.Sprintf("persister already contains given record with GetId %d", r.GetId()))
+		return fmt.Errorf("persister already contains a record with GetId %d", r.GetId())
 	}
 	p.mut.Lock()
 	defer p.mut.Unlock()
@@ -115,6 +127,7 @@ func (p *Persister) Load(r Recorder) {
 	if p.nextId <= r.GetId() {
 		p.nextId = r.GetId() + 1
 	}
+	return nil
 }
 
 // markDirty marks the given recorder as dirty and triggers the persistence mechanism
@@ -159,6 +172,12 @@ func (p *Persister) PersistAll(r Recorder) {
 		p.persistTimer.Stop()
 		p.persistTimer = nil
 	}
+	// desactivate persistMechanism if activated
+	if p.persistTimer != nil {
+		p.persistTimer.Stop()
+		p.persistTimer = nil
+		p.dirtyIds = []int{}
+	}
 
 	token := make(chan struct{}, ParallelPersister)
 	defer close(token)
@@ -180,6 +199,8 @@ func (p *Persister) PersistAll(r Recorder) {
 
 func (p *Persister) triggerPersist() {
 	if p.delay == 0 {
+		//p.mut.Lock()
+		//defer p.mut.Unlock()
 		if p.persistTimer != nil {
 			p.persistTimer.Stop()
 			p.persistTimer = nil
@@ -218,4 +239,15 @@ func (p *Persister) persist() {
 		token <- struct{}{}
 	}
 	p.dirtyIds = []int{}
+	p.persistDone.Broadcast()
+}
+
+// WaitPersistDone waits for current persisting mechanism to end and return (return instantly if no persist in progress)
+func (p *Persister) WaitPersistDone() {
+	if p.persistTimer == nil && len(p.dirtyIds) == 0 {
+		return
+	}
+	p.persistDone.L.Lock()
+	p.persistDone.Wait()
+	p.persistDone.L.Unlock()
 }

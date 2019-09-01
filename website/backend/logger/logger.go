@@ -17,7 +17,9 @@ func StartLog(logfile string) *os.File {
 		log.Fatal(err)
 	}
 	//set output of logs to f
+	//log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 	log.SetOutput(f)
+
 	return f
 }
 
