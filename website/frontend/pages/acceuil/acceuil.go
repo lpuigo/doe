@@ -127,10 +127,10 @@ func (m *MainPageModel) ClearSiteInfos() {
 // Action Methods
 
 func (m *MainPageModel) CheckSiteMode() {
-	if m.SiteMode == "Rip" && m.User.Permissions["Create"] {
-		m.ActiveMode = "Update"
-	} else {
+	if m.SiteMode == "Orange" && m.User.Permissions["Create"] {
 		m.ActiveMode = "Create"
+	} else {
+		m.ActiveMode = "Update"
 	}
 }
 
