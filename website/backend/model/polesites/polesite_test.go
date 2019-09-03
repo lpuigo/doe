@@ -137,7 +137,8 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `test/Alsace SRO 41.xlsx`
+	psXlsfile := `test/Alsace SRO 32.xlsx`
+	psXlsResFile := `test/Alsace SRO 32 gps.xlsx`
 	xf, err := os.Open(psXlsfile)
 	if err != nil {
 		t.Fatalf("could not open file: %s", err.Error())
@@ -147,6 +148,17 @@ func TestPolesiteFromXLS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
+
+	xfr, err := os.Create(psXlsResFile)
+	if err != nil {
+		t.Fatalf("could not create file: %s", err.Error())
+	}
+	defer xfr.Close()
+	err = ToXLS(xfr, ps)
+	if err != nil {
+		t.Fatalf("ToXLS return unexpected: %s", err.Error())
+	}
+
 	je := json.NewEncoder(os.Stdout)
 	//je.SetIndent("", "\t")
 	je.Encode(ps)
