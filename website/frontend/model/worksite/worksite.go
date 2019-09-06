@@ -3,7 +3,7 @@ package worksite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"strings"
 )
 

@@ -8,7 +8,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"sort"
 	"strconv"

@@ -7,13 +7,14 @@ type Actor struct {
 	Ref       string
 	FirstName string
 	LastName  string
+	State     string
 	Period    date.DateRange
 	Company   string
 	Contract  string
 	Role      string
 	Vacation  []date.DateRange
-
-	Client []string
+	Client    []string
+	Comment   string
 }
 
 func NewActor(firstName, lastName, company string) *Actor {
@@ -22,11 +23,13 @@ func NewActor(firstName, lastName, company string) *Actor {
 		Ref:       lastName + " " + firstName,
 		FirstName: firstName,
 		LastName:  lastName,
+		State:     "",
 		Period:    date.DateRange{},
 		Company:   company,
 		Role:      "",
 		Vacation:  []date.DateRange{},
 		Client:    []string{},
+		Comment:   "",
 	}
 }
 

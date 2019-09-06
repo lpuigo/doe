@@ -7,7 +7,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	ps "github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"sort"
 	"strconv"

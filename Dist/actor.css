@@ -1,0 +1,49 @@
+/* ====================================================================================================================
+    === Actor Table style ===
+ */
+
+.el-table .actor-row-candidate {
+    background: #e1edff;
+}
+
+.el-table .actor-row-candidate:hover {
+    background: #d8e3f2;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-active {
+    background: #ffffff;
+}
+
+.el-table .actor-row-active:hover {
+    background: #f0f0f0;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-holiday {
+    background: #e1d4ff;
+}
+
+.el-table .actor-row-holiday:hover {
+    background: #d5c9f0;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-gone {
+    background: #cccccc;
+}
+
+.el-table .actor-row-gone:hover {
+    background: #bdbdbd;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-error {
+    background: #ff644d;
+}
+
+.el-table .actor-row-error:hover {
+    background: #ed5d4a;
+    transition: background-color .15s ease;
+}
+

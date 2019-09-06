@@ -8,7 +8,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	date "github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	date "github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strconv"
 	"strings"

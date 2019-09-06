@@ -8,7 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	date "github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	date "github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"

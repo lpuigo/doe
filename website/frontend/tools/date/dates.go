@@ -52,6 +52,7 @@ func TodayAfter(d int) string {
 	return t.Format(TimeJSLayout)
 }
 
+// DateString convert Date (js format YYYY-MM-DD) to DD/MM/YYYY
 func DateString(v string) string {
 	if strings.Contains(v, "-") {
 		d := strings.Split(v, "-")

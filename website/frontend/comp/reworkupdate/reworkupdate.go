@@ -8,7 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/dates"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"strings"
 )
 
