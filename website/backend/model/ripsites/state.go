@@ -11,6 +11,17 @@ type State struct {
 	Comment   string
 }
 
+func MakeState(status string) State {
+	return State{
+		Status:    status,
+		Team:      "",
+		Actors:    []string{},
+		DateStart: "",
+		DateEnd:   "",
+		Comment:   "",
+	}
+}
+
 func (s State) TodoBlockedDone() (todo, blocked, done bool) {
 	if s.ToDo() {
 		return true, s.Blocked(), s.Done()
