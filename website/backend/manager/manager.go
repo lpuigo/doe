@@ -171,6 +171,21 @@ func (m *Manager) genActorById() clients.ActorById {
 	}
 }
 
+// GetCurrentUserClientsName returns Clients' names visible by current user (if user has no client, returns all clients)
+func (m Manager) GetCurrentUserClientsName() []string {
+	if m.CurrentUser == nil {
+		return nil
+	}
+	if len(m.CurrentUser.Clients) > 0 {
+		return m.CurrentUser.Clients
+	}
+	clientsNames := []string{}
+	for _, client := range m.Clients.GetAllClients() {
+		clientsNames = append(clientsNames, client.Name)
+	}
+	return clientsNames
+}
+
 // GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
 func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 	res := []*clients.Client{}
@@ -223,7 +238,7 @@ func (m Manager) genIsActorVisible() (clients.IsTeamVisible, error) {
 		return nil, err
 	}
 	for _, client := range clts {
-		allowedActors := m.Actors.GetActorsByClient(client.Name, false)
+		allowedActors := m.Actors.GetActorsByClient(false, client.Name)
 		for _, actor := range allowedActors {
 			actorVisible[clients.ClientTeam{Client: client.Name, Team: strconv.Itoa(actor.Id)}] = true
 			actorVisible[clients.ClientTeam{Client: client.Name, Team: actor.LastName}] = true
@@ -450,4 +465,14 @@ func (m Manager) getPolesitesStats(writer io.Writer, maxVal int, dateFor date.Da
 		return err
 	}
 	return json.NewEncoder(writer).Encode(polesiteStats)
+}
+
+// =====================================================================================================================
+// User related methods
+//
+
+func (m Manager) GetActors(writer io.Writer) error {
+	clientsNames := m.GetCurrentUserClientsName()
+	actors := m.Actors.GetActorsByClient(false, clientsNames...)
+	return json.NewEncoder(writer).Encode(actors)
 }

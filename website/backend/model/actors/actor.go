@@ -37,10 +37,13 @@ func (a *Actor) IsActiveOn(date string) bool {
 	return date < a.Period.End
 }
 
-func (a *Actor) WorksForClient(client string) bool {
+func (a *Actor) WorksForClient(client ...string) bool {
 	for _, clt := range a.Client {
-		if clt == client {
-			return true
+		for _, cl := range client {
+			if clt == cl {
+				return true
+			}
+
 		}
 	}
 	return false

@@ -56,7 +56,7 @@ type authentClient struct {
 func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
 	for _, client := range clients {
-		actors := mgr.Actors.GetActorsByClient(client.Name, false)
+		actors := mgr.Actors.GetActorsByClient(false, client.Name)
 		authentActors := authentActorsFrom(actors)
 		authClient := authentClient{
 			Name:     client.Name,

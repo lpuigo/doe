@@ -2,12 +2,13 @@ package route
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
-	"net/http"
-	"strconv"
 )
 
 func GetPolesitesInfo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

@@ -150,14 +150,14 @@ func (ap *ActorsPersister) GetAllActors() []*Actor {
 }
 
 // GetActorsByClient returns all Actors (active as today if activeOnly is true), acting for given client
-func (ap *ActorsPersister) GetActorsByClient(client string, activeOnly bool) []*Actor {
+func (ap *ActorsPersister) GetActorsByClient(activeOnly bool, clients ...string) []*Actor {
 	ap.RLock()
 	defer ap.RUnlock()
 
 	res := []*Actor{}
 	today := date.Today().String()
 	for _, ar := range ap.actors {
-		if ar.Actor.WorksForClient(client) && (!activeOnly || ar.IsActiveOn(today)) {
+		if ar.Actor.WorksForClient(clients...) && (!activeOnly || ar.IsActiveOn(today)) {
 			res = append(res, ar.Actor)
 		}
 	}
