@@ -3,13 +3,8 @@ package actorupdatemodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
-	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
-	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strings"
 )
 
@@ -154,37 +149,11 @@ const template string = `<el-dialog
     </div>
 
     <!-- 
-        Body Action Bar
+        Modal Footer Action Bar
     -->
     <span slot="footer">
 		<el-row :gutter="15">
 			<el-col :span="24" style="text-align: right">
-				<!--
-				<el-popover
-						ref="confirm_delete_popover"
-						placement="top"
-						width="160"
-						v-model="showconfirmdelete"
-				>
-					<p>Supprimer ce chantier ?</p>
-					<div style="text-align: left; margin: 0;">
-						<el-button :loading="saving" size="mini" type="text" @click="showconfirmdelete = false">Non</el-button>
-						<el-button :loading="saving" size="mini" type="primary" @click="DeleteWorksite">Oui</el-button>
-					</div>
-				</el-popover>
-				-->
-                <!--
-                <el-tooltip effect="light" :open-delay="500">
-                    <div slot="content">Supprimer ce chantier</div>
-                    <el-button :loading="saving" :disabled="isNewWorksite" type="danger" plain size="mini" icon="far fa-trash-alt" v-popover:confirm_delete_popover></el-button>
-                </el-tooltip>
-                -->
-                <!--
-                <el-tooltip effect="light" :open-delay="500">
-                    <div slot="content">Dupliquer ce chantier</div>
-                    <el-button :loading="saving" :disabled="isNewWorksite" type="info" plain size="mini" icon="far fa-clone" @click="Duplicate"></el-button>
-                </el-tooltip>
-                -->				
 				<el-tooltip :open-delay="500" effect="light">
 					<div slot="content">Annuler les changements</div>
 					<el-button :disabled="!hasChanged" @click="UndoChange" icon="fas fa-undo-alt" plain size="mini"
@@ -193,40 +162,23 @@ const template string = `<el-dialog
 				
 				<el-button @click="Hide" size="mini">Fermer</el-button>
 				
-				<el-button :disabled="!hasChanged" @click="ConfirmChange" plain size="mini">Enregistrer</el-button>
+				<el-button :disabled="!hasChanged" type="success" @click="ConfirmChange" plain size="mini">Enregistrer</el-button>
 			</el-col>
 		</el-row>
 	</span>
 </el-dialog>`
 
 type ActorUpdateModalModel struct {
-	*js.Object
-
-	Visible bool     `js:"visible"`
-	VM      *hvue.VM `js:"VM"`
-
-	User         *fm.User     `js:"user"`
-	EditedActor  *actor.Actor `js:"edited_actor"`
-	CurrentActor *actor.Actor `js:"current_actor"`
-
-	ShowConfirmDelete bool `js:"showconfirmdelete"`
+	*ActorModalModel
 }
 
 func NewActorUpdateModalModel(vm *hvue.VM) *ActorUpdateModalModel {
-	aumm := &ActorUpdateModalModel{Object: tools.O()}
-	aumm.Visible = false
-	aumm.VM = vm
-
-	aumm.User = fm.NewUser()
-	aumm.EditedActor = actor.NewActor()
-	aumm.CurrentActor = actor.NewActor()
-	aumm.ShowConfirmDelete = false
-
+	aumm := &ActorUpdateModalModel{ActorModalModel: NewActorModalModel(vm)}
 	return aumm
 }
 
 func ActorUpdateModalModelFromJS(o *js.Object) *ActorUpdateModalModel {
-	return &ActorUpdateModalModel{Object: o}
+	return &ActorUpdateModalModel{ActorModalModel: ActorModalModelFromJS(o)}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,49 +209,6 @@ func componentOptions() []hvue.ComponentOption {
 		//	return aumm.CurrentActor.Ref
 		//}),
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-// Modal Methods
-
-func (aumm *ActorUpdateModalModel) HasChanged() bool {
-	if aumm.EditedActor.Object == js.Undefined {
-		return true
-	}
-	return json.Stringify(aumm.CurrentActor) != json.Stringify(aumm.EditedActor)
-}
-
-func (aumm *ActorUpdateModalModel) Show(act *actor.Actor, user *fm.User) {
-	aumm.EditedActor = act
-	aumm.CurrentActor = act.Copy()
-	aumm.User = user
-	aumm.ShowConfirmDelete = false
-	aumm.Visible = true
-}
-
-func (aumm *ActorUpdateModalModel) HideWithControl() {
-	if aumm.HasChanged() {
-		message.ConfirmWarning(aumm.VM, "OK pour perdre les changements effectués ?", aumm.Hide)
-		return
-	}
-	aumm.Hide()
-}
-
-func (aumm *ActorUpdateModalModel) Hide() {
-	aumm.Visible = false
-	aumm.ShowConfirmDelete = false
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-// Action Button Methods
-
-func (aumm *ActorUpdateModalModel) ConfirmChange() {
-	aumm.EditedActor.Clone(aumm.CurrentActor)
-	aumm.Hide()
-}
-
-func (aumm *ActorUpdateModalModel) UndoChange() {
-	aumm.CurrentActor.Clone(aumm.EditedActor)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

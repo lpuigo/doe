@@ -18,6 +18,11 @@
             ref="ActorEditModal"
     ></actor-update-modal>
 
+    <!-- -->
+    <actor-vacancy-edit-modal
+            ref="ActorVacancyEditModal"
+    ></actor-vacancy-edit-modal>
+
     <el-container style="height: 100%;border: 1px solid #eee">
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
@@ -78,6 +83,7 @@
                           :user="User"
                           :filter="Filter" :filtertype="FilterType"
                           @edit-actor="ShowEditActor"
+                          @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-table>
         </el-main>
     </el-container>

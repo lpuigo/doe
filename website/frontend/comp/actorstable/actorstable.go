@@ -71,7 +71,7 @@ const (
         <template slot-scope="scope">
             <div class="header-menu-container on-hover">
             	<span>{{GetHoliday(scope.row)}}</span>
-				<i class="show link fas fa-edit"></i>
+				<i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
             </div>
         </template>
     </el-table-column>
@@ -257,4 +257,8 @@ func GetStateLabel(state string) string {
 
 func (atm *ActorsTableModel) EditActor(vm *hvue.VM, act *actor.Actor) {
 	vm.Emit("edit-actor", act)
+}
+
+func (atm *ActorsTableModel) EditActorVacancy(vm *hvue.VM, act *actor.Actor) {
+	vm.Emit("edit-actor-vacancy", act)
 }

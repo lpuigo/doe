@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorvacancyeditmodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
@@ -23,6 +24,7 @@ func main() {
 	hvue.NewVM(
 		hvue.El("#actor_app"),
 		actorupdatemodal.RegisterComponent(),
+		actorvacancyeditmodal.RegisterComponent(),
 		actorstable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -155,6 +157,12 @@ func (mpm *MainPageModel) ShowEditActor(vm *hvue.VM, act *actor.Actor) {
 	aem.Show(act, mpm.User)
 }
 
+//
+func (mpm *MainPageModel) ShowEditActorVacancy(vm *hvue.VM, act *actor.Actor) {
+	aem := actorvacancyeditmodal.ActorVacancyEditModalModelFromJS(mpm.VM.Refs("ActorVacancyEditModal"))
+	aem.Show(act, mpm.User)
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
@@ -241,17 +249,11 @@ func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {
 	refDict := makeDictActors(refActors)
 	updDict := makeDictActors(mpm.Actors)
 
-	print("callUpdateActors")
-
 	udpActors := []*actor.Actor{}
 	for id, act := range updDict {
 		refact := refDict[id]
 		if !(refact != nil && json.Stringify(act) == json.Stringify(refDict[id])) {
 			print("Changed User", act.Id, act.Ref)
-
-			udpActors = append(udpActors, act)
-		} else {
-			print("Unchanged User", act.Id, act.Ref)
 		}
 	}
 	return udpActors
