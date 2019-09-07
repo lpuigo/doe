@@ -83,6 +83,14 @@ pre {
     padding: 5px;
 }
 
+.on-hover .show{
+    visibility: hidden;
+}
+
+.on-hover:hover .show{
+    visibility: visible;
+}
+
 .header-menu-container {
     height: 100%;
     display: flex;

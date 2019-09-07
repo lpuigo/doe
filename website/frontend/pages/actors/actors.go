@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
@@ -121,13 +122,13 @@ func (mpm *MainPageModel) GetFilterType(vm *hvue.VM, activeMode string) []*eleme
 func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
 	mpm.Filter = ""
-	mpm.FilterType = "*"
+	mpm.FilterType = actorconst.FilterValueAll
 	mpm.ApplyFilter(vm)
 }
 
 //
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
-	message.ErrorStr(vm, "TODO Implement ApplyFilter", false)
+	// No OP
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +179,7 @@ func (mpm *MainPageModel) callGetActors(callback func()) {
 	loadedActors := []*actor.Actor{}
 	req.Response.Call("forEach", func(item *js.Object) {
 		act := actor.NewActorFromJS(item)
+		act.UpdateState()
 		loadedActors = append(loadedActors, act)
 	})
 	actors = loadedActors

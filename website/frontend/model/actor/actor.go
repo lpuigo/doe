@@ -49,6 +49,58 @@ func (a *Actor) SearchString(filter string) string {
 	return res
 }
 
+func (a *Actor) UpdateState() {
+	today := date.TodayAfter(0)
+	holidayPeriod := a.GetNextVacation()
+	switch {
+	case a.Period.Begin == "" || a.Period.Begin > today:
+		a.State = actorconst.StateCandidate
+	case a.Period.End != "" && a.Period.End < today:
+		a.State = actorconst.StateGone
+	case holidayPeriod == nil:
+		a.State = actorconst.StateActive
+	case holidayPeriod.Begin > today:
+		a.State = actorconst.StateActive
+	case holidayPeriod.Begin <= today:
+		a.State = actorconst.StateOnHoliday
+	default:
+		a.State = "Error"
+	}
+}
+
+// GetNextVacation returns actor's next (or current) vacation
+func (a *Actor) GetNextVacation() *date.DateRange {
+	if len(a.Vacation) == 0 {
+		return nil
+	}
+	today := date.TodayAfter(0)
+	vacBegin := ""
+	vacEnd := ""
+	for _, vacPeriod := range a.Vacation {
+		if vacPeriod.End < today {
+			continue
+		}
+		if vacBegin == "" && vacPeriod.End >= today {
+			vacBegin = vacPeriod.Begin
+			vacEnd = vacPeriod.End
+			continue
+		}
+		// vacBegin != ""
+		if vacPeriod.Begin < vacBegin {
+			vacBegin = vacPeriod.Begin
+			vacEnd = vacPeriod.End
+		}
+	}
+
+	if vacBegin == "" {
+		return nil
+	}
+	vdr := date.NewDateRange()
+	vdr.Begin = vacBegin
+	vdr.End = vacEnd
+	return vdr
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(actorconst.FilterValueAll, actorconst.FilterLabelAll),

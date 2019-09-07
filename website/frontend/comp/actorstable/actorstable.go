@@ -15,31 +15,53 @@ const (
 	template string = `<el-table
         :border=true
         :data="filteredActors"
+		:default-sort = "{prop: 'Client', order: 'ascending'}"
         :row-class-name="TableRowClassName" height="100%" size="mini"
 >
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
-            prop="Company" label="Compagnie" width="100px"
+            prop="Company" label="Compagnie" width="110px"
+			sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
     ></el-table-column>
     
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true
-            prop="Contract" label="Contrat" width="100px"
+            prop="Contract" label="Contrat" width="110px"
     ></el-table-column>
     
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
-            prop="Ref" label="Nom Prénom" width="100px"
+            prop="Client" label="Clients" width="200px"
+			sortable :sort-method="SortClient"
+    >
+        <template slot-scope="scope">
+			<span>{{GetClients(scope.row)}}</span>
+        </template>
+	</el-table-column>
+
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            prop="Role" label="Rôle" width="110px"
+			sortable :sort-by="['Role', 'State', 'Ref']"
     ></el-table-column>
+    
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            prop="Ref" label="Nom Prénom" width="200px"
+			sortable :sort-by="['State', 'Ref']"
+    >
+        <template slot-scope="scope">
+            <div class="header-menu-container on-hover">
+            	<span>{{scope.row.Ref}}</span>
+				<i v-if="user.Permissions.Invoice" class="show link fas fa-edit"></i>
+            </div>
+        </template>
+	</el-table-column>
     
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="State" label="Statut" width="100px"
-    ></el-table-column>
-    
-    <el-table-column
-            :resizable="true" :show-overflow-tooltip=true 
-            prop="Role" label="Rôle" width="100px"
+			:formatter="FormatState"
     ></el-table-column>
     
     <el-table-column
@@ -47,15 +69,10 @@ const (
             label="Congés" width="200px"
     >
         <template slot-scope="scope">
-            <span>{{GetHoliday(scope.row)}}</span>
-        </template>
-    </el-table-column>
-    
-    <el-table-column
-            label="Etat"
-    >
-        <template slot-scope="scope">
-            <rip-state-update :client="value.Client" :user="user" v-model="scope.row.State"></rip-state-update>
+            <div class="header-menu-container on-hover">
+            	<span>{{GetHoliday(scope.row)}}</span>
+				<i class="show link fas fa-edit"></i>
+            </div>
         </template>
     </el-table-column>
     
@@ -141,42 +158,69 @@ func (atm *ActorsTableModel) GetFilteredActors() []*actor.Actor {
 	return res
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Format & Style Functions
+
 func (atm *ActorsTableModel) TableRowClassName(rowInfo *js.Object) string {
 	actor := actor.NewActorFromJS(rowInfo.Get("row"))
 	return GetRowStyle(actor)
 }
 
 func (atm *ActorsTableModel) GetHoliday(act *actor.Actor) string {
-	if len(act.Vacation) == 0 {
+	vacPeriod := act.GetNextVacation()
+	if vacPeriod == nil {
 		return ""
 	}
-	today := date.TodayAfter(0)
-	vacBegin := ""
-	vacEnd := ""
-	for _, vacPeriod := range act.Vacation {
-		if vacPeriod.End < today {
-			continue
-		}
-		if vacBegin == "" && vacPeriod.End >= today {
-			vacBegin = vacPeriod.Begin
-			vacEnd = vacPeriod.End
-			continue
-		}
-		// vacBegin != ""
-		if vacPeriod.Begin < vacBegin {
-			vacBegin = vacPeriod.Begin
-			vacEnd = vacPeriod.End
-		}
-	}
+	return "du " + date.DateString(vacPeriod.Begin) + " au " + date.DateString(vacPeriod.End)
+}
 
-	if vacBegin == "" {
-		return ""
+func (atm *ActorsTableModel) GetClients(act *actor.Actor) string {
+	return strings.Join(act.Client, ", ")
+}
+
+func (atm *ActorsTableModel) SortClient(a, b *actor.Actor) int {
+	ca, cb := atm.GetClients(a), atm.GetClients(b)
+	switch {
+	case ca == cb:
+		switch {
+		case a.State == b.State:
+			return atm.SortRoleRef(a, b)
+		case a.State < b.State:
+			return -1
+		default:
+			return 1
+		}
+	case ca < cb:
+		return -1
+	default:
+		return 1
 	}
-	return date.DateString(vacBegin) + " au " + date.DateString(vacEnd)
+}
+
+func (atm *ActorsTableModel) SortRoleRef(a, b *actor.Actor) int {
+	switch {
+	case a.Role == b.Role:
+		switch {
+		case a.Ref == b.Ref:
+			return 0
+		case a.Ref < b.Ref:
+			return -1
+		default:
+			return 1
+		}
+	case a.Role < b.Role:
+		return -1
+	default:
+		return 1
+	}
+}
+
+func (atm *ActorsTableModel) FormatState(row, column, cellValue, index *js.Object) string {
+	return GetStateLabel(cellValue.String())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Style Functions
+// Tools Functions
 
 func GetRowStyle(actor *actor.Actor) string {
 	switch actor.State {
@@ -190,5 +234,20 @@ func GetRowStyle(actor *actor.Actor) string {
 		return "actor-row-gone"
 	default:
 		return "actor-row-error"
+	}
+}
+
+func GetStateLabel(state string) string {
+	switch state {
+	case actorconst.StateCandidate:
+		return actorconst.StateLabelCandidate
+	case actorconst.StateActive:
+		return actorconst.StateLabelActive
+	case actorconst.StateOnHoliday:
+		return actorconst.StateLabelOnHoliday
+	case actorconst.StateGone:
+		return actorconst.StateLabelGone
+	default:
+		return "Erreur"
 	}
 }

@@ -4,10 +4,10 @@ const (
 	StateCandidate string = "00 Candidate"
 	StateActive    string = "10 Active"
 	StateOnHoliday string = "20 On Holiday"
-	StateGone      string = "90 Fait"
+	StateGone      string = "90 Gone"
 
 	StateLabelCandidate string = "Candidat"
-	StateLabelActive    string = "Employé"
+	StateLabelActive    string = "Actif"
 	StateLabelOnHoliday string = "En Congés"
 	StateLabelGone      string = "Parti"
 )
