@@ -17,6 +17,10 @@ const (
 	RoleJuncter    string = "Racordeur"
 	RoleDriver     string = "Chauffeur"
 	RoleTeamleader string = "Chef d'Equipe"
+
+	ContractTemp string = "Intérim"
+	ContractCDD  string = "CDD"
+	ContractCDI  string = "CDI"
 )
 
 const (

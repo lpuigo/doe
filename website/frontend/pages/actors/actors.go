@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
@@ -21,6 +22,7 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#actor_app"),
+		actorupdatemodal.RegisterComponent(),
 		actorstable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -145,6 +147,12 @@ func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 //
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 	// No OP
+}
+
+//
+func (mpm *MainPageModel) ShowEditActor(vm *hvue.VM, act *actor.Actor) {
+	aem := actorupdatemodal.ActorUpdateModalModelFromJS(mpm.VM.Refs("ActorEditModal"))
+	aem.Show(act, mpm.User)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

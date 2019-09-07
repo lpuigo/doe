@@ -19,3 +19,10 @@ func NewDateRange() *DateRange {
 	dr.End = ""
 	return dr
 }
+
+func NewDateRangeFrom(beg, end string) *DateRange {
+	dr := &DateRange{Object: tools.O()}
+	dr.Begin = beg
+	dr.End = end
+	return dr
+}

@@ -13,6 +13,11 @@
 </head>
 <body>
 <div id="actor_app" style="height: 100%;">
+    <!-- -->
+    <actor-update-modal
+            ref="ActorEditModal"
+    ></actor-update-modal>
+
     <el-container style="height: 100%;border: 1px solid #eee">
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
@@ -69,7 +74,11 @@
 
         </el-header>
         <el-main style="height: 100%; padding: 5px 0px 0px 0px">
-            <actors-table v-model="Actors" :user="User" :filter="Filter" :filtertype="FilterType"></actors-table>
+            <actors-table v-model="Actors"
+                          :user="User"
+                          :filter="Filter" :filtertype="FilterType"
+                          @edit-actor="ShowEditActor"
+            ></actors-table>
         </el-main>
     </el-container>
 </div>

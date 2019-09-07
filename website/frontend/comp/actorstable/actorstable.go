@@ -20,7 +20,7 @@ const (
 >
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
-            prop="Company" label="Compagnie" width="110px"
+            prop="Company" label="Société" width="110px"
 			sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
     ></el-table-column>
     
@@ -53,7 +53,7 @@ const (
         <template slot-scope="scope">
             <div class="header-menu-container on-hover">
             	<span>{{scope.row.Ref}}</span>
-				<i v-if="user.Permissions.Invoice" class="show link fas fa-edit"></i>
+				<i v-if="user.Permissions.Invoice" class="show link fas fa-edit" @click="EditActor(scope.row)"></i>
             </div>
         </template>
 	</el-table-column>
@@ -250,4 +250,11 @@ func GetStateLabel(state string) string {
 	default:
 		return "Erreur"
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action Methods
+
+func (atm *ActorsTableModel) EditActor(vm *hvue.VM, act *actor.Actor) {
+	vm.Emit("edit-actor", act)
 }

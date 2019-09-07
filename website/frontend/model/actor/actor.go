@@ -3,8 +3,10 @@ package actor
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
 // Type Actor reflects ewin/doe/website/backend/model/actors.Actor
@@ -25,8 +27,48 @@ type Actor struct {
 	Comment   string            `js:"Comment"`
 }
 
+func NewActor() *Actor {
+	na := &Actor{Object: tools.O()}
+	na.Id = -1
+	na.Ref = ""
+	na.FirstName = ""
+	na.LastName = ""
+	na.State = ""
+	na.Period = date.NewDateRange()
+	na.Company = ""
+	na.Contract = ""
+	na.Role = ""
+	na.Vacation = []*date.DateRange{}
+	na.Client = []string{}
+	na.Comment = ""
+	return na
+}
+
 func NewActorFromJS(obj *js.Object) *Actor {
 	return &Actor{Object: obj}
+}
+
+func (a *Actor) Copy() *Actor {
+	return NewActorFromJS(json.Parse(json.Stringify(a.Object)))
+}
+
+func (a *Actor) Clone(oa *Actor) {
+	a.Id = oa.Id
+	a.Ref = oa.Ref
+	a.FirstName = oa.FirstName
+	a.LastName = oa.LastName
+	a.State = oa.State
+	a.Period.Begin = oa.Period.Begin
+	a.Period.End = oa.Period.End
+	a.Company = oa.Company
+	a.Contract = oa.Contract
+	a.Role = oa.Role
+	a.Vacation = []*date.DateRange{}
+	for _, vac := range oa.Vacation {
+		a.Vacation = append(a.Vacation, date.NewDateRangeFrom(vac.Begin, vac.End))
+	}
+	a.Client = oa.Client[:]
+	a.Comment = oa.Comment
 }
 
 func (a *Actor) SearchString(filter string) string {
