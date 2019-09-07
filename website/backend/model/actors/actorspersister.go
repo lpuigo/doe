@@ -163,3 +163,19 @@ func (ap *ActorsPersister) GetActorsByClient(activeOnly bool, clients ...string)
 	}
 	return res
 }
+
+// UpdateActors updates all given updated actors
+func (ap *ActorsPersister) UpdateActors(updatedActors []*Actor) error {
+	for _, actor := range updatedActors {
+		ar := NewActorRecordFromActor(actor)
+		if actor.Id == -1 {
+			ap.Add(ar)
+			continue
+		}
+		err := ap.Update(ar)
+		if err != nil {
+			return fmt.Errorf("could not update actor '%s' (id: %d)", actor.Ref, actor.Id)
+		}
+	}
+	return nil
+}

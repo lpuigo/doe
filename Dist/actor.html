@@ -21,7 +21,12 @@
                 </el-row>
 
                 <span></span>
-                <span></span>
+                <el-button-group>
+                    <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SaveActors"
+                               :disabled="!IsDirty" size="mini"></el-button>
+                    <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadActors(true)"
+                               :disabled="!IsDirty" size="mini"></el-button>
+                </el-button-group>
                 <span></span>
 
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">

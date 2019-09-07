@@ -31,10 +31,10 @@ func main() {
 				mpm.LoadActors(false)
 			})
 		}),
-		hvue.Computed("Title", func(vm *hvue.VM) interface{} {
-			//mpm := &MainPageModel{Object: vm.Object}
-			return "To Refactor"
-		}),
+		//hvue.Computed("Title", func(vm *hvue.VM) interface{} {
+		//	//mpm := &MainPageModel{Object: vm.Object}
+		//	return "To Refactor"
+		//}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.Dirty = (mpm.Reference != json.Stringify(mpm.Actors))
@@ -86,8 +86,12 @@ func (mpm *MainPageModel) PreventLeave() bool {
 	return mpm.Dirty
 }
 
+func (mpm *MainPageModel) GetReference() string {
+	return json.Stringify(mpm.Actors)
+}
+
 func (mpm *MainPageModel) SetReference() {
-	mpm.Reference = json.Stringify(mpm.Actors)
+	mpm.Reference = mpm.GetReference()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,13 +105,25 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 // Action Methods
 
 func (mpm *MainPageModel) LoadActors(update bool) {
-	go mpm.callGetActors(mpm.SetReference)
+	updateLoadedActors := func() {
+		mpm.SetReference()
+		for _, act := range mpm.Actors {
+			act.UpdateState()
+		}
+		// IsDirty is set to true if some update are undertaken
+	}
+	go mpm.callGetActors(updateLoadedActors)
 }
 
-//func (mpm *MainPageModel) SaveActor(vm *hvue.VM) {
-//	mpm = &MainPageModel{Object: vm.Object}
-//	go mpm.callGetActors()
-//}
+func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
+	mpm = &MainPageModel{Object: vm.Object}
+
+	updateActors := func() {
+		mpm.LoadActors(false)
+	}
+
+	go mpm.callUpdateActors(updateActors)
+}
 
 // SwitchActiveMode handles ActiveMode change
 func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
@@ -179,8 +195,64 @@ func (mpm *MainPageModel) callGetActors(callback func()) {
 	loadedActors := []*actor.Actor{}
 	req.Response.Call("forEach", func(item *js.Object) {
 		act := actor.NewActorFromJS(item)
-		act.UpdateState()
 		loadedActors = append(loadedActors, act)
 	})
 	actors = loadedActors
+}
+
+func (mpm *MainPageModel) callUpdateActors(callback func()) {
+	updatedActors := mpm.getUpdatedActors()
+	if len(updatedActors) == 0 {
+		message.ErrorStr(mpm.VM, "Could not find any updated actors", false)
+		return
+	}
+
+	defer callback()
+
+	req := xhr.NewRequest("PUT", "/api/actors")
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(json.Stringify(updatedActors))
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	message.SuccesStr(mpm.VM, "Modification sauvegardée")
+}
+
+func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {
+	refActors := []*actor.Actor{}
+	json.Parse(mpm.Reference).Call("forEach", func(item *js.Object) {
+		act := actor.NewActorFromJS(item)
+		refActors = append(refActors, act)
+	})
+	refDict := makeDictActors(refActors)
+	updDict := makeDictActors(mpm.Actors)
+
+	print("callUpdateActors")
+
+	udpActors := []*actor.Actor{}
+	for id, act := range updDict {
+		refact := refDict[id]
+		if !(refact != nil && json.Stringify(act) == json.Stringify(refDict[id])) {
+			print("Changed User", act.Id, act.Ref)
+
+			udpActors = append(udpActors, act)
+		} else {
+			print("Unchanged User", act.Id, act.Ref)
+		}
+	}
+	return udpActors
+}
+
+func makeDictActors(actors []*actor.Actor) map[int]*actor.Actor {
+	res := make(map[int]*actor.Actor)
+	for _, act := range actors {
+		res[act.Id] = act
+	}
+	return res
 }

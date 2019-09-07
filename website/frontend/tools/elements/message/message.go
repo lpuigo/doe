@@ -55,7 +55,9 @@ func ErrorStr(vm *hvue.VM, msg string, closeButton bool) {
 }
 
 func ErrorMsgStr(vm *hvue.VM, msg string, o *js.Object, closeButton bool) {
-	msg += ErrorMsgFromJS(o).Error
+	if o != nil {
+		msg += ErrorMsgFromJS(o).Error
+	}
 	ErrorStr(vm, msg, closeButton)
 }
 

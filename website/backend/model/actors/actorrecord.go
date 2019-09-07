@@ -47,3 +47,11 @@ func NewActorRecordFromFile(file string) (ar *ActorRecord, err error) {
 	}
 	return
 }
+
+// NewActorRecordFromActor returns a ActorRecord populated from given actor
+func NewActorRecordFromActor(act *Actor) *ActorRecord {
+	ar := NewActorRecord()
+	ar.Actor = act
+	ar.SetId(ar.Id)
+	return ar
+}

@@ -52,7 +52,6 @@ func GetPolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("UpdatePolesite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
@@ -60,6 +59,7 @@ func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, "request Polesite missing", http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
 	reqPolesiteId := mux.Vars(r)["psid"]
 	rpsid, err := strconv.Atoi(reqPolesiteId)
 	if err != nil {
