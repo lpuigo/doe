@@ -129,23 +129,26 @@ type Progress struct {
 	Total, Done, Blocked int
 }
 
-func (rs *Ripsite) GetPullingProgresses() (total, under, aerial, building Progress) {
+func (rs *Ripsite) GetPullingProgresses() (total, cable, under, aerial, building Progress) {
 	for _, pulling := range rs.Pullings {
 		if !pulling.State.IsDoable() {
 			continue
 		}
+		cable.Total += 1
 		tot, lov, und, aer, build := pulling.GetDists()
 		total.Total += tot
 		under.Total += und + lov
 		aerial.Total += aer
 		building.Total += build
 		if pulling.State.IsDone() {
+			cable.Done += 1
 			total.Done += tot
 			under.Done += und + lov
 			aerial.Done += aer
 			building.Done += build
 		}
 		if pulling.State.IsBlocked() {
+			cable.Blocked += 1
 			total.Blocked += tot
 			under.Blocked += und + lov
 			aerial.Blocked += aer
