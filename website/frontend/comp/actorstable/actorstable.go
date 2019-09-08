@@ -77,8 +77,7 @@ const (
     </el-table-column>
     
     <el-table-column
-            :resizable="true" :show-overflow-tooltip=true
-            prop="Comment" label="Commentaire"
+            :resizable="true" prop="Comment" label="Commentaire"
     ></el-table-column>
 </el-table>
 `

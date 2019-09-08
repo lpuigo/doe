@@ -225,6 +225,10 @@ func (m *MainPageModel) OpenRipsite(id int) {
 	js.Global.Get("window").Call("open", "ripsite.html?rsid="+strconv.Itoa(id))
 }
 
+func (m *MainPageModel) OpenActors() {
+	js.Global.Get("window").Call("open", "actor.html")
+}
+
 func (m *MainPageModel) CreateNewWorksite() {
 	m.EditWorksite(-1)
 }

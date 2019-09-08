@@ -47,3 +47,44 @@
     transition: background-color .15s ease;
 }
 
+/* ====================================================================================================================
+    === Actor Calendar style ===
+ */
+
+.calendar-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.calendar-row .calendar-slot {
+    flex-grow: 1;
+    margin: 1px 2px;
+    border-style: solid;
+    border-width: 0px;
+    border-radius: 3px;
+    border-color: #696969;
+}
+
+.calendar-slot.active {
+    background: #86d47f;
+}
+
+.calendar-slot.week-end {
+    background: #70996b;
+}
+
+.calendar-slot.holiday {
+    background: #c394d4;
+}
+
+.calendar-slot.inactive {
+    background: #eeeeee;
+}
+
+.calendar-slot.today {
+    margin: 0px 1px;
+    border-width: 1px;
+}
+

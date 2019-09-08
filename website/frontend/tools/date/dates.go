@@ -47,6 +47,11 @@ func MinMax(date ...string) (min, max string) {
 	return
 }
 
+func After(s string, d int) string {
+	t := New(s).Add(time.Duration(d*24) * time.Hour)
+	return t.Format(TimeJSLayout)
+}
+
 func TodayAfter(d int) string {
 	t := time.Now().Truncate(24 * time.Hour).Add(time.Duration(d*24) * time.Hour)
 	return t.Format(TimeJSLayout)
@@ -59,4 +64,34 @@ func DateString(v string) string {
 		return d[2] + "/" + d[1] + "/" + d[0]
 	}
 	return "-"
+}
+
+func Day(v string) string {
+	if strings.Contains(v, "-") {
+		d := strings.Split(v, "-")
+		return d[2]
+	}
+	return "-"
+}
+
+func MonthYear(v string) string {
+	if strings.Contains(v, "-") {
+		d := strings.Split(v, "-")
+		return d[1] + "/" + d[0]
+	}
+	return "-"
+}
+
+func GetFirstOfMonth(v string) string {
+	if strings.Contains(v, "-") {
+		d := strings.Split(v, "-")
+		return d[0] + "-" + d[1] + "-01"
+	}
+	return "-"
+}
+
+func GetMonday(v string) string {
+	d := New(v)
+	daynum := (int(d.Weekday()) + 6) % 7
+	return d.Truncate(24 * time.Hour).Add(time.Duration(-daynum*24) * time.Hour).Format(TimeJSLayout)
 }

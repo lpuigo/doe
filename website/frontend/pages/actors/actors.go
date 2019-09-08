@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorscalendar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorvacancyeditmodal"
@@ -26,6 +27,7 @@ func main() {
 		actorupdatemodal.RegisterComponent(),
 		actorvacancyeditmodal.RegisterComponent(),
 		actorstable.RegisterComponent(),
+		actorscalendar.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -137,7 +139,7 @@ func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
 
 // SwitchActiveMode handles ActiveMode change
 func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
-	message.ErrorStr(vm, "TODO Implement SwitchActiveMode", false)
+	//message.ErrorStr(vm, "TODO Implement SwitchActiveMode", false)
 }
 
 func (mpm *MainPageModel) GetFilterType(vm *hvue.VM, activeMode string) []*elements.ValueLabel {
