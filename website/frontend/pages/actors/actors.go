@@ -108,6 +108,12 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
+func (mpm *MainPageModel) AddActor() {
+	newActor := actor.NewActor()
+	mpm.Actors = append(mpm.Actors, newActor)
+	mpm.ShowEditActor(mpm.VM, newActor)
+}
+
 func (mpm *MainPageModel) LoadActors(update bool) {
 	updateLoadedActors := func() {
 		mpm.SetReference()
@@ -218,12 +224,11 @@ func (mpm *MainPageModel) callGetActors(callback func()) {
 
 func (mpm *MainPageModel) callUpdateActors(callback func()) {
 	updatedActors := mpm.getUpdatedActors()
+	defer callback()
 	if len(updatedActors) == 0 {
 		message.ErrorStr(mpm.VM, "Could not find any updated actors", false)
 		return
 	}
-
-	defer callback()
 
 	req := xhr.NewRequest("PUT", "/api/actors")
 	req.Timeout = tools.TimeOut
@@ -247,13 +252,15 @@ func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {
 		refActors = append(refActors, act)
 	})
 	refDict := makeDictActors(refActors)
-	updDict := makeDictActors(mpm.Actors)
 
 	udpActors := []*actor.Actor{}
-	for id, act := range updDict {
-		refact := refDict[id]
-		if !(refact != nil && json.Stringify(act) == json.Stringify(refDict[id])) {
-			print("Changed User", act.Id, act.Ref)
+	for _, act := range mpm.Actors {
+		if act.Ref == "" {
+			continue
+		}
+		refact := refDict[act.Id]
+		if !(refact != nil && json.Stringify(act) == json.Stringify(refact)) {
+			udpActors = append(udpActors, act)
 		}
 	}
 	return udpActors

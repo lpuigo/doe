@@ -92,6 +92,12 @@ func (a *Actor) SearchString(filter string) string {
 }
 
 func (a *Actor) UpdateState() {
+	if tools.Empty(a.Period.Begin) {
+		a.Period.Begin = ""
+	}
+	if tools.Empty(a.Period.End) {
+		a.Period.End = ""
+	}
 	today := date.TodayAfter(0)
 	holidayPeriod := a.GetNextVacation()
 	switch {

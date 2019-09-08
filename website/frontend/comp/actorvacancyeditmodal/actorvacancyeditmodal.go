@@ -13,14 +13,14 @@ import (
 const template string = `<el-dialog
         :before-close="HideWithControl"
         :visible.sync="visible"
-        width="70%"
+        width="40%"
 >
     <!-- 
         Modal Title
     -->
     <span slot="title">
 		<el-row :gutter="10" align="middle" type="flex">
-			<el-col :span="12">
+			<el-col :span="24">
 				<h2 style="margin: 0 0" v-if="current_actor">
 					<i class="fas fa-user-clock icon--left"></i>Edition des congés de : <span style="color: #ccebff">{{current_actor.Ref}}</span>
 				</h2>
@@ -35,26 +35,29 @@ const template string = `<el-dialog
     -->
     <div style="height: 45vh; padding: 5px 25px; ">
 		<el-table 
-				:border=true
+				:border="false"
         		:data="VacationDates"
-		        max-height="100%" size="mini"
+		        height="100%" size="mini"
 
 		>
 			<el-table-column
-					label="Action" width="80px"
+					label="" width="70px" align="center"
 			>
+				<template slot="header" slot-scope="scope">
+					<el-button type="success" plain icon="fas fa-user-plus" circle size="mini" :disabled="!datesComplete" @click="AddDates()"></el-button>
+				</template>
 				<template slot-scope="scope">
-					<el-button type="danger" icon="el-icon-delete" circle size="small" @click="DeleteDates(scope.$index)"></el-button>
+					<el-button type="danger" icon="fas fa-user-minus" circle size="mini" @click="DeleteDates(scope.$index)"></el-button>
 				</template>
 			</el-table-column>
 			
 			<el-table-column
-					prop="Begin" label="Début - Fin" width="700px" 
+					label="Congés" 
 			>
 				<template slot-scope="scope">
 					<el-date-picker
 							v-model="scope.row.Dates"
-							type="daterange" unlink-panels
+							type="daterange" unlink-panels size="small" style="width: 100%"
 							:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
 							value-format="yyyy-MM-dd"
 							range-separator="au"
@@ -66,8 +69,6 @@ const template string = `<el-dialog
 				</template>
 			</el-table-column>
 		</el-table>
-
-		<pre>{{VacationDates}}</pre>
 
     </div>
 
@@ -100,6 +101,10 @@ func NewVacDates(beg, end string) *VacDates {
 	vd := &VacDates{Object: tools.O()}
 	vd.Dates = []string{beg, end}
 	return vd
+}
+
+func (vd *VacDates) IsComplete() bool {
+	return !tools.Empty(vd.Dates[0]) && !tools.Empty(vd.Dates[1])
 }
 
 type ActorVacancyEditModalModel struct {
@@ -136,9 +141,13 @@ func componentOptions() []hvue.ComponentOption {
 			vemm := ActorVacancyEditModalModelFromJS(vm.Object)
 			return vemm.CurrentActor.Id == -1
 		}),
+		hvue.Computed("datesComplete", func(vm *hvue.VM) interface{} {
+			vemm := ActorVacancyEditModalModelFromJS(vm.Object)
+			return vemm.DatesComplete()
+		}),
 		hvue.Computed("hasChanged", func(vm *hvue.VM) interface{} {
 			vemm := ActorVacancyEditModalModelFromJS(vm.Object)
-			return vemm.HasChanged()
+			return vemm.DatesComplete() && vemm.HasChanged()
 		}),
 		//hvue.Computed("currentActorRef", func(vm *hvue.VM) interface{} {
 		//	aumm := ActorVacancyEditModalModelFromJS(vm.Object)
@@ -203,6 +212,19 @@ func (vemm *ActorVacancyEditModalModel) UndoChange() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Tools Button Methods
+
+func (vemm *ActorVacancyEditModalModel) DatesComplete() bool {
+	if len(vemm.VacationDates) == 0 {
+		return true
+	}
+	return vemm.VacationDates[0].IsComplete()
+}
+
+func (vemm *ActorVacancyEditModalModel) AddDates(vm *hvue.VM) {
+	vemm = ActorVacancyEditModalModelFromJS(vm.Object)
+	vemm.VacationDates = append([]*VacDates{NewVacDates("", "")}, vemm.VacationDates...)
+	vemm.UpdateVacation()
+}
 
 func (vemm *ActorVacancyEditModalModel) DeleteDates(vm *hvue.VM, index int) {
 	vemm = ActorVacancyEditModalModelFromJS(vm.Object)

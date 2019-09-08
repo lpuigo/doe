@@ -48,7 +48,7 @@ const (
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Ref" label="Nom Prénom" width="200px"
-			sortable :sort-by="['State', 'Ref']"
+			sortable :sort-by="['Ref']"
     >
         <template slot-scope="scope">
             <div class="header-menu-container on-hover">
@@ -167,6 +167,9 @@ func (atm *ActorsTableModel) TableRowClassName(rowInfo *js.Object) string {
 }
 
 func (atm *ActorsTableModel) GetHoliday(act *actor.Actor) string {
+	if act.State == actorconst.StateCandidate {
+		return "débute " + date.DateString(act.Period.Begin)
+	}
 	vacPeriod := act.GetNextVacation()
 	if vacPeriod == nil {
 		return ""
