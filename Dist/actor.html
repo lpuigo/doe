@@ -43,11 +43,11 @@
 
                 <el-button-group size="mini">
                     <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light">
-                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SaveActors"
+                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--medium" @click="SaveActors"
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
                     <el-tooltip content="Annuler les modifications" placement="bottom" effect="light">
-                        <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadActors(true)"
+                        <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(true)"
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
                 </el-button-group>
@@ -56,7 +56,7 @@
 
                 <el-button-group size="mini">
                     <el-tooltip content="Créer un nouvel acteur" placement="bottom" effect="light">
-                        <el-button class="icon" icon="fas fa-user-plus icon--big" @click="AddActor()"></el-button>
+                        <el-button class="icon" icon="fas fa-user-plus icon--medium" @click="AddActor()"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
