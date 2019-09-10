@@ -114,7 +114,7 @@
 
                     <el-row :gutter="20" type="flex" align="middle">
                         <el-button v-if="!User.Connected" type="primary" @click="ShowUserLogin" icon="far fa-user-circle icon--left icon--medium" size="mini">Login</el-button>
-                        <el-button v-else type="primary" @click="UserLogout" icon="fas fa-users icon--left icon--medium" size="mini">{{User.Name}} Logout</el-button>
+                        <el-button v-else type="primary" @click="UserLogout" icon="fas fa-user-circle icon--left icon--medium" size="mini">{{User.Name}} Logout</el-button>
                     </el-row>
                 </div>
             </el-header>
