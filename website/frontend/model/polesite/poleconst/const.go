@@ -59,6 +59,7 @@ const (
 
 	ProductCoated  string = "Enrobé"
 	ProductMoise   string = "Moisé"
+	ProductCouple  string = "Couplé"
 	ProductReplace string = "Remplacement"
 	ProductRemove  string = "Retrait"
 

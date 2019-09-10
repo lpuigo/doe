@@ -38,6 +38,7 @@ func InfoStr(vm *hvue.VM, msg string, closeButton bool) {
 }
 
 func SuccesStr(vm *hvue.VM, msg string) {
+	message.SetDuration(tools.SuccessMsgDuration)
 	messageString(vm, "success", msg, false)
 }
 

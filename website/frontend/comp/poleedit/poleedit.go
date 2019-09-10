@@ -103,7 +103,7 @@ const template string = `<div>
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6" class="align-right">Hauteur:</el-col>
         <el-col :span="18">
-            <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="7" :max="12" style="width: 100%"
+            <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="6" :max="12" style="width: 100%"
             ></el-input-number>
         </el-col>
     </el-row>

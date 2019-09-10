@@ -463,6 +463,7 @@ func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite) {
 		message.ErrorRequestMessage(mpm.VM, req)
 		return
 	}
+
 	message.SuccesStr(mpm.VM, "Chantier sauvegardé")
 	mpm.Reference = json.Stringify(ups)
 }

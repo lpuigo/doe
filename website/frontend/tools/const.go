@@ -1,7 +1,7 @@
 package tools
 
 const (
-	SuccessMsgDuration = 1500
+	SuccessMsgDuration = 2000
 	WarningMsgDuration = 5000
 	LongTimeOut        = 30000
 	TimeOut            = 10000

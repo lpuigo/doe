@@ -98,7 +98,7 @@ func (ptm *PoleTableModel) FormatState(r, c *js.Object, d string) string {
 }
 
 func (ptm *PoleTableModel) FormatProduct(p *ps.Pole) string {
-	return strings.Join(p.Product, ", ")
+	return strings.Join(p.Product, "\n")
 }
 
 func (ptm *PoleTableModel) FormatActors(vm *hvue.VM, p *ps.Pole) string {
