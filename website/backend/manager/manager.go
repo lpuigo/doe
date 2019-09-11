@@ -468,11 +468,31 @@ func (m Manager) getPolesitesStats(writer io.Writer, maxVal int, dateFor date.Da
 }
 
 // =====================================================================================================================
-// User related methods
+// Actors related methods
 //
 
 func (m Manager) GetActors(writer io.Writer) error {
 	clientsNames := m.GetCurrentUserClientsName()
 	actors := m.Actors.GetActorsByClient(false, clientsNames...)
 	return json.NewEncoder(writer).Encode(actors)
+}
+
+func (m Manager) ActorsArchiveName() string {
+	return m.Actors.ArchiveName()
+}
+
+func (m Manager) CreateActorsArchive(writer io.Writer) error {
+	return m.Actors.CreateArchive(writer)
+}
+
+// =====================================================================================================================
+// Clients related methods
+//
+
+func (m Manager) ClientsArchiveName() string {
+	return m.Clients.ArchiveName()
+}
+
+func (m Manager) CreateClientsArchive(writer io.Writer) error {
+	return m.Clients.CreateArchive(writer)
 }

@@ -1,9 +1,11 @@
 package actors
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
+	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -178,4 +180,30 @@ func (ap *ActorsPersister) UpdateActors(updatedActors []*Actor) error {
 		}
 	}
 	return nil
+}
+
+// ArchiveName returns the ActorArchive file name with today's date
+func (ap ActorsPersister) ArchiveName() string {
+	return fmt.Sprintf("Actors %s.zip", date.Today().String())
+}
+
+// CreateArchive writes a zipped archive of all contained Actors files to the given writer
+func (ap *ActorsPersister) CreateArchive(writer io.Writer) error {
+	ap.RLock()
+	defer ap.RUnlock()
+
+	zw := zip.NewWriter(writer)
+
+	for _, sr := range ap.actors {
+		wfw, err := zw.Create(sr.GetFileName())
+		if err != nil {
+			return fmt.Errorf("could not create zip entry for actor %d", sr.Id)
+		}
+		err = sr.Marshall(wfw)
+		if err != nil {
+			return fmt.Errorf("could not write zip entry for actor %d", sr.Id)
+		}
+	}
+
+	return zw.Close()
 }

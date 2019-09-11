@@ -20,11 +20,14 @@ const template string = `
 		style="height: 100%;"		
 	-->
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding: 6px 20px;">
+        <el-button type="primary" @click="ReloadData">Rechargement des données</el-button>
+		<h4>&nbsp;</h4>
         <h3>Archive des <a href="/api/worksites/archive">Chantiers Orange</a></h3>
         <h3>Archive des <a href="/api/ripsites/archive">Chantiers RIP</a></h3>
         <h3>Archive des <a href="/api/polesites/archive">Chantiers Poteaux</a></h3>
 		<h4>&nbsp;</h4>
-        <el-button type="primary" @click="ReloadData">Rechargement des données</el-button>
+        <h3>Archive des <a href="/api/clients/archive">Clients</a></h3>
+        <h3>Archive des <a href="/api/actors/archive">Equipes</a></h3>
 	</div>
 
 	<!-- 

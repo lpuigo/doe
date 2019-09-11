@@ -133,9 +133,13 @@ func main() {
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/attach", withUserManager("GetPolesiteAttachement", route.GetPolesiteAttachement)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("UpdatePolesite", route.UpdatePolesite)).Methods("PUT")
 
+	// Clients methods
+	router.HandleFunc("/api/clients/archive", withUserManager("GetClientsArchive", route.GetClientsArchive)).Methods("GET")
+
 	// Actors methods
 	router.HandleFunc("/api/actors", withUserManager("GetActors", route.GetActors)).Methods("GET")
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")
+	router.HandleFunc("/api/actors/archive", withUserManager("GetActorsArchive", route.GetActorsArchive)).Methods("GET")
 
 	// Administration methods
 	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")

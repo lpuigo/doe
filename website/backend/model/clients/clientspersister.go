@@ -1,9 +1,12 @@
 package clients
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
+	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -175,4 +178,30 @@ func (cp *ClientsPersister) CalcPriceByClientArticleGetter() func(clientName, ar
 		}
 		return article.CalcPrice(qty), nil
 	}
+}
+
+// ArchiveName returns the PoleSiteArchive file name with today's date
+func (cp ClientsPersister) ArchiveName() string {
+	return fmt.Sprintf("Clients %s.zip", date.Today().String())
+}
+
+// CreateArchive writes a zipped archive of all contained Polesites files to the given writer
+func (cp *ClientsPersister) CreateArchive(writer io.Writer) error {
+	cp.RLock()
+	defer cp.RUnlock()
+
+	zw := zip.NewWriter(writer)
+
+	for _, sr := range cp.clients {
+		wfw, err := zw.Create(sr.GetFileName())
+		if err != nil {
+			return fmt.Errorf("could not create zip entry for client %d", sr.Id)
+		}
+		err = sr.Marshall(wfw)
+		if err != nil {
+			return fmt.Errorf("could not write zip entry for client %d", sr.Id)
+		}
+	}
+
+	return zw.Close()
 }
