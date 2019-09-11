@@ -8,11 +8,15 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"sort"
+	"strconv"
 	"strings"
 )
 
 const (
-	template string = `<el-table
+	template string = `
+<el-table
         :border=true
         :data="filteredActors"
 		:default-sort = "{prop: 'Client', order: 'ascending'}"
@@ -22,6 +26,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
 			sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
+			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     ></el-table-column>
     
     <el-table-column
@@ -33,6 +38,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Client" label="Clients" width="200px"
 			sortable :sort-method="SortClient"
+			:filters="FilterList('Client')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     >
         <template slot-scope="scope">
 			<span>{{GetClients(scope.row)}}</span>
@@ -43,6 +49,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Role" label="Rôle" width="110px"
 			sortable :sort-by="['Role', 'State', 'Ref']"
+			:filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     ></el-table-column>
     
     <el-table-column
@@ -62,6 +69,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="State" label="Statut" width="100px"
 			:formatter="FormatState"
+			:filters="FilterList('State')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     ></el-table-column>
     
     <el-table-column
@@ -219,6 +227,59 @@ func (atm *ActorsTableModel) SortRoleRef(a, b *actor.Actor) int {
 
 func (atm *ActorsTableModel) FormatState(row, column, cellValue, index *js.Object) string {
 	return GetStateLabel(cellValue.String())
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Column Filtering Related Methods
+
+func (atm *ActorsTableModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
+	prop := col.Get("property").String()
+	return p.Get(prop).String() == value
+}
+
+func (atm *ActorsTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValText {
+	atm = ActorsTableModelFromJS(vm.Object)
+	count := map[string]int{}
+	attribs := []string{}
+
+	var translate func(string) string
+	switch prop {
+	case "State":
+		translate = func(state string) string {
+			return GetStateLabel(state)
+		}
+	default:
+		translate = func(val string) string { return val }
+	}
+
+	for _, act := range atm.Actors {
+		attrib := act.Object.Get(prop).String()
+		if _, exist := count[attrib]; !exist {
+			attribs = append(attribs, attrib)
+		}
+		count[attrib]++
+	}
+	sort.Strings(attribs)
+	res := []*elements.ValText{}
+	for _, a := range attribs {
+		fa := a
+		if fa == "" {
+			fa = "Vide"
+		}
+		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
+
+func (atm *ActorsTableModel) FilteredStatusValue() []string {
+	res := []string{
+		//poleconst.PsStatusNew,
+		//poleconst.PsStatusInProgress,
+		//poleconst.PsStatusBlocked,
+		//poleconst.PsStatusCancelled,
+		//poleconst.PsStatusDone,
+	}
+	return res
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
