@@ -34,13 +34,13 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 
 			<el-table-column
 					label="Client" prop="Client" sortable :sort-by="['Client', 'Ref']"
-					width="120px" :resizable=true :show-overflow-tooltip=true
+					width="180px" :resizable=true :show-overflow-tooltip=true
 					:filters="FilterList('Client')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
 			></el-table-column>
 
 			<el-table-column
 					label="Référence" sortable
-					width="120px" :resizable=true :show-overflow-tooltip=true
+					width="200px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">
                     <div class="header-menu-container">
@@ -52,7 +52,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 
             <el-table-column
                     label="CAff" prop="Manager" sortable :sort-by="['Manager', 'Ref']"
-                    width="120px" :resizable=true :show-overflow-tooltip=true
+                    width="180px" :resizable=true :show-overflow-tooltip=true
                     :filters="FilterList('Manager')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
 
@@ -63,7 +63,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             ></el-table-column>
 
             <el-table-column
-                    label="Avancement" width="130px" :resizable=true align="center"
+                    label="Avancement" width="180px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
                     <ripsiteinfo-progress-bar :total="scope.row.NbPole" :blocked="scope.row.NbPoleBlocked" :done="scope.row.NbPoleDone"></ripsiteinfo-progress-bar>
