@@ -200,12 +200,12 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 		return fmt.Errorf("unknown client '%s'", site.Client)
 	}
 
-	its, err := site.Itemize(client.Bpu, actorById)
+	its, err := site.Itemize(client.Bpu)
 	if err != nil {
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
-	return te.getItemsXLSAttachement(w, its)
+	return te.getItemsXLSAttachement(w, its, actorById)
 }
 
 // GetRipsiteXLSAttachementName returns the name of the XLSx file pertaining to given Ripsite
@@ -220,16 +220,16 @@ func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesi
 		return fmt.Errorf("unknown client '%s'", site.Client)
 	}
 
-	its, err := site.Itemize(client.Bpu, actorById)
+	its, err := site.Itemize(client.Bpu)
 	if err != nil {
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
-	return te.getItemsXLSAttachement(w, its)
+	return te.getItemsXLSAttachement(w, its, actorById)
 }
 
 // GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
-func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.Item) error {
+func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorById) error {
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {
@@ -257,6 +257,12 @@ func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.It
 			continue
 		}
 		row++
+		actors := []string{}
+		for _, actorId := range item.Actors {
+			if act := actorById(actorId); act != "" {
+				actors = append(actors, act)
+			}
+		}
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), item.Name)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Info)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Article.Name)
@@ -266,7 +272,7 @@ func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.It
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Work())
 		if item.Done {
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Oui")
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.Team)
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), strings.Join(actors, "\n"))
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.Date)
 		} else {
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "")

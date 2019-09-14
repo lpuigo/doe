@@ -3,10 +3,8 @@ package polesites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -98,18 +96,12 @@ const (
 	catPoleCreation string = "Création"
 )
 
-func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	poleArticles := currentBpu.GetCategoryArticles(activityPole)
 
 	todo, done := p.IsTodo(), p.IsDone()
-
-	actors := []string{}
-	for _, actorId := range p.Actors {
-		actors = append(actors, actorById(actorId))
-	}
-	sort.Strings(actors)
 
 	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
 	if err != nil {
@@ -129,7 +121,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu, actorById clien
 		p.Ref,
 		info,
 		p.Date,
-		strings.Join(actors, ", "),
+		"",
 		article,
 		1,
 		1,
@@ -152,7 +144,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu, actorById clien
 			p.Ref,
 			fmt.Sprintf("prestation complémentaire %s", product),
 			p.Date,
-			strings.Join(actors, ", "),
+			"",
 			article,
 			1,
 			1,

@@ -81,11 +81,11 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done int) {
 type IsPolesiteVisible func(s *PoleSite) bool
 
 // Itemize returns slice of item pertaining to polesite poles list
-func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	for _, pole := range ps.Poles {
-		items, err := pole.Itemize(ps.Client, ps.Ref, currentBpu, actorById)
+		items, err := pole.Itemize(ps.Client, ps.Ref, currentBpu)
 		if err != nil {
 			return nil, err
 		}
@@ -108,7 +108,7 @@ func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
 		}
 	}
 
-	calcItems, err := ps.Itemize(currentBpu, actorById)
+	calcItems, err := ps.Itemize(currentBpu)
 	if err != nil {
 		return fmt.Errorf("error on polesite stat itemize for '%s':%s", ps.Ref, err.Error())
 	}

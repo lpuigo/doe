@@ -3,7 +3,6 @@ package ripsites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
@@ -113,17 +112,17 @@ func (s *Site) GetMeasurementNumbers() (total, blocked, done int) {
 	return
 }
 
-func (s *Site) Itemize(bpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (s *Site) Itemize(bpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
-	pullItems, err := s.itemizePullings(bpu, actorById)
+	pullItems, err := s.itemizePullings(bpu)
 	if err != nil {
 		return nil, err
 	}
-	junctItems, err := s.itemizeJunctions(bpu, actorById)
+	junctItems, err := s.itemizeJunctions(bpu)
 	if err != nil {
 		return nil, err
 	}
-	measItems, err := s.itemizeMeasurements(bpu, actorById)
+	measItems, err := s.itemizeMeasurements(bpu)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +150,7 @@ const (
 	catMeasurement string = "Mesure"
 )
 
-func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	pullingArticles := currentBpu.GetCategoryArticles(activityPulling)
@@ -162,11 +161,11 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 			return nil, err
 		}
 		todo, done := pulling.State.GetTodoDone()
-		actors := []string{}
-		for _, actorId := range pulling.State.Actors {
-			actors = append(actors, actorById(actorId))
-		}
-		actorsString := strings.Join(actors, ", ")
+		//actors := []string{}
+		//for _, actorId := range pulling.State.Actors {
+		//	actors = append(actors, actorById(actorId))
+		//}
+		//actorsString := strings.Join(actors, ", ")
 
 		l, u, a, b := pulling.GetTotalDists()
 		// Item for underground cable pulling
@@ -181,7 +180,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, l+u),
 				pulling.State.DateEnd,
-				actorsString,
+				"",
 				article,
 				l+u,
 				l+u,
@@ -204,7 +203,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, a+b),
 				pulling.State.DateEnd,
-				actorsString,
+				"",
 				article,
 				a+b,
 				a+b,
@@ -227,7 +226,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, b),
 				pulling.State.DateEnd,
-				actorsString,
+				"",
 				article,
 				b,
 				b,
@@ -243,7 +242,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 	return res, nil
 }
 
-func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 	junctionArticles := currentBpu.GetCategoryArticles(activityJunction)
 
@@ -251,11 +250,11 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById
 
 	for _, junction := range s.Junctions {
 		todo, done := junction.State.GetTodoDone()
-		actors := []string{}
-		for _, actorId := range junction.State.Actors {
-			actors = append(actors, actorById(actorId))
-		}
-		actorsString := strings.Join(actors, ", ")
+		//actors := []string{}
+		//for _, actorId := range junction.State.Actors {
+		//	actors = append(actors, actorById(actorId))
+		//}
+		//actorsString := strings.Join(actors, ", ")
 
 		node, nodeFound := s.Nodes[junction.NodeName]
 		if !nodeFound {
@@ -302,12 +301,12 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById
 			info += fmt.Sprintf(" (%dFO)", boxSize)
 		}
 
-		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, mainArticle, qty1, qty1, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done)
 		item.Actors = junction.State.Actors
 		res = append(res, item)
 
 		if optArticle != nil {
-			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, optArticle, qty2, qty2, todo, done)
+			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done)
 			item2.Actors = junction.State.Actors
 			res = append(res, item2)
 		}
@@ -316,7 +315,7 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById
 	return res, nil
 }
 
-func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 	measurementArticles := currentBpu.GetCategoryArticles(activityMeasurement)
 
@@ -328,15 +327,15 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, actorById clients.ActorB
 
 	for _, measurement := range s.Measurements {
 		todo, done := measurement.State.GetTodoDone()
-		actors := []string{}
-		for _, actorId := range measurement.State.Actors {
-			actors = append(actors, actorById(actorId))
-		}
-		actorsString := strings.Join(actors, ", ")
+		//actors := []string{}
+		//for _, actorId := range measurement.State.Actors {
+		//	actors = append(actors, actorById(actorId))
+		//}
+		//actorsString := strings.Join(actors, ", ")
 
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
-		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, actorsString, mainArticle, qty1, qty2, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done)
 		item.Actors = measurement.State.Actors
 		res = append(res, item)
 	}
@@ -400,35 +399,35 @@ const (
 )
 
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (s *Site) AddStat(stats items.Stats, sc items.StatContext,
-	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
-
-	addValue := func(date, serie string, actors []string, value float64) {
-		stats.AddStatValue(s.Ref, s.Client, date, "", serie, value)
-		if sc.ShowTeam && len(actors) > 0 {
-			value /= float64(len(actors))
-			for _, actName := range actors {
-				stats.AddStatValue(s.Ref, s.Client+" : "+actName, date, "", serie, value)
-			}
-		}
-	}
-
-	calcItems, err := s.Itemize(currentBpu, actorById)
-	if err != nil {
-		return fmt.Errorf("error on ripsite stat itemize for '%s':%s", s.Ref, err.Error())
-	}
-	for _, item := range calcItems {
-		if !item.Done {
-			continue
-		}
-		actorsName := make([]string, len(item.Actors))
-		for i, actId := range item.Actors {
-			actorsName[i] = actorById(actId)
-		}
-		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
-		if showprice {
-			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
-		}
-	}
-	return nil
-}
+//func (s *Site) AddStat(stats items.Stats, sc items.StatContext,
+//	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
+//
+//	addValue := func(date, serie string, actors []string, value float64) {
+//		stats.AddStatValue(s.Ref, s.Client, date, "", serie, value)
+//		if sc.ShowTeam && len(actors) > 0 {
+//			value /= float64(len(actors))
+//			for _, actName := range actors {
+//				stats.AddStatValue(s.Ref, s.Client+" : "+actName, date, "", serie, value)
+//			}
+//		}
+//	}
+//
+//	calcItems, err := s.Itemize(currentBpu, actorById)
+//	if err != nil {
+//		return fmt.Errorf("error on ripsite stat itemize for '%s':%s", s.Ref, err.Error())
+//	}
+//	for _, item := range calcItems {
+//		if !item.Done {
+//			continue
+//		}
+//		actorsName := make([]string, len(item.Actors))
+//		for i, actId := range item.Actors {
+//			actorsName[i] = actorById(actId)
+//		}
+//		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
+//		if showprice {
+//			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
+//		}
+//	}
+//	return nil
+//}

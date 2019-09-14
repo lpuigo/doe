@@ -158,7 +158,7 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 //
 
 // getSitesItems returns items for all visible ripsites
-func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById) ([]*items.Item, error) {
+func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
 	items := []*items.Item{}
 	for _, sr := range sp.sites {
 		if isRSVisible(sr.Site) {
@@ -166,7 +166,7 @@ func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName 
 			if client == nil {
 				continue
 			}
-			siteItems, err := sr.Itemize(client.Bpu, actorById)
+			siteItems, err := sr.Itemize(client.Bpu)
 			if err != nil {
 				return nil, fmt.Errorf("error on ripsite stat itemize for '%s':%s", sr.Ref, err.Error())
 			}
@@ -182,7 +182,7 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	defer sp.RUnlock()
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, actorById)
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
 	if err != nil {
 		return nil, err
 	}
@@ -208,9 +208,10 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 		for i, actId := range item.Actors {
 			actorsName[i] = actorById(actId)
 		}
-		addValue(item.Site, item.Client, sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
+		dateFor := sc.DateFor(item.Date)
+		addValue(item.Site, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
 		if showprice {
-			addValue(item.Site, item.Client, sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
+			addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
 		}
 
 	}
