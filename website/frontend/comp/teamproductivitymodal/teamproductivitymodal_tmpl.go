@@ -14,10 +14,15 @@ const template string = `
             <h2 style="margin: 0 0">
                 <i class="fas fa-chart-line icon--left"></i>Productivité des équipes
             </h2>
-            <el-radio-group v-model="ActiveMode" size="mini" @change="RefreshStat">
+            <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
+                <el-radio-button label="activity">Par activité</el-radio-button>
+                <el-radio-button label="site">Par site</el-radio-button>
+            </el-radio-group>
+			<el-radio-group v-model="ActiveMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="week">Hebdo</el-radio-button>
                 <el-radio-button label="month">Mensuel</el-radio-button>
             </el-radio-group>
+
             <span></span>                        
             <span></span>                        
         </div>

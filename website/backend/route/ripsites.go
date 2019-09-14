@@ -150,25 +150,15 @@ func GetRipsitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var err error
-
 	vars := mux.Vars(r)
+	groupBy := vars["groupby"]
 	freq := vars["freq"]
-	switch freq {
-	case "week":
-		err = mgr.GetRipsitesWeekStats(w)
-	case "month":
-		err = mgr.GetRipsitesMonthStats(w)
-	default:
-		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
-		return
-	}
-
+	err := mgr.GetRipsitesStats(w, freq, groupBy)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("%s ripsites stats produced", freq), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("%s ripsites %s stats produced", freq, groupBy), http.StatusOK)
 }
 
 func GetRipsitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

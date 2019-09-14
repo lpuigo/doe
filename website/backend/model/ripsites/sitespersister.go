@@ -177,7 +177,7 @@ func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName 
 }
 
 // GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
+func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool, groupBy string) (*rs.RipsiteStats, error) {
 	sp.RLock()
 	defer sp.RUnlock()
 
@@ -209,11 +209,18 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 			actorsName[i] = actorById(actId)
 		}
 		dateFor := sc.DateFor(item.Date)
-		addValue(item.Site, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
-		if showprice {
-			addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
+		switch groupBy {
+		case "activity":
+			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+			if showprice {
+				addValue(item.Activity, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
+			}
+		case "site":
+			addValue(item.Site, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+			if showprice {
+				addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
+			}
 		}
-
 	}
 
 	// Aggregate Stats

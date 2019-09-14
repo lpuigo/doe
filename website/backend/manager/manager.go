@@ -167,7 +167,7 @@ func (m *Manager) genActorById() clients.ActorById {
 		if ar == nil {
 			return ""
 		}
-		return ar.Actor.Ref
+		return "(" + ar.Role + ") " + ar.Actor.Ref
 	}
 }
 
@@ -355,23 +355,30 @@ func (m Manager) CreateRipsitesArchive(writer io.Writer) error {
 	return m.Ripsites.CreateArchive(writer)
 }
 
-// GetWorksitesWeekStats returns Worksites Stats per Week (JSON in writer) visibles by current user
-func (m Manager) GetRipsitesWeekStats(writer io.Writer) error {
-	df := func(d string) string {
-		return date.GetMonday(d)
-	}
-	return m.getRipsitesStats(writer, 12, df)
-}
+func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
+	maxVal := 12
 
-// GetWorksitesWeekStats returns Worksites Stats per Month (JSON in writer) visibles by current user
-func (m Manager) GetRipsitesMonthStats(writer io.Writer) error {
-	df := func(d string) string {
-		return date.GetMonth(d)
+	var dateFor date.DateAggreg
+	switch freq {
+	case "week":
+		dateFor = func(d string) string {
+			return date.GetMonday(d)
+		}
+	case "month":
+		dateFor = func(d string) string {
+			return date.GetMonth(d)
+		}
+	default:
+		return fmt.Errorf("unsupported stat period '%s'", freq)
 	}
-	return m.getRipsitesStats(writer, 12, df)
-}
 
-func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
+	switch groupBy {
+	case "activity", "site":
+		// accepted values
+	default:
+		return fmt.Errorf("unsupported group type '%s'", freq)
+	}
+
 	isActorVisible, err := m.genIsActorVisible()
 	if err != nil {
 		return err
@@ -384,7 +391,7 @@ func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.Dat
 		ShowTeam:      !m.CurrentUser.Permissions["Review"],
 	}
 
-	ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
+	ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"], groupBy)
 	if err != nil {
 		return err
 	}

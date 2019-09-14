@@ -57,6 +57,7 @@ type TeamProductivityModalModel struct {
 	SiteColors    ripteamproductivitychart.SiteColorMap `js:"SiteColors"`
 
 	ActiveMode string `js:"ActiveMode"`
+	GroupMode  string `js:"GroupMode"`
 }
 
 func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
@@ -77,6 +78,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	tpmm.SiteColors = ripteamproductivitychart.SiteColorMap{}
 
 	tpmm.ActiveMode = "week"
+	tpmm.GroupMode = "activity"
 	return tpmm
 }
 
@@ -101,11 +103,11 @@ func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
 	if tpmm.SiteMode == "Rip" {
-		go tpmm.callGetRipsitesStats("/api/ripsites/stat/")
+		go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.ActiveMode)
 		return
 	}
 	if tpmm.SiteMode == "Poles" {
-		go tpmm.callGetRipsitesStats("/api/polesites/stat/")
+		go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.ActiveMode)
 		return
 	}
 	go tpmm.callGetWorksitesStats()
@@ -183,7 +185,7 @@ func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
 
 func (tpmm *TeamProductivityModalModel) callGetRipsitesStats(url string) {
 	defer func() { tpmm.Loading = false }()
-	req := xhr.NewRequest("GET", url+tpmm.ActiveMode)
+	req := xhr.NewRequest("GET", url)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)
