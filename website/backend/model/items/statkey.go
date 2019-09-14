@@ -28,6 +28,10 @@ type StatKey struct {
 
 type Stats map[StatKey]float64
 
+func NewStats() Stats {
+	return make(Stats)
+}
+
 func (s Stats) AddStatValue(site, team, date, article, serie string, value float64) {
 	s[StatKey{
 		Team:    team,

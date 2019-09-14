@@ -20,7 +20,7 @@ type ActorsPersister struct {
 
 func NewActorsPersister(dir string) (*ActorsPersister, error) {
 	ap := &ActorsPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Actors", dir),
 	}
 	err := ap.persister.CheckDirectory()
 	if err != nil {

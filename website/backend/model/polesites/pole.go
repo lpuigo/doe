@@ -98,7 +98,7 @@ const (
 	catPoleCreation string = "Création"
 )
 
-func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
+func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	poleArticles := currentBpu.GetCategoryArticles(activityPole)
@@ -123,6 +123,8 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 	}
 
 	it := items.NewItem(
+		client,
+		site,
 		activityPole,
 		p.Ref,
 		info,
@@ -144,6 +146,8 @@ func (p *Pole) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([]*ite
 		}
 
 		it := items.NewItem(
+			client,
+			site,
 			activityPole,
 			p.Ref,
 			fmt.Sprintf("prestation complémentaire %s", product),

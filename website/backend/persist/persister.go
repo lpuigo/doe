@@ -23,6 +23,7 @@ const (
 )
 
 type Persister struct {
+	name      string
 	directory string
 	delay     time.Duration
 	records   map[int]Recorder
@@ -34,8 +35,9 @@ type Persister struct {
 	persistTimer *time.Timer
 }
 
-func NewPersister(dir string) *Persister {
+func NewPersister(name, dir string) *Persister {
 	p := &Persister{
+		name:      name,
 		directory: dir,
 		delay:     DefaultPersistDelay,
 	}

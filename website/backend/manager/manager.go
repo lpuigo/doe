@@ -384,7 +384,7 @@ func (m Manager) getRipsitesStats(writer io.Writer, maxVal int, dateFor date.Dat
 		ShowTeam:      !m.CurrentUser.Permissions["Review"],
 	}
 
-	ripsiteStats, err := m.Ripsites.GetStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
+	ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err
 	}

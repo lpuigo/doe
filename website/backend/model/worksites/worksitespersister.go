@@ -25,7 +25,7 @@ type WorkSitesPersister struct {
 
 func NewWorkSitesPersist(dir string) (*WorkSitesPersister, error) {
 	wsp := &WorkSitesPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Worksites", dir),
 	}
 	err := wsp.persister.CheckDirectory()
 	if err != nil {

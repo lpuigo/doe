@@ -176,6 +176,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				return nil, fmt.Errorf("can not define Underground Pulling Item: %s", err.Error())
 			}
 			item := items.NewItem(
+				s.Client, s.Ref,
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, l+u),
@@ -198,6 +199,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				return nil, fmt.Errorf("can not define Aerial Pulling Item: %s", err.Error())
 			}
 			item := items.NewItem(
+				s.Client, s.Ref,
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, a+b),
@@ -220,6 +222,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, actorById clients.ActorById)
 				return nil, fmt.Errorf("can not define Building Pulling Item: %s", err.Error())
 			}
 			item := items.NewItem(
+				s.Client, s.Ref,
 				activityPulling,
 				pulling.Chuncks[0].TronconName,
 				fmt.Sprintf("Tirage %s (%dml)", pulling.CableName, b),
@@ -299,12 +302,12 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, actorById clients.ActorById
 			info += fmt.Sprintf(" (%dFO)", boxSize)
 		}
 
-		item := items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, mainArticle, qty1, qty1, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, mainArticle, qty1, qty1, todo, done)
 		item.Actors = junction.State.Actors
 		res = append(res, item)
 
 		if optArticle != nil {
-			item2 := items.NewItem(activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, optArticle, qty2, qty2, todo, done)
+			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, actorsString, optArticle, qty2, qty2, todo, done)
 			item2.Actors = junction.State.Actors
 			res = append(res, item2)
 		}
@@ -333,7 +336,7 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, actorById clients.ActorB
 
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
-		item := items.NewItem(activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, actorsString, mainArticle, qty1, qty2, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, actorsString, mainArticle, qty1, qty2, todo, done)
 		item.Actors = measurement.State.Actors
 		res = append(res, item)
 	}

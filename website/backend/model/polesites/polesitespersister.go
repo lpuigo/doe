@@ -23,7 +23,7 @@ type PoleSitesPersister struct {
 
 func NewPoleSitesPersist(dir string) (*PoleSitesPersister, error) {
 	psp := &PoleSitesPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Polesites", dir),
 	}
 	err := psp.persister.CheckDirectory()
 	if err != nil {

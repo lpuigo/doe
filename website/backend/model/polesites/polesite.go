@@ -85,7 +85,7 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, actorById clients.ActorById) ([
 	res := []*items.Item{}
 
 	for _, pole := range ps.Poles {
-		items, err := pole.Itemize(currentBpu, actorById)
+		items, err := pole.Itemize(ps.Client, ps.Ref, currentBpu, actorById)
 		if err != nil {
 			return nil, err
 		}

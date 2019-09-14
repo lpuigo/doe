@@ -6,6 +6,8 @@ import (
 )
 
 type Item struct {
+	Client       string // Site name
+	Site         string // Site name
 	Activity     string // Racco, Tirage, ...
 	Name         string // PTxxx, Cablezzz, ...
 	Info         string // BoxType + nbFO ...
@@ -19,8 +21,10 @@ type Item struct {
 	Done         bool
 }
 
-func NewItem(activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done bool) *Item {
+func NewItem(client, site, activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done bool) *Item {
 	return &Item{
+		Client:       client,
+		Site:         site,
 		Activity:     activity,
 		Name:         name,
 		Info:         info,
@@ -35,7 +39,7 @@ func NewItem(activity, name, info, date, team string, chapter *bpu.Article, quan
 }
 
 func (i *Item) String() string {
-	return fmt.Sprintf(`Activity: %s Name: %s
+	return fmt.Sprintf(`Client: %s, Site: %s, Activity: %s Name: %s
 	Info: %s
 	Date: %s
 	Team: %s
@@ -43,7 +47,7 @@ func (i *Item) String() string {
 	Quantity: %d
 	Todo: %t
 	Done: %t
-`, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done)
+`, i.Client, i.Site, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done)
 }
 
 // Price returns the price for the given item

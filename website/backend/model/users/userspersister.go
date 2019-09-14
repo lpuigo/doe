@@ -17,7 +17,7 @@ type UsersPersister struct {
 
 func NewUsersPersister(dir string) (*UsersPersister, error) {
 	wsp := &UsersPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Users", dir),
 	}
 	err := wsp.persister.CheckDirectory()
 	if err != nil {

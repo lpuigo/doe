@@ -23,7 +23,7 @@ type SitesPersister struct {
 
 func NewSitesPersit(dir string) (*SitesPersister, error) {
 	sp := &SitesPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Ripsites", dir),
 	}
 	err := sp.persister.CheckDirectory()
 	if err != nil {
@@ -156,26 +156,66 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 //	return res
 //}
 //
-// GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
-	sp.RLock()
-	defer sp.RUnlock()
 
-	// calc per Team/date/indicator values
-	calcValues := make(items.Stats)
+// getSitesItems returns items for all visible ripsites
+func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById) ([]*items.Item, error) {
+	items := []*items.Item{}
 	for _, sr := range sp.sites {
 		if isRSVisible(sr.Site) {
 			client := clientByName(sr.Site.Client)
 			if client == nil {
 				continue
 			}
-			err := sr.AddStat(calcValues, sc, actorById, client.Bpu, showprice)
+			siteItems, err := sr.Itemize(client.Bpu, actorById)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error on ripsite stat itemize for '%s':%s", sr.Ref, err.Error())
+			}
+			items = append(items, siteItems...)
+		}
+	}
+	return items, nil
+}
+
+// GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
+func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
+	sp.RLock()
+	defer sp.RUnlock()
+
+	// Build Item List
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, actorById)
+	if err != nil {
+		return nil, err
+	}
+
+	// create Prod Stats
+	stats := items.NewStats()
+
+	addValue := func(site, team, date, serie string, actors []string, value float64) {
+		stats.AddStatValue(site, team, date, "", serie, value)
+		if sc.ShowTeam && len(actors) > 0 {
+			value /= float64(len(actors))
+			for _, actName := range actors {
+				stats.AddStatValue(site, team+" : "+actName, date, "", serie, value)
 			}
 		}
 	}
 
+	for _, item := range sitesItems {
+		if !item.Done {
+			continue
+		}
+		actorsName := make([]string, len(item.Actors))
+		for i, actId := range item.Actors {
+			actorsName[i] = actorById(actId)
+		}
+		addValue(item.Site, item.Client, sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
+		if showprice {
+			addValue(item.Site, item.Client, sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
+		}
+
+	}
+
+	// Aggregate Stats
 	d1 := func(s items.StatKey) string { return s.Serie }
 	d2 := func(s items.StatKey) string { return s.Team }
 	d3 := func(s items.StatKey) string { return s.Site }
@@ -183,10 +223,10 @@ func (sp *SitesPersister) GetStats(sc items.StatContext, isRSVisible IsSiteVisib
 	f2 := items.KeepAll
 	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
 	f3 := items.KeepAll
-	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
+	return stats.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }
 
-// WorksitesArchiveName returns the SiteArchive file name with today's date
+// ArchiveName returns the SiteArchive file name with today's date
 func (sp SitesPersister) ArchiveName() string {
 	return fmt.Sprintf("Ripsites %s.zip", date.Today().String())
 }

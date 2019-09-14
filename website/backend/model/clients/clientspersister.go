@@ -21,7 +21,7 @@ type ClientsPersister struct {
 
 func NewClientsPersister(dir string) (*ClientsPersister, error) {
 	wsp := &ClientsPersister{
-		persister: persist.NewPersister(dir),
+		persister: persist.NewPersister("Clients", dir),
 	}
 	err := wsp.persister.CheckDirectory()
 	if err != nil {

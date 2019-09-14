@@ -13,15 +13,13 @@ type Container struct {
 	sync.RWMutex
 	persister *Persister
 
-	name                 string
 	newContaineeFromFile func(file string) (Recorder, error)
 	records              []Recorder
 }
 
 func NewContainer(name, dir string) (*Container, error) {
 	c := &Container{
-		name:      name,
-		persister: NewPersister(dir),
+		persister: NewPersister(name, dir),
 		newContaineeFromFile: func(file string) (recorder Recorder, e error) {
 			return nil, fmt.Errorf("%s.newContaineeFromFile is not defined", name)
 		},
@@ -44,7 +42,7 @@ func (c *Container) LoadDirectory() error {
 
 	files, err := c.persister.GetFilesList("deleted")
 	if err != nil {
-		return fmt.Errorf("could not get files from %s container: %v", c.name, err)
+		return fmt.Errorf("could not get files from %s container: %v", c.persister.name, err)
 	}
 
 	for _, file := range files {
