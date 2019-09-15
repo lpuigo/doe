@@ -82,25 +82,7 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 			"categories": ts.Dates,
 			//"tickPixelInterval" : 400,
 		},
-		"yAxis": js.S{
-			js.M{
-				"labels": js.M{
-					"format": "{value} h",
-				},
-				"title": js.M{
-					"text": "Heures",
-				},
-			},
-			js.M{
-				"labels": js.M{
-					"format": "{value}€",
-				},
-				"title": js.M{
-					"text": "Revenus",
-				},
-				"opposite": true,
-			},
-		},
+		"yAxis": tpc.getAxis(),
 		"legend": js.M{
 			"enabled": false,
 			//"layout":        "vertical",
@@ -135,11 +117,54 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 	js.Global.Get("Highcharts").Call("chart", tpc.VM.Refs("container"), chartdesc)
 }
 
+func (tpc *TeamProductivityChart) getAxis() []js.M {
+	res := []js.M{}
+	if !(len(tpc.Stats.Values["Work"]) == 0 && len(tpc.Stats.Values["MoyenneWork"]) == 0) {
+		res = append(res, js.M{
+			"labels": js.M{
+				"format": "{value} h",
+			},
+			"title": js.M{
+				"text": "Heures",
+			},
+		})
+	}
+	if len(tpc.Stats.Values["NbActorsWork"]) > 0 {
+		res = append(res, js.M{
+			"labels": js.M{
+				"format": "{value}",
+			},
+			"title": js.M{
+				"text": "Nb. Acteurs",
+			},
+			"opposite": true,
+		})
+	}
+	if len(tpc.Stats.Values["Price"]) > 0 {
+		res = append(res, js.M{
+			"labels": js.M{
+				"format": "{value}€",
+			},
+			"title": js.M{
+				"text": "Revenus",
+			},
+			"opposite": true,
+		})
+	}
+	return res
+}
+
 func (tpc *TeamProductivityChart) getSeries() []js.M {
 	res := []js.M{}
-	res = append(res, newSerie("column", "Travail", "work", "", " h", tpc.Colors["Work"], 0, 0.2, tpc.Stats.Values["Work"])...)
+	res = append(res, newSerie("column", "Travail", "work", "", " h", tpc.Colors["Work"], 0, 0.1, tpc.Stats.Values["Work"])...)
+	if len(tpc.Stats.Values["MoyenneWork"]) > 0 {
+		res = append(res, newSerie("column", "Moyenne", "mean", "", " h", tpc.Colors["Price"], 0, 0.15, tpc.Stats.Values["MoyenneWork"])...)
+	}
+	if len(tpc.Stats.Values["NbActorsWork"]) > 0 {
+		res = append(res, newSerie("column", "Nb Acteurs", "nbactors", "", "", tpc.Colors["Price"], 1, 0.2, tpc.Stats.Values["NbActorsWork"])...)
+	}
 	if len(tpc.Stats.Values["Price"]) > 0 {
-		res = append(res, newSerie("column", "€", "price", "", " €", tpc.Colors["Price"], 1, 0, tpc.Stats.Values["Price"])...)
+		res = append(res, newSerie("column", "Euros", "price", "", " €", tpc.Colors["Price"], 1, 0, tpc.Stats.Values["Price"])...)
 	}
 	return res
 }

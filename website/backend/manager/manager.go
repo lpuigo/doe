@@ -372,13 +372,6 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		return fmt.Errorf("unsupported stat period '%s'", freq)
 	}
 
-	switch groupBy {
-	case "activity", "site":
-		// accepted values
-	default:
-		return fmt.Errorf("unsupported group type '%s'", freq)
-	}
-
 	isActorVisible, err := m.genIsActorVisible()
 	if err != nil {
 		return err
@@ -391,11 +384,25 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		ShowTeam:      !m.CurrentUser.Permissions["Review"],
 	}
 
-	ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"], groupBy)
-	if err != nil {
-		return err
+	switch groupBy {
+	case "activity", "site":
+		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"], groupBy)
+		if err != nil {
+			return err
+		}
+		return json.NewEncoder(writer).Encode(ripsiteStats)
+
+	case "mean":
+		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), false, groupBy)
+		if err != nil {
+			return err
+		}
+		meanStats := items.CalcTeamMean(ripsiteStats, 1)
+		return json.NewEncoder(writer).Encode(meanStats)
+
+	default:
+		return fmt.Errorf("unsupported group type '%s'", groupBy)
 	}
-	return json.NewEncoder(writer).Encode(ripsiteStats)
 }
 
 // =====================================================================================================================

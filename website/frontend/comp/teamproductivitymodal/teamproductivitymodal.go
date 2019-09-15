@@ -200,8 +200,8 @@ func (tpmm *TeamProductivityModalModel) callGetRipsitesStats(url string) {
 		return
 	}
 	tpmm.RipStats = rs.RipsiteStatsFromJs(req.Response)
+	tpmm.initSitesColors()
 	tpmm.SelectedSites = tpmm.RipStats.Sites
 	tpmm.CheckSitesChange()
-	tpmm.RipTeamStats = tpmm.RipStats.CreateTeamStats(tpmm.SelectedSites)
-	tpmm.initSitesColors()
+	//tpmm.RipTeamStats = tpmm.RipStats.CreateTeamStats(tpmm.SelectedSites)
 }

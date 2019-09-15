@@ -36,7 +36,7 @@ func RipsiteStatsFromJs(o *js.Object) *RipsiteStats {
 }
 
 func (rs *RipsiteStats) CreateTeamStats(sites map[string]bool) []*TeamStats {
-	res := []*TeamStats{}
+	res := make([]*TeamStats, len(rs.Teams))
 	for i, team := range rs.Teams {
 		ts := NewTeamStats()
 		ts.Team = team
@@ -51,7 +51,7 @@ func (rs *RipsiteStats) CreateTeamStats(sites map[string]bool) []*TeamStats {
 			}
 			ts.Get("Values").Set(mes, datas)
 		}
-		res = append(res, ts)
+		res[i] = ts
 	}
 	return res
 }

@@ -17,6 +17,7 @@ const template string = `
             <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="activity">Par activité</el-radio-button>
                 <el-radio-button label="site">Par site</el-radio-button>
+                <el-radio-button label="mean">Moyenne</el-radio-button>
             </el-radio-group>
 			<el-radio-group v-model="ActiveMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="week">Hebdo</el-radio-button>

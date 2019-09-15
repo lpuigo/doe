@@ -220,6 +220,10 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 			if showprice {
 				addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
 			}
+		case "mean":
+			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+		default:
+			return nil, fmt.Errorf("unsupported groupBy value '%s'", groupBy)
 		}
 	}
 
@@ -231,7 +235,9 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	f2 := items.KeepAll
 	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
 	f3 := items.KeepAll
-	return stats.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
+	aggrStats := stats.Aggregate(sc, d1, d2, d3, f1, f2, f3)
+
+	return aggrStats, nil
 }
 
 // ArchiveName returns the SiteArchive file name with today's date
