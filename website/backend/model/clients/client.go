@@ -23,6 +23,7 @@ type ClientByName func(clientName string) *Client
 type IsTeamVisible func(ClientTeam) bool
 type TeamNameByMember func(string) string
 type ActorById func(id string) string
+type ActorInfoById func(id string) []string
 
 //type IsActorVisible func(ClientActor) string
 

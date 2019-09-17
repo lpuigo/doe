@@ -171,6 +171,22 @@ func (m *Manager) genActorById() clients.ActorById {
 	}
 }
 
+// genActorById returns a ActorById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
+func (m *Manager) genActorInfoById() clients.ActorInfoById {
+	return func(actorId string) []string {
+		var ar *actors.ActorRecord
+		if actId, err := strconv.Atoi(actorId); err == nil {
+			ar = m.Actors.GetById(actId)
+		} else {
+			ar = m.Actors.GetByRef(actorId)
+		}
+		if ar == nil {
+			return nil
+		}
+		return []string{ar.Role, ar.Actor.Ref}
+	}
+}
+
 // GetCurrentUserClientsName returns Clients' names visible by current user (if user has no client, returns all clients)
 func (m Manager) GetCurrentUserClientsName() []string {
 	if m.CurrentUser == nil {
@@ -393,7 +409,7 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		return json.NewEncoder(writer).Encode(ripsiteStats)
 
 	case "mean":
-		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), false, groupBy)
+		ripsiteStats, err := m.Ripsites.GetMeanProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorInfoById())
 		if err != nil {
 			return err
 		}

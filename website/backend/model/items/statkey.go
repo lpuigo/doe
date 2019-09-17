@@ -150,101 +150,77 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 //
 // Standard usage is ws.Values : map{series}[#team]{sites}[#date]float64
 func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats {
-	meanTeams := map[int]string{}
-	mainTeamsPos := []int{}
-	meanName := "Moyenne"
-	nbActorsName := "NbActors"
-	uxNbActorsName := "Nb d'Acteurs"
+	// team index of main team and pertaining role teams
+	mainTeamIndex := map[string]int{}            // index of main team
+	roleTeamIndex := map[string]int{}            // index of role team
+	actorsIndex := map[string]map[string][]int{} // index of mainteam > roleteams > actors
 
-	// detect Main Teams
-	for i, team := range aggrStat.Teams {
-		if !strings.Contains(team, ":") {
-			meanTeams[i] = team + " : " + meanName
-			mainTeamsPos = append(mainTeamsPos, i)
+	// Build main Team, role Team and Actors Team Indexes
+	for index, teamName := range aggrStat.Teams {
+		if !strings.Contains(teamName, ":") {
+			mainTeamIndex[teamName] = index
+			continue
 		}
+		if !strings.Contains(teamName, "/") {
+			roleTeamIndex[teamName] = index
+			continue
+		}
+		mainteam := strings.TrimSpace(teamName[0:strings.Index(teamName, " : ")])
+		roleteam := strings.TrimSpace(teamName[0:strings.Index(teamName, " / ")])
+		if actorsIndex[mainteam] == nil {
+			actorsIndex[mainteam] = map[string][]int{}
+		}
+		if actorsIndex[mainteam][roleteam] == nil {
+			actorsIndex[mainteam][roleteam] = []int{}
+		}
+		actorsIndex[mainteam][roleteam] = append(actorsIndex[mainteam][roleteam], index)
 	}
 
-	aggrStat.Sites[meanName] = true
-	aggrStat.Sites[uxNbActorsName] = true
+	// Calc Nb Actors
+	const StatSerieNbActor string = "NbActorsWork"
 
-	series := []string{}
-	for key, _ := range aggrStat.Values {
-		series = append(series, key)
-	}
+	workData := aggrStat.Values[StatSerieWork]
+	nbActors := make([]map[string][]float64, len(aggrStat.Teams))
+	mainTeamNbAct := map[string][]float64{}
 
-	// Calc mainteam mean for each Serie
-	for _, serieName := range series {
-		serieData := aggrStat.Values[serieName]
-		newSerie := meanName + serieName
-		newActorSerie := nbActorsName + serieName
-		// init New Serie
-		aggrStat.Values[newSerie] = make([]map[string][]float64, len(aggrStat.Teams))
-		aggrStat.Values[newActorSerie] = make([]map[string][]float64, len(aggrStat.Teams))
-
-		// For each main team data
-		for mainTeamNum, mainTeamPos := range mainTeamsPos {
-			lastTeamPos := len(aggrStat.Teams)
-			if mainTeamNum+1 < len(mainTeamsPos) {
-				lastTeamPos = mainTeamsPos[mainTeamNum+1]
-			}
-
-			meanWork := make([]float64, len(aggrStat.Dates))
-			nbactors := make([][]float64, len(aggrStat.Teams))
-			for j := 0; j < len(aggrStat.Teams); j++ {
-				nbactors[j] = make([]float64, len(aggrStat.Dates))
-			}
-			for i := 0; i < len(aggrStat.Dates); i++ {
-				// calc Sum of values per date
-				for _, mainTeamData := range serieData[mainTeamPos] {
-					meanWork[i] += mainTeamData[i]
-				}
-				actors := map[string]int{}
-
-				// calc Number of actors
-				for actorPos := mainTeamPos + 1; actorPos < lastTeamPos; actorPos++ {
-					for _, data := range serieData[actorPos] {
-						if data[i] >= threshold {
-							nbactors[actorPos][i] = 1
-							actors[aggrStat.Teams[actorPos]] = 1
+	for mainTeamName, mainTeamPos := range mainTeamIndex {
+		nbActors[mainTeamPos] = make(map[string][]float64)
+		mainNbAct := make([]float64, len(aggrStat.Dates)) // nb of actor for role team
+		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
+			roleNbAct := make([]float64, len(aggrStat.Dates)) // nb of actor for role team
+			// for each actors of current role (roleTeam)
+			var roleTeamRoleName string
+			for _, actPos := range roleTeamActorsPos {
+				nbActors[actPos] = map[string][]float64{}
+				for roleName, actorRoleData := range workData[actPos] {
+					roleTeamRoleName = roleName
+					actNbAct := make([]float64, len(aggrStat.Dates)) // nb of actor for actor
+					for i := 0; i < len(actNbAct); i++ {
+						if actorRoleData[i] > threshold {
+							actNbAct[i] = 1
+							roleNbAct[i] += 1
+							mainNbAct[i] += 1
 						}
 					}
-				}
-
-				// calc Mean
-				nbactors[mainTeamPos][i] = float64(len(actors))
-				if nbactors[mainTeamPos][i] > 0 {
-					meanWork[i] /= nbactors[mainTeamPos][i]
+					// Set actor's > Role > NbActors Data
+					nbActors[actPos][roleName] = actNbAct
 				}
 			}
-
-			// add mean data in new series for mainTeam and actors
-			// for mainTeam, Set mean work values instead of total
-			aggrStat.Values[newSerie][mainTeamPos] = map[string][]float64{}
-			aggrStat.Values[serieName][mainTeamPos] = map[string][]float64{
-				meanName: meanWork,
-			}
-			// and add nbActors
-			aggrStat.Values[newActorSerie][mainTeamPos] = map[string][]float64{
-				uxNbActorsName: nbactors[mainTeamPos],
-			}
-
-			// for mainTeam actors
-			for actorPos := mainTeamPos + 1; actorPos < lastTeamPos; actorPos++ {
-				// add mean value
-				actorMeanWork := make([]float64, len(aggrStat.Dates))
-				for i := 0; i < len(actorMeanWork); i++ {
-					actorMeanWork[i] = meanWork[i] * nbactors[actorPos][i]
-				}
-				aggrStat.Values[newSerie][actorPos] = map[string][]float64{
-					meanName: actorMeanWork,
-				}
-				// add nb actors (do they counts at each date)
-				aggrStat.Values[newActorSerie][actorPos] = map[string][]float64{
-					uxNbActorsName: nbactors[actorPos],
-				}
-			}
+			nbActors[roleTeamIndex[roleTeamName]] = map[string][]float64{roleTeamRoleName: roleNbAct}
+			nbActors[mainTeamPos][roleTeamRoleName] = roleNbAct
 		}
+		mainTeamNbAct[mainTeamName] = mainNbAct
 	}
+	aggrStat.Values[StatSerieNbActor] = nbActors
+
+	// Calc Mean Values
+	//zeros := make([]float64, len(aggrStat.Dates))
+	//
+	//for mainTeamName, mainTeamPos := range mainTeamIndex {
+	//	for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
+	//
+	//	}
+	//}
 
 	return aggrStat
 }

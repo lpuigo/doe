@@ -240,6 +240,61 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	return aggrStats, nil
 }
 
+// GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
+func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorInfoById clients.ActorInfoById) (*rs.RipsiteStats, error) {
+	sp.RLock()
+	defer sp.RUnlock()
+
+	// Build Item List
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
+	if err != nil {
+		return nil, err
+	}
+
+	// create Prod Stats
+	stats := items.NewStats()
+
+	for _, item := range sitesItems {
+		if !item.Done {
+			continue
+		}
+		dateFor := sc.DateFor(item.Date)
+
+		nbActors := float64(len(item.Actors))
+		var work float64
+		if nbActors > 0 {
+			work = item.Work() / nbActors
+		}
+		for _, actId := range item.Actors {
+			actInfos := actorInfoById(actId)
+			if len(actInfos) < 2 {
+				continue
+			}
+			actRole, actName := actInfos[0], actInfos[1]
+
+			client := item.Client
+			clientRole := item.Client + " : " + actRole
+			clientRoleName := item.Client + " : " + actRole + " / " + actName
+
+			stats.AddStatValue(actRole, client, dateFor, "", items.StatSerieWork, work)
+			stats.AddStatValue(actRole, clientRole, dateFor, "", items.StatSerieWork, work)
+			stats.AddStatValue(actRole, clientRoleName, dateFor, "", items.StatSerieWork, work)
+		}
+	}
+
+	// Aggregate Stats
+	d1 := func(s items.StatKey) string { return s.Serie }
+	d2 := func(s items.StatKey) string { return s.Team }
+	d3 := func(s items.StatKey) string { return s.Site }
+	f1 := items.KeepAll
+	f2 := items.KeepAll
+	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
+	f3 := items.KeepAll
+	aggrStats := stats.Aggregate(sc, d1, d2, d3, f1, f2, f3)
+
+	return aggrStats, nil
+}
+
 // ArchiveName returns the SiteArchive file name with today's date
 func (sp SitesPersister) ArchiveName() string {
 	return fmt.Sprintf("Ripsites %s.zip", date.Today().String())
