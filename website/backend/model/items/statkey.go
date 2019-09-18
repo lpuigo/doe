@@ -177,18 +177,25 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	}
 
 	// Calc Nb Actors
-	const StatSerieNbActor string = "NbActorsWork"
+	const (
+		StatSerieNbActor      string = "NbActorsWork"
+		StatSerieRoleMeanData string = "MoyenneWork"
+		StatSerieMainMeanData string = "MoyenneWork"
+	)
 
 	workData := aggrStat.Values[StatSerieWork]
 	nbActors := make([]map[string][]float64, len(aggrStat.Teams))
 	mainTeamNbAct := map[string][]float64{}
+	roleTeamRole := map[string]string{}
 
+	// for each main teams
 	for mainTeamName, mainTeamPos := range mainTeamIndex {
 		nbActors[mainTeamPos] = make(map[string][]float64)
 		mainNbAct := make([]float64, len(aggrStat.Dates)) // nb of actor for role team
+		// for each role team within main team
 		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
 			roleNbAct := make([]float64, len(aggrStat.Dates)) // nb of actor for role team
-			// for each actors of current role (roleTeam)
+			// for each actors of current roleTeam (having role)
 			var roleTeamRoleName string
 			for _, actPos := range roleTeamActorsPos {
 				nbActors[actPos] = map[string][]float64{}
@@ -208,19 +215,72 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 			}
 			nbActors[roleTeamIndex[roleTeamName]] = map[string][]float64{roleTeamRoleName: roleNbAct}
 			nbActors[mainTeamPos][roleTeamRoleName] = roleNbAct
+			roleTeamRole[roleTeamName] = roleTeamRoleName
 		}
 		mainTeamNbAct[mainTeamName] = mainNbAct
 	}
 	aggrStat.Values[StatSerieNbActor] = nbActors
 
-	// Calc Mean Values
-	//zeros := make([]float64, len(aggrStat.Dates))
-	//
-	//for mainTeamName, mainTeamPos := range mainTeamIndex {
-	//	for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
-	//
-	//	}
-	//}
+	//Calc Mean Values
+	zeros := make([]float64, len(aggrStat.Dates))
+	roleMeanData := make([]map[string][]float64, len(aggrStat.Teams))
+	//mainMeanData := make([]map[string][]float64, len(aggrStat.Teams))
+
+	// for each main teams
+	for mainTeamName, mainTeamPos := range mainTeamIndex {
+		mainTeamData := make([]float64, len(aggrStat.Dates))
+		mainTeamNbActorData := make([]float64, len(aggrStat.Dates))
+		roleMeanData[mainTeamPos] = map[string][]float64{}
+
+		// for each role team within main team
+		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
+			// calc roleTeam Mean work
+			roleTeamData := make([]float64, len(aggrStat.Dates))
+			roleTeamNbActorData := nbActors[roleTeamIndex[roleTeamName]][roleTeamRole[roleTeamName]]
+			var roleTeamRoleName string
+			// for each dates
+			for i := 0; i < len(roleTeamData); i++ {
+				// for each actor in role team
+				for _, actPos := range roleTeamActorsPos {
+					// get pertaining role and sum work
+					for roleName, actorRoleData := range workData[actPos] {
+						roleTeamRoleName = roleName
+						roleTeamData[i] += actorRoleData[i]
+					}
+				}
+				mainTeamData[i] += roleTeamData[i]
+				mainTeamNbActorData[i] += roleTeamNbActorData[i]
+
+				// then calc mean
+				if roleTeamNbActorData[i] > 0 {
+					roleTeamData[i] /= roleTeamNbActorData[i]
+				}
+			}
+
+			// set to zero work data for mainTeam & roleTeam
+			workData[roleTeamIndex[roleTeamName]][roleTeamRoleName] = zeros
+			workData[mainTeamPos][roleTeamRoleName] = zeros
+			// set role mean data ...
+			// ... for mainTeam
+			roleMeanData[mainTeamPos][roleTeamRoleName] = zeros
+			// ... for roleTeam
+			roleMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{roleTeamRoleName: roleTeamData}
+			// ... and for each pertaining actors
+			for _, actPos := range roleTeamActorsPos {
+				nbAct := nbActors[actPos][roleTeamRoleName]
+				actData := make([]float64, len(aggrStat.Dates))
+				for i := 0; i < len(nbAct); i++ {
+					if nbAct[i] > 0 {
+						actData[i] = roleTeamData[i]
+					}
+				}
+				roleMeanData[actPos] = map[string][]float64{roleTeamRoleName: actData}
+			}
+
+		}
+
+	}
+	aggrStat.Values[StatSerieRoleMeanData] = roleMeanData
 
 	return aggrStat
 }
