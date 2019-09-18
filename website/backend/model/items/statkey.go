@@ -1,10 +1,11 @@
 package items
 
 import (
+	"strings"
+
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
-	"strings"
 )
 
 const (
@@ -176,11 +177,12 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 		actorsIndex[mainteam][roleteam] = append(actorsIndex[mainteam][roleteam], index)
 	}
 
-	// Calc Nb Actors
 	const (
 		StatSerieNbActor      string = "NbActorsWork"
 		StatSerieRoleMeanData string = "MoyenneWork"
 		StatSerieMainMeanData string = "MoyenneWork"
+
+		StatSiteGlobal string = "Global"
 	)
 
 	workData := aggrStat.Values[StatSerieWork]
@@ -188,6 +190,7 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	mainTeamNbAct := map[string][]float64{}
 	roleTeamRole := map[string]string{}
 
+	// Calc Nb Actors
 	// for each main teams
 	for mainTeamName, mainTeamPos := range mainTeamIndex {
 		nbActors[mainTeamPos] = make(map[string][]float64)
@@ -224,13 +227,14 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	//Calc Mean Values
 	zeros := make([]float64, len(aggrStat.Dates))
 	roleMeanData := make([]map[string][]float64, len(aggrStat.Teams))
-	//mainMeanData := make([]map[string][]float64, len(aggrStat.Teams))
+	mainMeanData := make([]map[string][]float64, len(aggrStat.Teams))
 
 	// for each main teams
 	for mainTeamName, mainTeamPos := range mainTeamIndex {
 		mainTeamData := make([]float64, len(aggrStat.Dates))
 		mainTeamNbActorData := make([]float64, len(aggrStat.Dates))
 		roleMeanData[mainTeamPos] = map[string][]float64{}
+		mainMeanData[mainTeamPos] = map[string][]float64{}
 
 		// for each role team within main team
 		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
@@ -263,8 +267,10 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 			// set role mean data ...
 			// ... for mainTeam
 			roleMeanData[mainTeamPos][roleTeamRoleName] = zeros
+
 			// ... for roleTeam
 			roleMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{roleTeamRoleName: roleTeamData}
+			mainMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{}
 			// ... and for each pertaining actors
 			for _, actPos := range roleTeamActorsPos {
 				nbAct := nbActors[actPos][roleTeamRoleName]
@@ -275,12 +281,29 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 					}
 				}
 				roleMeanData[actPos] = map[string][]float64{roleTeamRoleName: actData}
+				mainMeanData[actPos] = map[string][]float64{}
 			}
+		}
 
+		for i := 0; i < len(mainTeamData); i++ {
+			if mainTeamNbActorData[i] > 0 {
+				mainTeamData[i] /= mainTeamNbActorData[i]
+			}
+		}
+		mainMeanData[mainTeamPos][StatSiteGlobal] = mainTeamData
+
+		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
+			mainMeanData[roleTeamIndex[roleTeamName]][StatSiteGlobal] = mainTeamData
+			for _, actPos := range roleTeamActorsPos {
+				mainMeanData[actPos][StatSiteGlobal] = mainTeamData
+			}
 		}
 
 	}
 	aggrStat.Values[StatSerieRoleMeanData] = roleMeanData
+	aggrStat.Values[StatSerieMainMeanData] = mainMeanData
+
+	aggrStat.Sites[StatSiteGlobal] = true
 
 	return aggrStat
 }
