@@ -56,6 +56,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
                     :filters="FilterList('Manager')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
 
+			<!--
 			<el-table-column
 					label="Info"
 					width="240px" :resizable=true :show-overflow-tooltip=true
@@ -64,12 +65,21 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 					<ripsiteinfo-info v-model="scope.row"></ripsiteinfo-info>
 				</template>
 			</el-table-column>
+			-->
 
             <el-table-column
                     label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
                     width="110px" :resizable=true :show-overflow-tooltip=true
                     align="center"	:formatter="FormatDate"
             ></el-table-column>
+
+            <el-table-column
+                    label="Nb. Points" width="130px" :resizable=true align="center"
+            >
+                <template slot-scope="scope">
+                    <ripsiteinfo-progress-bar :total="scope.row.NbPoints" :blocked="scope.row.NbPointsBlocked" :done="scope.row.NbPointsDone"></ripsiteinfo-progress-bar>
+                </template>
+            </el-table-column>
 
             <el-table-column
                     label="Tirage" width="130px" :resizable=true align="center"
@@ -80,18 +90,10 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             </el-table-column>
 
             <el-table-column
-                    label="Raccordement" width="130px" :resizable=true align="center"
+                    label="Racordement" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
                     <ripsiteinfo-progress-bar :total="scope.row.NbJunction" :blocked="scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>
-                </template>
-            </el-table-column>
-
-            <el-table-column
-                    label="Mesure" width="130px" :resizable=true align="center"
-            >
-                <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbMeasurement" :blocked="scope.row.NbMeasurementBlocked" :done="scope.row.NbMeasurementDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 

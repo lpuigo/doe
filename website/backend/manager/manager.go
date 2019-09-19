@@ -351,9 +351,10 @@ func (m *Manager) visibleRipsiteFilter() rs.IsSiteVisible {
 
 // GetRipsitesInfo returns array of RipsiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetRipsitesInfo(writer io.Writer) error {
+	clientByName := m.genGetClient()
 	rsis := []*fm.RipsiteInfo{}
 	for _, rsr := range m.Ripsites.GetAll(m.visibleRipsiteFilter()) {
-		rsis = append(rsis, rsr.Site.GetInfo())
+		rsis = append(rsis, rsr.Site.GetInfo(clientByName))
 	}
 
 	return json.NewEncoder(writer).Encode(rsis)

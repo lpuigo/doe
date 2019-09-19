@@ -3,6 +3,7 @@ package ripsites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
@@ -26,7 +27,7 @@ type Site struct {
 	Measurements []*Measurement
 }
 
-func (s *Site) GetInfo() *fm.RipsiteInfo {
+func (s *Site) GetInfo(clientByName clients.ClientByName) *fm.RipsiteInfo {
 	rsi := fm.NewBERipsiteInfo()
 
 	rsi.Id = s.Id
@@ -37,10 +38,6 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 	rsi.UpdateDate = s.UpdateDate
 	rsi.Status = s.Status
 	rsi.Comment = s.Comment
-
-	rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = s.GetPullingNumbers()
-	rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = s.GetJunctionNumbers()
-	rsi.NbMeasurement, rsi.NbMeasurementBlocked, rsi.NbMeasurementDone = s.GetMeasurementNumbers()
 
 	var searchBuilder strings.Builder
 	fmt.Fprintf(&searchBuilder, "%s:%s,", "Client", strings.ToUpper(s.Client))
@@ -55,7 +52,89 @@ func (s *Site) GetInfo() *fm.RipsiteInfo {
 	}
 	rsi.Search = searchBuilder.String()
 
+	client := clientByName(s.Client)
+	if client == nil {
+
+	}
+	itms, err := s.Itemize(client.Bpu)
+	if err != nil {
+		rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = 0, 0, 0
+		rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = 0, 0, 0
+		rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = 0, 0, 0
+		return rsi
+	}
+	points, pulling, junction := s.getPointsNumbers(itms)
+	rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = points.total, points.blocked, points.done
+	rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = pulling.total, pulling.blocked, pulling.done
+	rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = junction.total, junction.blocked, junction.done
+
+	//pullingComplete := rsi.NbPullingBlocked + rsi.NbPullingDone == rsi.NbPulling
+	//junctionComplete := rsi.NbJunctionBlocked + rsi.NbJunctionDone == rsi.NbJunction
+	//
+	//if pullingComplete && junctionComplete && rsi.NbPointsBlocked + rsi.NbPointsDone != rsi.NbPoints {
+	//	rsi.NbPoints = rsi.NbPointsBlocked + rsi.NbPointsDone
+	//}
 	return rsi
+}
+
+type counts struct {
+	total   int
+	blocked int
+	done    int
+}
+
+// GetMeasurementNumbers returns total, blocked and done number of Measurements
+func (s *Site) getPointsNumbers(itms []*items.Item) (points, pulling, junction counts) {
+	const factor = 1000
+	pullingComplete := true
+	junctionComplete := true
+	for _, itm := range itms {
+		if !itm.Todo {
+			continue
+		}
+		pts := int(itm.Work() * factor)
+		switch itm.Activity {
+		case activityPulling:
+			pulling.total += pts
+			if itm.Done {
+				pulling.done += pts
+			}
+			if itm.Blocked {
+				pulling.blocked += pts
+			}
+			if !itm.Blocked && !itm.Done {
+				pullingComplete = false
+			}
+		case activityJunction, activityMeasurement:
+			junction.total += pts
+			if itm.Done {
+				junction.done += pts
+			}
+			if itm.Blocked {
+				junction.blocked += pts
+			}
+			if !itm.Blocked && !itm.Done {
+				junctionComplete = false
+			}
+		}
+	}
+	pulling.total /= factor
+	pulling.blocked /= factor
+	pulling.done /= factor
+	if pullingComplete && pulling.total != pulling.done+pulling.blocked {
+		pulling.total = pulling.done + pulling.blocked
+	}
+
+	junction.total /= factor
+	junction.blocked /= factor
+	junction.done /= factor
+	if junctionComplete && junction.total != junction.done+junction.blocked {
+		junction.total = junction.done + junction.blocked
+	}
+	points.total = pulling.total + junction.total
+	points.blocked = pulling.blocked + junction.blocked
+	points.done = pulling.done + junction.done
+	return
 }
 
 // GetPullingNumbers returns total, blocked and done number of Pullings
@@ -160,7 +239,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 		if err != nil {
 			return nil, err
 		}
-		todo, done := pulling.State.GetTodoDone()
+		todo, done, blocked := pulling.State.GetTodoDoneBlocked()
 		//actors := []string{}
 		//for _, actorId := range pulling.State.Actors {
 		//	actors = append(actors, actorById(actorId))
@@ -186,6 +265,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				l+u,
 				todo,
 				done,
+				blocked,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -209,6 +289,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				a+b,
 				todo,
 				done,
+				blocked,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -232,6 +313,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				b,
 				todo,
 				done,
+				blocked,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -249,7 +331,7 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	var e error
 
 	for _, junction := range s.Junctions {
-		todo, done := junction.State.GetTodoDone()
+		todo, done, blocked := junction.State.GetTodoDoneBlocked()
 		//actors := []string{}
 		//for _, actorId := range junction.State.Actors {
 		//	actors = append(actors, actorById(actorId))
@@ -301,12 +383,12 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			info += fmt.Sprintf(" (%dFO)", boxSize)
 		}
 
-		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done, blocked)
 		item.Actors = junction.State.Actors
 		res = append(res, item)
 
 		if optArticle != nil {
-			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done)
+			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done, blocked)
 			item2.Actors = junction.State.Actors
 			res = append(res, item2)
 		}
@@ -326,7 +408,7 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	qty1 := 1
 
 	for _, measurement := range s.Measurements {
-		todo, done := measurement.State.GetTodoDone()
+		todo, done, blocked := measurement.State.GetTodoDoneBlocked()
 		//actors := []string{}
 		//for _, actorId := range measurement.State.Actors {
 		//	actors = append(actors, actorById(actorId))
@@ -335,7 +417,7 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
-		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done)
+		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done, blocked)
 		item.Actors = measurement.State.Actors
 		res = append(res, item)
 	}

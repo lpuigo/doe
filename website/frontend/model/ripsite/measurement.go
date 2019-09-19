@@ -96,3 +96,7 @@ func (m *Measurement) SearchString(filter string) string {
 	}
 	return res
 }
+
+func (m *Measurement) GetNbFiber() int {
+	return m.NbFiber
+}

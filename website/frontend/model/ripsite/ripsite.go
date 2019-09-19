@@ -181,6 +181,26 @@ func (rs *Ripsite) GetJunctionProgresses() (fibers, nodes, splices Progress) {
 	return
 }
 
+func (rs *Ripsite) GetMeasurementProgresses() (nodes, fibers Progress) {
+	for _, measurement := range rs.Measurements {
+		if !measurement.State.IsDoable() {
+			continue
+		}
+		nbFiber := measurement.GetNbFiber()
+		nodes.Total += 1
+		fibers.Total += nbFiber
+		if measurement.State.IsDone() {
+			nodes.Done += 1
+			fibers.Done += nbFiber
+		}
+		if measurement.State.IsBlocked() {
+			nodes.Blocked += 1
+			fibers.Blocked += nbFiber
+		}
+	}
+	return
+}
+
 func RipsiteStatusLabel(status string) string {
 	switch status {
 	case ripconst.RsStatusNew:

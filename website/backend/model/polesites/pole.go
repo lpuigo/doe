@@ -91,6 +91,23 @@ func (p *Pole) IsDone() bool {
 	}
 }
 
+func (p *Pole) IsBlocked() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	case poleconst.StateNoGo:
+		return true
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateToDo:
+	//case poleconst.StateHoleDone:
+	case poleconst.StateIncident:
+		return true
+	//case poleconst.StateDone:
+	//case poleconst.StateCancelled:
+	default:
+		return false
+	}
+}
+
 const (
 	activityPole    string = "Poteaux"
 	catPoleCreation string = "Création"
@@ -101,7 +118,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 
 	poleArticles := currentBpu.GetCategoryArticles(activityPole)
 
-	todo, done := p.IsTodo(), p.IsDone()
+	todo, done, blocked := p.IsTodo(), p.IsDone(), p.IsBlocked()
 
 	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
 	if err != nil {
@@ -127,6 +144,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 		1,
 		todo,
 		done,
+		blocked,
 	)
 	it.Actors = p.Actors
 	res = append(res, it)
@@ -150,6 +168,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 			1,
 			todo,
 			done,
+			blocked,
 		)
 		it.Actors = p.Actors
 		res = append(res, it)

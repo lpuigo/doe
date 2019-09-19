@@ -120,6 +120,22 @@ const template string = `
             ></ripsiteinfo-progress-bar>
         </el-col>
     </el-row>
+
+	<!-- Measurement Progress -->
+    <el-row :gutter="10" type="flex" align="middle" class="doublespaced">
+        <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Total Mesures :</h4></el-col>
+        <el-col :span="19">
+            <ripsiteinfo-progress-bar height="10px" :total="MeasurementFiberTotal" :done="MeasurementFiberDone" :blocked="MeasurementFiberBlocked"
+            ></ripsiteinfo-progress-bar>
+        </el-col>
+    </el-row>
+    <el-row :gutter="10" type="flex" align="middle" class="spaced">
+        <el-col :span="3" class="align-right">Boitiers :</el-col>
+        <el-col :span="19">
+            <ripsiteinfo-progress-bar height="7px" :total="MeasurementNodeTotal" :done="MeasurementNodeDone" :blocked="MeasurementNodeBlocked"
+            ></ripsiteinfo-progress-bar>
+        </el-col>
+    </el-row>
 </div>
 `
 
@@ -143,6 +159,10 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Computed("JunctionTotal", func(vm *hvue.VM) interface{} {
 			rium := RipInfoUpdateModelFromJS(vm.Object)
 			return rium.SetJunctionStats()
+		}),
+		hvue.Computed("MeasurementFiberTotal", func(vm *hvue.VM) interface{} {
+			rium := RipInfoUpdateModelFromJS(vm.Object)
+			return rium.SetMeasurementStats()
 		}),
 		//hvue.Filter("FormatTronconRef", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
 		//	rpum := RipPullingUpdateModelFromJS(vm.Object)
@@ -186,6 +206,13 @@ type RipInfoUpdateModel struct {
 	JunctionSpliceTotal   int `js:"JunctionSpliceTotal"`
 	JunctionSpliceDone    int `js:"JunctionSpliceDone"`
 	JunctionSpliceBlocked int `js:"JunctionSpliceBlocked"`
+
+	//MeasurementFiberTotal   int `js:"MeasurementFiberTotal"`
+	MeasurementFiberDone    int `js:"MeasurementFiberDone"`
+	MeasurementFiberBlocked int `js:"MeasurementFiberBlocked"`
+	MeasurementNodeTotal    int `js:"MeasurementNodeTotal"`
+	MeasurementNodeDone     int `js:"MeasurementNodeDone"`
+	MeasurementNodeBlocked  int `js:"MeasurementNodeBlocked"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -244,6 +271,21 @@ func (rium *RipInfoUpdateModel) SetJunctionStats() int {
 	rium.JunctionSpliceTotal = splices.Total
 	rium.JunctionSpliceBlocked = splices.Blocked
 	rium.JunctionSpliceDone = splices.Done
+
+	return fibers.Total
+}
+
+// SetMeasurementStats sets MeasurementDone and MeasurementBlocked values, and returns MeasurementTotal
+func (rium *RipInfoUpdateModel) SetMeasurementStats() int {
+	nodes, fibers := rium.Ripsite.GetMeasurementProgresses()
+
+	rium.MeasurementNodeTotal = nodes.Total
+	rium.MeasurementNodeBlocked = nodes.Blocked
+	rium.MeasurementNodeDone = nodes.Done
+
+	//rium.MeasurementFiberTotal = fibers.Total
+	rium.MeasurementFiberBlocked = fibers.Blocked
+	rium.MeasurementFiberDone = fibers.Done
 
 	return fibers.Total
 }

@@ -50,9 +50,10 @@ func (s State) Done() bool {
 	}
 }
 
-func (s State) GetTodoDone() (todo, done bool) {
+func (s State) GetTodoDoneBlocked() (todo, done, blocked bool) {
 	todo = s.ToDo()
 	done = s.Done()
+	blocked = s.Blocked()
 	return
 }
 

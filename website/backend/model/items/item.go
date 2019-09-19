@@ -19,9 +19,10 @@ type Item struct {
 	WorkQuantity int
 	Todo         bool
 	Done         bool
+	Blocked      bool
 }
 
-func NewItem(client, site, activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done bool) *Item {
+func NewItem(client, site, activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done, blocked bool) *Item {
 	return &Item{
 		Client:       client,
 		Site:         site,
@@ -35,6 +36,7 @@ func NewItem(client, site, activity, name, info, date, team string, chapter *bpu
 		WorkQuantity: workQuantity,
 		Todo:         todo,
 		Done:         done,
+		Blocked:      blocked,
 	}
 }
 
@@ -47,7 +49,8 @@ func (i *Item) String() string {
 	Quantity: %d
 	Todo: %t
 	Done: %t
-`, i.Client, i.Site, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done)
+	Blocked: %t
+`, i.Client, i.Site, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done, i.Blocked)
 }
 
 // Price returns the price for the given item
