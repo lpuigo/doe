@@ -24,7 +24,8 @@ const template string = `
                 <el-radio-button label="month">Mensuel</el-radio-button>
             </el-radio-group>
 
-            <span></span>                        
+            <a v-if="SiteMode=='Rip'" :href="GetActorsActivity()"><i class="far fa-file-excel icon--big"></i></a>
+            <span v-else></span>                        
             <span></span>                        
         </div>
 	</span>

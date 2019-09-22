@@ -295,6 +295,28 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 	return aggrStats, nil
 }
 
+func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg, isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
+
+	// Build Item List
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*items.Item{}
+	for _, itm := range sitesItems {
+		if !(itm.Todo && itm.Done) {
+			continue
+		}
+		if dateFor(itm.Date) < firstDate {
+			continue
+		}
+		itm.Date = dateFor(itm.Date)
+		res = append(res, itm.SplitByActors()...)
+	}
+	return res, nil
+}
+
 // ArchiveName returns the SiteArchive file name with today's date
 func (sp SitesPersister) ArchiveName() string {
 	return fmt.Sprintf("Ripsites %s.zip", date.Today().String())

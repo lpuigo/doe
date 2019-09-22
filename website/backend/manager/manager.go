@@ -171,7 +171,7 @@ func (m *Manager) genActorById() clients.ActorById {
 	}
 }
 
-// genActorById returns a ActorById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
+// genActorInfoById returns a ActorInfoById function: func(actorId string) []string which returns nil if actorId is not known, or [0] Actor Role [1] Actor Ref
 func (m *Manager) genActorInfoById() clients.ActorInfoById {
 	return func(actorId string) []string {
 		var ar *actors.ActorRecord
@@ -420,6 +420,35 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 	default:
 		return fmt.Errorf("unsupported group type '%s'", groupBy)
 	}
+}
+
+func (m Manager) GetRipsitesActorsActivity(writer io.Writer, freq string) error {
+
+	var dateFor date.DateAggreg
+	var firstDate string
+	switch freq {
+	case "week":
+		dateFor = func(d string) string {
+			return date.GetMonday(d)
+		}
+	case "month":
+		dateFor = func(d string) string {
+			return date.GetMonth(d)
+		}
+	default:
+		return fmt.Errorf("unsupported stat period '%s'", freq)
+	}
+
+	// set firstDate according to freq choice, in order to have at least a full month of data
+	// month : last and current month
+	// week : 5 last weeks and current
+	firstDate = dateFor(date.Today().AddDays(-32).String())
+
+	itms, err := m.Ripsites.GetAllItems(firstDate, dateFor, m.visibleRipsiteFilter(), m.genGetClient())
+	if err != nil {
+		return err
+	}
+	return m.TemplateEngine.GetItemsXLSAttachement(writer, itms, m.genActorById())
 }
 
 // =====================================================================================================================

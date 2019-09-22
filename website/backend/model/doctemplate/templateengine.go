@@ -205,7 +205,7 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
-	return te.getItemsXLSAttachement(w, its, actorById)
+	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
 // GetRipsiteXLSAttachementName returns the name of the XLSx file pertaining to given Ripsite
@@ -225,11 +225,11 @@ func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesi
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}
 
-	return te.getItemsXLSAttachement(w, its, actorById)
+	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
-// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
-func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorById) error {
+// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given items
+func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorById) error {
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {
@@ -242,16 +242,19 @@ func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.It
 	}
 
 	row := rowRipHeader
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), "Item")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), "Info")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), "Code BPU")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), "Quantité")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), "Prix")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), "Quant. Tr.")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), "Travail")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Installé")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "Equipe")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "Date")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), "Client")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), "Site")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), "Activité")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), "Item")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), "Info")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), "Code BPU")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), "Quantité")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Prix")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "Quant. Tr.")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "Travail")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "Installé")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Equipe")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "Date")
 	for _, item := range its {
 		if !(item.Todo && item.Quantity > 0) {
 			continue
@@ -263,21 +266,24 @@ func (te *DocTemplateEngine) getItemsXLSAttachement(w io.Writer, its []*items.It
 				actors = append(actors, act)
 			}
 		}
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), item.Name)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Info)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Article.Name)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Quantity)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), item.Price())
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), item.WorkQuantity)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Work())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), item.Client)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Site)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Activity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), item.Info)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), item.Article.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Quantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), item.Price())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.WorkQuantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.Work())
 		if item.Done {
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Oui")
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), strings.Join(actors, "\n"))
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.Date)
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "Oui")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), strings.Join(actors, "\n"))
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), item.Date)
 		} else {
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "")
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "")
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "")
 		}
 	}
 	xf.UpdateLinkedValue()

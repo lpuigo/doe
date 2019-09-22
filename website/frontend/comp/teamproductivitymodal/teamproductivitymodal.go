@@ -158,6 +158,10 @@ func (tpmm *TeamProductivityModalModel) SiteCircleStyle(site string) string {
 	return "color: " + tpmm.SiteColors.GetWorkColor(site)
 }
 
+func (tpmm *TeamProductivityModalModel) GetActorsActivity() string {
+	return "/api/ripsites/actors/" + tpmm.ActiveMode
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 

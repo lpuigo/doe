@@ -17,6 +17,7 @@ type Item struct {
 	Article      *bpu.Article
 	Quantity     int
 	WorkQuantity int
+	DivideBy     int
 	Todo         bool
 	Done         bool
 	Blocked      bool
@@ -31,13 +32,51 @@ func NewItem(client, site, activity, name, info, date, team string, chapter *bpu
 		Info:         info,
 		Date:         date,
 		Team:         team,
+		Actors:       []string{},
 		Article:      chapter,
 		Quantity:     quantity,
 		WorkQuantity: workQuantity,
+		DivideBy:     1,
 		Todo:         todo,
 		Done:         done,
 		Blocked:      blocked,
 	}
+}
+
+func (i *Item) Clone() *Item {
+	return &Item{
+		Client:       i.Client,
+		Site:         i.Site,
+		Activity:     i.Activity,
+		Name:         i.Name,
+		Info:         i.Info,
+		Date:         i.Date,
+		Team:         i.Team,
+		Actors:       i.Actors,
+		Article:      i.Article,
+		Quantity:     i.Quantity,
+		WorkQuantity: i.WorkQuantity,
+		DivideBy:     i.DivideBy,
+		Todo:         i.Todo,
+		Done:         i.Done,
+		Blocked:      i.Blocked,
+	}
+}
+
+// SplitByActors returns a slice containing 1 copy of given item per actors
+func (i *Item) SplitByActors() []*Item {
+	res := make([]*Item, len(i.Actors))
+	if len(res) <= 1 {
+		return []*Item{i}
+	}
+	nbActors := i.DivideBy * len(i.Actors)
+	for numAct, actId := range i.Actors {
+		actItem := i.Clone()
+		actItem.Actors = []string{actId}
+		actItem.DivideBy = nbActors
+		res[numAct] = actItem
+	}
+	return res
 }
 
 func (i *Item) String() string {
@@ -55,10 +94,18 @@ func (i *Item) String() string {
 
 // Price returns the price for the given item
 func (i *Item) Price() float64 {
-	return i.Article.Price * float64(i.Quantity)
+	res := i.Article.Price * float64(i.Quantity)
+	if i.DivideBy > 1 {
+		return res / float64(i.DivideBy)
+	}
+	return res
 }
 
 // Price returns the price for the given item
 func (i *Item) Work() float64 {
-	return i.Article.Work * float64(i.WorkQuantity)
+	res := i.Article.Work * float64(i.WorkQuantity)
+	if i.DivideBy > 1 {
+		return res / float64(i.DivideBy)
+	}
+	return res
 }
