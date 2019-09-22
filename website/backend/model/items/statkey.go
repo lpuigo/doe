@@ -162,7 +162,7 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 		return res
 	}
 	getData := func(data, criteria float64) float64 { return data }
-	divData := func(t, a float64) float64 { return t / a }
+	//divData := func(t, a float64) float64 { return t / a }
 
 	// team index of main team and pertaining role teams
 	mainTeamIndex := map[string]int{}            // index of main team
@@ -240,14 +240,14 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	//Calc Mean Values
 	zeros := make([]float64, len(aggrStat.Dates))
 	roleMeanData := make([]map[string][]float64, len(aggrStat.Teams))
-	mainMeanData := make([]map[string][]float64, len(aggrStat.Teams))
+	//mainMeanData := make([]map[string][]float64, len(aggrStat.Teams))
 
 	// for each main teams
 	for mainTeamName, mainTeamPos := range mainTeamIndex {
-		mainTeamData := make([]float64, len(aggrStat.Dates))
+		//mainTeamData := make([]float64, len(aggrStat.Dates))
 		mainTeamNbActorData := make([]float64, len(aggrStat.Dates))
 		roleMeanData[mainTeamPos] = map[string][]float64{}
-		mainMeanData[mainTeamPos] = map[string][]float64{}
+		//mainMeanData[mainTeamPos] = map[string][]float64{}
 
 		// for each role team within main team
 		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
@@ -267,7 +267,7 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 						}
 					}
 				}
-				mainTeamData[i] += roleTeamData[i]
+				//mainTeamData[i] += roleTeamData[i]
 				mainTeamNbActorData[i] += roleTeamNbActorData[i]
 
 				// then calc mean
@@ -278,43 +278,44 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 
 			// set to zero work data for mainTeam & roleTeam
 			workData[roleTeamIndex[roleTeamName]][roleTeamRoleName] = zeros
-			workData[mainTeamPos][roleTeamRoleName] = zeros
+			//workData[mainTeamPos][roleTeamRoleName] = zeros
+
 			// set role mean data ...
 			// ... for mainTeam
 			roleMeanData[mainTeamPos][roleTeamRoleName] = zeros
 
 			// ... for roleTeam
 			roleMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{roleTeamRoleName: roleTeamData}
-			mainMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{}
+			//mainMeanData[roleTeamIndex[roleTeamName]] = map[string][]float64{}
 			// ... and for each pertaining actors
 			for _, actPos := range roleTeamActorsPos {
 				actData := mapData(roleTeamData, nbActors[actPos][roleTeamRoleName], 0, getData)
 				roleMeanData[actPos] = map[string][]float64{roleTeamRoleName: actData}
-				mainMeanData[actPos] = map[string][]float64{}
+				//mainMeanData[actPos] = map[string][]float64{}
 			}
 		}
 
-		mainTeamData = mapData(mainTeamData, mainTeamNbActorData, 0, divData)
-		mainMeanData[mainTeamPos][StatSiteGlobal] = mainTeamData
+		//mainTeamData = mapData(mainTeamData, mainTeamNbActorData, 0, divData)
+		//mainMeanData[mainTeamPos][StatSiteGlobal] = mainTeamData
 
-		for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
-			role := roleTeamRole[roleTeamName]
-			roleTeamPos := roleTeamIndex[roleTeamName]
-
-			// apply mainTeam mean on roleTeam if there is role activity
-			mainMeanData[roleTeamPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[roleTeamPos][role], 0, getData)
-
-			// apply mainTeam mean on actor if there is actor activity
-			for _, actPos := range roleTeamActorsPos {
-				mainMeanData[actPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[actPos][role], 0, getData)
-			}
-		}
+		//for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
+		//	role := roleTeamRole[roleTeamName]
+		//	roleTeamPos := roleTeamIndex[roleTeamName]
+		//
+		//	apply mainTeam mean on roleTeam if there is role activity
+		//	mainMeanData[roleTeamPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[roleTeamPos][role], 0, getData)
+		//
+		//	apply mainTeam mean on actor if there is actor activity
+		//	for _, actPos := range roleTeamActorsPos {
+		//		mainMeanData[actPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[actPos][role], 0, getData)
+		//	}
+		//}
 	}
 
 	aggrStat.Values[StatSerieRoleMeanData] = roleMeanData
-	aggrStat.Values[StatSerieMainMeanData] = mainMeanData
+	//aggrStat.Values[StatSerieMainMeanData] = mainMeanData
 
-	aggrStat.Sites[StatSiteGlobal] = true
+	//aggrStat.Sites[StatSiteGlobal] = true
 
 	return aggrStat
 }
