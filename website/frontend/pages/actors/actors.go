@@ -34,7 +34,7 @@ func main() {
 			mpm := &MainPageModel{Object: vm.Object}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
 			mpm.GetUserSession(func() {
-				mpm.LoadActors(false)
+				mpm.LoadActors(true)
 			})
 		}),
 		//hvue.Computed("Title", func(vm *hvue.VM) interface{} {
@@ -43,7 +43,7 @@ func main() {
 		//}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
-			mpm.Dirty = (mpm.Reference != json.Stringify(mpm.Actors))
+			mpm.Dirty = mpm.CheckReference()
 			return mpm.Dirty
 		}),
 		//hvue.Computed("ShowTable", func(vm *hvue.VM) interface{} {
@@ -100,6 +100,11 @@ func (mpm *MainPageModel) SetReference() {
 	mpm.Reference = mpm.GetReference()
 }
 
+// CheckReference returns true when some data has change
+func (mpm *MainPageModel) CheckReference() bool {
+	return mpm.Reference != json.Stringify(mpm.Actors)
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Management Methods
 
@@ -116,13 +121,16 @@ func (mpm *MainPageModel) AddActor() {
 	mpm.ShowEditActor(mpm.VM, newActor)
 }
 
-func (mpm *MainPageModel) LoadActors(update bool) {
+func (mpm *MainPageModel) LoadActors(init bool) {
 	updateLoadedActors := func() {
 		mpm.SetReference()
 		for _, act := range mpm.Actors {
 			act.UpdateState()
 		}
 		// IsDirty is set to true if some update are undertaken
+		if init && mpm.CheckReference() {
+			mpm.SaveActors(mpm.VM)
+		}
 	}
 	go mpm.callGetActors(updateLoadedActors)
 }

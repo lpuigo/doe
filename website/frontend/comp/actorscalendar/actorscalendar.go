@@ -56,13 +56,13 @@ const (
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Role" label="Rôle" width="110px"
                     sortable :sort-by="['Role', 'State', 'Ref']"
+                    :filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
             ></el-table-column>
             
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Ref" label="Nom Prénom" width="200px"
                     sortable :sort-by="['Ref']"
-                    :filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
             >
                 <template slot-scope="scope">
                     <div class="header-menu-container on-hover">
