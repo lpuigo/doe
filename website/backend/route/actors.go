@@ -3,11 +3,11 @@ package route
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/lpuig/ewin/doe/website/backend/model/actors"
-	"net/http"
-
+	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"net/http"
 )
 
 func GetActors(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
@@ -58,12 +58,30 @@ func GetActorsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) 
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.ActorsArchiveName()))
-	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-	err := mgr.CreateActorsArchive(w)
+	err := mgr.GetActorsWorkingHoursRecordXLS(w, "2019-09-29")
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logmsg.Response = http.StatusOK
+}
+
+func GetActorsWorkingHoursRecord(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetActorsWorkingHoursRecord").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	monthDate := mux.Vars(r)["month"]
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.GetActorsWorkingHoursRecordXLSName(monthDate)))
+	w.Header().Set("Content-Type", "application/zip")
+
+	err := mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Actors Working Hours Record for %s produced", monthDate), http.StatusOK)
 }

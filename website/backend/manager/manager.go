@@ -17,6 +17,7 @@ import (
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
+	"sort"
 	"strconv"
 )
 
@@ -543,6 +544,21 @@ func (m Manager) ActorsArchiveName() string {
 
 func (m Manager) CreateActorsArchive(writer io.Writer) error {
 	return m.Actors.CreateArchive(writer)
+}
+
+func (m Manager) GetActorsWorkingHoursRecordXLSName(monthDate string) string {
+	return fmt.Sprintf("CRA %s.xlsx", monthDate)
+}
+
+func (m Manager) GetActorsWorkingHoursRecordXLS(writer io.Writer, date string) error {
+	actors := m.Actors.GetAllActors()
+	sort.Slice(actors, func(i, j int) bool {
+		if actors[i].Company != actors[j].Company {
+			return actors[i].Company < actors[j].Company
+		}
+		return actors[i].Ref < actors[j].Ref
+	})
+	return m.TemplateEngine.GetActorsWorkingHoursRecordXLS(writer, date, actors)
 }
 
 // =====================================================================================================================

@@ -3,6 +3,7 @@ package doctemplate
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
@@ -287,5 +288,53 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 		}
 	}
 	xf.UpdateLinkedValue()
+	return xf.Write(w)
+}
+
+const (
+	awhrXLSFile   string = "CRA _COMPANY_ _DATE_.xlsx"
+	awhrSheetName string = "CRA"
+	awhrRowStart  int    = 4
+)
+
+func (te *DocTemplateEngine) GetActorsWorkingHoursRecordXLS(w io.Writer, monthDate string, actors []*actors.Actor) error {
+	file := filepath.Join(te.tmplDir, awhrXLSFile)
+	xf, err := excelize.OpenFile(file)
+	if err != nil {
+		return err
+	}
+
+	found := xf.GetSheetIndex(awhrSheetName)
+	if found == 0 {
+		return fmt.Errorf("could not find CRA sheet")
+	}
+
+	begDate := date.DateFrom(monthDate).GetMonth()
+	endDate := begDate.AddDays(32).GetMonth().AddDays(-1)
+	row := awhrRowStart
+	for _, week := range date.GetMonthlyWeeksBetween(begDate, endDate) {
+		strBeg := week.Begin.ToDDMMYYYY()
+		strEnd := week.End.ToDDMMYYYY()
+		strWeek := week.ToDateStringRange()
+		for _, actor := range actors {
+			if !actor.IsActiveOnDateRange(strWeek) {
+				continue
+			}
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 1), strBeg)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 2), strEnd)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 3), actor.LastName)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 4), actor.FirstName)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 5), actor.Role)
+			activity, comment := actor.GetActivityInfoFor(strWeek)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 6), activity*7)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 7), 0)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 8), activity)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 9), comment)
+
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 11), actor.Company)
+
+			row++
+		}
+	}
 	return xf.Write(w)
 }

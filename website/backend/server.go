@@ -141,6 +141,7 @@ func main() {
 	router.HandleFunc("/api/actors", withUserManager("GetActors", route.GetActors)).Methods("GET")
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")
 	router.HandleFunc("/api/actors/archive", withUserManager("GetActorsArchive", route.GetActorsArchive)).Methods("GET")
+	router.HandleFunc("/api/actors/whrecord/{month:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetActorsWorkingHoursRecord", route.GetActorsWorkingHoursRecord)).Methods("GET")
 
 	// Administration methods
 	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")

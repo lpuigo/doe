@@ -72,6 +72,15 @@ func GetMonday(d string) string {
 	return DateFrom(d).GetMonday().String()
 }
 
+// GetDayNum returns the week day number (0: monday -> 6: Sunday)
+func GetDayNum(d string) int {
+	wd := int(DateFrom(d).ToTime().Weekday())
+	if wd == 0 {
+		wd = 7
+	}
+	return wd - 1
+}
+
 func GetMonth(d string) string {
 	return DateFrom(d).GetMonth().String()
 }
@@ -79,4 +88,13 @@ func GetMonth(d string) string {
 func ChangeDDMMYYYYtoYYYYMMDD(d string) string {
 	cols := strings.Split(d, "/")
 	return cols[2] + "-" + cols[1] + "-" + cols[0]
+}
+
+func ToDDMMYYYY(d string) string {
+	cols := strings.Split(d, "-")
+	return cols[2] + "/" + cols[1] + "/" + cols[0]
+}
+
+func GetDateAfter(d string, nbDay int) string {
+	return DateFrom(d).AddDays(nbDay).String()
 }

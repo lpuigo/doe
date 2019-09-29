@@ -11,6 +11,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
@@ -70,6 +71,9 @@ type MainPageModel struct {
 	Actors     []*actor.Actor `js:"Actors"`
 	Reference  string         `js:"Reference"`
 	Dirty      bool           `js:"Dirty"`
+
+	CraVisible bool   `js:"craVisible"`
+	CraMonth   string `js:"craMonth"`
 }
 
 func NewMainPageModel() *MainPageModel {
@@ -82,6 +86,9 @@ func NewMainPageModel() *MainPageModel {
 	mpm.Actors = []*actor.Actor{}
 	mpm.Reference = ""
 	mpm.Dirty = false
+	mpm.CraVisible = false
+	mpm.CraMonth = date.GetFirstOfMonth(date.TodayAfter(-7))
+
 	return mpm
 }
 
@@ -177,6 +184,12 @@ func (mpm *MainPageModel) ShowEditActor(vm *hvue.VM, act *actor.Actor) {
 func (mpm *MainPageModel) ShowEditActorVacancy(vm *hvue.VM, act *actor.Actor) {
 	aem := actorvacancyeditmodal.ActorVacancyEditModalModelFromJS(mpm.VM.Refs("ActorVacancyEditModal"))
 	aem.Show(act, mpm.User)
+}
+
+//
+func (mpm *MainPageModel) GetActorsWorkingHoursRecord(vm *hvue.VM) {
+	js.Global.Get("window").Call("open", "/api/actors/whrecord/"+mpm.CraMonth)
+	mpm.CraVisible = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
