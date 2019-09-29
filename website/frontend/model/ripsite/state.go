@@ -31,7 +31,12 @@ func NewState() *State {
 }
 
 func (s *State) IsDone() bool {
-	return s.Status == ripconst.StateDone
+	switch s.Status {
+	case ripconst.StateDone, ripconst.StateWarning1, ripconst.StateWarning2:
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *State) IsBlocked() bool {
