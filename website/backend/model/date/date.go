@@ -15,11 +15,20 @@ const (
 )
 
 func DateFrom(d string) Date {
+	checkedDate, err := ParseDate(d)
+	if err != nil {
+		return Date{}
+	}
+	return checkedDate
+}
+
+func ParseDate(d string) (Date, error) {
 	date, err := time.Parse(TimeJSLayout, d)
 	if err != nil {
-		panic("could not parse date format :" + err.Error())
+		return Date{}, err
 	}
-	return Date(date)
+	return Date(date), nil
+
 }
 
 func (d Date) ToTime() time.Time {

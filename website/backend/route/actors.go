@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 )
 
@@ -74,11 +75,17 @@ func GetActorsWorkingHoursRecord(mgr *mgr.Manager, w http.ResponseWriter, r *htt
 	defer logmsg.Log()
 
 	monthDate := mux.Vars(r)["month"]
+	_, err := date.ParseDate(monthDate)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		AddError(w, logmsg, fmt.Sprintf("misformated date '%s'", monthDate), http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.GetActorsWorkingHoursRecordXLSName(monthDate)))
 	w.Header().Set("Content-Type", "application/zip")
 
-	err := mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
+	err = mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return

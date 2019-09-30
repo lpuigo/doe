@@ -553,9 +553,6 @@ func (m Manager) GetActorsWorkingHoursRecordXLSName(monthDate string) string {
 func (m Manager) GetActorsWorkingHoursRecordXLS(writer io.Writer, date string) error {
 	actors := m.Actors.GetAllActors()
 	sort.Slice(actors, func(i, j int) bool {
-		if actors[i].Company != actors[j].Company {
-			return actors[i].Company < actors[j].Company
-		}
 		return actors[i].Ref < actors[j].Ref
 	})
 	return m.TemplateEngine.GetActorsWorkingHoursRecordXLS(writer, date, actors)

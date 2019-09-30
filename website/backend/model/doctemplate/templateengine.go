@@ -332,6 +332,7 @@ func (te *DocTemplateEngine) GetActorsWorkingHoursRecordXLS(w io.Writer, monthDa
 			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 9), comment)
 
 			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 11), actor.Company)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 12), strings.Join(actor.Client, ", "))
 
 			row++
 		}
