@@ -296,23 +296,24 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(wsis)
 }
 
-// GetWorksitesWeekStats returns Worksites Stats per Week (JSON in writer) visibles by current user
-func (m Manager) GetWorksitesWeekStats(writer io.Writer) error {
-	df := func(d string) string {
-		return date.GetMonday(d)
-	}
-	return m.getWorksitesStats(writer, 12, df)
-}
+// GetWorksitesStats returns  visibles by current user Worksites Stats per Freq (week or month) as JSON in writer
+func (m Manager) GetWorksitesStats(writer io.Writer, freq string) error {
+	maxVal := 12
 
-// GetWorksitesWeekStats returns Worksites Stats per Month (JSON in writer) visibles by current user
-func (m Manager) GetWorksitesMonthStats(writer io.Writer) error {
-	df := func(d string) string {
-		return date.GetMonth(d)
+	var dateFor date.DateAggreg
+	switch freq {
+	case "week":
+		dateFor = func(d string) string {
+			return date.GetMonday(d)
+		}
+	case "month":
+		dateFor = func(d string) string {
+			return date.GetMonth(d)
+		}
+	default:
+		return fmt.Errorf("unsupported stat period '%s'", freq)
 	}
-	return m.getWorksitesStats(writer, 12, df)
-}
 
-func (m Manager) getWorksitesStats(writer io.Writer, maxVal int, dateFor date.DateAggreg) error {
 	isTeamVisible, err := m.genIsTeamVisible()
 	if err != nil {
 		return err

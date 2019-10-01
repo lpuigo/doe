@@ -204,10 +204,8 @@ func GetWorksitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	freq := vars["freq"]
 	switch freq {
-	case "week":
-		err = mgr.GetWorksitesWeekStats(w)
-	case "month":
-		err = mgr.GetWorksitesMonthStats(w)
+	case "week", "month":
+		err = mgr.GetWorksitesStats(w, freq)
 	default:
 		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
 		return
