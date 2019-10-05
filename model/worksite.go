@@ -5,6 +5,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 )
 
 type Worksite struct {
@@ -126,45 +127,59 @@ type StatKey struct {
 
 type IsWSVisible func(ws *Worksite) bool
 
-const (
-	NbElsInstalled string = "Installed"
-	NbElsBlocked   string = "Blocked"
-	NbElsMeasured  string = "Measured"
-	NbElsDOE       string = "DOE"
-)
-
 // AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, teamName clients.TeamNameByMember) {
+func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTeamVisible clients.IsTeamVisible, teamName clients.TeamNameByMember, showTeam, calcToDo bool) {
 	nbDOE := 0
 	teamDOE := ""
 
-	addNbEls := func(client, team, date, measurement string, nbEl int) {
-		// add client / team info
-		nbels[StatKey{
-			Team: client + " : " + "Eq. " + teamName(team),
-			Date: date,
-			Mes:  measurement,
-		}] += nbEl
-		// add client info
-		nbels[StatKey{
-			Team: client,
-			Date: date,
-			Mes:  measurement,
-		}] += nbEl
+	var addNbEls func(client, team, date, measurement string, nbEl int)
+
+	if showTeam {
+		addNbEls = func(client, team, date, measurement string, nbEl int) {
+			// add client / team info
+			nbels[StatKey{
+				Team: client + " : " + "Eq. " + teamName(team),
+				Date: date,
+				Mes:  measurement,
+			}] += nbEl
+			// add client info
+			nbels[StatKey{
+				Team: client,
+				Date: date,
+				Mes:  measurement,
+			}] += nbEl
+		}
+	} else {
+		addNbEls = func(client, team, date, measurement string, nbEl int) {
+			// add client info
+			nbels[StatKey{
+				Team: client,
+				Date: date,
+				Mes:  measurement,
+			}] += nbEl
+		}
 	}
 
 	for _, o := range ws.Orders {
 		for _, t := range o.Troncons {
+			if calcToDo {
+				nbels[StatKey{
+					Team: ws.Client,
+					Date: dateFor(ws.OrderDate),
+					Mes:  worksite.NbElsSumitted,
+				}] += t.NbRacco
+			}
+
 			if !isTeamVisible(clients.ClientTeam{Client: ws.Client, Team: t.InstallActor}) {
 				continue
 			}
 			// NbElsInstalled for Team & Client
 			if !t.Blockage && t.InstallDate != "" {
-				addNbEls(ws.Client, t.InstallActor, dateFor(t.InstallDate), NbElsInstalled, t.NbRacco)
+				addNbEls(ws.Client, t.InstallActor, dateFor(t.InstallDate), worksite.NbElsInstalled, t.NbRacco)
 			}
 			// NbElsMeasured for Team & Client
 			if !t.Blockage && t.MeasureDate != "" {
-				addNbEls(ws.Client, t.MeasureActor, dateFor(t.MeasureDate), NbElsMeasured, t.NbRacco)
+				addNbEls(ws.Client, t.MeasureActor, dateFor(t.MeasureDate), worksite.NbElsMeasured, t.NbRacco)
 
 				nbDOE += t.NbRacco
 				teamDOE = t.MeasureActor
@@ -175,13 +190,20 @@ func (ws *Worksite) AddStat(nbels map[StatKey]int, dateFor date.DateAggreg, isTe
 				if t.InstallDate != "" {
 					d = dateFor(t.InstallDate)
 				}
-				addNbEls(ws.Client, t.InstallActor, d, NbElsBlocked, t.NbRacco)
+				addNbEls(ws.Client, t.InstallActor, d, worksite.NbElsBlocked, t.NbRacco)
 			}
 		}
 	}
 
 	// NbElsDOE
 	if ws.DoeDate != "" {
-		addNbEls(ws.Client, teamDOE, dateFor(ws.DoeDate), NbElsDOE, nbDOE)
+		addNbEls(ws.Client, teamDOE, dateFor(ws.DoeDate), worksite.NbElsDOE, nbDOE)
+		if calcToDo && ws.AttachmentDate != "" {
+			nbels[StatKey{
+				Team: ws.Client,
+				Date: dateFor(ws.AttachmentDate),
+				Mes:  worksite.NbElsBilled,
+			}] += nbDOE
+		}
 	}
 }

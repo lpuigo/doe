@@ -59,9 +59,9 @@ func GetActorsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) 
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.ActorsArchiveName()))
-	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Type", "application/zip")
 
-	err := mgr.GetActorsWorkingHoursRecordXLS(w, "2019-09-29")
+	err := mgr.CreateActorsArchive(w)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,7 +83,7 @@ func GetActorsWorkingHoursRecord(mgr *mgr.Manager, w http.ResponseWriter, r *htt
 	}
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.GetActorsWorkingHoursRecordXLSName(monthDate)))
-	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 	err = mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
 	if err != nil {

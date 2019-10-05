@@ -5,6 +5,20 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
+const (
+	NbElsSumitted  string = "Submitted"
+	NbElsInstalled string = "Installed"
+	NbElsBlocked   string = "Blocked"
+	NbElsMeasured  string = "Measured"
+	NbElsDOE       string = "DOE"
+	NbElsBilled    string = "Billed"
+
+	NbElsToInstall string = "ToInstall"
+	NbElsToMeasure string = "ToMeasure"
+	NbElsToDOE     string = "ToDOE"
+	NbElsToBill    string = "ToBill"
+)
+
 type WorksiteStats struct {
 	*js.Object
 

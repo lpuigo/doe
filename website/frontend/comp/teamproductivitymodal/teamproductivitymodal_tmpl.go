@@ -14,6 +14,10 @@ const template string = `
             <h2 style="margin: 0 0">
                 <i class="fas fa-chart-line icon--left"></i>Productivité des équipes
             </h2>
+            <el-radio-group v-if="SiteMode=='Orange'" v-model="InfoMode" size="mini" @change="RefreshStat">
+                <el-radio-button label="prod">Production</el-radio-button>
+                <el-radio-button label="stock">Stock</el-radio-button>
+            </el-radio-group>
             <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="activity">Par activité</el-radio-button>
                 <el-radio-button label="site">Par site</el-radio-button>

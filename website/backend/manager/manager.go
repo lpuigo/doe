@@ -297,7 +297,7 @@ func (m Manager) GetWorksitesInfo(writer io.Writer) error {
 }
 
 // GetWorksitesStats returns  visibles by current user Worksites Stats per Freq (week or month) as JSON in writer
-func (m Manager) GetWorksitesStats(writer io.Writer, freq string) error {
+func (m Manager) GetWorksitesStats(writer io.Writer, info, freq string) error {
 	maxVal := 12
 
 	var dateFor date.DateAggreg
@@ -318,7 +318,14 @@ func (m Manager) GetWorksitesStats(writer io.Writer, freq string) error {
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"]))
+	switch info {
+	case "prod":
+		return json.NewEncoder(writer).Encode(m.Worksites.GetStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, m.genGetClient(), !m.CurrentUser.Permissions["Review"], false))
+	case "stock":
+		return json.NewEncoder(writer).Encode(m.Worksites.GetStockStats(maxVal, dateFor, m.visibleWorksiteFilter(), isTeamVisible, m.genGetClient()))
+	default:
+		return fmt.Errorf("unsupported info '%s'", info)
+	}
 }
 
 func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite) error {

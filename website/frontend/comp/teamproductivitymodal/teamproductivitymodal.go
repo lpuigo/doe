@@ -58,6 +58,7 @@ type TeamProductivityModalModel struct {
 
 	ActiveMode string `js:"ActiveMode"`
 	GroupMode  string `js:"GroupMode"`
+	InfoMode   string `js:"InfoMode"`
 }
 
 func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
@@ -79,6 +80,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 
 	tpmm.ActiveMode = "week"
 	tpmm.GroupMode = "activity"
+	tpmm.InfoMode = "prod"
 	return tpmm
 }
 
@@ -110,7 +112,8 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 		go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.ActiveMode)
 		return
 	}
-	go tpmm.callGetWorksitesStats()
+	// tpmm.SiteMode == "Orange"
+	go tpmm.callGetWorksitesStats("/api/worksites/stat/" + tpmm.InfoMode + "/" + tpmm.ActiveMode)
 }
 
 func (tpmm *TeamProductivityModalModel) initSitesColors() {
@@ -165,10 +168,9 @@ func (tpmm *TeamProductivityModalModel) GetActorsActivity() string {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (tpmm *TeamProductivityModalModel) callGetWorksitesStats() {
+func (tpmm *TeamProductivityModalModel) callGetWorksitesStats(url string) {
 	defer func() { tpmm.Loading = false }()
-	url := "/api/worksites/stat/"
-	req := xhr.NewRequest("GET", url+tpmm.ActiveMode)
+	req := xhr.NewRequest("GET", url)
 	req.Timeout = tools.TimeOut
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)

@@ -171,11 +171,16 @@ func (tpc *TeamProductivityChart) getSeries() []interface{} {
 			res = append(res, newSerie("column", "€", "#51A825", 0, tpc.Stats.Values["Price"]))
 		}
 		res = append(res, newSerie("line", "Travail", "#389eff", 0, tpc.Stats.Values["Work"]))
-	default:
-		res = append(res, newSerie("column", "Installés", "#51A825", 0, tpc.Stats.Values["Installed"]))
-		res = append(res, newSerie("column", "Mesurés", "#29d1cb", 0, tpc.Stats.Values["Measured"]))
-		res = append(res, newSerie("column", "Bloqués", "#cc2020", 0.2, tpc.Stats.Values["Blocked"]))
-		res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values["DOE"]))
+	case len(tpc.Stats.Values[worksite.NbElsInstalled]) > 0:
+		res = append(res, newSerie("column", "Installés", "#51A825", 0, tpc.Stats.Values[worksite.NbElsInstalled]))
+		res = append(res, newSerie("column", "Mesurés", "#29d1cb", 0, tpc.Stats.Values[worksite.NbElsMeasured]))
+		res = append(res, newSerie("column", "Bloqués", "#cc2020", 0.2, tpc.Stats.Values[worksite.NbElsBlocked]))
+		res = append(res, newSerie("line", "DOE", "#389eff", 0, tpc.Stats.Values[worksite.NbElsDOE]))
+	case len(tpc.Stats.Values[worksite.NbElsToInstall]) > 0:
+		res = append(res, newSerie("line", "A installer", "#51A825", 0, tpc.Stats.Values[worksite.NbElsToInstall]))
+		res = append(res, newSerie("line", "A Mesurer", "#29d1cb", 0, tpc.Stats.Values[worksite.NbElsToMeasure]))
+		res = append(res, newSerie("line", "DOE à faire", "#389eff", 0, tpc.Stats.Values[worksite.NbElsToDOE]))
+		res = append(res, newSerie("line", "Attachements", "#cc2020", 0, tpc.Stats.Values[worksite.NbElsToBill]))
 	}
 	return res
 }

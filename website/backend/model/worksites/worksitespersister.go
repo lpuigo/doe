@@ -11,7 +11,6 @@ import (
 	"io"
 	"path/filepath"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 )
@@ -149,12 +148,7 @@ func (wsp *WorkSitesPersister) GetById(id int) *WorkSiteRecord {
 	return nil
 }
 
-// GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam bool) *worksite.WorksiteStats {
-	wsp.RLock()
-	defer wsp.RUnlock()
-
-	// calc Nb installed ELs per Team/date/mesurement
+func (wsp *WorkSitesPersister) getVisibleWorksitesStats(dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam, calcToDo bool) map[model.StatKey]int {
 	nbEls := make(map[model.StatKey]int)
 	for _, wsr := range wsp.workSites {
 		if isWSVisible(wsr.Worksite) {
@@ -162,9 +156,21 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 			if client == nil {
 				continue
 			}
-			wsr.AddStat(nbEls, dateFor, isTeamVisible, client.GenTeamNameByMember())
+			wsr.AddStat(nbEls, dateFor, isTeamVisible, client.GenTeamNameByMember(), showTeam, calcToDo)
 		}
 	}
+	return nbEls
+}
+
+// GetStats returns all Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
+//
+// maxVal most recent dates are returned if maxVal > 0 (otherwise, all dates a returned)
+func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName, showTeam, calcToDo bool) *worksite.WorksiteStats {
+	wsp.RLock()
+	defer wsp.RUnlock()
+
+	// calc Nb installed ELs per Team/date/mesurement
+	nbEls := wsp.getVisibleWorksitesStats(dateFor, isWSVisible, isTeamVisible, clientByName, showTeam, calcToDo)
 
 	ws := worksite.NewBEWorksiteStats()
 
@@ -182,10 +188,7 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 	}
 	teams := []string{}
 	for t, _ := range teamset {
-		// if showTeam is false, only show client sum-up
-		if !(!showTeam && strings.Contains(t, " : ")) {
-			teams = append(teams, t)
-		}
+		teams = append(teams, t)
 	}
 	sort.Strings(teams)
 
@@ -212,7 +215,7 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 	}
 	sort.Strings(dates)
 	// keep maxVal newest data
-	if len(dates) > maxVal {
+	if maxVal > 0 && len(dates) > maxVal {
 		dates = dates[len(dates)-maxVal:]
 	}
 
@@ -240,6 +243,72 @@ func (wsp *WorkSitesPersister) GetStats(maxVal int, dateFor date.DateAggreg, isW
 		}
 	}
 	return ws
+}
+
+// GetStockStats returns all Stock Stats about all contained WorkSiteRecords visible with isWSVisible = true and IsTeamVisible = true
+func (wsp *WorkSitesPersister) GetStockStats(maxVal int, dateFor date.DateAggreg, isWSVisible model.IsWSVisible, isTeamVisible clients.IsTeamVisible, clientByName clients.ClientByName) *worksite.WorksiteStats {
+	prodStats := wsp.GetStats(-1, dateFor, isWSVisible, isTeamVisible, clientByName, false, true)
+	dates := prodStats.Dates
+	// keep maxVal newest data
+	if len(dates) > maxVal {
+		dates = dates[len(dates)-maxVal:]
+	}
+	stockStats := &worksite.WorksiteStats{
+		Dates:  dates,
+		Teams:  prodStats.Teams,
+		Values: make(map[string][][]int),
+	}
+	for _, value := range []string{worksite.NbElsToInstall, worksite.NbElsToMeasure, worksite.NbElsToDOE, worksite.NbElsToBill} {
+		stockStats.Values[value] = make([][]int, len(prodStats.Teams))
+	}
+
+	addSlice := func(slA, slB []int) []int {
+		res := make([]int, len(slA))
+		for i, a := range slA {
+			res[i] = a + slB[i]
+		}
+		return res
+	}
+
+	subSlice := func(slA, slB []int) []int {
+		res := make([]int, len(slA))
+		for i, a := range slA {
+			res[i] = a - slB[i]
+		}
+		return res
+	}
+
+	cumSlice := func(sl []int) []int {
+		res := make([]int, len(sl))
+		for i, a := range sl {
+			v := a
+			if i > 0 {
+				v += res[i-1]
+			}
+			res[i] = v
+		}
+		// keep maxVal newest data
+		if len(res) > maxVal {
+			res = res[len(res)-maxVal:]
+		}
+		return res
+	}
+
+	for teamNum, _ := range prodStats.Teams {
+		submitted := prodStats.Values[worksite.NbElsSumitted][teamNum]
+		installed := prodStats.Values[worksite.NbElsInstalled][teamNum]
+		done := addSlice(installed, prodStats.Values[worksite.NbElsBlocked][teamNum])
+		measured := prodStats.Values[worksite.NbElsMeasured][teamNum]
+		DOEed := prodStats.Values[worksite.NbElsDOE][teamNum]
+		Billed := prodStats.Values[worksite.NbElsBilled][teamNum]
+
+		stockStats.Values[worksite.NbElsToInstall][teamNum] = cumSlice(subSlice(submitted, done))
+		stockStats.Values[worksite.NbElsToMeasure][teamNum] = cumSlice(subSlice(installed, measured))
+		stockStats.Values[worksite.NbElsToDOE][teamNum] = cumSlice(subSlice(measured, DOEed))
+		stockStats.Values[worksite.NbElsToBill][teamNum] = cumSlice(subSlice(DOEed, Billed))
+	}
+
+	return stockStats
 }
 
 // WorksitesArchiveName returns the WorksiteArchive file name with today's date
