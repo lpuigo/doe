@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
+	"strings"
 )
 
 type Worksite struct {
@@ -117,6 +118,7 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo, priceByClientArticle fu
 			wsi.Search += searchPt("PB", t.Pb)
 		}
 	}
+	wsi.Search = strings.ToLower(wsi.Search)
 }
 
 type StatKey struct {

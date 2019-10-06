@@ -54,7 +54,7 @@ func (wsi *WorksiteInfo) TextFiltered(filter string) bool {
 		expected = false
 		filter = filter[1:]
 	}
-	return strings.Contains(wsi.Search, filter) == expected
+	return strings.Contains(wsi.Search, strings.ToLower(filter)) == expected
 }
 
 func (wsi *WorksiteInfo) NeedRework() bool {
