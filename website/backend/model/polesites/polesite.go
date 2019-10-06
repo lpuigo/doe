@@ -69,7 +69,7 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done int) {
 		case poleconst.StateIncident:
 			total++
 			blocked++
-		case poleconst.StateDone:
+		case poleconst.StateDone, poleconst.StateAttachment:
 			total++
 			done++
 			//case poleconst.StateCancelled:

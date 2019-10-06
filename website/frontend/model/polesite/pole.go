@@ -146,6 +146,8 @@ func PoleStateLabel(state string) string {
 		return poleconst.LabelIncident
 	case poleconst.StateDone:
 		return poleconst.LabelDone
+	case poleconst.StateAttachment:
+		return poleconst.LabelAttachment
 	case poleconst.StateCancelled:
 		return poleconst.LabelCancelled
 	default:
@@ -162,6 +164,7 @@ func GetStatesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
 		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
 		elements.NewValueLabel(poleconst.StateDone, poleconst.LabelDone),
+		elements.NewValueLabel(poleconst.StateAttachment, poleconst.LabelAttachment),
 		elements.NewValueLabel(poleconst.StateCancelled, poleconst.LabelCancelled),
 	}
 }
@@ -201,6 +204,8 @@ func PoleRowClassName(status string) string {
 		return "pole-row-incident"
 	case poleconst.StateDone:
 		return "pole-row-done"
+	case poleconst.StateAttachment:
+		return "pole-row-attachment"
 	case poleconst.StateCancelled:
 		return "pole-row-cancelled"
 

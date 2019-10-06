@@ -22,6 +22,7 @@ const (
 	StateHoleDone     string = "20 Hole Done"
 	StateIncident     string = "25 Incident"
 	StateDone         string = "90 Done"
+	StateAttachment   string = "95 Attachment"
 	StateCancelled    string = "99 Cancelled"
 
 	LabelNotSubmitted string = "Non soumis"
@@ -31,6 +32,7 @@ const (
 	LabelHoleDone     string = "Trou fait"
 	LabelIncident     string = "Incident"
 	LabelDone         string = "Fait"
+	LabelAttachment   string = "Attach. fait"
 	LabelCancelled    string = "Annulé"
 
 	FilterValueAll      string = ""

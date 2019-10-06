@@ -70,6 +70,9 @@ func (pm *PoleMarker) UpdateFromState() {
 	case poleconst.StateDone:
 		html = pmHtmlPlain
 		class = "green"
+	case poleconst.StateAttachment:
+		html = pmHtmlPlain
+		class = "purple"
 	case poleconst.StateCancelled:
 		html = pmHtmlPlain
 		class = ""

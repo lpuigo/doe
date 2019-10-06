@@ -8,7 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	date "github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
@@ -143,16 +143,6 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Kizeo -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Kizeo:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Référence Kizeo"
-                      v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-
     <!-- Date Aspiratrice -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6" class="align-right">Aspiratrice:</el-col>
@@ -195,8 +185,18 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Actors -->
+    <!-- Kizeo -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6" class="align-right">Kizeo:</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Référence Kizeo"
+                      v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Actors -->
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6" class="align-right">Acteurs:</el-col>
         <el-col :span="18">
             <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
@@ -218,7 +218,6 @@ const template string = `<div>
         </el-col>
     </el-row>
     
-
     <!-- Status -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6" class="align-right">Status:</el-col>
@@ -237,7 +236,7 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Date Status -->
+    <!-- Date -->
     <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6" class="align-right">Date:</el-col>
         <el-col :span="18">
@@ -247,6 +246,21 @@ const template string = `<div>
                             value-format="yyyy-MM-dd"
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
+            ></el-date-picker>
+        </el-col>
+    </el-row>
+
+    <!-- AttachmentDate -->
+    <el-row v-if="ShowAttachmentDate" :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6" class="align-right">Attachement:</el-col>
+        <el-col :span="18">
+            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                            style="width: 100%" type="date"
+                            v-model="editedpolemarker.Pole.AttachmentDate"
+                            value-format="yyyy-MM-dd"
+                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                            :clearable="false"
+							@change="UpdateState()"
             ></el-date-picker>
         </el-col>
     </el-row>
@@ -285,7 +299,14 @@ func componentOptions() []hvue.ComponentOption {
 			"ShowDate",
 			func(vm *hvue.VM) interface{} {
 				pem := PoleEditModelFromJS(vm.Object)
-				return pem.EditedPoleMarker.Pole.State == poleconst.StateDone
+				return pem.EditedPoleMarker.Pole.State == poleconst.StateDone || pem.EditedPoleMarker.Pole.State == poleconst.StateAttachment
+			}),
+		hvue.Computed(
+			"ShowAttachmentDate",
+			func(vm *hvue.VM) interface{} {
+				pem := PoleEditModelFromJS(vm.Object)
+				stateShow := pem.EditedPoleMarker.Pole.State == poleconst.StateDone || pem.EditedPoleMarker.Pole.State == poleconst.StateAttachment
+				return stateShow && !tools.Empty(pem.EditedPoleMarker.Pole.Date)
 			}),
 	}
 }
@@ -342,11 +363,16 @@ func (pem *PoleEditModel) GetStates() []*elements.ValueLabel {
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker
+	if ep.Pole.State == poleconst.StateDone {
+		if tools.Empty(ep.Pole.Date) {
+			ep.Pole.Date = date.TodayAfter(0)
+		}
+		if !tools.Empty(ep.Pole.AttachmentDate) {
+			ep.Pole.State = poleconst.StateAttachment
+		}
+	}
 	ep.UpdateFromState()
 	ep.Refresh()
-	if ep.Pole.State == poleconst.StateDone {
-		ep.Pole.Date = date.TodayAfter(0)
-	}
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {

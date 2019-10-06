@@ -27,11 +27,12 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
                 width="160px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
+        <!--
         <el-table-column
                 label="DT" prop="DtRef" sortable
                 width="130px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
-
+        -->
         <el-table-column
                 label="DICT" prop="DictRef" sortable
                 width="120px" :resizable=true :show-overflow-tooltip=true
@@ -48,6 +49,7 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
                 width="100px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
+        <!--
         <el-table-column
                 label="Hauteur" prop="Height"
                 width="80px" :resizable=true :show-overflow-tooltip=true
@@ -57,6 +59,7 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
                 label="Matière" prop="Material"
                 width="80px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
+        -->
 
         <el-table-column
                 label="Aspi." prop="AspiDate" sortable
@@ -66,7 +69,7 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
 
         <el-table-column
                 label="Produits"
-                width="90px" :resizable=true
+                width="110px" :resizable=true
         >
             <template slot-scope="scope">
                 <span style="white-space: pre">{{FormatProduct(scope.row)}}</span>
@@ -83,19 +86,25 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
         </el-table-column>
 
         <el-table-column
-                label="Ref. Kizeo" prop="Kizeo"
-                width="80px" :resizable=true :show-overflow-tooltip=true
-        ></el-table-column>
-
-        <el-table-column
                 label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
                 width="100px" :resizable=true :show-overflow-tooltip=true
                 :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
         ></el-table-column>
 
         <el-table-column
+                label="Ref. Kizeo" prop="Kizeo"
+                width="80px" :resizable=true :show-overflow-tooltip=true
+        ></el-table-column>
+
+        <el-table-column
                 label="Date" prop="Date" sortable
-                width="90px" :resizable=true
+                width="100px" :resizable=true
+                align="center"	:formatter="FormatDate"
+        ></el-table-column>
+
+        <el-table-column
+                label="Attachement" prop="AttachmentDate" sortable
+                width="110px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 

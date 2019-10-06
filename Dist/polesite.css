@@ -27,6 +27,10 @@ html, body {
     color: #2ee62e;
 }
 
+.purple {
+    color: #d85ce6;
+}
+
 /* =====================================================================================================================
    === Pole Row Style
  */
@@ -73,6 +77,15 @@ html, body {
 
 .el-table .pole-row-done:hover {
     background: #bad4b4;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-attachment {
+    background: #d9d1ad;
+}
+
+.el-table .pole-row-attachment:hover {
+    background: #c2bb9b;
     transition: background-color .15s ease;
 }
 
