@@ -98,7 +98,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             </el-table-column>
 
             <el-table-column
-                    label="Maj" prop="UpdateDate"
+                    label="Maj" prop="UpdateDate" sortable
                     width="90px" :resizable=true :show-overflow-tooltip=true
                     align="center"	:formatter="FormatDate"
             ></el-table-column>
