@@ -86,6 +86,10 @@ func (ptm *PolesiteTableModel) AttachmentUrl(id int) string {
 	return "/api/polesites/" + strconv.Itoa(id) + "/attach"
 }
 
+func (ptm *PolesiteTableModel) ExportUrl(id int) string {
+	return "/api/polesites/" + strconv.Itoa(id) + "/export"
+}
+
 func (ptm *PolesiteTableModel) OpenPolesite(id int) {
 	js.Global.Get("window").Call("open", "polesite.html?psid="+strconv.Itoa(id))
 }

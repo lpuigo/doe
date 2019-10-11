@@ -45,7 +45,10 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 				<template slot-scope="scope">
                     <div class="header-menu-container">
                         <span @click="OpenPolesite(scope.row.Id)" class="link">{{scope.row.Ref}}</span>
-						<a v-if="user.Permissions.Invoice" :href="AttachmentUrl(scope.row.Id)"><i class="link fas fa-file-excel"></i></a>
+						<div>
+							<a v-if="user.Permissions.Invoice" :href="AttachmentUrl(scope.row.Id)"><i class="link fas fa-file-excel"></i></a>
+							<a v-if="user.Permissions.Admin" :href="ExportUrl(scope.row.Id)"><i class="link far fa-file-excel"></i></a>
+						</div>
                     </div>
 				</template>
 			</el-table-column>

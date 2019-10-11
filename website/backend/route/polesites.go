@@ -161,3 +161,32 @@ func GetPolesiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Req
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
 }
+
+// GetPolesiteExport
+func GetPolesiteExport(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesiteExport").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", psr.PoleSite.ExportName()))
+	w.Header().Set("Content-Type", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+	err = psr.PoleSite.XLSExport(w)
+	if err != nil {
+		AddError(w, logmsg, "could not generate Polesite XLS export file. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("Export XLS produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
+}

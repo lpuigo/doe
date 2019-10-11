@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
+	"io"
 	"strings"
 )
 
@@ -126,4 +127,14 @@ func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
 		}
 	}
 	return nil
+}
+
+// ExportName returns the PoleSite XLS export file name
+func (ps *PoleSite) ExportName() string {
+	return fmt.Sprintf("Polesite %s-%s (%d).xlsx", ps.Client, ps.Ref, ps.Id)
+}
+
+// XLSExport returns the PoleSite XLS export
+func (ps *PoleSite) XLSExport(w io.Writer) error {
+	return ToXLS(w, ps)
 }
