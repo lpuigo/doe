@@ -12,6 +12,17 @@ const (
 )
 
 const (
+	StateLabelToDo       string = "A faire"
+	StateLabelInProgress string = "En cours"
+	StateLabelBlocked    string = "Bloqué"
+	StateLabelRedo       string = "A reprendre"
+	StateLabelWarning2   string = "Seuil 2"
+	StateLabelWarning1   string = "Seuil 1"
+	StateLabelDone       string = "Fait"
+	StateLabelCanceled   string = "Annulé"
+)
+
+const (
 	RsStatusNew        string = "00 New"
 	RsStatusInProgress string = "20 InProgress"
 	RsStatusBlocked    string = "90 Blocked"

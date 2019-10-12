@@ -122,13 +122,13 @@ func GetStateStatusesValueLabel() []*elements.ValueLabel {
 
 func GetStateStatusesWithWarningValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
-		elements.NewValueLabel(ripconst.StateToDo, "A faire"),
-		elements.NewValueLabel(ripconst.StateInProgress, "En cours"),
-		elements.NewValueLabel(ripconst.StateBlocked, "Bloqué"),
-		elements.NewValueLabel(ripconst.StateWarning2, "Seuil 2"),
-		elements.NewValueLabel(ripconst.StateWarning1, "Seuil 1"),
-		elements.NewValueLabel(ripconst.StateDone, "Fait"),
-		elements.NewValueLabel(ripconst.StateCanceled, "Annulé"),
+		elements.NewValueLabel(ripconst.StateToDo, ripconst.StateLabelToDo),
+		elements.NewValueLabel(ripconst.StateInProgress, ripconst.StateLabelInProgress),
+		elements.NewValueLabel(ripconst.StateBlocked, ripconst.StateLabelBlocked),
+		elements.NewValueLabel(ripconst.StateWarning2, ripconst.StateLabelWarning2),
+		elements.NewValueLabel(ripconst.StateWarning1, ripconst.StateLabelWarning1),
+		elements.NewValueLabel(ripconst.StateDone, ripconst.StateLabelDone),
+		elements.NewValueLabel(ripconst.StateCanceled, ripconst.StateLabelCanceled),
 	}
 }
 
@@ -150,5 +150,30 @@ func (s *State) GetRowStyle() string {
 		return "ripactivitystatus-row-canceled"
 	default:
 		return "worksite-row-error"
+	}
+}
+
+func (s *State) GetLabel() string {
+	return GetStatusLabel(s.Status)
+}
+
+func GetStatusLabel(s string) string {
+	switch s {
+	case ripconst.StateToDo:
+		return ripconst.StateLabelToDo
+	case ripconst.StateInProgress:
+		return ripconst.StateLabelInProgress
+	case ripconst.StateBlocked:
+		return ripconst.StateLabelBlocked
+	case ripconst.StateWarning2:
+		return ripconst.StateLabelWarning2
+	case ripconst.StateWarning1:
+		return ripconst.StateLabelWarning1
+	case ripconst.StateDone:
+		return ripconst.StateLabelDone
+	case ripconst.StateCanceled:
+		return ripconst.StateLabelCanceled
+	default:
+		return s
 	}
 }

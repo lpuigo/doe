@@ -9,6 +9,7 @@ import (
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"strconv"
 	"strings"
 )
@@ -101,10 +102,21 @@ func (rjum *RipJunctionUpdateModel) GetNbFiber(vm *hvue.VM, junction *fmrip.Junc
 	return junction.GetNbFiber()
 }
 
+func (rjum *RipJunctionUpdateModel) GetNode(vm *hvue.VM, junction *fmrip.Junction) *fmrip.Node {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	return rjum.Ripsite.Nodes[junction.NodeName]
+}
+
 func (rjum *RipJunctionUpdateModel) GetNodeDesc(vm *hvue.VM, junction *fmrip.Junction) string {
 	rjum = RipJunctionUpdateModelFromJS(vm.Object)
 	node := rjum.Ripsite.Nodes[junction.NodeName]
-	return node.Name + " - " + node.Ref + " (" + node.Type + ": " + node.BoxType + ") " + node.Address
+	return node.Name + " - " + node.Ref
+}
+
+func (rjum *RipJunctionUpdateModel) GetNodeType(vm *hvue.VM, junction *fmrip.Junction) string {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	node := rjum.Ripsite.Nodes[junction.NodeName]
+	return node.Type + ": " + node.BoxType
 }
 
 func (rjum *RipJunctionUpdateModel) GetTronconDesc(vm *hvue.VM, junction *fmrip.Junction) string {
@@ -115,4 +127,38 @@ func (rjum *RipJunctionUpdateModel) GetTronconDesc(vm *hvue.VM, junction *fmrip.
 		return node.TronconInName
 	}
 	return troncon.Name + " ( " + strconv.Itoa(troncon.Size) + "FO)"
+}
+
+func (rjum *RipJunctionUpdateModel) GetActors(vm *hvue.VM, junction *fmrip.Junction) string {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	client := rjum.User.GetClientByName(rjum.Ripsite.Client)
+	if client == nil {
+		return ""
+	}
+
+	res := []string{}
+	for _, actId := range junction.State.Actors {
+		actor := client.GetActorBy(actId)
+		if actor == nil {
+			continue
+		}
+		res = append(res, actor.GetRef())
+	}
+	return strings.Join(res, "\n")
+}
+
+func (rjum *RipJunctionUpdateModel) FormatDate(r, c *js.Object, d string) string {
+	return date.DateString(d)
+}
+
+func (rjum *RipJunctionUpdateModel) FormatStatus(r, c *js.Object, d string) string {
+	return fmrip.GetStatusLabel(d)
+}
+
+func (rjum *RipJunctionUpdateModel) GetNodeAttr(vm *hvue.VM, col string) func(a *fmrip.Junction) string {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	return func(a *fmrip.Junction) string {
+		node := rjum.Ripsite.Nodes[a.NodeName]
+		return node.Get(col).String()
+	}
 }
