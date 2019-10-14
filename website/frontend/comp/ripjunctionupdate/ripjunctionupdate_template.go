@@ -5,6 +5,7 @@ const template string = `
         :data="filteredJunctions"
         :row-class-name="TableRowClassName"
         height="100%" :border=true size="mini"
+		@row-dblclick="SetSelectedState"
 >
     <el-table-column
             label="Noeud" prop="NodeName" sortable
@@ -63,6 +64,9 @@ const template string = `
             label="Etat" prop="State.Status" sortable
             width="120px" :resizable="true" :formatter="FormatStatus"
     ></el-table-column>
+	<!--
+		:filters="FilterList('State.Status')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
+	-->
 
     <el-table-column
             label="Acteurs"

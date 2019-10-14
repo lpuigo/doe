@@ -70,6 +70,10 @@ func RipJunctionUpdateModelFromJS(o *js.Object) *RipJunctionUpdateModel {
 	return &RipJunctionUpdateModel{Object: o}
 }
 
+func (rjum *RipJunctionUpdateModel) SetSelectedState(junction *fmrip.Junction) {
+	rjum.VM.Emit("update-state", junction.State)
+}
+
 func (rjum *RipJunctionUpdateModel) GetFilteredJunctions() []*fmrip.Junction {
 	if rjum.FilterType == ripconst.FilterValueAll && rjum.Filter == "" {
 		return rjum.Ripsite.Junctions
@@ -126,7 +130,7 @@ func (rjum *RipJunctionUpdateModel) GetTronconDesc(vm *hvue.VM, junction *fmrip.
 	if troncon == nil {
 		return node.TronconInName
 	}
-	return troncon.Name + " ( " + strconv.Itoa(troncon.Size) + "FO)"
+	return troncon.Name + " (" + strconv.Itoa(troncon.Size) + "FO)"
 }
 
 func (rjum *RipJunctionUpdateModel) GetActors(vm *hvue.VM, junction *fmrip.Junction) string {
@@ -162,3 +166,46 @@ func (rjum *RipJunctionUpdateModel) GetNodeAttr(vm *hvue.VM, col string) func(a 
 		return node.Get(col).String()
 	}
 }
+
+/*
+func (rjum *RipJunctionUpdateModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
+	prop := col.Get("property").String()
+	print("FilterHandler", prop, p.Get(prop).String())
+	return p.Get(prop).String() == value
+}
+
+func (rjum *RipJunctionUpdateModel) FilterList(vm *hvue.VM, prop string) []*elements.ValText {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	count := map[string]int{}
+	attribs := []string{}
+
+	var translate func(string) string
+	switch prop {
+	case "State.Status":
+		translate = func(val string) string {
+			return fmrip.GetStatusLabel(val)
+		}
+	default:
+		translate = func(val string) string { return val }
+	}
+
+	for _, junction := range rjum.GetFilteredJunctions() {
+		attrib := junction.Object.Get(prop).String()
+		if _, exist := count[attrib]; !exist {
+			attribs = append(attribs, attrib)
+		}
+		count[attrib]++
+	}
+	sort.Strings(attribs)
+	res := []*elements.ValText{}
+	for _, a := range attribs {
+		fa := a
+		if fa == "" {
+			fa = "Vide"
+		}
+		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
+
+*/

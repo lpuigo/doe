@@ -17,6 +17,13 @@
 <body>
 <div id="ripsites_app" style="height: 100%;">
     <el-container style="height: 100%;border: 1px solid #eee">
+
+        <state-update-modal
+                ref="StateUpdateModal"
+                :user="User"
+                :client="Ripsite.Client"
+        ></state-update-modal>
+
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
                 <el-row :gutter="20" type="flex" align="middle">
@@ -83,8 +90,16 @@
         </el-header>
         <el-main style="height: 100%; padding: 5px 0px 0px 0px">
             <rip-info-update v-if="ActivityMode == 'Info'" v-model="Ripsite" :user="User"></rip-info-update>
-            <rip-pulling-update v-if="ActivityMode == 'Pulling'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-pulling-update>
-            <rip-junction-update v-if="ActivityMode == 'Junction'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-junction-update>
+            <rip-pulling-update
+                    v-if="ActivityMode == 'Pulling'"
+                    v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"
+                    @update-state="UpdateState"
+            ></rip-pulling-update>
+            <rip-junction-update
+                    v-if="ActivityMode == 'Junction'"
+                    v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"
+                    @update-state="UpdateState"
+            ></rip-junction-update>
             <rip-measurement-update v-if="ActivityMode == 'Measurement'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-measurement-update>
         </el-main>
     </el-container>

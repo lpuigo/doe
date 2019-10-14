@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripmeasurementupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/stateupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
@@ -28,6 +29,7 @@ func main() {
 	hvue.NewVM(
 		ripsiteinfo.RegisterComponent(),
 		ripinfoupdate.RegisterComponent(),
+		stateupdatemodal.RegisterComponent(),
 		rippullingupdate.RegisterComponent(),
 		ripjunctionupdate.RegisterComponent(),
 		ripmeasurementupdate.RegisterComponent(),
@@ -173,20 +175,21 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 
 //
 func (mpm *MainPageModel) SetActivityMode() {
-	mpm.ActivityMode = "Info"
-	return
-	if len(mpm.Ripsite.Pullings) > 0 {
-		mpm.ActivityMode = "Pulling"
-		return
-	}
-	if len(mpm.Ripsite.Junctions) > 0 {
+	if mpm.ActivityMode == "Measurement" && len(mpm.Ripsite.Measurements) == 0 {
 		mpm.ActivityMode = "Junction"
-		return
 	}
-	if len(mpm.Ripsite.Pullings) > 0 {
-		mpm.ActivityMode = "Measurement"
-		return
+	if mpm.ActivityMode == "Junction" && len(mpm.Ripsite.Junctions) == 0 {
+		mpm.ActivityMode = "Pulling"
 	}
+	if mpm.ActivityMode == "Pulling" && len(mpm.Ripsite.Pullings) == 0 {
+		mpm.ActivityMode = "Info"
+	}
+}
+
+//
+func (mpm *MainPageModel) UpdateState(state *fmrip.State) {
+	sum := stateupdatemodal.StateUpdateModalModelFromJS(mpm.VM.Refs("StateUpdateModal"))
+	sum.Show(state)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
