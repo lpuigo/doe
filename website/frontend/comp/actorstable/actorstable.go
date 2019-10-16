@@ -174,8 +174,11 @@ func (atm *ActorsTableModel) TableRowClassName(rowInfo *js.Object) string {
 }
 
 func (atm *ActorsTableModel) GetHoliday(act *actor.Actor) string {
+	if act.State == actorconst.StateGone {
+		return "parti le " + date.DateString(act.Period.End)
+	}
 	if act.State == actorconst.StateCandidate {
-		return "débute " + date.DateString(act.Period.Begin)
+		return "débute le " + date.DateString(act.Period.Begin)
 	}
 	vacPeriod := act.GetNextVacation()
 	if vacPeriod == nil {
