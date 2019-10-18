@@ -60,6 +60,11 @@ func (m *Map) CreatePane(name string) *Pane {
 	return &Pane{Object: m.Object.Call("createPane", name)}
 }
 
+// RemoveLayer Remove the given layer.
+func (m *Map) RemoveLayer(layer *Layer) {
+	m.Call("removeLayer", layer)
+}
+
 // Pane is a leaflet pane.
 type Pane struct {
 	*js.Object

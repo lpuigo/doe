@@ -25,8 +25,12 @@
                     <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span></h2>
                 </el-row>
                 <el-button-group>
-                    <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
-                    <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)" :disabled="!IsDirty" size="mini"></el-button>
+                    <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)" :disabled="!IsDirty" size="mini"></el-button>
+                    </el-tooltip>
                 </el-button-group>
 
 
@@ -35,8 +39,12 @@
                 <el-button class="icon" icon="fas fa-th-list icon--big" @click="ShowPoleTable" size="mini"></el-button>
                 -->
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">
-                    <el-radio-button label="Map"><i class="fas fa-map"></i></el-radio-button>
-                    <el-radio-button label="Table"><i class="fas fa-th-list"></i></el-radio-button>
+                    <el-tooltip content="Carte" placement="bottom" effect="light" open-delay="500">
+                        <el-radio-button label="Map"><i class="fas fa-map"></i></el-radio-button>
+                    </el-tooltip>
+                    <el-tooltip content="Tableau" placement="bottom" effect="light" open-delay="500">
+                        <el-radio-button label="Table"><i class="fas fa-th-list"></i></el-radio-button>
+                    </el-tooltip>
                 </el-radio-group>
 
                 <span></span>
@@ -53,15 +61,22 @@
                         <el-button size="mini" type="text" @click="VisibleSearchLoc = false">Annuler</el-button>
                         <el-button type="primary" size="mini" @click="SearchLocation">Chercher</el-button>
                     </div>
-                    <el-button slot="reference" class="icon" icon="fas fa-search-location icon--big" size="mini"></el-button>
+                    <el-tooltip slot="reference" content="Recherche adresse" placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-search-location icon--big" size="mini"></el-button>
+                    </el-tooltip>
                 </el-popover>
-                <el-button class="icon" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini" tooltip="Création d'un nouveau poteau"></el-button>
+
+                <el-tooltip content="Création d'un nouveau poteau" placement="bottom" effect="light" open-delay="500">
+                    <el-button class="icon" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini"></el-button>
+                </el-tooltip>
 
                 <span></span>
                 <span></span>
 
                 <el-button-group>
-                    <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"></el-button>
+                    <el-tooltip content="Recentrer la carte" placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"></el-button>
+                    </el-tooltip>
                 </el-button-group>
 
                 <div style="width: 20vw">
@@ -98,10 +113,11 @@
                             :editedpolemarker.sync="SelectedPoleMarker"
                             :user="User"
                             :polesite="Polesite"
-                            @deletepole="DeletePole"
+                            @delete-pole="DeletePole"
+                            @duplicate-pole="DuplicatePole"
                             @center-on-pole="CenterOnPole"
                     ></pole-edit>
-                    <el-button @click="UnSelectPole" size="mini">OK</el-button>
+                    <el-button @click="CloseEditPole" size="mini">OK</el-button>
                 </div>
             </el-aside>
 
@@ -109,7 +125,6 @@
                 <div style="height:100%;" :style="ShowMap">
                     <pole-map
                               ref="MapEwin"
-                              :poles="Polesite.Poles"
                               @marker-click="MarkerClick"
                     ></pole-map>
                 </div>

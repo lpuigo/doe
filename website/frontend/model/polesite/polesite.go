@@ -51,6 +51,12 @@ func (ps *Polesite) DeletePole(pole *Pole) bool {
 	return false
 }
 
+// DeletePole deletes the given pole and returns true if it was found and deleted, false otherwise (no-op)
+func (ps *Polesite) DuplicatePole(pole *Pole) bool {
+	print("DuplicatePole", pole.Object)
+	return true
+}
+
 func NewPolesite() *Polesite {
 	return &Polesite{Object: tools.O()}
 }

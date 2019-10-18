@@ -69,6 +69,31 @@ func PoleFromJS(o *js.Object) *Pole {
 	return &Pole{Object: o}
 }
 
+func (p *Pole) Duplicate(suffix string, offset float64) *Pole {
+	np := NewPole()
+	np.Ref = p.Ref + suffix
+	np.City = p.City
+	np.Address = p.Address
+	np.Sticker = p.Sticker
+	np.Lat = p.Lat + offset
+	np.Long = p.Long + offset
+	np.State = p.State
+	//np.Date = ""
+	np.Actors = []string{}
+	np.DtRef = p.DtRef
+	np.DictRef = p.DictRef
+	np.DictDate = p.DictDate
+	np.DictInfo = p.DictInfo
+	np.Height = p.Height
+	np.Material = p.Material
+	//np.AspiDate = ""
+	//np.Kizeo = ""
+	np.Comment = p.Comment
+	np.Product = p.Product[:]
+	//np.AttachmentDate = ""
+	return np
+}
+
 func (p *Pole) SwitchState() {
 	switch p.State {
 	case poleconst.StateNotSubmitted:

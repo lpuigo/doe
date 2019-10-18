@@ -83,11 +83,11 @@ type MainPageModel struct {
 	VM   *hvue.VM `js:"VM"`
 	User *fm.User `js:"User"`
 
-	ActiveMode         string              `js:"ActiveMode"`
-	Filter             string              `js:"Filter"`
-	FilterType         string              `js:"FilterType"`
-	Polesite           *polesite.Polesite  `js:"Polesite"`
-	PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
+	ActiveMode string             `js:"ActiveMode"`
+	Filter     string             `js:"Filter"`
+	FilterType string             `js:"FilterType"`
+	Polesite   *polesite.Polesite `js:"Polesite"`
+	//PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
 	SearchAddress      string              `js:"SearchAddress"`
@@ -105,7 +105,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.Filter = ""
 	mpm.FilterType = poleconst.FilterValueAll
 	mpm.Polesite = polesite.NewPolesite()
-	mpm.PolesGroup = nil
+	//mpm.PolesGroup = nil
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
 	mpm.SearchAddress = ""
@@ -124,40 +124,19 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Action Methods
+// Tools Methods
+
+func (mpm *MainPageModel) GetPoleMap() *polemap.PoleMap {
+	return polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
+}
 
 func (mpm *MainPageModel) PreventLeave() bool {
 	return mpm.Dirty
 }
 
-func (mpm *MainPageModel) LoadPolesite(update bool) {
-	opsid := tools.GetURLSearchParam("psid")
-	if opsid == nil {
-		print("psid undefined")
-		return
-	}
-	if opsid.String() == "" {
-		print("psid empty")
-		return
-	}
-
-	callback := mpm.UpdateMap
-	if update {
-		mpm.UnSelectPole()
-		callback = mpm.RefreshMap
-	}
-	go mpm.callGetPolesite(opsid.Int(), callback)
-}
-
-func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
-	mpm = &MainPageModel{Object: vm.Object}
-	go mpm.callUpdatePolesite(mpm.Polesite)
-}
-
 // initMap init Poles Array in PoleMap component
 func (mpm *MainPageModel) initMap() {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	mpm.PolesGroup = pm.AddPoles(mpm.Polesite.Poles)
+	mpm.GetPoleMap().AddPoles(mpm.Polesite.Poles)
 }
 
 // UpdateMap updates current Poles Array in PoleMap component
@@ -172,37 +151,77 @@ func (mpm *MainPageModel) UpdateMap() {
 
 // RefreshMap refreshes current Poles Array in PoleMap component
 func (mpm *MainPageModel) RefreshMap() {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	mpm.PolesGroup = pm.RefreshPoles(mpm.Polesite.Poles, mpm.PolesGroup)
+	//mpm.PolesGroup = mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles, mpm.PolesGroup)
+	mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles)
 }
 
 // CenterMapOnPoles centers PoleMap component to show all poles
 func (mpm *MainPageModel) CenterMapOnPoles() {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	pm.CenterOnPoles()
+	mpm.GetPoleMap().CenterOnPoles()
 }
 
 // GetMapCenter returns PoleMap center location
 func (mpm *MainPageModel) GetMapCenter() *leaflet.LatLng {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	return pm.Map.GetCenter()
+	return mpm.GetPoleMap().GetCenter()
 }
 
 // CenterMapOnLatLong centers PoleMap component on lat long position
 func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
-	pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-	pm.CenterOn(lat, long, 20)
+	mpm.GetPoleMap().CenterOn(lat, long, 20)
+}
+
+func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
+	mpm.SelectedPoleMarker = pm
+	pm.StartEditMode()
+	mpm.IsPoleSelected = true
+
+	pm.CenterOnMap(20)
+}
+
+func (mpm *MainPageModel) UnSelectPole(refresh bool) {
+	if mpm.SelectedPoleMarker != nil && mpm.SelectedPoleMarker.Object != nil {
+		mpm.SelectedPoleMarker.EndEditMode(refresh)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action Methods
+
+func (mpm *MainPageModel) LoadPolesite(update bool) {
+	opsid := tools.GetURLSearchParam("psid")
+	if opsid == nil {
+		print("psid undefined")
+		return
+	}
+	if opsid.String() == "" {
+		print("psid empty")
+		return
+	}
+
+	callback := mpm.UpdateMap
+	if update {
+		mpm.UnSelectPole(false)
+		callback = mpm.RefreshMap
+	}
+	go mpm.callGetPolesite(opsid.Int(), callback)
+}
+
+func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
+	mpm = &MainPageModel{Object: vm.Object}
+	go mpm.callUpdatePolesite(mpm.Polesite)
 }
 
 // MarkerClick handles marker-click PoleMap events
 func (mpm *MainPageModel) MarkerClick(poleMarkerObj, event *js.Object) {
 	pm := polemap.PoleMarkerFromJS(poleMarkerObj)
+	mpm.UnSelectPole(true)
 	mpm.SelectPole(pm)
 }
 
 // TablePoleSelected handles selected pole via PoleTable Component
 func (mpm *MainPageModel) TablePoleSelected(p *polesite.Pole) {
 	pm := mpm.GetPoleMarker(p)
+	mpm.UnSelectPole(true)
 	mpm.SelectPole(pm)
 }
 
@@ -214,44 +233,27 @@ func (mpm *MainPageModel) CenterOnPole(p *polesite.Pole) {
 		//mpm.initMap()
 	}
 	pm := mpm.GetPoleMarker(p)
+	mpm.UnSelectPole(true)
 	mpm.SelectPole(pm)
 }
 
 // SwitchActiveMode handles ActiveMode change
 func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
-	// TODO Map Display None
-	//mpm = &MainPageModel{Object: vm.Object}
-	//switch mpm.ActiveMode {
-	//case "Map":
-	//	mpm.UpdateMap()
-	//default:
-	//}
+	// No Op currently
 }
 
-func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
-	if mpm.IsPoleSelected {
-		mpm.SelectedPoleMarker.EndEditMode()
-	}
-	mpm.SelectedPoleMarker = pm
-	pm.StartEditMode()
-	mpm.IsPoleSelected = true
-
-	pm.CenterOnMap(20)
-}
-
-func (mpm *MainPageModel) UnSelectPole() {
-	if mpm.IsPoleSelected {
-		mpm.SelectedPoleMarker.EndEditMode()
-		mpm.IsPoleSelected = false
-		//mpm.SelectedPoleMarker = nil
-	}
-}
+////
+//func (mpm *MainPageModel) SwitchPoleState(pm *polemap.PoleMarker) {
+//	pm.Pole.SwitchState()
+//	pm.UpdateFromState()
+//	pm.Refresh()
+//}
 
 //
-func (mpm *MainPageModel) SwitchPoleState(pm *polemap.PoleMarker) {
-	pm.Pole.SwitchState()
-	pm.UpdateFromState()
-	pm.Refresh()
+func (mpm *MainPageModel) CloseEditPole() {
+	mpm.IsPoleSelected = false
+	mpm.SelectedPoleMarker.EndEditMode(true)
+	mpm.SelectedPoleMarker = nil
 }
 
 func (mpm *MainPageModel) UpdateSearchLocation(vm *hvue.VM) {
@@ -283,14 +285,20 @@ func (mpm *MainPageModel) GetFilterType() []*elements.ValueLabel {
 
 // GetPoleMarker returns the PoleMarker associated with given Pole (or nil if not found)
 func (mpm *MainPageModel) GetPoleMarker(pole *polesite.Pole) *polemap.PoleMarker {
-	layers := mpm.PolesGroup.GetLayers()
-	for i := 0; i < layers.Length(); i++ {
-		pm := polemap.PoleMarkerFromJS(layers.Index(i))
-		if pm.Pole.Id == pole.Id {
-			return pm
-		}
+	return mpm.GetPoleMap().GetPoleMarkerById(pole.Id)
+}
+
+// AddPole add given Pole to Polesite, and select new pertaining PoleMarker
+func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
+	mpm.Polesite.AddPole(newPole)
+	mpm.RefreshMap()
+
+	newPoleMarker := mpm.GetPoleMarker(newPole)
+	if newPoleMarker == nil {
+		message.ErrorStr(mpm.VM, "Impossible de selectionner le nouveau poteau", false)
+		return
 	}
-	return nil
+	mpm.SelectPole(newPoleMarker)
 }
 
 //
@@ -300,21 +308,22 @@ func (mpm *MainPageModel) CreatePole(vm *hvue.VM) {
 	newPole := polesite.NewPole()
 	newPole.Lat, newPole.Long = mpm.GetMapCenter().ToFloats()
 	newPole.State = poleconst.StateNotSubmitted
+	mpm.AddPole(newPole)
+}
 
-	mpm.Polesite.AddPole(newPole)
-	mpm.RefreshMap()
+//
+func (mpm *MainPageModel) DuplicatePole(vm *hvue.VM, pm *js.Object) {
+	mpm = &MainPageModel{Object: vm.Object}
 
-	newPoleMarker := mpm.GetPoleMarker(newPole)
-	if newPoleMarker == nil {
-		message.ErrorStr(vm, "Impossible de selectionner le nouveau poteau", false)
-		return
-	}
-	mpm.SelectPole(newPoleMarker)
+	pmToDuplicate := polemap.PoleMarkerFromJS(pm)
+	newPole := pmToDuplicate.Pole.Duplicate(" (copy)", 0.0001)
+	mpm.AddPole(newPole)
 }
 
 //
 func (mpm *MainPageModel) DeletePole(vm *hvue.VM, pm *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
+	mpm.CloseEditPole()
 
 	pmToDelete := polemap.PoleMarkerFromJS(pm)
 
@@ -322,7 +331,7 @@ func (mpm *MainPageModel) DeletePole(vm *hvue.VM, pm *js.Object) {
 		print("DeletePole failed", pmToDelete.Object)
 		return
 	}
-	mpm.UnSelectPole()
+	//mpm.UnSelectPole(false)
 	mpm.RefreshMap()
 }
 
@@ -337,18 +346,22 @@ func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 //
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
+	poleMap := mpm.GetPoleMap()
 	// TODO Map Display None
 	//if mpm.ActiveMode != "Map" {
 	//	return
 	//}
 
-	defer mpm.PolesGroup.Refresh()
+	defer poleMap.PoleMarkersGroup.Refresh()
 
 	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
-		mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
-			pm := polemap.PoleMarkerFromJS(l.Object)
-			pm.SetOpacity(poleconst.OpacityNormal)
-		})
+		for _, poleMarker := range poleMap.PoleMarkers {
+			poleMarker.SetOpacity(poleconst.OpacityNormal)
+		}
+		//mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
+		//	pm := polemap.PoleMarkerFromJS(l.Object)
+		//	pm.SetOpacity(poleconst.OpacityNormal)
+		//})
 		return
 	}
 
@@ -386,19 +399,27 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 		return strings.Contains(strings.ToUpper(sis), expected)
 	}
 	found := false
-	mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
-		pm := polemap.PoleMarkerFromJS(l.Object)
-		if filter(pm) {
-			minmax(pm)
-			pm.SetOpacity(poleconst.OpacityFiltered)
+	for _, poleMarker := range poleMap.PoleMarkers {
+		if filter(poleMarker) {
+			minmax(poleMarker)
+			poleMarker.SetOpacity(poleconst.OpacityFiltered)
 			found = true
 		} else {
-			pm.SetOpacity(poleconst.OpacityBlur)
+			poleMarker.SetOpacity(poleconst.OpacityBlur)
 		}
-	})
+	}
+	//mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
+	//	pm := polemap.PoleMarkerFromJS(l.Object)
+	//	if filter(pm) {
+	//		minmax(pm)
+	//		pm.SetOpacity(poleconst.OpacityFiltered)
+	//		found = true
+	//	} else {
+	//		pm.SetOpacity(poleconst.OpacityBlur)
+	//	}
+	//})
 	if found {
-		pm := polemap.PoleMapFromJS(mpm.VM.Refs("MapEwin"))
-		pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minLat, minLong), leaflet.NewLatLng(maxLat, maxLong))
+		poleMap.FitBounds(leaflet.NewLatLng(minLat, minLong), leaflet.NewLatLng(maxLat, maxLong))
 	}
 }
 

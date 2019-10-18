@@ -11,6 +11,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/latlong"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 	"strconv"
 	"strings"
@@ -18,10 +19,11 @@ import (
 
 const template string = `<div>
 	<div class="header-menu-container">
-		<h1>
-			Poteau: {{editedpolemarker.Pole.Ref}}
+		<h1 style="color: #3a8ee6">
+			Poteau: <span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}}</span>
 		</h1>
         <span></span>
+        
         <el-popover placement="bottom" width="360" title="Suppression du poteau"
                     v-model="VisibleDeletePole">
             <p>Confirmez la suppression du poteau {{editedpolemarker.Pole.Ref}} ?</p>
@@ -31,7 +33,20 @@ const template string = `<div>
             </div>
             <el-button slot="reference" type="danger" plain class="icon" icon="far fa-trash-alt icon--big" size="mini"></el-button>
         </el-popover>
-		<el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
+        
+        <el-popover placement="bottom" width="360" title="Duplication du poteau"
+                    v-model="VisibleDuplicatePole">
+            <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} ?</p>
+            <div style="text-align: right; margin: 0; margin-top: 10px">
+                <el-button size="mini" @click="VisibleDuplicatePole = false">Annuler</el-button>
+                <el-button type="danger" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
+            </div>
+            <el-button slot="reference" type="warning" plain class="icon" icon="far fa-clone icon--big" size="mini"></el-button>
+        </el-popover>
+
+        <el-tooltip content="Zoomer sur la carte" placement="bottom" effect="light" open-delay="500">
+            <el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
+        </el-tooltip>
 	</div>
     <!-- Référence -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -47,9 +62,33 @@ const template string = `<div>
     <!-- Lat / Long -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
         <el-col :span="6" class="align-right">Lat / Long:</el-col>
-        <el-col :span="18">
+        <el-col :span="15">
             <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
         </el-col>
+		<el-col :span="3">
+			<el-popover title="Latitude / Longitude" placement="right"
+                        trigger="click" width="300" v-model="VisibleLatLong">
+				<el-row :gutter="5" type="flex" align="middle" class="spaced">
+					<el-col :span="4" class="align-right">Lat:</el-col>
+					<el-col :span="20">
+						<el-input placeholder="Latitude"
+								  v-model="EditedLat" size="mini"
+								  @change="UpdatePoleDegLat"
+						></el-input>
+					</el-col>
+				</el-row>
+				<el-row :gutter="5" type="flex" align="middle" class="spaced">
+					<el-col :span="4" class="align-right">Long:</el-col>
+					<el-col :span="20">
+						<el-input placeholder="Longitude"
+								  v-model="EditedLong" size="mini"
+								  @change="UpdatePoleDegLong"
+						></el-input>
+					</el-col>
+				</el-row>
+				<el-button slot="reference" type="info" plain style="width: 100%" class="icon" icon="far fa-edit" size="mini" :disabled="VisibleLatLong"></el-button>
+			</el-popover>
+		</el-col>
     </el-row>
     
     <!-- Ville -->
@@ -291,6 +330,7 @@ func componentOptions() []hvue.ComponentOption {
 			"editedlatlong",
 			func(vm *hvue.VM) interface{} {
 				pem := PoleEditModelFromJS(vm.Object)
+				pem.setDegLatLong()
 				return strconv.FormatFloat(pem.EditedPoleMarker.Pole.Lat, 'f', 8, 64) +
 					", " +
 					strconv.FormatFloat(pem.EditedPoleMarker.Pole.Long, 'f', 8, 64)
@@ -316,10 +356,15 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleEditModel struct {
 	*js.Object
-	EditedPoleMarker  *polemap.PoleMarker `js:"editedpolemarker"`
-	VisibleDeletePole bool                `js:"VisibleDeletePole"`
-	User              *fm.User            `js:"user"`
-	Polesite          *polesite.Polesite  `js:"polesite"`
+	EditedPoleMarker     *polemap.PoleMarker `js:"editedpolemarker"`
+	VisibleDeletePole    bool                `js:"VisibleDeletePole"`
+	VisibleLatLong       bool                `js:"VisibleLatLong"`
+	VisibleDuplicatePole bool                `js:"VisibleDuplicatePole"`
+	User                 *fm.User            `js:"user"`
+	Polesite             *polesite.Polesite  `js:"polesite"`
+
+	EditedLat  string `js:"EditedLat"`
+	EditedLong string `js:"EditedLong"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -331,8 +376,14 @@ func PoleEditModelFromJS(obj *js.Object) *PoleEditModel {
 func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem := &PoleEditModel{Object: tools.O()}
 	pem.VisibleDeletePole = false
+	pem.VisibleLatLong = false
+	pem.VisibleDuplicatePole = false
 	pem.User = fm.NewUser()
 	pem.Polesite = nil
+
+	pem.EditedLat = ""
+	pem.EditedLong = ""
+
 	pem.VM = vm
 	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
@@ -389,6 +440,44 @@ func (pem *PoleEditModel) UpdateTooltip(vm *hvue.VM) {
 	pem.EditedPoleMarker.Refresh()
 }
 
+func (pem *PoleEditModel) UpdatePoleDegLat(vm *hvue.VM, value string) {
+	pem = PoleEditModelFromJS(vm.Object)
+	val, err := latlong.DegToDec(value)
+	if err != nil {
+		pem.errMsgDegLatLong(value)
+		return
+	}
+	pem.EditedPoleMarker.Pole.Lat = val
+	pem.EditedPoleMarker.UpdateMarkerLatLng()
+	pem.EditedPoleMarker.CenterOnMap(20)
+
+}
+
+func (pem *PoleEditModel) UpdatePoleDegLong(vm *hvue.VM, value string) {
+	pem = PoleEditModelFromJS(vm.Object)
+	val, err := latlong.DegToDec(value)
+	if err != nil {
+		pem.errMsgDegLatLong(value)
+		return
+	}
+	pem.EditedPoleMarker.Pole.Long = val
+	pem.EditedPoleMarker.UpdateMarkerLatLng()
+	pem.EditedPoleMarker.CenterOnMap(20)
+
+}
+
+func (pem *PoleEditModel) errMsgDegLatLong(value string) {
+	msg := "impossible de lire la valeur: '" + value + "'\n\n"
+	msg += "format attendu: 12°34'56,789"
+	message.ErrorStr(pem.VM, msg, true)
+}
+
+// setDegLatLong sets EditedLat and EditedLong value from edited pole lat/long
+func (pem *PoleEditModel) setDegLatLong() {
+	pem.EditedLat = latlong.DecToDeg(pem.EditedPoleMarker.Pole.Lat)
+	pem.EditedLong = latlong.DecToDeg(pem.EditedPoleMarker.Pole.Long)
+}
+
 func (pem *PoleEditModel) UpdatePoleLatLong(vm *hvue.VM, value string) {
 	pem = PoleEditModelFromJS(vm.Object)
 	lls := strings.Split(value, ",")
@@ -427,6 +516,12 @@ func (pem *PoleEditModel) CenterOnEdited(vm *hvue.VM) {
 
 func (pem *PoleEditModel) DeletePole(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
-	pem.VM.Emit("deletepole", pem.EditedPoleMarker)
 	pem.VisibleDeletePole = false
+	pem.VM.Emit("delete-pole", pem.EditedPoleMarker)
+}
+
+func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.VisibleDuplicatePole = false
+	pem.VM.Emit("duplicate-pole", pem.EditedPoleMarker)
 }

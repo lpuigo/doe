@@ -35,10 +35,12 @@ func (pm *PoleMarker) StartEditMode() {
 	pm.Refresh()
 }
 
-func (pm *PoleMarker) EndEditMode() {
+func (pm *PoleMarker) EndEditMode(refresh bool) {
 	pm.SetOpacity(poleconst.OpacityNormal)
 	pm.SetDraggable(false)
-	pm.Refresh()
+	if refresh {
+		pm.Refresh()
+	}
 }
 
 const (
@@ -87,6 +89,10 @@ func (pm *PoleMarker) UpdateFromState() {
 
 func (pm *PoleMarker) UpdateTitle() {
 	pm.Marker.UpdateToolTip(pm.Pole.Ref)
+}
+
+func (pm *PoleMarker) UpdateMarkerLatLng() {
+	pm.Marker.SetLatLng(leaflet.NewLatLng(pm.Pole.Lat, pm.Pole.Long))
 }
 
 func (pm *PoleMarker) SetLatLng(latlng *leaflet.LatLng) {
