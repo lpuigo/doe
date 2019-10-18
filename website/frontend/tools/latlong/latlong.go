@@ -29,15 +29,15 @@ func DegToDec(val string) (float64, error) {
 	if len(vals) < 3 {
 		return 0, errors.New("'" + val + "' is not a proper DMS value")
 	}
-	deg, err := strconv.Atoi(vals[0])
+	deg, err := strconv.Atoi(strings.Trim(vals[0], " "))
 	if err != nil {
 		return 0, err
 	}
-	min, err := strconv.Atoi(vals[1])
+	min, err := strconv.Atoi(strings.Trim(vals[1], " "))
 	if err != nil {
 		return 0, err
 	}
-	sec, err := strconv.ParseFloat(vals[2], 64)
+	sec, err := strconv.ParseFloat(strings.Trim(vals[2], " "), 64)
 	if err != nil {
 		return 0, err
 	}
