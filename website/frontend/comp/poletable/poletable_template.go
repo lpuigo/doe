@@ -13,7 +13,7 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
         <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
         <el-table-column
                 fixed label="Ref" prop="Ref" sortable
-                width="100px" :resizable=true :show-overflow-tooltip=true
+                width="200px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
         <el-table-column
@@ -27,12 +27,11 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
                 width="160px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
-        <!--
         <el-table-column
                 label="DT" prop="DtRef" sortable
                 width="130px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
-        -->
+
         <el-table-column
                 label="DICT" prop="DictRef" sortable
                 width="120px" :resizable=true :show-overflow-tooltip=true
