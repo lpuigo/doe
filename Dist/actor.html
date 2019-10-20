@@ -23,6 +23,11 @@
             ref="ActorVacancyEditModal"
     ></actor-vacancy-edit-modal>
 
+    <!-- -->
+    <actors-stats-modal
+            ref="ActorsStatsModal"
+    ></actors-stats-modal>
+
     <el-container style="height: 100%;border: 1px solid #eee">
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
@@ -40,6 +45,12 @@
                     <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay="500">
                         <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(false)"
                                    :disabled="!IsDirty"></el-button>
+                    </el-tooltip>
+                </el-button-group>
+
+                <el-button-group size="mini">
+                    <el-tooltip content="Taille des Equipes" placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-chart-area icon--medium" @click="ShowActorsStats()"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
@@ -148,6 +159,7 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
+<script src="/Assets/highcharts/highcharts.js"></script>
 <script type="text/javascript" src="actors.js"></script>
 
 </html>

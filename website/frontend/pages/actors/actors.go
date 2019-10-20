@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorscalendar"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorsstatsmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorvacancyeditmodal"
@@ -27,6 +28,7 @@ func main() {
 		hvue.El("#actor_app"),
 		actorupdatemodal.RegisterComponent(),
 		actorvacancyeditmodal.RegisterComponent(),
+		actorsstatsmodal.RegisterComponent(),
 		actorstable.RegisterComponent(),
 		actorscalendar.RegisterComponent(),
 		hvue.DataS(mpm),
@@ -184,6 +186,12 @@ func (mpm *MainPageModel) ShowEditActor(vm *hvue.VM, act *actor.Actor) {
 func (mpm *MainPageModel) ShowEditActorVacancy(vm *hvue.VM, act *actor.Actor) {
 	aem := actorvacancyeditmodal.ActorVacancyEditModalModelFromJS(mpm.VM.Refs("ActorVacancyEditModal"))
 	aem.Show(act, mpm.User)
+}
+
+//
+func (mpm *MainPageModel) ShowActorsStats(vm *hvue.VM) {
+	aem := actorsstatsmodal.ActorsStatsModalModelFromJS(mpm.VM.Refs("ActorsStatsModal"))
+	aem.Show(mpm.Actors, mpm.User)
 }
 
 //
