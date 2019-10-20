@@ -14,7 +14,7 @@ const (
 
 const (
 	RolePuller     string = "Tireur"
-	RoleJuncter    string = "Racordeur"
+	RoleJuncter    string = "Raccordeur"
 	RoleDriver     string = "Chauffeur"
 	RoleTeamleader string = "Chef d'Equipe"
 
