@@ -35,7 +35,7 @@ func componentOption() []hvue.ComponentOption {
 		hvue.MethodsOf(&ActorsStatsChart{}),
 		hvue.Mounted(func(vm *hvue.VM) {
 			tpc := &ActorsStatsChart{Object: vm.Object}
-			tpc.setChart()
+			tpc.SetChart()
 		}),
 	}
 }
@@ -56,11 +56,15 @@ func NewActorsStatsChart(vm *hvue.VM) *ActorsStatsChart {
 	return asc
 }
 
-func (asc *ActorsStatsChart) SetStyle() string {
-	return "width:100%; height:250px;"
+func ActorsStatsChartFromJS(o *js.Object) *ActorsStatsChart {
+	return &ActorsStatsChart{Object: o}
 }
 
-func (asc *ActorsStatsChart) setChart() {
+func (asc *ActorsStatsChart) SetStyle() string {
+	return "width:100%; height:450px;"
+}
+
+func (asc *ActorsStatsChart) SetChart() {
 	ts := asc.Stats
 	//startDate := date.JSDate(ts.StartDate)
 
@@ -118,7 +122,7 @@ func (asc *ActorsStatsChart) setChart() {
 
 func (asc *ActorsStatsChart) getAxis() []js.M {
 	res := []js.M{}
-	if len(asc.Stats.Values["actors"]) > 0 {
+	if len(asc.Stats.Values["employees"]) > 0 {
 		res = append(res, js.M{
 			"labels": js.M{
 				"format": "{value}",
@@ -134,10 +138,14 @@ func (asc *ActorsStatsChart) getAxis() []js.M {
 
 func (asc *ActorsStatsChart) getSeries() []js.M {
 	res := []js.M{}
-	res = append(res, newSerie("line", "Acteurs", "actors", "", "",
+	res = append(res, newSerie("line", "Acteurs", "employees", "", "",
 		"#888888", 0,
 		0.05,
-		asc.Stats.Values["actors"])...)
+		asc.Stats.Values["employees"])...)
+	res = append(res, newSerie("line", "Présents", "acting", "", "",
+		"#67C23A", 0,
+		0.05,
+		asc.Stats.Values["acting"])...)
 	return res
 }
 
