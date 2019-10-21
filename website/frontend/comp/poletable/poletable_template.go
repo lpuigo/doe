@@ -13,7 +13,12 @@ const template string = `<el-main  style="height: 100%; padding: 0px">
         <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
         <el-table-column
                 fixed label="Ref" prop="Ref" sortable
-                width="200px" :resizable=true :show-overflow-tooltip=true
+                width="100px" :resizable=true :show-overflow-tooltip=true
+        ></el-table-column>
+
+        <el-table-column
+                fixed label="Appui" prop="Sticker" sortable
+                width="100px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
         <el-table-column

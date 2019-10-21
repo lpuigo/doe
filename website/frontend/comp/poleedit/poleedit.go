@@ -20,13 +20,13 @@ import (
 const template string = `<div>
 	<div class="header-menu-container">
 		<h1 style="color: #3a8ee6">
-			Poteau: <span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}}</span>
+			Poteau: <span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span>
 		</h1>
         <span></span>
         
         <el-popover placement="bottom" width="360" title="Suppression du poteau"
                     v-model="VisibleDeletePole">
-            <p>Confirmez la suppression du poteau {{editedpolemarker.Pole.Ref}} ?</p>
+            <p>Confirmez la suppression du poteau {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
             <div style="text-align: right; margin: 0; margin-top: 10px">
                 <el-button size="mini" @click="VisibleDeletePole = false">Annuler</el-button>
                 <el-button type="danger" plain size="mini" @click="DeletePole">Confirmer</el-button>
@@ -36,10 +36,10 @@ const template string = `<div>
         
         <el-popover placement="bottom" width="360" title="Duplication du poteau"
                     v-model="VisibleDuplicatePole">
-            <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} ?</p>
+            <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
             <div style="text-align: right; margin: 0; margin-top: 10px">
                 <el-button size="mini" @click="VisibleDuplicatePole = false">Annuler</el-button>
-                <el-button type="danger" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
+                <el-button type="warning" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
             </div>
             <el-button slot="reference" type="warning" plain class="icon" icon="far fa-clone icon--big" size="mini"></el-button>
         </el-popover>
@@ -59,8 +59,18 @@ const template string = `<div>
         </el-col>
     </el-row>
     
-    <!-- Lat / Long -->
+    <!-- Etiquette -->
     <el-row :gutter="5" type="flex" align="middle" class="spaced">
+        <el-col :span="6" class="align-right">Appui (Etiquette):</el-col>
+        <el-col :span="18">
+            <el-input placeholder="Etiquette"
+                      v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
+            ></el-input>
+        </el-col>
+    </el-row>
+
+    <!-- Lat / Long -->
+    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6" class="align-right">Lat / Long:</el-col>
         <el-col :span="15">
             <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
@@ -107,16 +117,6 @@ const template string = `<div>
         <el-col :span="18">
             <el-input placeholder="Adresse"
                       v-model="editedpolemarker.Pole.Address" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-
-    <!-- Etiquette -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">Etiquette:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Etiquette"
-                      v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
             ></el-input>
         </el-col>
     </el-row>
