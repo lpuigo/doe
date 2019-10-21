@@ -77,7 +77,7 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.MethodsOf(&ActorsStatsModalModel{}),
 		//hvue.Computed("UpdatedStats", func(vm *hvue.VM) interface{} {
 		//	asmm := ActorsStatsModalModelFromJS(vm.Object)
-		//	asmm.CalcStats()
+		//	asmm.UpdateChart()
 		//	return asmm.Stats
 		//}),
 	}
@@ -107,7 +107,7 @@ func NewActorsStatsModalModel(vm *hvue.VM) *ActorsStatsModalModel {
 	asmm.User = fm.NewUser()
 	asmm.Actors = []*actor.Actor{}
 	asmm.Stats = rs.NewTeamStats()
-	asmm.DateRange = 16
+	asmm.DateRange = 12
 	asmm.ResetCurrentDate()
 
 	return asmm
@@ -123,14 +123,13 @@ func ActorsStatsModalModelFromJS(o *js.Object) *ActorsStatsModalModel {
 func (asmm *ActorsStatsModalModel) Show(actors []*actor.Actor, user *fm.User) {
 	asmm.User = user
 	asmm.Actors = actors
-	asmm.ResetCurrentDate()
-	asmm.CalcStats()
+	asmm.UpdateChart()
 	asmm.Visible = true
 }
 
 func (asmm *ActorsStatsModalModel) Hide() {
 	asmm.Visible = false
-	asmm.Actors = []*actor.Actor{}
+	asmm.Stats = rs.NewTeamStats()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +138,7 @@ func (asmm *ActorsStatsModalModel) Hide() {
 func (asmm *ActorsStatsModalModel) UpdateChart() {
 	asmm.CalcStats()
 	if asmm.Visible {
-		actorsstatschart.ActorsStatsChartFromJS(asmm.VM.Refs("Chart")).SetChart()
+		actorsstatschart.ActorsStatsChartFromJS(asmm.VM.Refs("Chart")).SetChart(asmm.Stats)
 	}
 }
 
@@ -166,7 +165,7 @@ func (asmm *ActorsStatsModalModel) CurrentDateRange() string {
 // Business Methods
 
 func (asmm *ActorsStatsModalModel) CurrentRangeEnd() string {
-	return date.After(asmm.CurrentDate, asmm.DateRange*7)
+	return date.After(asmm.CurrentDate, asmm.DateRange*7-7)
 }
 
 //func (asmm *ActorsStatsModalModel) DateOf(i int) string {
@@ -184,15 +183,15 @@ func (asmm *ActorsStatsModalModel) CalcDates() []string {
 	return res
 }
 
-func (asmm *ActorsStatsModalModel) CalcNbActors() {
-	nbDates := len(asmm.Stats.Dates)
+func (asmm *ActorsStatsModalModel) CalcValues(stats *rs.TeamStats) {
+	nbDates := len(stats.Dates)
 	if nbDates == 0 {
 		return
 	}
-	startDate := asmm.Stats.Dates[0]
-	endDate := asmm.Stats.Dates[nbDates-1]
+	startDate := stats.Dates[0]
+	endDate := stats.Dates[nbDates-1]
 	dateIndex := map[string]int{}
-	for index, day := range asmm.Stats.Dates {
+	for index, day := range stats.Dates {
 		dateIndex[day] = index + 1
 	}
 	nbEmployees := make([]float64, nbDates)
@@ -267,11 +266,12 @@ func (asmm *ActorsStatsModalModel) CalcNbActors() {
 			for i := posBeg + 1; i < posEnd; i++ {
 				nbActing[i]--
 			}
-			print("CalcNbActors", actr.Ref, "vac:", vac.Begin, vac.End, "calc", posBeg, posEnd)
 		}
 	}
-	for i := 1; i < nbDates; i++ {
-		nbEmployees[i] += nbEmployees[i-1]
+	for i := 0; i < nbDates; i++ {
+		if i > 0 {
+			nbEmployees[i] += nbEmployees[i-1]
+		}
 		nbActing[i] += nbEmployees[i]
 	}
 	values := map[string]map[string][]float64{}
@@ -281,11 +281,12 @@ func (asmm *ActorsStatsModalModel) CalcNbActors() {
 	values["acting"] = map[string][]float64{
 		"présents": nbActing,
 	}
-	asmm.Stats.Values = values
+	stats.Values = values
 }
 
 func (asmm *ActorsStatsModalModel) CalcStats() {
+	asmm.Stats = rs.NewTeamStats()
 	asmm.Stats.Dates = asmm.CalcDates()
 	asmm.Stats.Team = "Ewin Services"
-	asmm.CalcNbActors()
+	asmm.CalcValues(asmm.Stats)
 }

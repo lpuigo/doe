@@ -34,8 +34,8 @@ func componentOption() []hvue.ComponentOption {
 		}),
 		hvue.MethodsOf(&ActorsStatsChart{}),
 		hvue.Mounted(func(vm *hvue.VM) {
-			tpc := &ActorsStatsChart{Object: vm.Object}
-			tpc.SetChart()
+			asc := &ActorsStatsChart{Object: vm.Object}
+			asc.SetChart(asc.Stats)
 		}),
 	}
 }
@@ -64,10 +64,8 @@ func (asc *ActorsStatsChart) SetStyle() string {
 	return "width:100%; height:450px;"
 }
 
-func (asc *ActorsStatsChart) SetChart() {
-	ts := asc.Stats
-	//startDate := date.JSDate(ts.StartDate)
-
+func (asc *ActorsStatsChart) SetChart(ts *rs.TeamStats) {
+	asc.Stats = ts
 	chartdesc := js.M{
 		"chart": js.M{
 			"backgroundColor": "#F7F7F7",
