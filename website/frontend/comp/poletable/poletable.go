@@ -166,9 +166,9 @@ func (ptm *PoleTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValT
 
 	var translate func(string) string
 	switch prop {
-	case "Status":
+	case "State":
 		translate = func(val string) string {
-			return ps.PolesiteStatusLabel(val)
+			return ps.PoleStateLabel(val)
 		}
 	default:
 		translate = func(val string) string { return val }
