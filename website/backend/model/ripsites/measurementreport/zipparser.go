@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	dbThresholdWarn1 float64 = 0.200001
-	dbThresholdWarn2 float64 = 0.3
-	dbThresholdKo    float64 = 0.4
+	dbThresholdWarn1       float64 = 0.200001
+	dbThresholdWarn2       float64 = 0.3
+	dbThresholdKo          float64 = 0.4
+	dbConnectorThresholdKo float64 = 0.8
 )
 
 func ParseZipMeasurementFiles(r io.ReaderAt, size int64) (map[string]*MeasurementReport, error) {
@@ -140,7 +141,7 @@ func getMeasurement(mr *MeasurementReport, line string) txtParserState {
 
 	connector, err := strconv.ParseFloat(col[9], 64)
 	if err == nil {
-		if connector > 0.4 {
+		if connector > dbConnectorThresholdKo {
 			mr.ConnectorKO++
 			msg = append(msg, fmt.Sprintf("Max Connector %sdb", col[9]))
 		}
