@@ -1,6 +1,7 @@
 package poletable
 
 const template string = `<el-container  style="height: 100%; padding: 0px">
+    <!--
     <el-header style="height: auto; margin-top: 5px">
         <el-row type="flex" align="middle" :gutter="5">
 			<el-col :span="2" style="text-align: right"><span>Mode d'affichage:</span></el-col>
@@ -30,6 +31,7 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
         </el-row>
     </el-header>
     <div style="height: 100%;overflow-x: hidden;overflow-y: auto;padding: 0px 0px; margin-top: 8px">
+    -->
 		<el-table
 				:data="filteredPoles"
 				:row-class-name="TableRowClassName"
@@ -162,6 +164,8 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
 					min-width="120px" :resizable=true
 			></el-table-column>
 		</el-table>
-    </div>		
+	<!--
+    </div>
+    -->		
 </el-container>
 `
