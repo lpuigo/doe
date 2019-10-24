@@ -129,6 +129,7 @@
                     ></pole-map>
                 </div>
                 <pole-table v-if="ActiveMode == 'Table'"
+                        :columns="ColumnSelector"
                         :user="User"
                         :polesite="Polesite"
                         :filter="Filter"

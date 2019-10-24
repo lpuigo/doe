@@ -95,6 +95,8 @@ type MainPageModel struct {
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
 	Reference          string              `js:"Reference"`
 	Dirty              bool                `js:"Dirty"`
+
+	ColumnSelector *poletable.ColumnSelector `js:"ColumnSelector"`
 }
 
 func NewMainPageModel() *MainPageModel {
@@ -113,6 +115,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.VisibleSearchLoc = false
 	mpm.Reference = ""
 	mpm.Dirty = false
+	mpm.ColumnSelector = poletable.DefaultColumnSelector()
 	return mpm
 }
 

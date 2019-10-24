@@ -27,7 +27,7 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripprogressbar.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("user", "polesite", "filter", "filtertype"),
+		hvue.Props("user", "polesite", "filter", "filtertype", "columns"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleTableModel(vm)
 		}),
@@ -48,10 +48,11 @@ func componentOptions() []hvue.ComponentOption {
 type PoleTableModel struct {
 	*js.Object
 
-	Polesite   *ps.Polesite `js:"polesite"`
-	User       *fm.User     `js:"user"`
-	Filter     string       `js:"filter"`
-	FilterType string       `js:"filtertype"`
+	Polesite       *ps.Polesite    `js:"polesite"`
+	User           *fm.User        `js:"user"`
+	Filter         string          `js:"filter"`
+	FilterType     string          `js:"filtertype"`
+	ColumnSelector *ColumnSelector `js:"columns"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -62,6 +63,7 @@ func NewPoleTableModel(vm *hvue.VM) *PoleTableModel {
 	rtm.User = fm.NewUser()
 	rtm.Filter = ""
 	rtm.FilterType = ""
+	rtm.ColumnSelector = DefaultColumnSelector()
 	rtm.VM = vm
 	return rtm
 }
@@ -75,6 +77,11 @@ func (ptm *PoleTableModel) SetSelectedPole(vm *hvue.VM, p *ps.Pole) {
 
 func (ptm *PoleTableModel) AddPole(vm *hvue.VM) {
 	message.InfoStr(vm, "AddPole non encore implémenté", false)
+}
+
+func (ptm *PoleTableModel) ApplyColumnMode(vm *hvue.VM) {
+	ptm = &PoleTableModel{Object: vm.Object}
+	ptm.ColumnSelector.Apply(ptm.ColumnSelector.Mode)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +106,10 @@ func (ptm *PoleTableModel) FormatState(r, c *js.Object, d string) string {
 
 func (ptm *PoleTableModel) FormatProduct(p *ps.Pole) string {
 	return strings.Join(p.Product, "\n")
+}
+
+func (ptm *PoleTableModel) FormatType(p *ps.Pole) string {
+	return p.Material + " " + strconv.Itoa(p.Height) + "m"
 }
 
 func (ptm *PoleTableModel) FormatActors(vm *hvue.VM, p *ps.Pole) string {

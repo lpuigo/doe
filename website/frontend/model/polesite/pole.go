@@ -126,6 +126,7 @@ func (p *Pole) SearchString(filter string) string {
 	res += searchItem(",", poleconst.FilterValueCity, p.City)
 	res += searchItem(",", poleconst.FilterValueAddr, p.Address)
 	res += searchItem(",", poleconst.FilterValueComment, p.Comment)
+	res += searchItem(",", poleconst.FilterValueMaterial, p.Material)
 	res += searchItem(",", poleconst.FilterValueHeigth, strconv.Itoa(p.Height))
 	if len(p.Product) > 0 {
 		for _, prd := range p.Product {
@@ -149,6 +150,7 @@ func GetFilterTypeValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.FilterValueCity, poleconst.FilterLabelCity),
 		elements.NewValueLabel(poleconst.FilterValueAddr, poleconst.FilterLabelAddr),
 		elements.NewValueLabel(poleconst.FilterValueComment, poleconst.FilterLabelComment),
+		elements.NewValueLabel(poleconst.FilterValueMaterial, poleconst.FilterLabelMaterial),
 		elements.NewValueLabel(poleconst.FilterValueHeigth, poleconst.FilterLabelHeigth),
 		elements.NewValueLabel(poleconst.FilterValueProduct, poleconst.FilterLabelProduct),
 		elements.NewValueLabel(poleconst.FilterValueDt, poleconst.FilterLabelDt),
