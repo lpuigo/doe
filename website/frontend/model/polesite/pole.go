@@ -26,6 +26,8 @@ type Pole struct {
 	DictRef        string   `js:"DictRef"`
 	DictDate       string   `js:"DictDate"`
 	DictInfo       string   `js:"DictInfo"`
+	DaStartDate    string   `js:"DaStartDate"`
+	DaEndDate      string   `js:"DaEndDate"`
 	Height         int      `js:"Height"`
 	Material       string   `js:"Material"`
 	AspiDate       string   `js:"AspiDate"`
@@ -54,6 +56,8 @@ func NewPole() *Pole {
 	np.DictRef = ""
 	np.DictDate = ""
 	np.DictInfo = ""
+	np.DaStartDate = ""
+	np.DaEndDate = ""
 	np.Height = 0
 	np.Material = ""
 	np.AspiDate = ""
@@ -84,6 +88,8 @@ func (p *Pole) Duplicate(suffix string, offset float64) *Pole {
 	np.DictRef = p.DictRef
 	np.DictDate = p.DictDate
 	np.DictInfo = p.DictInfo
+	np.DaStartDate = p.DaStartDate
+	np.DaEndDate = p.DaEndDate
 	np.Height = p.Height
 	np.Material = p.Material
 	//np.AspiDate = ""

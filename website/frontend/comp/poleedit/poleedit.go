@@ -19,7 +19,7 @@ import (
 
 const template string = `<div>
 	<div class="header-menu-container">
-		<h1 style="color: #3a8ee6">
+		<h1 class="blue">
 			Poteau: <span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span>
 		</h1>
         <span></span>
@@ -69,151 +69,6 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Lat / Long -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">Lat / Long:</el-col>
-        <el-col :span="15">
-            <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
-        </el-col>
-		<el-col :span="3">
-			<el-popover title="Latitude / Longitude" placement="right"
-                        trigger="click" width="300" v-model="VisibleLatLong">
-				<el-row :gutter="5" type="flex" align="middle" class="spaced">
-					<el-col :span="4" class="align-right">Lat:</el-col>
-					<el-col :span="20">
-						<el-input placeholder="Latitude"
-								  v-model="EditedLat" size="mini"
-								  @change="UpdatePoleDegLat"
-						></el-input>
-					</el-col>
-				</el-row>
-				<el-row :gutter="5" type="flex" align="middle" class="spaced">
-					<el-col :span="4" class="align-right">Long:</el-col>
-					<el-col :span="20">
-						<el-input placeholder="Longitude"
-								  v-model="EditedLong" size="mini"
-								  @change="UpdatePoleDegLong"
-						></el-input>
-					</el-col>
-				</el-row>
-				<el-button slot="reference" type="info" plain style="width: 100%" class="icon" icon="far fa-edit" size="mini" :disabled="VisibleLatLong"></el-button>
-			</el-popover>
-		</el-col>
-    </el-row>
-    
-    <!-- Ville -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Ville:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Ville"
-                      v-model="editedpolemarker.Pole.City" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-
-    <!-- Adresse -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Adresse:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Adresse"
-                      v-model="editedpolemarker.Pole.Address" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-
-    <!-- Matériau -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">Matériau:</el-col>
-        <el-col :span="18">
-            <el-select v-model="editedpolemarker.Pole.Material" filterable size="mini" style="width: 100%"
-                       @clear=""
-            >
-                <el-option
-                        v-for="item in GetMaterials()"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                ></el-option>
-            </el-select>
-        </el-col>
-    </el-row>
-
-    <!-- Hauteur -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Hauteur:</el-col>
-        <el-col :span="18">
-            <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="6" :max="12" style="width: 100%"
-            ></el-input-number>
-        </el-col>
-    </el-row>
-
-    <!-- DT DICT -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">DT:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Référence DT"
-                      v-model="editedpolemarker.Pole.DtRef" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">DICT:</el-col>
-        <el-col :span="10">
-            <el-input placeholder="Référence DICT"
-                      v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
-            ></el-input>
-        </el-col>
-        <el-col :span="8">
-            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="editedpolemarker.Pole.DictDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1}"
-                            :clearable="false"
-            ></el-date-picker>
-        </el-col>
-    </el-row>
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Info DICT:</el-col>
-        <el-col :span="18">
-            <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Information DICT"
-                      v-model="editedpolemarker.Pole.DictInfo" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
-
-    <!-- Date Aspiratrice -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">Aspiratrice:</el-col>
-        <el-col :span="18">
-            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="editedpolemarker.Pole.AspiDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-            ></el-date-picker>
-        </el-col>
-    </el-row>
-
-    <!-- Produits -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Produits:</el-col>
-        <el-col :span="18">
-            <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
-                       @clear=""
-                       @change=""
-            >
-                <el-option
-                        v-for="item in GetProducts()"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                ></el-option>
-            </el-select>
-        </el-col>
-    </el-row>
-
     <!-- Commentaire -->
     <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
         <el-col :span="6" class="align-right">Commentaire:</el-col>
@@ -224,87 +79,271 @@ const template string = `<div>
         </el-col>
     </el-row>
 
-    <!-- Kizeo -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Kizeo:</el-col>
-        <el-col :span="18">
-            <el-input placeholder="Référence Kizeo"
-                      v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
-            ></el-input>
-        </el-col>
-    </el-row>
+    <el-collapse v-model="chapters" @change="ChapterChange">
+        <el-collapse-item name="1">
+            <template slot="title">
+                <h1 class="title">Adresse: <span class="blue">{{editedpolemarker.Pole.Address}}</span></h1>
+            </template>
+            <!-- Lat / Long -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Lat / Long:</el-col>
+                <el-col :span="15">
+                    <el-input v-model="editedlatlong" size="mini" @input="UpdatePoleLatLong"></el-input>
+                </el-col>
+                <el-col :span="3">
+                    <el-popover title="Latitude / Longitude" placement="right"
+                                trigger="click" width="300" v-model="VisibleLatLong">
+                        <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                            <el-col :span="4" class="align-right">Lat:</el-col>
+                            <el-col :span="20">
+                                <el-input placeholder="Latitude"
+                                          v-model="EditedLat" size="mini"
+                                          @change="UpdatePoleDegLat"
+                                ></el-input>
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                            <el-col :span="4" class="align-right">Long:</el-col>
+                            <el-col :span="20">
+                                <el-input placeholder="Longitude"
+                                          v-model="EditedLong" size="mini"
+                                          @change="UpdatePoleDegLong"
+                                ></el-input>
+                            </el-col>
+                        </el-row>
+                        <el-button slot="reference" type="info" plain style="width: 100%" class="icon" icon="far fa-edit" size="mini" :disabled="VisibleLatLong"></el-button>
+                    </el-popover>
+                </el-col>
+            </el-row>
+            
+            <!-- Ville -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Ville:</el-col>
+                <el-col :span="18">
+                    <el-input placeholder="Ville"
+                              v-model="editedpolemarker.Pole.City" clearable size="mini"
+                    ></el-input>
+                </el-col>
+            </el-row>
+        
+            <!-- Adresse -->
+            <el-row :gutter="5" type="flex" align="middle">
+                <el-col :span="6" class="align-right">Adresse:</el-col>
+                <el-col :span="18">
+                    <el-input placeholder="Adresse"
+                              v-model="editedpolemarker.Pole.Address" clearable size="mini"
+                    ></el-input>
+                </el-col>
+            </el-row>
+        </el-collapse-item>
 
-    <!-- Actors -->
-    <el-row :gutter="5" type="flex" align="middle" class="doublespaced">
-        <el-col :span="6" class="align-right">Acteurs:</el-col>
-        <el-col :span="18">
-            <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
-                       @clear=""
-                       @change=""
-            >
-                <el-option
-                        v-for="item in GetActors()"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                >
-                    <!--
-                    <span style="float: left">{{ item.value }}</span>
-                    <span style="float: right; color: #8492a6; font-size: 0.9em; margin-right: 15px">{{ item.label }}</span>
-                    -->
-                </el-option>
-            </el-select>
-        </el-col>
-    </el-row>
-    
-    <!-- Status -->
-    <el-row :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Status:</el-col>
-        <el-col :span="18">
-            <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
-                       @clear=""
-                       @change="UpdateState()"
-            >
-                <el-option
-                        v-for="item in GetStates()"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                ></el-option>
-            </el-select>
-        </el-col>
-    </el-row>
+        <el-collapse-item name="2">
+            <template slot="title">
+                <h1 class="title">Travaux: <span class="blue">{{editedpolemarker.Pole.Material}} {{editedpolemarker.Pole.Height}}m</span></h1>
+            </template>
+            <!-- Matériau & Hauteur-->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Matériau:</el-col>
+                <el-col :span="10">
+                    <el-select v-model="editedpolemarker.Pole.Material" filterable size="mini" style="width: 100%"
+                               @clear=""
+                    >
+                        <el-option
+                                v-for="item in GetMaterials()"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                        ></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="8">
+                    <el-input-number v-model="editedpolemarker.Pole.Height" size="mini" controls-position="right" :precision="0" :min="6" :max="15" style="width: 100%"
+                    ></el-input-number>
+                </el-col>
+            </el-row>
+        
+            <!-- Produits -->
+            <el-row :gutter="5" type="flex" align="middle">
+                <el-col :span="6" class="align-right">Produits:</el-col>
+                <el-col :span="18">
+                    <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
+                               @clear=""
+                               @change=""
+                    >
+                        <el-option
+                                v-for="item in GetProducts()"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                        ></el-option>
+                    </el-select>
+                </el-col>
+            </el-row>
+        </el-collapse-item>
 
-    <!-- Date -->
-    <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Date:</el-col>
-        <el-col :span="18">
-            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="editedpolemarker.Pole.Date"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-            ></el-date-picker>
-        </el-col>
-    </el-row>
+        <el-collapse-item name="3">
+            <template slot="title">
+                <h1 class="title">DT, DICT et DA</h1>
+            </template>
+            <!-- DT -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">DT:</el-col>
+                <el-col :span="18">
+                    <el-input placeholder="Référence DT"
+                              v-model="editedpolemarker.Pole.DtRef" clearable size="mini"
+                    ></el-input>
+                </el-col>
+            </el-row>
+            <!-- DICT -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">DICT:</el-col>
+                <el-col :span="10">
+                    <el-input placeholder="Référence DICT"
+                              v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
+                    ></el-input>
+                </el-col>
+                <el-col :span="8">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Début" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.DictDate"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1}"
+                                    :clearable="false"
+                    ></el-date-picker>
+                </el-col>
+            </el-row>
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Info DICT:</el-col>
+                <el-col :span="18">
+                    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Information DICT"
+                              v-model="editedpolemarker.Pole.DictInfo" clearable size="mini"
+                    ></el-input>
+                </el-col>
+            </el-row>
+            <!-- DA -->
+            <el-row :gutter="5" type="flex" align="middle">
+                <el-col :span="6" class="align-right">DA:</el-col>
+                <el-col :span="9">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Début" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.DaStartDate"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1}"
+                                    :clearable="false"
+                    ></el-date-picker>
+                </el-col>
+                <el-col :span="9">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Fin" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.DaEndDate"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1}"
+                                    :clearable="false"
+                    ></el-date-picker>
+                </el-col>
+            </el-row>
+        </el-collapse-item>
 
-    <!-- AttachmentDate -->
-    <el-row v-if="ShowAttachmentDate" :gutter="5" type="flex" align="middle" class="spaced">
-        <el-col :span="6" class="align-right">Attachement:</el-col>
-        <el-col :span="18">
-            <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
-                            style="width: 100%" type="date"
-                            v-model="editedpolemarker.Pole.AttachmentDate"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                            :clearable="false"
-							@change="UpdateState()"
-            ></el-date-picker>
-        </el-col>
-    </el-row>
+        <el-collapse-item name="4">
+            <template slot="title">
+                <h1 class="title">Etat: <span class="blue">{{FormatState(editedpolemarker.Pole.State)}} {{FormatDate(editedpolemarker.Pole.Date)}}</span></h1>
+            </template>
+            <!-- Status -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Status:</el-col>
+                <el-col :span="18">
+                    <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
+                               @clear=""
+                               @change="UpdateState()"
+                    >
+                        <el-option
+                                v-for="item in GetStates()"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                        ></el-option>
+                    </el-select>
+                </el-col>
+            </el-row>
 
+            <!-- Actors -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Acteurs:</el-col>
+                <el-col :span="18">
+                    <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
+                               @clear=""
+                               @change=""
+                    >
+                        <el-option
+                                v-for="item in GetActors()"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                        >
+                            <!--
+                            <span style="float: left">{{ item.value }}</span>
+                            <span style="float: right; color: #8492a6; font-size: 0.9em; margin-right: 15px">{{ item.label }}</span>
+                            -->
+                        </el-option>
+                    </el-select>
+                </el-col>
+            </el-row>
 
+            <!-- Date Aspiratrice -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Aspiratrice:</el-col>
+                <el-col :span="18">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.AspiDate"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                    :clearable="false"
+                    ></el-date-picker>
+                </el-col>
+            </el-row>
+        
+            <!-- Kizeo -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Kizeo:</el-col>
+                <el-col :span="18">
+                    <el-input placeholder="Référence Kizeo"
+                              v-model="editedpolemarker.Pole.Kizeo" clearable size="mini"
+                    ></el-input>
+                </el-col>
+            </el-row>
+        
+            <!-- Date -->
+            <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Réalisation:</el-col>
+                <el-col :span="18">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.Date"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                    :clearable="false"
+                    ></el-date-picker>
+                </el-col>
+            </el-row>
+        
+            <!-- AttachmentDate -->
+            <el-row v-if="ShowAttachmentDate" :gutter="5" type="flex" align="middle">
+                <el-col :span="6" class="align-right">Attachement:</el-col>
+                <el-col :span="18">
+                    <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
+                                    style="width: 100%" type="date"
+                                    v-model="editedpolemarker.Pole.AttachmentDate"
+                                    value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
+                                    :clearable="false"
+                                    @change="UpdateState()"
+                    ></el-date-picker>
+                </el-col>
+            </el-row>
+        </el-collapse-item>
+        
+    </el-collapse>
 </div>
 `
 
@@ -318,7 +357,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("editedpolemarker", "user", "polesite"),
+		hvue.Props("editedpolemarker", "user", "polesite", "chapters"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleEditModel(vm)
 		}),
@@ -360,8 +399,10 @@ type PoleEditModel struct {
 	VisibleDeletePole    bool                `js:"VisibleDeletePole"`
 	VisibleLatLong       bool                `js:"VisibleLatLong"`
 	VisibleDuplicatePole bool                `js:"VisibleDuplicatePole"`
-	User                 *fm.User            `js:"user"`
-	Polesite             *polesite.Polesite  `js:"polesite"`
+	ActiveChapter        []string            `js:"chapters"`
+
+	User     *fm.User           `js:"user"`
+	Polesite *polesite.Polesite `js:"polesite"`
 
 	EditedLat  string `js:"EditedLat"`
 	EditedLong string `js:"EditedLong"`
@@ -378,6 +419,8 @@ func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem.VisibleDeletePole = false
 	pem.VisibleLatLong = false
 	pem.VisibleDuplicatePole = false
+	pem.ActiveChapter = []string{}
+
 	pem.User = fm.NewUser()
 	pem.Polesite = nil
 
@@ -388,6 +431,9 @@ func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Comp Methods
 
 func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
 	pem = PoleEditModelFromJS(vm.Object)
@@ -405,6 +451,17 @@ func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
 		res = append(res, elements.NewValueLabel(strconv.Itoa(actor.Id), ref))
 	}
 	return res
+}
+
+func (pem *PoleEditModel) FormatDate(d string) string {
+	if d == "" {
+		return ""
+	}
+	return date.DateString(d)
+}
+
+func (pem *PoleEditModel) FormatState(s string) string {
+	return polesite.PoleStateLabel(s)
 }
 
 func (pem *PoleEditModel) GetStates() []*elements.ValueLabel {
@@ -524,4 +581,8 @@ func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	pem.VisibleDuplicatePole = false
 	pem.VM.Emit("duplicate-pole", pem.EditedPoleMarker)
+}
+
+func (pem *PoleEditModel) ChapterChange(vm *hvue.VM, val *js.Object) {
+	vm.Emit("update:chapters", val)
 }

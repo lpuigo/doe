@@ -24,6 +24,8 @@ type Pole struct {
 	DictRef        string
 	DictDate       string
 	DictInfo       string
+	DaStartDate    string
+	DaEndDate      string
 	Height         int
 	Material       string
 	AspiDate       string

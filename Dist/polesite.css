@@ -32,6 +32,25 @@ html, body {
 }
 
 /* =====================================================================================================================
+   === PoleEdit Header Style
+ */
+.el-collapse-item__header {
+    height: 38px;
+    line-height: 38px;
+}
+
+.el-collapse-item__content {
+    padding-bottom: 15px;
+}
+
+.title {
+    font-size: 1.1em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+}
+
+
+/* =====================================================================================================================
    === Pole Row Style
  */
 

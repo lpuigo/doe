@@ -90,6 +90,7 @@ type MainPageModel struct {
 	//PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
+	ActiveChapter      []string            `js:"ActiveChapter"`
 	SearchAddress      string              `js:"SearchAddress"`
 	SearchAddressMsg   string              `js:"SearchAddressMsg"`
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
@@ -110,6 +111,7 @@ func NewMainPageModel() *MainPageModel {
 	//mpm.PolesGroup = nil
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
+	mpm.ActiveChapter = []string{}
 	mpm.SearchAddress = ""
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false

@@ -113,11 +113,14 @@
                             :editedpolemarker.sync="SelectedPoleMarker"
                             :user="User"
                             :polesite="Polesite"
+                            :chapters.sync="ActiveChapter"
                             @delete-pole="DeletePole"
                             @duplicate-pole="DuplicatePole"
                             @center-on-pole="CenterOnPole"
                     ></pole-edit>
-                    <el-button @click="CloseEditPole" size="mini">OK</el-button>
+                    <div style="margin-top: 10px; text-align: right;">
+                        <el-button type="primary" plain @click="CloseEditPole" size="mini">Fermer</el-button>
+                    </div>
                 </div>
             </el-aside>
 
