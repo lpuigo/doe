@@ -91,6 +91,7 @@ type MainPageModel struct {
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
 	ActiveChapter      []string            `js:"ActiveChapter"`
+	TableMode          string              `js:"TableMode"`
 	SearchAddress      string              `js:"SearchAddress"`
 	SearchAddressMsg   string              `js:"SearchAddressMsg"`
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
@@ -112,6 +113,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
 	mpm.ActiveChapter = []string{}
+	mpm.TableMode = "creation"
 	mpm.SearchAddress = ""
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false

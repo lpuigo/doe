@@ -19,15 +19,26 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Registration
 
-func RegisterComponent() hvue.ComponentOption {
-	return hvue.Component("pole-table", componentOptions()...)
+func registerComponentTable(tableType string) hvue.ComponentOption {
+	var tableComponent hvue.ComponentOption
+	switch tableType {
+	case "creation":
+		tableComponent = hvue.Template(template_creation)
+	case "followup":
+		tableComponent = hvue.Template(template_followup)
+	case "billing":
+		tableComponent = hvue.Template(template_billing)
+	default:
+		tableComponent = hvue.Template("<span>Mode '" + tableType + "' non défini</span>")
+	}
+	return hvue.Component("pole-table-"+tableType, componentOptionsTable(tableComponent)...)
 }
 
-func componentOptions() []hvue.ComponentOption {
+func componentOptionsTable(tableComponent hvue.ComponentOption) []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripprogressbar.RegisterComponent(),
-		hvue.Template(template),
-		hvue.Props("user", "polesite", "filter", "filtertype", "columns"),
+		tableComponent,
+		hvue.Props("user", "polesite", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleTableModel(vm)
 		}),
@@ -48,11 +59,10 @@ func componentOptions() []hvue.ComponentOption {
 type PoleTableModel struct {
 	*js.Object
 
-	Polesite       *ps.Polesite    `js:"polesite"`
-	User           *fm.User        `js:"user"`
-	Filter         string          `js:"filter"`
-	FilterType     string          `js:"filtertype"`
-	ColumnSelector *ColumnSelector `js:"columns"`
+	Polesite   *ps.Polesite `js:"polesite"`
+	User       *fm.User     `js:"user"`
+	Filter     string       `js:"filter"`
+	FilterType string       `js:"filtertype"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -63,7 +73,6 @@ func NewPoleTableModel(vm *hvue.VM) *PoleTableModel {
 	rtm.User = fm.NewUser()
 	rtm.Filter = ""
 	rtm.FilterType = ""
-	rtm.ColumnSelector = DefaultColumnSelector()
 	rtm.VM = vm
 	return rtm
 }
@@ -79,11 +88,6 @@ func (ptm *PoleTableModel) AddPole(vm *hvue.VM) {
 	message.InfoStr(vm, "AddPole non encore implémenté", false)
 }
 
-func (ptm *PoleTableModel) ApplyColumnMode(vm *hvue.VM) {
-	ptm = &PoleTableModel{Object: vm.Object}
-	ptm.ColumnSelector.Apply(ptm.ColumnSelector.Mode)
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Formatting Related Methods
 
@@ -94,6 +98,21 @@ func (ptm *PoleTableModel) TableRowClassName(rowInfo *js.Object) string {
 
 func (ptm *PoleTableModel) HeaderCellStyle() string {
 	return "background: #a1e6e6;"
+}
+
+func (ptm *PoleTableModel) PoleRefName(p *ps.Pole) string {
+	res := p.Ref
+	if p.Sticker != "" {
+		res += " " + p.Sticker
+	}
+	return res
+}
+
+func (ptm *PoleTableModel) EndDate(d string, delay int) string {
+	if d == "" {
+		return ""
+	}
+	return date.DateString(date.After(d, delay))
 }
 
 func (ptm *PoleTableModel) FormatDate(r, c *js.Object, d string) string {
@@ -123,6 +142,19 @@ func (ptm *PoleTableModel) FormatActors(vm *hvue.VM, p *ps.Pole) string {
 		}
 	}
 	return strings.Join(actors, "\n")
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Sorting Methods
+
+func (ptm *PoleTableModel) SortDate(attrib string) func(obj *js.Object) string {
+	return func(obj *js.Object) string {
+		val := obj.Get(attrib).String()
+		if val == "" {
+			return "9999-12-31"
+		}
+		return val
+	}
 }
 
 func (ptm *PoleTableModel) SortState(a, b *ps.Pole) int {
