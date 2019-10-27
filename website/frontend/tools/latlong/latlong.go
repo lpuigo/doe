@@ -18,9 +18,10 @@ func DecToDeg(val float64) string {
 }
 
 func DegToDec(val string) (float64, error) {
-	vals := strings.FieldsFunc(strings.ReplaceAll(val, ",", "."), func(r rune) bool {
+	vals := strings.FieldsFunc(strings.Replace(val, ",", ".", -1), func(r rune) bool {
 		switch r {
 		case '°', '\'', '"':
+
 			return true
 		default:
 			return false
