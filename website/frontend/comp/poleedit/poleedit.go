@@ -297,7 +297,6 @@ const template string = `<div>
                                     style="width: 100%" type="date"
                                     v-model="editedpolemarker.Pole.AspiDate"
                                     value-format="yyyy-MM-dd"
-                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                                     :clearable="false"
                     ></el-date-picker>
                 </el-col>
