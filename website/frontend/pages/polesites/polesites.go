@@ -91,7 +91,7 @@ type MainPageModel struct {
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
 	ActiveChapter      []string            `js:"ActiveChapter"`
-	TableMode          string              `js:"TableMode"`
+	TableContext       *poletable.Context  `js:"TableContext"`
 	SearchAddress      string              `js:"SearchAddress"`
 	SearchAddressMsg   string              `js:"SearchAddressMsg"`
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
@@ -113,7 +113,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
 	mpm.ActiveChapter = []string{}
-	mpm.TableMode = "creation"
+	mpm.TableContext = poletable.NewContext("followup")
 	mpm.SearchAddress = ""
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false
@@ -179,6 +179,7 @@ func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
 
 func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
 	mpm.SelectedPoleMarker = pm
+	mpm.TableContext.SelectedPole = pm.Pole.Id
 	pm.StartEditMode()
 	mpm.IsPoleSelected = true
 
@@ -226,8 +227,11 @@ func (mpm *MainPageModel) MarkerClick(poleMarkerObj, event *js.Object) {
 }
 
 // TablePoleSelected handles selected pole via PoleTable Component
-func (mpm *MainPageModel) TablePoleSelected(p *polesite.Pole) {
-	pm := mpm.GetPoleMarker(p)
+func (mpm *MainPageModel) TablePoleSelected(context *poletable.Context) {
+	pm := mpm.GetPoleMarkerById(context.SelectedPole)
+	if pm == nil {
+		return
+	}
 	mpm.UnSelectPole(true)
 	mpm.SelectPole(pm)
 }
@@ -261,6 +265,7 @@ func (mpm *MainPageModel) CloseEditPole() {
 	mpm.IsPoleSelected = false
 	mpm.SelectedPoleMarker.EndEditMode(true)
 	mpm.SelectedPoleMarker = nil
+	mpm.TableContext.SelectedPole = poletable.None
 }
 
 func (mpm *MainPageModel) UpdateSearchLocation(vm *hvue.VM) {
@@ -293,6 +298,11 @@ func (mpm *MainPageModel) GetFilterType() []*elements.ValueLabel {
 // GetPoleMarker returns the PoleMarker associated with given Pole (or nil if not found)
 func (mpm *MainPageModel) GetPoleMarker(pole *polesite.Pole) *polemap.PoleMarker {
 	return mpm.GetPoleMap().GetPoleMarkerById(pole.Id)
+}
+
+// GetPoleMarkerById returns the PoleMarker associated with given Id (or nil if not found)
+func (mpm *MainPageModel) GetPoleMarkerById(id int) *polemap.PoleMarker {
+	return mpm.GetPoleMap().GetPoleMarkerById(id)
 }
 
 // AddPole add given Pole to Polesite, and select new pertaining PoleMarker

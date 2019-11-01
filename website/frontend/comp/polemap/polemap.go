@@ -75,7 +75,7 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 	mOption := leaflet.DefaultMarkerOption()
 	mOption.Icon = &ico.Icon
 	mOption.Opacity = 0.5
-	mOption.Title = pole.Ref
+	mOption.Title = pole.GetTitle()
 
 	poleMarker := NewPoleMarker(mOption, pole)
 	//poleMarker.BindPopup(pole.Ref)

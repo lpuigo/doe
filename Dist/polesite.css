@@ -63,6 +63,11 @@ html, body {
     background-color: initial !important;
 }
 
+.el-table .pole-selected {
+    font-weight: bold;
+    color: blue;
+}
+
 .el-table .pole-row-todo {
     background: #ffffff;
 }

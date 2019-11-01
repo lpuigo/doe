@@ -10,7 +10,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"sort"
 	"strconv"
 	"strings"
@@ -38,7 +37,7 @@ func componentOptionsTable(tableComponent hvue.ComponentOption) []hvue.Component
 	return []hvue.ComponentOption{
 		ripprogressbar.RegisterComponent(),
 		tableComponent,
-		hvue.Props("user", "polesite", "filter", "filtertype"),
+		hvue.Props("user", "polesite", "filter", "filtertype", "context"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleTableModel(vm)
 		}),
@@ -63,6 +62,7 @@ type PoleTableModel struct {
 	User       *fm.User     `js:"user"`
 	Filter     string       `js:"filter"`
 	FilterType string       `js:"filtertype"`
+	Context    *Context     `js:"context"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -73,6 +73,7 @@ func NewPoleTableModel(vm *hvue.VM) *PoleTableModel {
 	rtm.User = fm.NewUser()
 	rtm.Filter = ""
 	rtm.FilterType = ""
+	rtm.Context = NewContext("")
 	rtm.VM = vm
 	return rtm
 }
@@ -81,19 +82,34 @@ func NewPoleTableModel(vm *hvue.VM) *PoleTableModel {
 // Comp Event Related Methods
 
 func (ptm *PoleTableModel) SetSelectedPole(vm *hvue.VM, p *ps.Pole) {
-	vm.Emit("pole-selected", p)
+	if p.Object == nil {
+		// implicit callback ... skip
+		return
+	}
+	ptm = &PoleTableModel{Object: vm.Object}
+	//if p.Id == ptm.Context.SelectedPole {
+	//	// no change ... skip
+	//	return
+	//}
+	ptm.Context.SelectedPole = p.Id
+	vm.Emit("update:context", ptm.Context)
 }
 
-func (ptm *PoleTableModel) AddPole(vm *hvue.VM) {
-	message.InfoStr(vm, "AddPole non encore implémenté", false)
-}
+//func (ptm *PoleTableModel) AddPole(vm *hvue.VM) {
+//	message.InfoStr(vm, "AddPole non encore implémenté", false)
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Formatting Related Methods
 
-func (ptm *PoleTableModel) TableRowClassName(rowInfo *js.Object) string {
+func (ptm *PoleTableModel) TableRowClassName(vm *hvue.VM, rowInfo *js.Object) string {
+	ptm = &PoleTableModel{Object: vm.Object}
 	p := &ps.Pole{Object: rowInfo.Get("row")}
-	return ps.PoleRowClassName(p.State)
+	selected := ""
+	if ptm.Context.SelectedPole == p.Id {
+		selected = "pole-selected "
+	}
+	return selected + ps.PoleRowClassName(p.State)
 }
 
 func (ptm *PoleTableModel) HeaderCellStyle() string {

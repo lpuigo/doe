@@ -42,7 +42,7 @@ func NewPole() *Pole {
 		Object: tools.O(),
 	}
 
-	np.Id = 0
+	np.Id = -100
 	np.Ref = ""
 	np.City = ""
 	np.Address = ""
@@ -147,6 +147,14 @@ func (p *Pole) SearchString(filter string) string {
 
 func (p *Pole) Clone() *Pole {
 	return &Pole{Object: json.Parse(json.Stringify(p))}
+}
+
+func (p *Pole) GetTitle() string {
+	title := p.Ref
+	if p.Sticker != "" {
+		title += " " + p.Sticker
+	}
+	return title
 }
 
 func GetFilterTypeValueLabel() []*elements.ValueLabel {

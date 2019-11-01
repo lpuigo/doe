@@ -137,8 +137,8 @@
                         :polesite="Polesite"
                         :filter="Filter"
                         :filtertype="FilterType"
-                        :mode.sync="TableMode"
-                        @pole-selected="TablePoleSelected"
+                        :context.sync="TableContext"
+                        @update:context="TablePoleSelected"
                 ></pole-table>
             </el-main>
         </el-container>
