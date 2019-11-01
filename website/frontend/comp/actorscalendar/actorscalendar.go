@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	//:row-class-name="TableRowClassName"
 	template string = `<el-container style="height: 100%">
     <el-header style="height: auto; padding: 0px">
         <el-row type="flex" align="middle">
@@ -38,14 +37,14 @@ const (
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Company" label="Société" width="110px"
                     sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
-                    :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+                    :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
             
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Client" label="Clients" width="200px"
                     sortable :sort-method="SortClient"
-                    :filters="FilterList('Client')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+                    :filters="FilterList('Client')" :filter-method="FilterHandler" filter-placement="bottom-end"
             >
                 <template slot-scope="scope">
                     <span>{{GetClients(scope.row)}}</span>
@@ -56,7 +55,7 @@ const (
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Role" label="Rôle" width="110px"
                     sortable :sort-by="['Role', 'State', 'Ref']"
-                    :filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+                    :filters="FilterList('Role')" :filter-method="FilterHandler" filter-placement="bottom-end"
             ></el-table-column>
             
             <el-table-column

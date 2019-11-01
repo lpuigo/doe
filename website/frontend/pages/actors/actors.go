@@ -40,22 +40,11 @@ func main() {
 				mpm.LoadActors(true)
 			})
 		}),
-		//hvue.Computed("Title", func(vm *hvue.VM) interface{} {
-		//	//mpm := &MainPageModel{Object: vm.Object}
-		//	return "To Refactor"
-		//}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.Dirty = mpm.CheckReference()
 			return mpm.Dirty
 		}),
-		//hvue.Computed("ShowTable", func(vm *hvue.VM) interface{} {
-		//	mpm := &MainPageModel{Object: vm.Object}
-		//	if mpm.ActiveMode != "Table" {
-		//		return "display: none;"
-		//	}
-		//	return ""
-		//}),
 	)
 
 	js.Global.Set("mpm", mpm)
@@ -82,7 +71,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
 	mpm.User = fm.NewUser()
-	mpm.ActiveMode = "Table"
+	mpm.ActiveMode = "Calendar"
 	mpm.Filter = ""
 	mpm.FilterType = ""
 	mpm.Actors = []*actor.Actor{}

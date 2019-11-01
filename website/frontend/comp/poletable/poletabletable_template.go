@@ -49,7 +49,7 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
         <el-table-column
                 label="Fin DICT" sortable :sort-by="SortDate('DictDate')"
                 width="100px" :resizable=true
-                align="center"	:formatter="FormatDate"
+                align="center"
         >
             <template slot-scope="scope">
                 <span>{{EndDate(scope.row.DictDate, 90)}}</span>

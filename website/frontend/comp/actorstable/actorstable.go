@@ -26,7 +26,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
 			sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
-			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
     <el-table-column
@@ -38,7 +38,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Client" label="Clients" width="200px"
 			sortable :sort-method="SortClient"
-			:filters="FilterList('Client')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+			:filters="FilterList('Client')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     >
         <template slot-scope="scope">
 			<span>{{GetClients(scope.row)}}</span>
@@ -49,7 +49,7 @@ const (
             :resizable="true" :show-overflow-tooltip=true 
             prop="Role" label="Rôle" width="110px"
 			sortable :sort-by="['Role', 'State', 'Ref']"
-			:filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+			:filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
     <el-table-column
@@ -64,6 +64,16 @@ const (
             </div>
         </template>
 	</el-table-column>
+    
+    <el-table-column
+            label="Arrivée" sortable :sort-by="SortDate('Period', 'Begin')"
+            width="110px" :resizable="true" 
+			align="center"	:formatter="FormatDate"
+    >
+		<template slot-scope="scope">
+			<span>{{FormatDate(scope.row.Period.Begin)}}</span>
+		</template>
+    </el-table-column>
     
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
@@ -232,6 +242,20 @@ func (atm *ActorsTableModel) FormatState(row, column, cellValue, index *js.Objec
 	return GetStateLabel(cellValue.String())
 }
 
+func (atm *ActorsTableModel) FormatDate(d string) string {
+	return date.DateString(d)
+}
+
+func (atm *ActorsTableModel) SortDate(attrib1, attrib2 string) func(obj *js.Object) string {
+	return func(obj *js.Object) string {
+		val := obj.Get(attrib1).Get(attrib2).String()
+		if val == "" {
+			return "9999-12-31"
+		}
+		return val
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Column Filtering Related Methods
 
@@ -276,11 +300,10 @@ func (atm *ActorsTableModel) FilterList(vm *hvue.VM, prop string) []*elements.Va
 
 func (atm *ActorsTableModel) FilteredStatusValue() []string {
 	res := []string{
-		//poleconst.PsStatusNew,
-		//poleconst.PsStatusInProgress,
-		//poleconst.PsStatusBlocked,
-		//poleconst.PsStatusCancelled,
-		//poleconst.PsStatusDone,
+		actorconst.StateCandidate,
+		actorconst.StateActive,
+		actorconst.StateOnHoliday,
+		//actorconst.StateGone,
 	}
 	return res
 }
