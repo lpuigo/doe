@@ -31,13 +31,14 @@ const (
 	ServicePort = ":8080"
 	SessionKey  = "SECRET_KEY"
 
-	WorksitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
-	RipsitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
-	PolesitesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	UsersDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
-	ActorsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
-	ClientsDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
-	TemplatesDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
+	WorksitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
+	RipsitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
+	PolesitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	UsersDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
+	ActorsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
+	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
+	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
+	TemplatesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
 	LaunchWebBrowser = true
 
@@ -48,14 +49,15 @@ const (
 func main() {
 	conf := &Conf{
 		ManagerConfig: manager.ManagerConfig{
-			WorksitesDir: WorksitesDir,
-			RipsitesDir:  RipsitesDir,
-			PolesitesDir: PolesitesDir,
-			UsersDir:     UsersDir,
-			ActorsDir:    ActorsDir,
-			ClientsDir:   ClientsDir,
-			TemplatesDir: TemplatesDir,
-			SessionKey:   SessionKey,
+			WorksitesDir:  WorksitesDir,
+			RipsitesDir:   RipsitesDir,
+			PolesitesDir:  PolesitesDir,
+			UsersDir:      UsersDir,
+			ActorsDir:     ActorsDir,
+			TimeSheetsDir: TimeSheetsDir,
+			ClientsDir:    ClientsDir,
+			TemplatesDir:  TemplatesDir,
+			SessionKey:    SessionKey,
 		},
 		LogFile:          LogFile,
 		ServicePort:      ServicePort,
@@ -143,6 +145,9 @@ func main() {
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")
 	router.HandleFunc("/api/actors/archive", withUserManager("GetActorsArchive", route.GetActorsArchive)).Methods("GET")
 	router.HandleFunc("/api/actors/whrecord/{month:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetActorsWorkingHoursRecord", route.GetActorsWorkingHoursRecord)).Methods("GET")
+
+	// TimeSheets methods
+	router.HandleFunc("/api/timesheet/{week:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetTimeSheet", route.GetTimeSheet)).Methods("GET")
 
 	// Administration methods
 	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")
