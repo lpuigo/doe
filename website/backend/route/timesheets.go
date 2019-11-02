@@ -22,6 +22,12 @@ func GetTimeSheet(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if weekDate != date.GetMonday(weekDate) {
+		w.Header().Set("Content-Type", "application/json")
+		AddError(w, logmsg, fmt.Sprintf("date '%s' is not a monday", weekDate), http.StatusBadRequest)
+		return
+	}
+
 	err = mgr.GetTimeSheet(w, weekDate)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)

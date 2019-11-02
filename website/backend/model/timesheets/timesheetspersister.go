@@ -73,6 +73,19 @@ func (tsp *TimeSheetsPersister) GetById(id int) *TimeSheetRecord {
 	return nil
 }
 
+// GetByWeekDate returns the TimeSheetRecord with given WeekDate (or nil if Id not found)
+func (tsp *TimeSheetsPersister) GetByWeekDate(weekDate string) *TimeSheetRecord {
+	tsp.RLock()
+	defer tsp.RUnlock()
+
+	for _, tsr := range tsp.timeSheetRecords {
+		if tsr.WeekDate == weekDate {
+			return tsr
+		}
+	}
+	return nil
+}
+
 // Add adds the given TimeSheetRecord to the TimeSheetsPersister and return its (updated with new id) TimeSheetRecord
 func (tsp *TimeSheetsPersister) Add(ntsr *TimeSheetRecord) *TimeSheetRecord {
 	tsp.Lock()
@@ -125,8 +138,24 @@ func (tsp *TimeSheetsPersister) Remove(rtsr *TimeSheetRecord) error {
 	return nil
 }
 
-//GetTimeSheetFor returns timesheet for given week date and actors (only to given date active actors are returned)
+//GetTimeSheetFor returns timesheet for given week date and actors (only actors active at given date are returned)
 func (tsp *TimeSheetsPersister) GetTimeSheetFor(weekdate string, actors []*actors.Actor) (*TimeSheet, error) {
-	//TODO to be implemented
-	return nil, fmt.Errorf("func GetTimeSheetFor not implemented")
+	tsp.RLock()
+	defer tsp.RUnlock()
+
+	activeIds := []int{}
+	for _, act := range actors {
+		if act.IsActiveOn(weekdate) {
+			activeIds = append(activeIds, act.Id)
+		}
+	}
+	// seek TimeSheet for weekDate
+	tsr := tsp.GetByWeekDate(weekdate)
+	if tsr == nil {
+		return NewTimeSheetForActorsIds(weekdate, activeIds), nil
+	}
+
+	// clone timesheet with given actors ids
+	ntsr := tsr.CloneForActorIds(activeIds)
+	return ntsr, nil
 }
