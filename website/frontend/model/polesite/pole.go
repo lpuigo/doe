@@ -127,8 +127,11 @@ func (p *Pole) SearchString(filter string) string {
 		}
 		return prefix + typ + value
 	}
-
-	res := searchItem("", poleconst.FilterValueRef, p.Ref)
+	ref := p.Ref
+	if p.Sticker != "" {
+		ref += " " + p.Sticker
+	}
+	res := searchItem("", poleconst.FilterValueRef, ref)
 	res += searchItem(",", poleconst.FilterValueCity, p.City)
 	res += searchItem(",", poleconst.FilterValueAddr, p.Address)
 	res += searchItem(",", poleconst.FilterValueComment, p.Comment)
