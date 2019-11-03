@@ -66,11 +66,14 @@
                 <span></span>
 
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">
-                    <el-tooltip content="Vue en Tableau" placement="bottom" effect="light" open-delay="500">
-                        <el-radio-button label="Table"><i class="fas fa-th-list"></i></el-radio-button>
-                    </el-tooltip>
                     <el-tooltip content="Vue Calendrier" placement="bottom" effect="light" open-delay="500">
-                        <el-radio-button label="Calendar"><i class="far fa-calendar-alt"></i></el-radio-button>
+                        <el-radio-button label="Calendar"><i class="far fa-calendar-alt icon--medium"></i></el-radio-button>
+                    </el-tooltip>
+                    <el-tooltip content="Pointage Horaire" placement="bottom" effect="light" open-delay="500">
+                        <el-radio-button label="TimeSheet"><i class="far fa-calendar-check icon--medium"></i></el-radio-button>
+                    </el-tooltip>
+                    <el-tooltip content="Vue en Tableau" placement="bottom" effect="light" open-delay="500">
+                        <el-radio-button label="Table"><i class="fas fa-th-list icon--medium"></i></el-radio-button>
                     </el-tooltip>
                 </el-radio-group>
 
@@ -130,6 +133,17 @@
 
         </el-header>
         <el-main style="height: 100%; padding: 5px 0px 0px 0px">
+            <actors-calendar v-if="ActiveMode=='Calendar'"
+                             v-model="Actors"
+                             :user="User"
+                             :filter="Filter" :filtertype="FilterType"
+                             @edit-actor-vacancy="ShowEditActorVacancy"
+            ></actors-calendar>
+            <actors-time-sheet v-if="ActiveMode=='TimeSheet'"
+                             v-model="Actors"
+                             :user="User"
+                             :filter="Filter" :filtertype="FilterType"
+            ></actors-time-sheet>
             <actors-table v-if="ActiveMode=='Table'"
                           v-model="Actors"
                           :user="User"
@@ -137,12 +151,6 @@
                           @edit-actor="ShowEditActor"
                           @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-table>
-            <actors-calendar v-if="ActiveMode=='Calendar'"
-                             v-model="Actors"
-                             :user="User"
-                             :filter="Filter" :filtertype="FilterType"
-                             @edit-actor-vacancy="ShowEditActorVacancy"
-            ></actors-calendar>
         </el-main>
     </el-container>
 </div>

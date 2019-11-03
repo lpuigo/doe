@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorscalendar"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorsstatsmodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstimesheet"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorvacancyeditmodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -29,8 +30,9 @@ func main() {
 		actorupdatemodal.RegisterComponent(),
 		actorvacancyeditmodal.RegisterComponent(),
 		actorsstatsmodal.RegisterComponent(),
-		actorstable.RegisterComponent(),
 		actorscalendar.RegisterComponent(),
+		actorstimesheet.RegisterComponent(),
+		actorstable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
