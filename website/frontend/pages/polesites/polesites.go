@@ -95,6 +95,7 @@ type MainPageModel struct {
 	SearchAddress      string              `js:"SearchAddress"`
 	SearchAddressMsg   string              `js:"SearchAddressMsg"`
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
+	VisibleTools       bool                `js:"VisibleTools"`
 	Reference          string              `js:"Reference"`
 	Dirty              bool                `js:"Dirty"`
 
@@ -117,6 +118,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SearchAddress = ""
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false
+	mpm.VisibleTools = false
 	mpm.Reference = ""
 	mpm.Dirty = false
 	mpm.ColumnSelector = poletable.DefaultColumnSelector()
@@ -190,6 +192,10 @@ func (mpm *MainPageModel) UnSelectPole(refresh bool) {
 	if mpm.SelectedPoleMarker != nil && mpm.SelectedPoleMarker.Object != nil {
 		mpm.SelectedPoleMarker.EndEditMode(refresh)
 	}
+}
+
+func (mpm *MainPageModel) DictZipArchiveURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/dictzip"
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

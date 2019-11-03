@@ -1,6 +1,7 @@
 package polesites
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
@@ -8,6 +9,8 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"io"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -137,4 +140,42 @@ func (ps *PoleSite) ExportName() string {
 // XLSExport returns the PoleSite XLS export
 func (ps *PoleSite) XLSExport(w io.Writer) error {
 	return ToXLS(w, ps)
+}
+
+// ExportName returns the PoleSite XLS export file name
+func (ps *PoleSite) DictZipName() string {
+	return fmt.Sprintf("Polesite %s-%s.zip", ps.Client, ps.Ref)
+}
+
+// ExportName returns the PoleSite XLS export file name
+func (ps *PoleSite) DictZipArchive(w io.Writer) error {
+	zw := zip.NewWriter(w)
+
+	path := strings.TrimSuffix(ps.DictZipName(), ".zip")
+
+	makeDir := func(base ...string) string {
+		return filepath.Join(base...) + "/"
+	}
+
+	// Create sorted List of DICT in PoleSite
+	dicts := map[string]int{}
+	for _, pole := range ps.Poles {
+		dicts[pole.DictRef]++
+	}
+	dictList := make([]string, len(dicts))
+	i := 0
+	for dict, _ := range dicts {
+		dictList[i] = dict
+		i++
+	}
+	sort.Strings(dictList)
+
+	for _, dict := range dictList {
+		_, err := zw.Create(makeDir(path, dict))
+		if err != nil {
+			return err
+		}
+	}
+
+	return zw.Close()
 }
