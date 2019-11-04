@@ -160,6 +160,10 @@ func (ps *PoleSite) DictZipArchive(w io.Writer) error {
 	// Create sorted List of DICT in PoleSite
 	dicts := map[string]int{}
 	for _, pole := range ps.Poles {
+		dict := strings.Trim(pole.DictRef, " \t")
+		if dict == "" {
+			continue
+		}
 		dicts[pole.DictRef]++
 	}
 	dictList := make([]string, len(dicts))
