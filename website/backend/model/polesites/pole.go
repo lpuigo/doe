@@ -115,6 +115,14 @@ const (
 	catPoleCreation string = "Création"
 )
 
+func (p *Pole) ExtendedRef() string {
+	ref := p.Ref
+	if p.Sticker != "" {
+		ref += " " + p.Sticker
+	}
+	return ref
+}
+
 func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
 
@@ -133,11 +141,13 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 		//strings.ReplaceAll(info, "\n", "\r\n")
 	}
 
+	ref := p.ExtendedRef()
+
 	it := items.NewItem(
 		client,
 		site,
 		activityPole,
-		p.Ref,
+		ref,
 		info,
 		p.Date,
 		"",
@@ -161,7 +171,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 			client,
 			site,
 			activityPole,
-			p.Ref,
+			ref,
 			fmt.Sprintf("prestation complémentaire %s", product),
 			p.Date,
 			"",
