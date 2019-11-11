@@ -264,7 +264,7 @@ func (mpm *MainPageModel) callUpdateActors(callback func()) {
 		message.ErrorRequestMessage(mpm.VM, req)
 		return
 	}
-	message.SuccesStr(mpm.VM, "Modification sauvegardée")
+	message.NotifySuccess(mpm.VM, "Equipes", "Modifications sauvegardées")
 }
 
 func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {

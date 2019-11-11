@@ -25,3 +25,20 @@ func confirmCallBack(confirm func()) func(string) {
 		}
 	}
 }
+
+func ConfirmCancelWarning(vm *hvue.VM, msg string, confirm, cancel func()) {
+	vm.Call("$confirm", msg, js.M{
+		"confirmButtonText": "OK",
+		"cancelButtonText":  "Non",
+		"type":              "warning",
+		"callback": func(action string) {
+			switch action {
+			case "confirm":
+				confirm()
+			case "cancel":
+				cancel()
+			default:
+			}
+		},
+	})
+}

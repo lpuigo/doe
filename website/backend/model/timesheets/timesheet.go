@@ -55,3 +55,9 @@ func (ts *TimeSheet) CloneForActorIds(ids []int) *TimeSheet {
 	}
 	return nts
 }
+
+func (ts *TimeSheet) UpdateActorsTimesFrom(uts *TimeSheet) {
+	for id, at := range uts.ActorsTimes {
+		ts.ActorsTimes[id] = at
+	}
+}

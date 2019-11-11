@@ -14,20 +14,25 @@ const (
 			:key="index"
 			class="calendar-slot"
  			:class="GetColumnColor(index)"
-			style="padding: 2px 0px"
+			style="padding: 2px 0px;"
 		>
-        <el-row :gutter="10" type="flex" align="middle">
-			<el-col :offset="3" :span="6">
-				<el-button type="primary" plain icon="fas fa-calendar-plus" size="mini" @click="SetFullDay(index)"></el-button>
-			</el-col>
-            <el-col :span="12">
-				<el-input-number v-model="times.Hours[index]"
-								size="mini" controls-position="right" style="width: 100%"
-								@change="HandleChange"
-								:min="0" :max="11"
-				></el-input-number>
-            </el-col>
-        </el-row>
+			<el-row :gutter="10" type="flex" align="middle">
+				<el-col :offset="3" :span="6">
+					<el-button 
+							type="primary" plain icon="fas fa-calendar-plus" size="mini" 
+							@click="SetFullDay(index)"
+							:disabled="activedays[index] < 1"
+					></el-button>
+				</el-col>
+				<el-col :span="12">
+					<el-input-number v-model="times.Hours[index]"
+							size="mini" controls-position="right" style="width: 100%"
+							@change="HandleChange"
+							:min="0" :max="11"
+							:disabled="activedays[index] < 1"
+					></el-input-number>
+				</el-col>
+			</el-row>
 		</div>
 	</div>
 `
@@ -41,7 +46,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("times"),
+		hvue.Props("times", "activedays"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorTimeEditModel(vm)
 		}),
@@ -63,7 +68,8 @@ func componentOptions() []hvue.ComponentOption {
 type ActorTimeEditModel struct {
 	*js.Object
 
-	Times *timesheet.ActorsTime `js:"times"`
+	Times      *timesheet.ActorsTime `js:"times"`
+	ActiveDays []int                 `js:"activedays"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -71,6 +77,7 @@ type ActorTimeEditModel struct {
 func NewActorTimeEditModel(vm *hvue.VM) *ActorTimeEditModel {
 	atem := &ActorTimeEditModel{Object: tools.O()}
 	atem.Times = timesheet.NewActorTime()
+	atem.ActiveDays = make([]int, 6)
 	atem.VM = vm
 	return atem
 }
@@ -97,7 +104,16 @@ func (atem *ActorTimeEditModel) GetColumnColor(vm *hvue.VM, index int) string {
 		if index >= 5 {
 			return "inactive"
 		}
+		if atem.ActiveDays[index] < 0 {
+			return "inactive"
+		}
+		if atem.ActiveDays[index] == 0 {
+			return "holiday"
+		}
 		return ""
+	}
+	if atem.ActiveDays[index] < 1 {
+		return "error"
 	}
 	return "active"
 }

@@ -89,6 +89,10 @@
     background: #c394d4;
 }
 
+.calendar-slot.error {
+    background: #f0a878;
+}
+
 .calendar-slot.inactive {
     background: #eeeeee;
 }

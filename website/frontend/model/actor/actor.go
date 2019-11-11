@@ -149,6 +149,31 @@ func (a *Actor) GetNextVacation() *date.DateRange {
 	return vdr
 }
 
+// GetActiveDays returns a slice of 6 int for given weekDate (-1 for inactive, 0 for Holydays, 1 for working day)
+func (a *Actor) GetActiveDays(weekDate string) []int {
+	res := make([]int, 6)
+outer:
+	for i := 0; i < 6; i++ {
+		day := date.After(weekDate, i)
+		if a.Period.Begin == "" {
+			res[i] = -1
+			continue outer
+		}
+		if !(day >= a.Period.Begin && !(a.Period.End != "" && day > a.Period.End)) {
+			res[i] = -1
+			continue outer
+		}
+		for _, vac := range a.Vacation {
+			if day >= vac.Begin && day <= vac.End {
+				res[i] = 0
+				continue outer
+			}
+		}
+		res[i] = 1
+	}
+	return res
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(actorconst.FilterValueAll, actorconst.FilterLabelAll),

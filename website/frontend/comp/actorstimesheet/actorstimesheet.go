@@ -11,6 +11,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
 	"strings"
 )
@@ -19,13 +20,31 @@ const (
 	template string = `<el-container style="height: 100%">
     <el-header style="height: auto; padding: 0px">
         <el-row type="flex" align="middle">
-            <el-col :offset="13" :span="1">
-                <el-button icon="fas fa-chevron-down" size="mini" @click="ResetCurrentDate()"></el-button>
+            <el-col :offset="10" :span="2">
+                <el-button-group>
+                    <el-tooltip content="Enregistrer les temps saisis" placement="bottom" effect="light" open-delay=500>
+                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--medium" @click="HandleSaveTimeSheet"
+                                   :disabled="!IsDirty" size="mini"></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay=500>
+                        <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="HandleReloadTimeSheet"
+                                   :disabled="!IsDirty" size="mini"></el-button>
+                    </el-tooltip>
+                </el-button-group>
+            </el-col>
+            <el-col :offset="2" :span="1">
+                <el-tooltip content="Dernière semaine passée" placement="bottom" effect="light" open-delay=500>
+                	<el-button icon="fas fa-chevron-down" size="mini" @click="HandleResetCurrentDate()"></el-button>
+				</el-tooltip>
             </el-col>
             <el-col :span="10">
-                <el-button icon="fas fa-chevron-left" size="mini" @click="CurrentDateBefore()"></el-button>
+                <el-tooltip content="Semaine précédente" placement="bottom" effect="light" open-delay=500>
+                	<el-button icon="fas fa-chevron-left" size="mini" @click="HandleCurrentDateBefore()"></el-button>
+				</el-tooltip>
                 <span style="margin: 0px 10px">{{CurrentDateRange()}}</span>
-                <el-button icon="fas fa-chevron-right" size="mini" @click="CurrentDateAfter()"></el-button>
+                <el-tooltip content="Semaine suivante" placement="bottom" effect="light" open-delay=500>
+                	<el-button icon="fas fa-chevron-right" size="mini" @click="HandleCurrentDateAfter()"></el-button>
+				</el-tooltip>
             </el-col>
         </el-row>
     </el-header>
@@ -66,24 +85,24 @@ const (
                     label="Nom Prénom" prop="Ref" width="200px"
                     :resizable="true" :show-overflow-tooltip=true 
                     sortable :sort-by="['Ref']"
-            >
-                <template slot-scope="scope">
-                    <div class="header-menu-container on-hover">
-                        <span>{{scope.row.Ref}}</span>
-						<i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
-                    </div>
-                </template>
-            </el-table-column>
+            ></el-table-column>
 
 			<el-table-column
 					label="Activité" width="80px" align="center"
 			>
                 <template slot-scope="scope">
-                    <el-button type="primary" size="mini" icon="fas fa-calendar-check" @click="SetActorWeek(scope.row.Id)"></el-button>
+                    <div style="padding: 3px 0px">
+						<el-tooltip content="Remplir la semaine" placement="bottom" effect="light" open-delay=500>
+							<el-button 
+									type="primary" size="mini" icon="fas fa-calendar-check" 
+									@click="SetActorWeek(scope.row)"
+									:disabled="!TimesheetLoaded"
+							></el-button>
+						</el-tooltip>
+                    </div>                        
                 </template>
 			</el-table-column>
 
-            
             <el-table-column
             >
                 <template slot="header" slot-scope="scope">
@@ -96,18 +115,10 @@ const (
                     </div>
                 </template>        
                 <template slot-scope="scope">
-                    <actor-time-edit :times="GetActorsTime(scope.row.Id)"></actor-time-edit>
-<!--
-                    <div class="calendar-row">
-                        <div v-for="(dayClass, index) in GetClassStateFor(scope.row)"
-                            :key="index"
-                            class="calendar-slot"
-                            :class="dayClass"
-                        >
-                            <pre>{{GetActorsTime(scope.row.Id)}}</pre>
-                        </div>
-                    </div>
--->                    
+                    <actor-time-edit v-if="TimesheetLoaded" 
+                    		:times="GetActorsTime(scope.row.Id)" 
+                    		:activedays="GetActiveDays(scope.row)"
+                    ></actor-time-edit>
                 </template>
             </el-table-column>
         </el-table>
@@ -131,10 +142,18 @@ func componentOptions() []hvue.ComponentOption {
 			acm := ActorsCalendarModelFromJS(vm.Object)
 			acm.GetTimeSheet()
 		}),
+		hvue.BeforeDestroy(func(vm *hvue.VM) {
+			print("exiting TimeSheetTable")
+		}),
 		hvue.MethodsOf(&ActorsCalendarModel{}),
 		hvue.Computed("filteredActors", func(vm *hvue.VM) interface{} {
 			acm := ActorsCalendarModelFromJS(vm.Object)
 			return acm.GetFilteredActors()
+		}),
+		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
+			acm := ActorsCalendarModelFromJS(vm.Object)
+			acm.Dirty = acm.CheckReference()
+			return acm.Dirty
 		}),
 	}
 }
@@ -148,7 +167,10 @@ type ActorsCalendarModel struct {
 	CurrentDate string `js:"CurrentDate"`
 	DateRange   int    `js:"DateRange"`
 
-	TimeSheet *timesheet.TimeSheet `js:"TimeSheet"`
+	TimeSheet       *timesheet.TimeSheet `js:"TimeSheet"`
+	TimesheetLoaded bool                 `js:"TimesheetLoaded"`
+	Reference       string               `js:"Reference"`
+	Dirty           bool                 `js:"Dirty"`
 }
 
 func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
@@ -156,6 +178,10 @@ func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
 	acm.ResetCurrentDate()
 	acm.DateRange = 6
 	acm.TimeSheet = timesheet.NewTimeSheet()
+	acm.TimesheetLoaded = false
+	acm.Reference = ""
+	acm.Dirty = true
+
 	return acm
 }
 
@@ -293,8 +319,47 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (acm *ActorsCalendarModel) ResetCurrentDate() {
-	acm.CurrentDate = date.GetMonday(date.TodayAfter(-7))
+func (acm *ActorsCalendarModel) HandleSaveTimeSheet() {
+	callback := func() {
+		acm.GetTimeSheet()
+	}
+	go acm.callUpdateActors(callback)
+}
+
+func (acm *ActorsCalendarModel) HandleReloadTimeSheet() {
+	acm.ResetToReference()
+}
+
+func (acm *ActorsCalendarModel) HandleResetCurrentDate() {
+	if acm.ResetCurrentDate() {
+		acm.GetTimeSheet()
+	}
+}
+
+func (acm *ActorsCalendarModel) HandleCurrentDateBefore() {
+	acm.CheckAskSaveDialogBefore(func() {
+		acm.CurrentDateBefore()
+		acm.GetTimeSheet()
+	})
+}
+
+func (acm *ActorsCalendarModel) HandleCurrentDateAfter() {
+	acm.CheckAskSaveDialogBefore(func() {
+		acm.CurrentDateAfter()
+		acm.GetTimeSheet()
+	})
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Tools Methods
+
+func (acm *ActorsCalendarModel) ResetCurrentDate() bool {
+	currentMonday := date.GetMonday(date.TodayAfter(-7))
+	if acm.CurrentDate == currentMonday {
+		return false
+	}
+	acm.CurrentDate = currentMonday
+	return true
 }
 
 func (acm *ActorsCalendarModel) CurrentDateBefore() {
@@ -313,11 +378,32 @@ func (acm *ActorsCalendarModel) DateOf(i int) string {
 	return date.Day(date.After(acm.CurrentDate, i))
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Tools Methods
+func (acm *ActorsCalendarModel) GetReference() string {
+	return json.Stringify(acm.TimeSheet)
+}
+
+func (acm *ActorsCalendarModel) SetReference() {
+	acm.Reference = acm.GetReference()
+}
+
+func (acm *ActorsCalendarModel) ResetToReference() {
+	if acm.Reference == "" {
+		return
+	}
+	acm.TimeSheet = timesheet.TimeSheetFromJS(json.Parse(acm.Reference))
+}
+
+// CheckReference returns true when some data has change
+func (acm *ActorsCalendarModel) CheckReference() bool {
+	return acm.Reference != acm.GetReference()
+}
 
 func (acm *ActorsCalendarModel) GetTimeSheet() {
-	callback := func() {}
+	acm.TimesheetLoaded = false
+	callback := func() {
+		acm.SetReference()
+		acm.TimesheetLoaded = true
+	}
 	go acm.callGetTimeSheet(callback)
 }
 
@@ -330,9 +416,35 @@ func (acm *ActorsCalendarModel) GetActorsTime(id int) *timesheet.ActorsTime {
 	return at
 }
 
-func (acm *ActorsCalendarModel) SetActorWeek(vm *hvue.VM, id int) {
+func (acm *ActorsCalendarModel) GetActiveDays(act *actor.Actor) []int {
+	return act.GetActiveDays(acm.CurrentDate)
+}
+
+func (acm *ActorsCalendarModel) SetActorWeek(vm *hvue.VM, act *actor.Actor) {
 	acm = ActorsCalendarModelFromJS(vm.Object)
-	acm.TimeSheet.ActorsTimes[id].SetActiveWeek()
+	acm.TimeSheet.ActorsTimes[act.Id].SetActiveWeek(act.GetActiveDays(acm.CurrentDate))
+}
+
+func (acm *ActorsCalendarModel) getUpdatedTimeSheet() *timesheet.TimeSheet {
+	updatedTS := acm.TimeSheet.Clone()
+	refTS := timesheet.TimeSheetFromJS(json.Parse(acm.Reference))
+	updatedTS.AddUpdatedActorsTimes(refTS, acm.TimeSheet)
+	return updatedTS
+}
+
+func (acm *ActorsCalendarModel) CheckAskSaveDialogBefore(callback func()) {
+	if !acm.Dirty {
+		callback()
+		return
+	}
+	message.ConfirmCancelWarning(acm.VM, "Sauvegarder les modifications apportées ?",
+		func() { // confirm
+			go acm.callUpdateActors(func() { callback() })
+		},
+		func() { // cancel
+			callback()
+		},
+	)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -353,4 +465,27 @@ func (acm *ActorsCalendarModel) callGetTimeSheet(callback func()) {
 	}
 	acm.TimeSheet = timesheet.TimeSheetFromJS(req.Response)
 	callback()
+}
+
+func (acm *ActorsCalendarModel) callUpdateActors(callback func()) {
+	updatedTs := acm.getUpdatedTimeSheet()
+	defer callback()
+	if len(updatedTs.ActorsTimes) == 0 {
+		message.ErrorStr(acm.VM, "Could not find any updated Actors Time", false)
+		return
+	}
+
+	req := xhr.NewRequest("PUT", "/api/timesheet/"+updatedTs.WeekDate)
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(json.Stringify(updatedTs))
+	if err != nil {
+		message.ErrorStr(acm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(acm.VM, req)
+		return
+	}
+	message.NotifySuccess(acm.VM, "Pointage Horaire", "Modifications sauvegardées")
 }

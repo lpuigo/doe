@@ -78,6 +78,10 @@ func (tsp *TimeSheetsPersister) GetByWeekDate(weekDate string) *TimeSheetRecord 
 	tsp.RLock()
 	defer tsp.RUnlock()
 
+	return tsp.getByWeekDate(weekDate)
+}
+
+func (tsp *TimeSheetsPersister) getByWeekDate(weekDate string) *TimeSheetRecord {
 	for _, tsr := range tsp.timeSheetRecords {
 		if tsr.WeekDate == weekDate {
 			return tsr
@@ -91,6 +95,10 @@ func (tsp *TimeSheetsPersister) Add(ntsr *TimeSheetRecord) *TimeSheetRecord {
 	tsp.Lock()
 	defer tsp.Unlock()
 
+	return tsp.add(ntsr)
+}
+
+func (tsp *TimeSheetsPersister) add(ntsr *TimeSheetRecord) *TimeSheetRecord {
 	// give the record its new ID
 	tsp.persister.Add(ntsr)
 	ntsr.Id = ntsr.GetId()
@@ -158,4 +166,23 @@ func (tsp *TimeSheetsPersister) GetTimeSheetFor(weekdate string, actors []*actor
 	// clone timesheet with given actors ids
 	ntsr := tsr.CloneForActorIds(activeIds)
 	return ntsr, nil
+}
+
+//UpdateTimeSheet updates and persists given timesheet (if no timesheet record for same weekdate if found, creates a new timesheet record)
+func (tsp *TimeSheetsPersister) UpdateTimeSheet(uts *TimeSheet) error {
+	tsp.Lock()
+	defer tsp.Unlock()
+
+	// seek existing TimeSheet for given Week
+	tsr := tsp.getByWeekDate(uts.WeekDate)
+
+	if tsr == nil {
+		// weekDate not found => persist given timesheet
+		tsp.add(NewTimeSheetRecordFromTimeSheet(uts))
+		return nil
+	}
+	// existing timesheet record was found for given weekDate => Update it
+	tsr.TimeSheet.UpdateActorsTimesFrom(uts)
+	tsp.persister.MarkDirty(tsr)
+	return nil
 }
