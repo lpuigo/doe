@@ -4,10 +4,14 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstimesheet/actortimeedit"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/model/timesheet"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
+	"honnef.co/go/js/xhr"
 	"strings"
 )
 
@@ -66,10 +70,19 @@ const (
                 <template slot-scope="scope">
                     <div class="header-menu-container on-hover">
                         <span>{{scope.row.Ref}}</span>
-                        <i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
+						<i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
                     </div>
                 </template>
             </el-table-column>
+
+			<el-table-column
+					label="Activité" width="80px" align="center"
+			>
+                <template slot-scope="scope">
+                    <el-button type="primary" size="mini" icon="fas fa-calendar-check" @click="SetActorWeek(scope.row.Id)"></el-button>
+                </template>
+			</el-table-column>
+
             
             <el-table-column
             >
@@ -83,13 +96,18 @@ const (
                     </div>
                 </template>        
                 <template slot-scope="scope">
+                    <actor-time-edit :times="GetActorsTime(scope.row.Id)"></actor-time-edit>
+<!--
                     <div class="calendar-row">
                         <div v-for="(dayClass, index) in GetClassStateFor(scope.row)"
                             :key="index"
                             class="calendar-slot"
                             :class="dayClass"
-                        >{{scope.row.Id}} {{index}}</div>
+                        >
+                            <pre>{{GetActorsTime(scope.row.Id)}}</pre>
+                        </div>
                     </div>
+-->                    
                 </template>
             </el-table-column>
         </el-table>
@@ -103,10 +121,15 @@ func RegisterComponent() hvue.ComponentOption {
 
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
+		actortimeedit.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorsCalendarModel(vm)
+		}),
+		hvue.Mounted(func(vm *hvue.VM) {
+			acm := ActorsCalendarModelFromJS(vm.Object)
+			acm.GetTimeSheet()
 		}),
 		hvue.MethodsOf(&ActorsCalendarModel{}),
 		hvue.Computed("filteredActors", func(vm *hvue.VM) interface{} {
@@ -124,12 +147,15 @@ type ActorsCalendarModel struct {
 
 	CurrentDate string `js:"CurrentDate"`
 	DateRange   int    `js:"DateRange"`
+
+	TimeSheet *timesheet.TimeSheet `js:"TimeSheet"`
 }
 
 func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
 	acm := &ActorsCalendarModel{ActorsTableModel: actorstable.NewActorsTableModel(vm)}
 	acm.ResetCurrentDate()
 	acm.DateRange = 6
+	acm.TimeSheet = timesheet.NewTimeSheet()
 	return acm
 }
 
@@ -285,4 +311,46 @@ func (acm *ActorsCalendarModel) CurrentDateRange() string {
 
 func (acm *ActorsCalendarModel) DateOf(i int) string {
 	return date.Day(date.After(acm.CurrentDate, i))
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Tools Methods
+
+func (acm *ActorsCalendarModel) GetTimeSheet() {
+	callback := func() {}
+	go acm.callGetTimeSheet(callback)
+}
+
+func (acm *ActorsCalendarModel) GetActorsTime(id int) *timesheet.ActorsTime {
+	at, found := acm.TimeSheet.ActorsTimes[id]
+	if !found {
+		at = timesheet.NewActorTime()
+		at.Get("Hours").SetIndex(0, -100)
+	}
+	return at
+}
+
+func (acm *ActorsCalendarModel) SetActorWeek(vm *hvue.VM, id int) {
+	acm = ActorsCalendarModelFromJS(vm.Object)
+	acm.TimeSheet.ActorsTimes[id].SetActiveWeek()
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WS call Methods
+
+func (acm *ActorsCalendarModel) callGetTimeSheet(callback func()) {
+	req := xhr.NewRequest("GET", "/api/timesheet/"+acm.CurrentDate)
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(acm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(acm.VM, req)
+		return
+	}
+	acm.TimeSheet = timesheet.TimeSheetFromJS(req.Response)
+	callback()
 }

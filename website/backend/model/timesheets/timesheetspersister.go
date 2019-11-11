@@ -145,7 +145,7 @@ func (tsp *TimeSheetsPersister) GetTimeSheetFor(weekdate string, actors []*actor
 
 	activeIds := []int{}
 	for _, act := range actors {
-		if act.IsActiveOn(weekdate) {
+		if act.IsActiveOnWeek(weekdate) {
 			activeIds = append(activeIds, act.Id)
 		}
 	}

@@ -47,6 +47,16 @@ func (a *Actor) IsActiveOn(date string) bool {
 	return date < a.Period.End
 }
 
+func (a *Actor) IsActiveOnWeek(weekDate string) bool {
+	if !(a.Period.Begin != "" && date.GetMonday(a.Period.Begin) <= weekDate) {
+		return false
+	}
+	if a.Period.End == "" {
+		return true
+	}
+	return weekDate <= date.GetMonday(a.Period.End)
+}
+
 func (a *Actor) IsActiveOnDateRange(dr date.DateStringRange) bool {
 	if a.Period.Begin == "" {
 		return false

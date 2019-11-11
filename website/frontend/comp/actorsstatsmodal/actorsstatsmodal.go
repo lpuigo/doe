@@ -23,7 +23,7 @@ const template string = `<el-dialog
 		<el-row :gutter="10" align="middle" type="flex">
 			<el-col :span="12">
 				<h2 style="margin: 0 0">
-					<i class="fas fa-chart-area icon--left"></i>Nombre d'Acteurs</span>
+					<i class="fas fa-chart-area icon--left"></i>Nombre d'Acteurs
 				</h2>
 			</el-col>
 		</el-row>

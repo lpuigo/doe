@@ -38,18 +38,18 @@
                 <span></span>
 
                 <el-button-group size="mini">
-                    <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-cloud-upload-alt icon--medium" @click="SaveActors"
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(false)"
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
                 <el-button-group size="mini">
-                    <el-tooltip content="Taille des Equipes" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Taille des Equipes" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-chart-area icon--medium" @click="ShowActorsStats()"></el-button>
                     </el-tooltip>
                 </el-button-group>
@@ -57,7 +57,7 @@
                 <span></span>
 
                 <el-button-group size="mini">
-                    <el-tooltip content="Créer un nouvel acteur" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Créer un nouvel acteur" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-user-plus icon--medium" @click="AddActor()"></el-button>
                     </el-tooltip>
                 </el-button-group>
@@ -66,13 +66,13 @@
                 <span></span>
 
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">
-                    <el-tooltip content="Vue Calendrier" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Vue Calendrier" placement="bottom" effect="light" open-delay=500>
                         <el-radio-button label="Calendar"><i class="far fa-calendar-alt icon--medium"></i></el-radio-button>
                     </el-tooltip>
-                    <el-tooltip content="Pointage Horaire" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Pointage Horaire" placement="bottom" effect="light" open-delay=500>
                         <el-radio-button label="TimeSheet"><i class="far fa-calendar-check icon--medium"></i></el-radio-button>
                     </el-tooltip>
-                    <el-tooltip content="Vue en Tableau" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Vue en Tableau" placement="bottom" effect="light" open-delay=500>
                         <el-radio-button label="Table"><i class="fas fa-th-list icon--medium"></i></el-radio-button>
                     </el-tooltip>
                 </el-radio-group>
@@ -118,11 +118,12 @@
                         <el-button size="mini" type="primary" @click="GetActorsWorkingHoursRecord()">OK</el-button>
                     </div>
 
-                    <el-tooltip slot="reference" content="Edition du CRA" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip slot="reference" content="Edition du CRA" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="far fa-file-excel icon--medium" size="mini" :disabled="craVisible"></el-button>
                     </el-tooltip>
                 </el-popover>
                 <span></span>
+
 
                 <el-row :gutter="20" type="flex" align="middle">
                     <span v-if="!User.Connected"><i
@@ -159,6 +160,7 @@
 
 <!--<script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
 <script src="/Assets/vue/2.5.17/vue.min.js"></script>
+<!--<script src="/Assets/vue/2.5.17/vue.js"></script>-->
 <script src="https://unpkg.com/element-ui@2.12.0/lib/index.js"></script>
 <!--<script src="/Assets/element-ui/2.6.1/lib/index.js"></script>-->
 <script src="https://unpkg.com/element-ui@2.12.0/lib/umd/locale/fr.js"></script>

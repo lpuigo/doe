@@ -4,7 +4,6 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/prjptf/src/client/goel/message"
 	"honnef.co/go/js/xhr"
 	"strconv"
 )
@@ -38,7 +37,7 @@ func InfoStr(vm *hvue.VM, msg string, closeButton bool) {
 }
 
 func SuccesStr(vm *hvue.VM, msg string) {
-	message.SetDuration(tools.SuccessMsgDuration)
+	SetDuration(tools.SuccessMsgDuration)
 	messageString(vm, "success", msg, false)
 }
 
@@ -72,7 +71,7 @@ func ErrorMsgFromJS(o *js.Object) *ErrorMsg {
 }
 
 func ErrorRequestMessage(vm *hvue.VM, req *xhr.Request) {
-	message.SetDuration(tools.WarningMsgDuration)
+	SetDuration(tools.WarningMsgDuration)
 	msg := "Quelquechose c'est mal passé !\n"
 	msg += "Le server retourne un code " + strconv.Itoa(req.Status) + "\n"
 	ErrorMsgStr(vm, msg, req.Response, true)
