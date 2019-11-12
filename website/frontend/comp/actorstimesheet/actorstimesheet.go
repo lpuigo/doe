@@ -13,6 +13,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
+	"strconv"
 	"strings"
 )
 
@@ -58,13 +59,13 @@ const (
         >
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Company" label="Société" width="110px"
+                    prop="Company" label="Société" width="100px"
                     sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
                     :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
             
             <el-table-column
-                    label="Clients" prop="Client" width="200px"
+                    label="Clients" prop="Client" width="160px"
                     :resizable="true" :show-overflow-tooltip=true 
                     sortable :sort-method="SortClient"
                     :filters="FilterList('Client')" :filter-method="FilterHandler" filter-placement="bottom-end"
@@ -82,17 +83,32 @@ const (
             ></el-table-column>
             
             <el-table-column
-                    label="Nom Prénom" prop="Ref" width="200px"
+                    label="Nom Prénom" prop="Ref" width="160px"
                     :resizable="true" :show-overflow-tooltip=true 
                     sortable :sort-by="['Ref']"
-            ></el-table-column>
+            >
+                <template slot-scope="scope">
+                    <div class="header-menu-container on-hover">
+                        <span>{{scope.row.Ref}}</span>
+                        <i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                    label="Heures" width="60px" align="center"
+            >
+                <template slot-scope="scope">
+                    <span>{{GetActiveHours(scope.row.Id)}}</span>
+                </template>
+            </el-table-column>
 
 			<el-table-column
 					label="Activité" width="80px" align="center"
 			>
                 <template slot-scope="scope">
                     <div style="padding: 3px 0px">
-						<el-tooltip content="Remplir la semaine" placement="bottom" effect="light" open-delay=500>
+						<el-tooltip content="Remplir la semaine" placement="left" effect="light" open-delay=500>
 							<el-button 
 									type="primary" size="mini" icon="fas fa-calendar-check" 
 									@click="SetActorWeek(scope.row)"
@@ -331,9 +347,15 @@ func (acm *ActorsCalendarModel) HandleReloadTimeSheet() {
 }
 
 func (acm *ActorsCalendarModel) HandleResetCurrentDate() {
-	if acm.ResetCurrentDate() {
-		acm.GetTimeSheet()
+	currentMonday := GetCurrentDate()
+	if acm.CurrentDate == currentMonday {
+		return
 	}
+
+	acm.CheckAskSaveDialogBefore(func() {
+		acm.CurrentDate = currentMonday
+		acm.GetTimeSheet()
+	})
 }
 
 func (acm *ActorsCalendarModel) HandleCurrentDateBefore() {
@@ -353,13 +375,12 @@ func (acm *ActorsCalendarModel) HandleCurrentDateAfter() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tools Methods
 
-func (acm *ActorsCalendarModel) ResetCurrentDate() bool {
-	currentMonday := date.GetMonday(date.TodayAfter(-7))
-	if acm.CurrentDate == currentMonday {
-		return false
-	}
-	acm.CurrentDate = currentMonday
-	return true
+func GetCurrentDate() string {
+	return date.GetMonday(date.TodayAfter(-7))
+}
+
+func (acm *ActorsCalendarModel) ResetCurrentDate() {
+	acm.CurrentDate = GetCurrentDate()
 }
 
 func (acm *ActorsCalendarModel) CurrentDateBefore() {
@@ -375,7 +396,7 @@ func (acm *ActorsCalendarModel) CurrentDateRange() string {
 }
 
 func (acm *ActorsCalendarModel) DateOf(i int) string {
-	return date.Day(date.After(acm.CurrentDate, i))
+	return date.DayMonth(date.After(acm.CurrentDate, i))
 }
 
 func (acm *ActorsCalendarModel) GetReference() string {
@@ -411,13 +432,36 @@ func (acm *ActorsCalendarModel) GetActorsTime(id int) *timesheet.ActorsTime {
 	at, found := acm.TimeSheet.ActorsTimes[id]
 	if !found {
 		at = timesheet.NewActorTime()
-		at.Get("Hours").SetIndex(0, -100)
+		acm.TimeSheet.ActorsTimes[id] = at
 	}
 	return at
 }
 
 func (acm *ActorsCalendarModel) GetActiveDays(act *actor.Actor) []int {
 	return act.GetActiveDays(acm.CurrentDate)
+}
+
+func (acm *ActorsCalendarModel) GetActiveHours(id int) string {
+	at, found := acm.TimeSheet.ActorsTimes[id]
+	if !found {
+		return ""
+	}
+	hours, supHours := 0, 0
+	for i := 0; i < 6; i++ {
+		todayHours := at.Hours[i]
+		todaySupHours := 0
+		if todayHours > 7 {
+			todaySupHours = todayHours - 7
+			todayHours = 7
+		}
+		if i > 4 {
+			todaySupHours += todayHours
+			todayHours = 0
+		}
+		hours += todayHours
+		supHours += todaySupHours
+	}
+	return strconv.Itoa(hours) + " + " + strconv.Itoa(supHours)
 }
 
 func (acm *ActorsCalendarModel) SetActorWeek(vm *hvue.VM, act *actor.Actor) {

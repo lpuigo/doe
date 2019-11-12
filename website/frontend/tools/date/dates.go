@@ -74,6 +74,14 @@ func Day(v string) string {
 	return "-"
 }
 
+func DayMonth(v string) string {
+	if strings.Contains(v, "-") {
+		d := strings.Split(v, "-")
+		return d[2] + "/" + d[1]
+	}
+	return "-"
+}
+
 func MonthYear(v string) string {
 	if strings.Contains(v, "-") {
 		d := strings.Split(v, "-")

@@ -144,6 +144,7 @@
                              v-model="Actors"
                              :user="User"
                              :filter="Filter" :filtertype="FilterType"
+                             @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-time-sheet>
             <actors-table v-if="ActiveMode=='Table'"
                           v-model="Actors"
