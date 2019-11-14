@@ -101,14 +101,14 @@ func getPTName(mr *MeasurementReport, line string) txtParserState {
 	for _, dir := range chunks {
 		if !trFound {
 			if trIndex := reTR.FindStringIndex(dir); trIndex != nil {
-				mr.Troncon = strings.Replace(dir[trIndex[0]:trIndex[1]], " ", "", -1)
+				mr.Troncon = "TR " + strings.Replace(dir[trIndex[0]+2:trIndex[1]], " ", "", -1)
 				trFound = true
 				continue
 			}
 		}
 		if trFound {
 			if ptIndex := rePT.FindStringIndex(dir); ptIndex != nil {
-				mr.PtName = strings.Replace(dir[ptIndex[0]:ptIndex[1]], " ", "", -1)
+				mr.PtName = "PT " + strings.Replace(dir[ptIndex[0]+2:ptIndex[1]], " ", "", -1)
 				break
 			}
 		}
