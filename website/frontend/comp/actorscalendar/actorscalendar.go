@@ -42,7 +42,7 @@ const (
             
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Client" label="Clients" width="200px"
+                    prop="Client" label="Clients" width="160px"
                     sortable :sort-method="SortClient"
                     :filters="FilterList('Client')" :filter-method="FilterHandler" filter-placement="bottom-end"
             >
@@ -53,14 +53,14 @@ const (
         
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Role" label="Rôle" width="110px"
+                    prop="Role" label="Rôle" width="90px"
                     sortable :sort-by="['Role', 'State', 'Ref']"
                     :filters="FilterList('Role')" :filter-method="FilterHandler" filter-placement="bottom-end"
             ></el-table-column>
             
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Ref" label="Nom Prénom" width="200px"
+                    prop="Ref" label="Nom Prénom" width="180px"
                     sortable :sort-by="['Ref']"
             >
                 <template slot-scope="scope">
@@ -129,7 +129,7 @@ type ActorsCalendarModel struct {
 func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
 	acm := &ActorsCalendarModel{ActorsTableModel: actorstable.NewActorsTableModel(vm)}
 	acm.ResetCurrentDate()
-	acm.DateRange = 28
+	acm.DateRange = 5 * 7
 	return acm
 }
 
@@ -184,16 +184,20 @@ func (acm *ActorsCalendarModel) GetInRangeActors() []*actor.Actor {
 // Format & Style Functions
 
 func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
+	acm = ActorsCalendarModelFromJS(vm.Object)
 	rangeStart := acm.CurrentDate
 	rangeLength := acm.DateRange
-
 	today := int(date.NbDaysBetween(rangeStart, date.TodayAfter(0)))
 
 	// calc class array
 	res := make([]string, rangeLength)
 	for i := 0; i < rangeLength; i++ {
+		day := date.After(rangeStart, i)
 		res[i] = "header"
-		if i%7 > 4 {
+		switch {
+		case acm.User.IsDayOff(day):
+			res[i] += " day-off"
+		case i%7 > 4:
 			res[i] += " week-end"
 		}
 		if i == today {
@@ -204,6 +208,7 @@ func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
 }
 
 func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []string {
+	acm = ActorsCalendarModelFromJS(vm.Object)
 	rangeStart := acm.CurrentDate
 	rangeEnd := acm.CurrentRangeEnd()
 	rangeLength := acm.DateRange
@@ -223,7 +228,7 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 		departure -= int(date.NbDaysBetween(act.Period.End, rangeEnd))
 	}
 
-	// Vancancy
+	// Vacancy
 	isVas := make([]bool, rangeLength)
 	for _, vacPeriod := range act.Vacation {
 		if vacPeriod.End < rangeStart || vacPeriod.Begin > rangeEnd {
@@ -245,18 +250,21 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 	// calc class array
 	res := make([]string, rangeLength)
 	for i := 0; i < rangeLength; i++ {
+		day := date.After(rangeStart, i)
 		if i == today {
 			res[i] = "today "
 		}
-		if !(i >= arrival && i < departure) {
+		switch {
+		case !(i >= arrival && i < departure):
 			res[i] += "inactive "
 			continue
-		}
-		if isVas[i] {
+		case acm.User.IsDayOff(day):
+			res[i] += "day-off "
+			continue
+		case isVas[i]:
 			res[i] += "holiday "
 			continue
-		}
-		if i%7 > 4 {
+		case i%7 > 4:
 			res[i] += "week-end "
 		}
 		res[i] += "active "

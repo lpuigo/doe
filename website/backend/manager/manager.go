@@ -21,6 +21,7 @@ type Manager struct {
 	Users          *users.UsersPersister
 	Actors         *actors.ActorsPersister
 	TimeSheets     *timesheets.TimeSheetsPersister
+	DaysOff        *Calendar
 	Clients        *clients.ClientsPersister
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
@@ -84,6 +85,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		Users:          up,
 		Actors:         ap,
 		TimeSheets:     tsp,
+		DaysOff:        NewCalendar(conf.CalendarFile),
 		Clients:        cp,
 		TemplateEngine: te,
 		SessionStore:   session.NewSessionStore(conf.SessionKey),
@@ -103,7 +105,13 @@ func (m Manager) Clone() *Manager {
 }
 
 func (m *Manager) Reload() error {
-	err := m.Worksites.LoadDirectory()
+	err := m.DaysOff.Reload()
+	if err != nil {
+		return fmt.Errorf("could not set holiday calendar: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d public holidays dates", m.DaysOff.NbDays()))
+
+	err = m.Worksites.LoadDirectory()
 	if err != nil {
 		return fmt.Errorf("could not populate worksites: %s", err.Error())
 	}

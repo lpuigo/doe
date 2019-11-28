@@ -152,22 +152,22 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Template(template),
 		hvue.Props("value", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
-			return NewActorsCalendarModel(vm)
+			return NewActorsTimeSheetModel(vm)
 		}),
 		hvue.Mounted(func(vm *hvue.VM) {
-			acm := ActorsCalendarModelFromJS(vm.Object)
+			acm := ActorsTimeSheetModelFromJS(vm.Object)
 			acm.GetTimeSheet()
 		}),
 		hvue.BeforeDestroy(func(vm *hvue.VM) {
 			print("exiting TimeSheetTable")
 		}),
-		hvue.MethodsOf(&ActorsCalendarModel{}),
+		hvue.MethodsOf(&ActorsTimeSheetModel{}),
 		hvue.Computed("filteredActors", func(vm *hvue.VM) interface{} {
-			acm := ActorsCalendarModelFromJS(vm.Object)
+			acm := ActorsTimeSheetModelFromJS(vm.Object)
 			return acm.GetFilteredActors()
 		}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
-			acm := ActorsCalendarModelFromJS(vm.Object)
+			acm := ActorsTimeSheetModelFromJS(vm.Object)
 			acm.Dirty = acm.CheckReference()
 			return acm.Dirty
 		}),
@@ -177,7 +177,7 @@ func componentOptions() []hvue.ComponentOption {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Model
 
-type ActorsCalendarModel struct {
+type ActorsTimeSheetModel struct {
 	*actorstable.ActorsTableModel
 
 	CurrentDate string `js:"CurrentDate"`
@@ -189,8 +189,8 @@ type ActorsCalendarModel struct {
 	Dirty           bool                 `js:"Dirty"`
 }
 
-func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
-	acm := &ActorsCalendarModel{ActorsTableModel: actorstable.NewActorsTableModel(vm)}
+func NewActorsTimeSheetModel(vm *hvue.VM) *ActorsTimeSheetModel {
+	acm := &ActorsTimeSheetModel{ActorsTableModel: actorstable.NewActorsTableModel(vm)}
 	acm.ResetCurrentDate()
 	acm.DateRange = 6
 	acm.TimeSheet = timesheet.NewTimeSheet()
@@ -201,19 +201,19 @@ func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
 	return acm
 }
 
-func ActorsCalendarModelFromJS(o *js.Object) *ActorsCalendarModel {
-	return &ActorsCalendarModel{ActorsTableModel: actorstable.ActorsTableModelFromJS(o)}
+func ActorsTimeSheetModelFromJS(o *js.Object) *ActorsTimeSheetModel {
+	return &ActorsTimeSheetModel{ActorsTableModel: actorstable.ActorsTableModelFromJS(o)}
 }
 
-func (acm *ActorsCalendarModel) GetFilteredActors() []*actor.Actor {
-	acts := acm.GetInRangeActors()
-	if acm.FilterType == actorconst.FilterValueAll && acm.Filter == "" {
+func (atsm *ActorsTimeSheetModel) GetFilteredActors() []*actor.Actor {
+	acts := atsm.GetInRangeActors()
+	if atsm.FilterType == actorconst.FilterValueAll && atsm.Filter == "" {
 		return acts
 	}
 	res := []*actor.Actor{}
-	expected := strings.ToUpper(acm.Filter)
+	expected := strings.ToUpper(atsm.Filter)
 	filter := func(a *actor.Actor) bool {
-		sis := a.SearchString(acm.FilterType)
+		sis := a.SearchString(atsm.FilterType)
 		if sis == "" {
 			return false
 		}
@@ -228,15 +228,15 @@ func (acm *ActorsCalendarModel) GetFilteredActors() []*actor.Actor {
 	return res
 }
 
-func (acm *ActorsCalendarModel) CurrentRangeEnd() string {
-	return date.After(acm.CurrentDate, acm.DateRange-1)
+func (atsm *ActorsTimeSheetModel) CurrentRangeEnd() string {
+	return date.After(atsm.CurrentDate, atsm.DateRange-1)
 }
 
-func (acm *ActorsCalendarModel) GetInRangeActors() []*actor.Actor {
-	rangeDeb := acm.CurrentDate
-	rangeEnd := acm.CurrentRangeEnd()
+func (atsm *ActorsTimeSheetModel) GetInRangeActors() []*actor.Actor {
+	rangeDeb := atsm.CurrentDate
+	rangeEnd := atsm.CurrentRangeEnd()
 	res := []*actor.Actor{}
-	for _, act := range acm.Actors {
+	for _, act := range atsm.Actors {
 		if act.Period.Begin > rangeEnd {
 			continue // actors came in after current period
 		}
@@ -251,17 +251,22 @@ func (acm *ActorsCalendarModel) GetInRangeActors() []*actor.Actor {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Format & Style Functions
 
-func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
-	rangeStart := acm.CurrentDate
-	rangeLength := acm.DateRange
+func (atsm *ActorsTimeSheetModel) GetHeaderClassState(vm *hvue.VM) []string {
+	atsm = ActorsTimeSheetModelFromJS(vm.Object)
+	rangeStart := atsm.CurrentDate
+	rangeLength := atsm.DateRange
 
 	today := int(date.NbDaysBetween(rangeStart, date.TodayAfter(0)))
 
 	// calc class array
 	res := make([]string, rangeLength)
 	for i := 0; i < rangeLength; i++ {
+		day := date.After(rangeStart, i)
 		res[i] = "header"
-		if i%7 > 4 {
+		switch {
+		case atsm.User.IsDayOff(day):
+			res[i] += " day-off"
+		case i%7 > 4:
 			res[i] += " week-end"
 		}
 		if i == today {
@@ -271,10 +276,11 @@ func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
 	return res
 }
 
-func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []string {
-	rangeStart := acm.CurrentDate
-	rangeEnd := acm.CurrentRangeEnd()
-	rangeLength := acm.DateRange
+func (atsm *ActorsTimeSheetModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []string {
+	atsm = ActorsTimeSheetModelFromJS(vm.Object)
+	rangeStart := atsm.CurrentDate
+	rangeEnd := atsm.CurrentRangeEnd()
+	rangeLength := atsm.DateRange
 
 	today := int(date.NbDaysBetween(rangeStart, date.TodayAfter(0)))
 
@@ -313,18 +319,21 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 	// calc class array
 	res := make([]string, rangeLength)
 	for i := 0; i < rangeLength; i++ {
+		day := date.After(rangeStart, i)
 		if i == today {
 			res[i] = "today "
 		}
-		if !(i >= arrival && i < departure) {
+		switch {
+		case !(i >= arrival && i < departure):
 			res[i] += "inactive "
 			continue
-		}
-		if isVas[i] {
+		case atsm.User.IsDayOff(day):
+			res[i] += "day-off "
+			continue
+		case isVas[i]:
 			res[i] += "holiday "
 			continue
-		}
-		if i%7 > 4 {
+		case i%7 > 4:
 			res[i] += "week-end "
 		}
 		res[i] += "active "
@@ -335,40 +344,40 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (acm *ActorsCalendarModel) HandleSaveTimeSheet() {
+func (atsm *ActorsTimeSheetModel) HandleSaveTimeSheet() {
 	callback := func() {
-		acm.GetTimeSheet()
+		atsm.GetTimeSheet()
 	}
-	go acm.callUpdateActors(callback)
+	go atsm.callUpdateActors(callback)
 }
 
-func (acm *ActorsCalendarModel) HandleReloadTimeSheet() {
-	acm.ResetToReference()
+func (atsm *ActorsTimeSheetModel) HandleReloadTimeSheet() {
+	atsm.ResetToReference()
 }
 
-func (acm *ActorsCalendarModel) HandleResetCurrentDate() {
+func (atsm *ActorsTimeSheetModel) HandleResetCurrentDate() {
 	currentMonday := GetCurrentDate()
-	if acm.CurrentDate == currentMonday {
+	if atsm.CurrentDate == currentMonday {
 		return
 	}
 
-	acm.CheckAskSaveDialogBefore(func() {
-		acm.CurrentDate = currentMonday
-		acm.GetTimeSheet()
+	atsm.CheckAskSaveDialogBefore(func() {
+		atsm.CurrentDate = currentMonday
+		atsm.GetTimeSheet()
 	})
 }
 
-func (acm *ActorsCalendarModel) HandleCurrentDateBefore() {
-	acm.CheckAskSaveDialogBefore(func() {
-		acm.CurrentDateBefore()
-		acm.GetTimeSheet()
+func (atsm *ActorsTimeSheetModel) HandleCurrentDateBefore() {
+	atsm.CheckAskSaveDialogBefore(func() {
+		atsm.CurrentDateBefore()
+		atsm.GetTimeSheet()
 	})
 }
 
-func (acm *ActorsCalendarModel) HandleCurrentDateAfter() {
-	acm.CheckAskSaveDialogBefore(func() {
-		acm.CurrentDateAfter()
-		acm.GetTimeSheet()
+func (atsm *ActorsTimeSheetModel) HandleCurrentDateAfter() {
+	atsm.CheckAskSaveDialogBefore(func() {
+		atsm.CurrentDateAfter()
+		atsm.GetTimeSheet()
 	})
 }
 
@@ -379,70 +388,71 @@ func GetCurrentDate() string {
 	return date.GetMonday(date.TodayAfter(-7))
 }
 
-func (acm *ActorsCalendarModel) ResetCurrentDate() {
-	acm.CurrentDate = GetCurrentDate()
+func (atsm *ActorsTimeSheetModel) ResetCurrentDate() {
+	atsm.CurrentDate = GetCurrentDate()
 }
 
-func (acm *ActorsCalendarModel) CurrentDateBefore() {
-	acm.CurrentDate = date.After(acm.CurrentDate, -7)
+func (atsm *ActorsTimeSheetModel) CurrentDateBefore() {
+	atsm.CurrentDate = date.After(atsm.CurrentDate, -7)
 }
 
-func (acm *ActorsCalendarModel) CurrentDateAfter() {
-	acm.CurrentDate = date.After(acm.CurrentDate, 7)
+func (atsm *ActorsTimeSheetModel) CurrentDateAfter() {
+	atsm.CurrentDate = date.After(atsm.CurrentDate, 7)
 }
 
-func (acm *ActorsCalendarModel) CurrentDateRange() string {
-	return date.DateString(acm.CurrentDate) + " à " + date.DateString(acm.CurrentRangeEnd())
+func (atsm *ActorsTimeSheetModel) CurrentDateRange() string {
+	return date.DateString(atsm.CurrentDate) + " à " + date.DateString(atsm.CurrentRangeEnd())
 }
 
-func (acm *ActorsCalendarModel) DateOf(i int) string {
-	return date.DayMonth(date.After(acm.CurrentDate, i))
+func (atsm *ActorsTimeSheetModel) DateOf(i int) string {
+	return date.DayMonth(date.After(atsm.CurrentDate, i))
 }
 
-func (acm *ActorsCalendarModel) GetReference() string {
-	return json.Stringify(acm.TimeSheet)
+func (atsm *ActorsTimeSheetModel) GetReference() string {
+	return json.Stringify(atsm.TimeSheet)
 }
 
-func (acm *ActorsCalendarModel) SetReference() {
-	acm.Reference = acm.GetReference()
+func (atsm *ActorsTimeSheetModel) SetReference() {
+	atsm.Reference = atsm.GetReference()
 }
 
-func (acm *ActorsCalendarModel) ResetToReference() {
-	if acm.Reference == "" {
+func (atsm *ActorsTimeSheetModel) ResetToReference() {
+	if atsm.Reference == "" {
 		return
 	}
-	acm.TimeSheet = timesheet.TimeSheetFromJS(json.Parse(acm.Reference))
+	atsm.TimeSheet = timesheet.TimeSheetFromJS(json.Parse(atsm.Reference))
 }
 
 // CheckReference returns true when some data has change
-func (acm *ActorsCalendarModel) CheckReference() bool {
-	return acm.Reference != acm.GetReference()
+func (atsm *ActorsTimeSheetModel) CheckReference() bool {
+	return atsm.Reference != atsm.GetReference()
 }
 
-func (acm *ActorsCalendarModel) GetTimeSheet() {
-	acm.TimesheetLoaded = false
+func (atsm *ActorsTimeSheetModel) GetTimeSheet() {
+	atsm.TimesheetLoaded = false
 	callback := func() {
-		acm.SetReference()
-		acm.TimesheetLoaded = true
+		atsm.SetReference()
+		atsm.TimesheetLoaded = true
 	}
-	go acm.callGetTimeSheet(callback)
+	go atsm.callGetTimeSheet(callback)
 }
 
-func (acm *ActorsCalendarModel) GetActorsTime(id int) *timesheet.ActorsTime {
-	at, found := acm.TimeSheet.ActorsTimes[id]
+func (atsm *ActorsTimeSheetModel) GetActorsTime(id int) *timesheet.ActorsTime {
+	at, found := atsm.TimeSheet.ActorsTimes[id]
 	if !found {
 		at = timesheet.NewActorTime()
-		acm.TimeSheet.ActorsTimes[id] = at
+		atsm.TimeSheet.ActorsTimes[id] = at
 	}
 	return at
 }
 
-func (acm *ActorsCalendarModel) GetActiveDays(act *actor.Actor) []int {
-	return act.GetActiveDays(acm.CurrentDate)
+func (atsm *ActorsTimeSheetModel) GetActiveDays(vm *hvue.VM, act *actor.Actor) []int {
+	atsm = ActorsTimeSheetModelFromJS(vm.Object)
+	return act.GetActiveDays(atsm.CurrentDate, atsm.User.DaysOff)
 }
 
-func (acm *ActorsCalendarModel) GetActiveHours(id int) string {
-	at, found := acm.TimeSheet.ActorsTimes[id]
+func (atsm *ActorsTimeSheetModel) GetActiveHours(id int) string {
+	at, found := atsm.TimeSheet.ActorsTimes[id]
 	if !found {
 		return ""
 	}
@@ -464,26 +474,26 @@ func (acm *ActorsCalendarModel) GetActiveHours(id int) string {
 	return strconv.Itoa(hours) + " + " + strconv.Itoa(supHours)
 }
 
-func (acm *ActorsCalendarModel) SetActorWeek(vm *hvue.VM, act *actor.Actor) {
-	acm = ActorsCalendarModelFromJS(vm.Object)
-	acm.TimeSheet.ActorsTimes[act.Id].SetActiveWeek(act.GetActiveDays(acm.CurrentDate))
+func (atsm *ActorsTimeSheetModel) SetActorWeek(vm *hvue.VM, act *actor.Actor) {
+	atsm = ActorsTimeSheetModelFromJS(vm.Object)
+	atsm.TimeSheet.ActorsTimes[act.Id].SetActiveWeek(act.GetActiveDays(atsm.CurrentDate, atsm.User.DaysOff))
 }
 
-func (acm *ActorsCalendarModel) getUpdatedTimeSheet() *timesheet.TimeSheet {
-	updatedTS := acm.TimeSheet.Clone()
-	refTS := timesheet.TimeSheetFromJS(json.Parse(acm.Reference))
-	updatedTS.AddUpdatedActorsTimes(refTS, acm.TimeSheet)
+func (atsm *ActorsTimeSheetModel) getUpdatedTimeSheet() *timesheet.TimeSheet {
+	updatedTS := atsm.TimeSheet.Clone()
+	refTS := timesheet.TimeSheetFromJS(json.Parse(atsm.Reference))
+	updatedTS.AddUpdatedActorsTimes(refTS, atsm.TimeSheet)
 	return updatedTS
 }
 
-func (acm *ActorsCalendarModel) CheckAskSaveDialogBefore(callback func()) {
-	if !acm.Dirty {
+func (atsm *ActorsTimeSheetModel) CheckAskSaveDialogBefore(callback func()) {
+	if !atsm.Dirty {
 		callback()
 		return
 	}
-	message.ConfirmCancelWarning(acm.VM, "Sauvegarder les modifications apportées ?",
+	message.ConfirmCancelWarning(atsm.VM, "Sauvegarder les modifications apportées ?",
 		func() { // confirm
-			go acm.callUpdateActors(func() { callback() })
+			go atsm.callUpdateActors(func() { callback() })
 		},
 		func() { // cancel
 			callback()
@@ -494,28 +504,28 @@ func (acm *ActorsCalendarModel) CheckAskSaveDialogBefore(callback func()) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WS call Methods
 
-func (acm *ActorsCalendarModel) callGetTimeSheet(callback func()) {
-	req := xhr.NewRequest("GET", "/api/timesheet/"+acm.CurrentDate)
+func (atsm *ActorsTimeSheetModel) callGetTimeSheet(callback func()) {
+	req := xhr.NewRequest("GET", "/api/timesheet/"+atsm.CurrentDate)
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
 	err := req.Send(nil)
 	if err != nil {
-		message.ErrorStr(acm.VM, "Oups! "+err.Error(), true)
+		message.ErrorStr(atsm.VM, "Oups! "+err.Error(), true)
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorRequestMessage(acm.VM, req)
+		message.ErrorRequestMessage(atsm.VM, req)
 		return
 	}
-	acm.TimeSheet = timesheet.TimeSheetFromJS(req.Response)
+	atsm.TimeSheet = timesheet.TimeSheetFromJS(req.Response)
 	callback()
 }
 
-func (acm *ActorsCalendarModel) callUpdateActors(callback func()) {
-	updatedTs := acm.getUpdatedTimeSheet()
+func (atsm *ActorsTimeSheetModel) callUpdateActors(callback func()) {
+	updatedTs := atsm.getUpdatedTimeSheet()
 	defer callback()
 	if len(updatedTs.ActorsTimes) == 0 {
-		message.ErrorStr(acm.VM, "Could not find any updated Actors Time", false)
+		message.ErrorStr(atsm.VM, "Could not find any updated Actors Time", false)
 		return
 	}
 
@@ -524,12 +534,12 @@ func (acm *ActorsCalendarModel) callUpdateActors(callback func()) {
 	req.ResponseType = xhr.JSON
 	err := req.Send(json.Stringify(updatedTs))
 	if err != nil {
-		message.ErrorStr(acm.VM, "Oups! "+err.Error(), true)
+		message.ErrorStr(atsm.VM, "Oups! "+err.Error(), true)
 		return
 	}
 	if req.Status != tools.HttpOK {
-		message.ErrorRequestMessage(acm.VM, req)
+		message.ErrorRequestMessage(atsm.VM, req)
 		return
 	}
-	message.NotifySuccess(acm.VM, "Pointage Horaire", "Modifications sauvegardées")
+	message.NotifySuccess(atsm.VM, "Pointage Horaire", "Modifications sauvegardées")
 }

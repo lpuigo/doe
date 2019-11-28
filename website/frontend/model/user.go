@@ -9,11 +9,12 @@ import (
 type User struct {
 	*js.Object
 
-	Name        string          `js:"Name"`
-	Pwd         string          `js:"Pwd"`
-	Connected   bool            `js:"Connected"`
-	Clients     []*Client       `js:"Clients"`
-	Permissions map[string]bool `js:"Permissions"`
+	Name        string            `js:"Name"`
+	Pwd         string            `js:"Pwd"`
+	Connected   bool              `js:"Connected"`
+	Clients     []*Client         `js:"Clients"`
+	Permissions map[string]bool   `js:"Permissions"`
+	DaysOff     map[string]string `js:"DaysOff"`
 }
 
 func NewUser() *User {
@@ -23,6 +24,7 @@ func NewUser() *User {
 	user.Connected = false
 	user.Clients = []*Client{}
 	user.Permissions = make(map[string]bool)
+	user.DaysOff = make(map[string]string)
 	return user
 }
 
@@ -36,6 +38,7 @@ func (u *User) Copy(ou *User) {
 	u.Connected = ou.Connected
 	u.Clients = ou.Clients
 	u.Permissions = ou.Permissions
+	u.DaysOff = ou.DaysOff
 }
 
 // GetClientByName returns the client with given name (nil if not found)
@@ -72,4 +75,9 @@ func (u *User) GetArticlesValueLabelsFor(clientName string) []*elements.ValueLab
 		res = append(res, elements.NewValueLabel(a, a))
 	}
 	return res
+}
+
+func (u *User) IsDayOff(day string) bool {
+	_, exists := u.DaysOff[day]
+	return exists
 }

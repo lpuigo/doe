@@ -7,6 +7,7 @@ type ManagerConfig struct {
 	UsersDir      string
 	ActorsDir     string
 	TimeSheetsDir string
+	CalendarFile  string
 	ClientsDir    string
 	TemplatesDir  string
 	SessionKey    string

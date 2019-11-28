@@ -61,7 +61,7 @@
 
 .calendar-row .calendar-slot {
     flex-grow: 1;
-    margin: 1px 2px;
+    margin: 1px 1px;
     text-align: center;
     border-style: solid;
     border-width: 0px;
@@ -77,12 +77,25 @@
     background: #bbbbbb;
 }
 
+.calendar-slot.header.day-off {
+    background: #aa82b8;
+    color: #f8e6ff;
+}
+
+.calendar-slot.day-off {
+    background: #c394d4;
+}
+
+.calendar-slot.active.day-off {
+    background: #bbbbbb;
+}
+
 .calendar-slot.active {
     background: #86d47f;
 }
 
 .calendar-slot.active.week-end {
-    background: #70996b;
+    background: #83b37d;
 }
 
 .calendar-slot.holiday {

@@ -143,7 +143,7 @@ func NewActorsTableModel(vm *hvue.VM) *ActorsTableModel {
 	atm := &ActorsTableModel{Object: tools.O()}
 	atm.VM = vm
 	atm.Actors = []*actor.Actor{}
-	atm.User = nil
+	atm.User = fm.NewUser()
 	atm.Filter = ""
 	atm.FilterType = ""
 	return atm

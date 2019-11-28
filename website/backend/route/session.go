@@ -73,6 +73,7 @@ type authentUser struct {
 	Name        string
 	Clients     []authentClient
 	Permissions map[string]bool
+	DaysOff     map[string]string
 }
 
 func newAuthentUser() authentUser {
@@ -80,6 +81,7 @@ func newAuthentUser() authentUser {
 		Name:        "",
 		Clients:     []authentClient{},
 		Permissions: make(map[string]bool),
+		DaysOff:     make(map[string]string),
 	}
 }
 
@@ -87,6 +89,7 @@ func (au *authentUser) SetFrom(mgr *mgr.Manager, clients []*clients.Client) {
 	au.Name = mgr.CurrentUser.Name
 	au.Clients = getAuthentClientFrom(mgr, clients)
 	au.Permissions = mgr.CurrentUser.Permissions
+	au.DaysOff = mgr.DaysOff.GetDays()
 }
 
 // GetUser checks for session cookie, and return pertaining user

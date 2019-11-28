@@ -37,6 +37,7 @@ const (
 	UsersDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
 	ActorsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
 	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
+	CalendarFile  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
 	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
 	TemplatesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
@@ -55,6 +56,7 @@ func main() {
 			UsersDir:      UsersDir,
 			ActorsDir:     ActorsDir,
 			TimeSheetsDir: TimeSheetsDir,
+			CalendarFile:  CalendarFile,
 			ClientsDir:    ClientsDir,
 			TemplatesDir:  TemplatesDir,
 			SessionKey:    SessionKey,
