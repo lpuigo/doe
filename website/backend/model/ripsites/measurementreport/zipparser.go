@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -94,13 +95,22 @@ func getPTName(mr *MeasurementReport, line string) txtParserState {
 	}
 	col := splitLine(line)
 	chunks := strings.Split(col[1], "/")
-	for i, dir := range chunks {
-		if i > 3 && strings.HasPrefix(dir, "TR") {
-			mr.Troncon = "TR " + strings.Trim(strings.TrimPrefix(dir, "TR"), " ")
+	reTR := regexp.MustCompile(`TR *[0-9]+`)
+	rePT := regexp.MustCompile(`PT *[0-9]+`)
+	trFound := false
+	for _, dir := range chunks {
+		if !trFound {
+			if trIndex := reTR.FindStringIndex(dir); trIndex != nil {
+				mr.Troncon = "TR " + strings.Replace(dir[trIndex[0]+2:trIndex[1]], " ", "", -1)
+				trFound = true
+				continue
+			}
 		}
-		if i > 4 && strings.HasPrefix(dir, "PT") {
-			mr.PtName = "PT " + strings.Trim(strings.TrimPrefix(dir, "PT"), " ")
-			break
+		if trFound {
+			if ptIndex := rePT.FindStringIndex(dir); ptIndex != nil {
+				mr.PtName = "PT " + strings.Replace(dir[ptIndex[0]+2:ptIndex[1]], " ", "", -1)
+				break
+			}
 		}
 	}
 	return getAlarms
