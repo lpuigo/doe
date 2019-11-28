@@ -28,6 +28,7 @@ const template string = `
 		<h4>&nbsp;</h4>
         <h3>Archive des <a href="/api/clients/archive">Clients</a></h3>
         <h3>Archive des <a href="/api/actors/archive">Equipes</a></h3>
+        <h3>Archive des <a href="/api/timesheet/archive">Pointages Horaire</a></h3>
 	</div>
 
 	<!-- 

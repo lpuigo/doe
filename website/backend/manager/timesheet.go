@@ -14,3 +14,11 @@ func (m Manager) GetTimeSheet(writer io.Writer, weekdate string) error {
 	}
 	return json.NewEncoder(writer).Encode(timesheet)
 }
+
+func (m Manager) TimeSheetsArchiveName() string {
+	return m.TimeSheets.ArchiveName()
+}
+
+func (m Manager) CreateTimeSheetsArchive(writer io.Writer) error {
+	return m.TimeSheets.CreateArchive(writer)
+}
