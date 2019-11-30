@@ -344,6 +344,9 @@ const (
 
 	amtsColStart      int = 2
 	amtsColMonthStart int = 5
+	amtsColHours      int = 36
+	amtsColExtraHours int = 37
+	amtsColActingDays int = 38
 	amtsColComment    int = 39
 	amtsColCompany    int = 41
 	amtsColClient     int = 42
@@ -354,9 +357,10 @@ const (
 	amtsColHolidaysHoursTpl  int = 47
 	amtsColOffHoursTpl       int = 48
 
-	amtsWeekEnd       int = 1
-	amtsPublicHoliday int = 2
-	amtsNextMonth     int = 3
+	amtsNormalDay int = 0
+	amtsWeekEnd   int = 1
+	amtsHoliday   int = 2
+	amtsNextMonth int = 3
 )
 
 func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, actors []*actors.Actor, monthTimeSheet *timesheets.TimeSheet, publicHolidays map[string]string) error {
@@ -389,7 +393,7 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 			dates[colNum] = curDate
 			switch {
 			case publicHolidays[curDate] != "":
-				dayAttr[colNum] = amtsPublicHoliday
+				dayAttr[colNum] = amtsHoliday
 				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHeaderHolidays)
 			case date.GetDayNum(curDate) > 4:
 				dayAttr[colNum] = amtsWeekEnd
@@ -402,6 +406,7 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 	}
 
 	_ = xf.SetCellValue(amtsSheetName, xlsx.RcToAxis(amtsRowDate, amtsColDate), date.DateFrom(monthTimeSheet.WeekDate).ToTime())
+	var countHour, countExtraHour, countActiveDays int
 	row := amtsRowStart
 	for _, actor := range actors {
 		ats, exists := monthTimeSheet.ActorsTimes[actor.Id]
@@ -415,29 +420,67 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColCompany), actor.Company)
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColClient), strings.Join(actor.Client, ", "))
 
+		countHour = 0
+		countExtraHour = 0
+		countActiveDays = 0
+
 	hoursLoop:
 		for dayNum, hour := range ats.Hours {
 			celladdr := xlsx.RcToAxis(row, amtsColMonthStart+dayNum)
-			switch dayAttr[dayNum] {
-			case amtsNextMonth:
+			dayStatus := dayAttr[dayNum]
+			if dayStatus == amtsNextMonth {
+				// End of the month reached ... done for this actor
 				break hoursLoop
-			case amtsPublicHoliday:
-				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursHolidays)
-			case amtsWeekEnd:
-				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursWeekEnd)
 			}
-			if !(dates[dayNum] >= actor.Period.Begin && !(actor.Period.End != "" && dates[dayNum] > actor.Period.End)) {
+			currentDate := dates[dayNum]
+			if !(currentDate >= actor.Period.Begin && !(actor.Period.End != "" && currentDate > actor.Period.End)) {
+				// actor not active ... no hours allowed then
 				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursOff)
 				continue hoursLoop
 			}
+		vacationLoop:
 			for _, holiday := range actor.Vacation {
-				if holiday.OverlapDate(dates[dayNum]) {
-					_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursHolidays)
+				if holiday.OverlapDate(currentDate) {
+					dayStatus = amtsHoliday
+					// skip any others vacation
+					break vacationLoop
+				}
+			}
+
+			switch dayStatus {
+			case amtsHoliday:
+				// in Holidays ... no hours allowed then
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursHolidays)
+				continue hoursLoop
+			case amtsWeekEnd:
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursWeekEnd)
+				if hour > 0 {
+					// Week End ... hours count as extra
+					countExtraHour += hour
+					countActiveDays++
+				} else {
 					continue hoursLoop
 				}
+			default:
+				// normal workind day
+				// extra hours when more than 7 hours
+				nh := hour
+				eh := 0
+				if nh > 7 {
+					nh = 7
+					eh = hour - 7
+				}
+				countHour += nh
+				countExtraHour += eh
+				countActiveDays++
 			}
 			_ = xf.SetCellInt(amtsSheetName, celladdr, hour)
 		}
+
+		_ = xf.SetCellInt(amtsSheetName, xlsx.RcToAxis(row, amtsColHours), countHour)
+		_ = xf.SetCellInt(amtsSheetName, xlsx.RcToAxis(row, amtsColExtraHours), countExtraHour)
+		_ = xf.SetCellInt(amtsSheetName, xlsx.RcToAxis(row, amtsColActingDays), countActiveDays)
+
 		row++
 	}
 
