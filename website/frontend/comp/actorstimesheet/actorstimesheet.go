@@ -438,12 +438,13 @@ func (atsm *ActorsTimeSheetModel) GetTimeSheet() {
 }
 
 func (atsm *ActorsTimeSheetModel) GetActorsTime(id int) *timesheet.ActorsTime {
-	at, found := atsm.TimeSheet.ActorsTimes[id]
-	if !found {
-		at = timesheet.NewActorTime()
-		atsm.TimeSheet.ActorsTimes[id] = at
-	}
-	return at
+	return atsm.TimeSheet.ActorsTimes[id]
+	//at, found := atsm.TimeSheet.ActorsTimes[id]
+	//if !found {
+	//	at = timesheet.NewActorTime()
+	//	atsm.TimeSheet.AddActorTime(id, at)
+	//}
+	//return at
 }
 
 func (atsm *ActorsTimeSheetModel) GetActiveDays(vm *hvue.VM, act *actor.Actor) []int {

@@ -9,31 +9,34 @@ import (
 
 const (
 	template string = `
-	<div class="calendar-row">
-		<div v-for="(hour, index) in times.Hours"
-			:key="index"
-			class="calendar-slot"
- 			:class="GetColumnColor(index)"
-			style="padding: 2px 0px;"
-		>
-			<el-row :gutter="10" type="flex" align="middle">
-				<el-col :offset="3" :span="6">
-					<el-button 
-							type="primary" plain icon="fas fa-calendar-plus" size="mini" 
-							@click="SetFullDay(index)"
-							:disabled="activedays[index] < 1"
-					></el-button>
-				</el-col>
-				<el-col :span="12">
-					<el-input-number v-model="times.Hours[index]"
-							size="mini" controls-position="right" style="width: 100%"
-							@change="HandleChange"
-							:min="0" :max="11"
-							:disabled="activedays[index] < 1"
-					></el-input-number>
-				</el-col>
-			</el-row>
+	<div>
+		<div v-if="times != null" class="calendar-row">
+			<div v-for="(hour, index) in times.Hours"
+				:key="index"
+				class="calendar-slot"
+				:class="GetColumnColor(index)"
+				style="padding: 2px 0px;"
+			>
+				<el-row :gutter="10" type="flex" align="middle">
+					<el-col :offset="3" :span="6">
+						<el-button 
+								type="primary" plain icon="fas fa-calendar-plus" size="mini" 
+								@click="SetFullDay(index)"
+								:disabled="activedays[index] < 1"
+						></el-button>
+					</el-col>
+					<el-col :span="12">
+						<el-input-number v-model="times.Hours[index]"
+								size="mini" controls-position="right" style="width: 100%"
+								@change="HandleChange"
+								:min="0" :max="11"
+								:disabled="activedays[index] < 1"
+						></el-input-number>
+					</el-col>
+				</el-row>
+			</div>
 		</div>
+		<div v-else>Sauvegarde nécessaire</div>	
 	</div>
 `
 )
