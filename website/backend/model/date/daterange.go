@@ -23,6 +23,20 @@ func (dsr DateStringRange) Overlap(odsr DateStringRange) DateStringRange {
 	return dsr
 }
 
+// OverlapDate checks if given date is in DateStringRange
+func (dsr DateStringRange) OverlapDate(day string) bool {
+	if dsr.Begin == "" && dsr.End == "" {
+		return false
+	}
+	if day >= dsr.Begin {
+		if dsr.End != "" && day > dsr.End {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 func (dsr DateStringRange) IsEmpty() bool {
 	return dsr.Begin == "" && dsr.End == ""
 }
@@ -32,6 +46,14 @@ func (dsr DateStringRange) Duration() int {
 		return 0
 	}
 	return int(date.NbDaysBetween(dsr.Begin, dsr.End)) + 1
+}
+
+func NewDateStringRangeForMonth(monthDate string) DateStringRange {
+	beg := date.GetFirstOfMonth(monthDate)
+	return DateStringRange{
+		Begin: beg,
+		End:   date.After(date.After(beg, 32), -1),
+	}
 }
 
 type DateRange struct {

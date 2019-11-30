@@ -76,7 +76,7 @@ func (tsp *TimeSheetsPersister) GetById(id int) *TimeSheetRecord {
 	return nil
 }
 
-// GetByWeekDate returns the TimeSheetRecord with given WeekDate (or nil if Id not found)
+// GetByWeekDate returns the TimeSheetRecord with given WeekDate (or nil if WeekDate not found)
 func (tsp *TimeSheetsPersister) GetByWeekDate(weekDate string) *TimeSheetRecord {
 	tsp.RLock()
 	defer tsp.RUnlock()
@@ -149,7 +149,7 @@ func (tsp *TimeSheetsPersister) Remove(rtsr *TimeSheetRecord) error {
 	return nil
 }
 
-//GetTimeSheetFor returns timesheet for given week date and actors (only actors active at given date are returned)
+// GetTimeSheetFor returns timesheet for given week date and actors (only actors active at given date are returned)
 func (tsp *TimeSheetsPersister) GetTimeSheetFor(weekdate string, actors []*actors.Actor) (*TimeSheet, error) {
 	tsp.RLock()
 	defer tsp.RUnlock()
@@ -169,6 +169,35 @@ func (tsp *TimeSheetsPersister) GetTimeSheetFor(weekdate string, actors []*actor
 	// clone timesheet with given actors ids
 	ntsr := tsr.CloneForActorIds(activeIds)
 	return ntsr, nil
+}
+
+// GetMonthlyTimeSheetFor returns monthly timesheet for given month date and actors (only actors active at given date are returned)
+func (tsp *TimeSheetsPersister) GetMonthlyTimeSheetFor(monthDate string, actors []*actors.Actor) *TimeSheet {
+	tsp.RLock()
+	defer tsp.RUnlock()
+
+	monthRange := date.NewDateStringRangeForMonth(monthDate)
+	activeIds := []int{}
+	for _, act := range actors {
+		if act.IsActiveOnDateRange(monthRange) {
+			activeIds = append(activeIds, act.Id)
+		}
+	}
+
+	monthTimeSheet := NewMonthlyTimeSheetForActorsIds(monthRange.Begin, activeIds)
+	weekDate := date.GetMonday(monthRange.Begin)
+	for {
+		tsr := tsp.getByWeekDate(weekDate)
+		if tsr != nil {
+			monthTimeSheet.Merge(tsr.TimeSheet)
+		}
+		weekDate = date.GetDateAfter(weekDate, 7)
+		if weekDate > monthRange.End {
+			break
+		}
+	}
+
+	return monthTimeSheet
 }
 
 //UpdateTimeSheet updates and persists given timesheet (if no timesheet record for same weekdate if found, creates a new timesheet record)

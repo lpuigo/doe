@@ -2,7 +2,7 @@ package bpu
 
 import (
 	"fmt"
-	"github.com/lpuig/ewin/chantiersalsace/parsesuivi/xls"
+	xlstool "github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"github.com/tealeg/xlsx"
 	"sort"
 	"strings"
@@ -125,19 +125,19 @@ func parseActivityRow(sh *xlsx.Sheet, row int) (p *Article, err error) {
 	cSize := sh.Cell(row, colPricesSize)
 	size, e := cSize.Int()
 	if e != nil {
-		err = fmt.Errorf("could not get size info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xls.RcToAxis(row, colPricesSize))
+		err = fmt.Errorf("could not get size info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xlstool.RcToAxis(row, colPricesSize))
 		return
 	}
 	cPrice := sh.Cell(row, colPricesPrice)
 	price, e := cPrice.Float()
 	if e != nil {
-		err = fmt.Errorf("could not get price info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xls.RcToAxis(row, colPricesPrice))
+		err = fmt.Errorf("could not get price info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xlstool.RcToAxis(row, colPricesPrice))
 		return
 	}
 	cWork := sh.Cell(row, colPricesWork)
 	work, e := cWork.Float()
 	if e != nil {
-		err = fmt.Errorf("could not get work info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xls.RcToAxis(row, colPricesWork))
+		err = fmt.Errorf("could not get work info '%s' in sheet '%s!%s'", cSize.Value, bpuPriceSheetName, xlstool.RcToAxis(row, colPricesWork))
 		return
 	}
 	p = NewArticle()
@@ -168,7 +168,7 @@ func (bpu *Bpu) parseBoxes(sheet *xlsx.Sheet) (err error) {
 		sizeCell := sheet.Cell(row, colBoxesSize)
 		size, e := sizeCell.Int()
 		if e != nil {
-			err = fmt.Errorf("could not get size info '%s' in sheet '%s!%s'", sizeCell.Value, bpuBoxeSheetName, xls.RcToAxis(row, colBoxesSize))
+			err = fmt.Errorf("could not get size info '%s' in sheet '%s!%s'", sizeCell.Value, bpuBoxeSheetName, xlstool.RcToAxis(row, colBoxesSize))
 			return
 		}
 		nBox := NewBox()

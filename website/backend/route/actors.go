@@ -85,7 +85,8 @@ func GetActorsWorkingHoursRecord(mgr *mgr.Manager, w http.ResponseWriter, r *htt
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.GetActorsWorkingHoursRecordXLSName(monthDate)))
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-	err = mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
+	//err = mgr.GetActorsWorkingHoursRecordXLS(w, monthDate)
+	err = mgr.GetActorsMonthlyTimeSheetsXLS(w, monthDate)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return

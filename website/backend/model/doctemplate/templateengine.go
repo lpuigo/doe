@@ -6,11 +6,11 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
+	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -31,17 +31,17 @@ const (
 	rowCEM42 int = 16
 	rowIMB   int = 21
 
-	rowRipHeader int = 8
+	rowRipHeader int = 9
 
-	colFI       int = 1
-	colPA       int = 2
-	colPB       int = 3
-	colCode     int = 4
-	colAddr     int = 5
-	colCity     int = 6
-	colNbEl     int = 7
-	colEndD     int = 8
-	colCEMPrice int = 8
+	colFI       int = 2
+	colPA       int = 3
+	colPB       int = 4
+	colCode     int = 5
+	colAddr     int = 6
+	colCity     int = 7
+	colNbEl     int = 8
+	colEndD     int = 9
+	colCEMPrice int = 9
 )
 
 type DocTemplateEngine struct {
@@ -78,11 +78,6 @@ func (te *DocTemplateEngine) GetWorksiteXLSAttachment(w io.Writer, ws *model.Wor
 		return err
 	}
 
-	coord := func(row, col int) string {
-		acol := excelize.ToAlphaString(col)
-		return acol + strconv.Itoa(row)
-	}
-
 	found := xf.GetSheetIndex(sheetName)
 	if found == 0 {
 		return fmt.Errorf("could not find EWIN sheet")
@@ -96,28 +91,28 @@ func (te *DocTemplateEngine) GetWorksiteXLSAttachment(w io.Writer, ws *model.Wor
 		"CEM42": rowCEM42,
 	}
 	for _, article := range client.GetOrangeArticles() {
-		xf.SetCellValue(sheetName, coord(cemLine[article.Name], colCEMPrice), article.Price)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(cemLine[article.Name], colCEMPrice), article.Price)
 	}
 
 	line := rowIMB
 	for _, ord := range ws.Orders {
 		for _, tr := range ord.Troncons {
-			xf.SetCellStr(sheetName, coord(line, colFI), ord.Ref)
-			xf.SetCellStr(sheetName, coord(line, colPA), ws.Ref)
-			xf.SetCellStr(sheetName, coord(line, colPB), tr.Pb.Ref)
-			xf.SetCellStr(sheetName, coord(line, colCode), tr.Article)
-			xf.SetCellStr(sheetName, coord(line, colAddr), tr.Pb.Address)
-			xf.SetCellStr(sheetName, coord(line, colCity), ws.City)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colFI), ord.Ref)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colPA), ws.Ref)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colPB), tr.Pb.Ref)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colCode), tr.Article)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colAddr), tr.Pb.Address)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colCity), ws.City)
 			nbEl := tr.NbRacco
 			if tr.Blockage {
 				nbEl = 0
 			}
-			xf.SetCellInt(sheetName, coord(line, colNbEl), nbEl)
+			xf.SetCellInt(sheetName, xlsx.RcToAxis(line, colNbEl), nbEl)
 			endDate := ""
 			if tr.MeasureDate != "" {
 				endDate = date.DateFrom(tr.MeasureDate).ToDDMMYYYY()
 			}
-			xf.SetCellStr(sheetName, coord(line, colEndD), endDate)
+			xf.SetCellStr(sheetName, xlsx.RcToAxis(line, colEndD), endDate)
 			line++
 		}
 	}
@@ -243,19 +238,19 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 	}
 
 	row := rowRipHeader
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), "Client")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), "Site")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), "Activité")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), "Item")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), "Info")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), "Code BPU")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), "Quantité")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Prix")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "Quant. Tr.")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "Travail")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "Installé")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Equipe")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "Date")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), "Client")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), "Site")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), "Activité")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), "Item")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), "Info")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), "Code BPU")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), "Quantité")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), "Prix")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), "Quant. Tr.")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "Travail")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Installé")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "Equipe")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), "Date")
 	for _, item := range its {
 		if !(item.Todo && item.Quantity > 0) {
 			continue
@@ -267,24 +262,24 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 				actors = append(actors, act)
 			}
 		}
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 0), item.Client)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Site)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Activity)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Name)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), item.Info)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), item.Article.Name)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Quantity)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), item.Price())
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.WorkQuantity)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.Work())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Client)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Site)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Activity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 4), item.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 5), item.Info)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 6), item.Article.Name)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 7), item.Quantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.Price())
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.WorkQuantity)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), item.Work())
 		if item.Done {
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "Oui")
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), strings.Join(actors, "\n"))
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), item.Date)
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Oui")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), strings.Join(actors, "\n"))
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), item.Date)
 		} else {
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), "")
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "")
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), "")
 		}
 	}
 	xf.UpdateLinkedValue()
@@ -294,7 +289,7 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 const (
 	awhrXLSFile   string = "CRA _COMPANY_ _DATE_.xlsx"
 	awhrSheetName string = "CRA"
-	awhrRowStart  int    = 4
+	awhrRowStart  int    = 5
 )
 
 func (te *DocTemplateEngine) GetActorsWorkingHoursRecordXLS(w io.Writer, monthDate string, actors []*actors.Actor) error {
@@ -320,22 +315,131 @@ func (te *DocTemplateEngine) GetActorsWorkingHoursRecordXLS(w io.Writer, monthDa
 			if !actor.IsActiveOnDateRange(strWeek) {
 				continue
 			}
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 1), strBeg)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 2), strEnd)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 3), actor.LastName)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 4), actor.FirstName)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 5), actor.Role)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 2), strBeg)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 3), strEnd)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 4), actor.LastName)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 5), actor.FirstName)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 6), actor.Role)
 			activity, comment := actor.GetActivityInfoFor(strWeek)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 6), activity*7)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 7), 0)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 8), activity)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 9), comment)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 7), activity*7)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 8), 0)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 9), activity)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 10), comment)
 
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 11), actor.Company)
-			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 12), strings.Join(actor.Client, ", "))
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 12), actor.Company)
+			xf.SetCellValue(awhrSheetName, xlsx.RcToAxis(row, 13), strings.Join(actor.Client, ", "))
 
 			row++
 		}
 	}
+	return xf.Write(w)
+}
+
+const (
+	amtsXLSFile   string = "CRA MONTH _COMPANY_ _DATE_.xlsx"
+	amtsSheetName string = "CRA"
+	amtsRowDate   int    = 3
+	amtsColDate   int    = 5
+	amtsRowStart  int    = 9
+
+	amtsColStart      int = 2
+	amtsColMonthStart int = 5
+	amtsColComment    int = 39
+	amtsColCompany    int = 41
+	amtsColClient     int = 42
+
+	amtsColWEHeaderTpl       int = 44
+	amtsColWEHoursTpl        int = 45
+	amtsColHolidaysHeaderTpl int = 46
+	amtsColHolidaysHoursTpl  int = 47
+	amtsColOffHoursTpl       int = 48
+
+	amtsWeekEnd       int = 1
+	amtsPublicHoliday int = 2
+	amtsNextMonth     int = 3
+)
+
+func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, actors []*actors.Actor, monthTimeSheet *timesheets.TimeSheet, publicHolidays map[string]string) error {
+	file := filepath.Join(te.tmplDir, amtsXLSFile)
+	xf, err := excelize.OpenFile(file)
+	if err != nil {
+		return err
+	}
+
+	styleHeaderWeekEnd, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColWEHeaderTpl))
+	styleHoursWeekEnd, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColWEHoursTpl))
+	styleHeaderHolidays, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColHolidaysHeaderTpl))
+	styleHoursHolidays, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColHolidaysHoursTpl))
+	styleHoursOff, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColOffHoursTpl))
+
+	found := xf.GetSheetIndex(amtsSheetName)
+	if found == 0 {
+		return fmt.Errorf("could not find CRA sheet")
+	}
+	dates := make([]string, 31) // dates of month
+	dayAttr := make([]int, 31)  // attr for days of month : 0 open, 1 WE, 2 NextMonth
+	var endOfMonth bool
+	for colNum := 0; colNum < 31; colNum++ {
+		curDate := date.GetDateAfter(monthTimeSheet.WeekDate, colNum)
+		if !endOfMonth && colNum > 27 && date.GetMonth(curDate) > monthTimeSheet.WeekDate {
+			endOfMonth = true
+		}
+		celladdr := xlsx.RcToAxis(amtsRowStart-1, amtsColDate+colNum)
+		if !endOfMonth {
+			dates[colNum] = curDate
+			switch {
+			case publicHolidays[curDate] != "":
+				dayAttr[colNum] = amtsPublicHoliday
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHeaderHolidays)
+			case date.GetDayNum(curDate) > 4:
+				dayAttr[colNum] = amtsWeekEnd
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHeaderWeekEnd)
+			}
+		} else {
+			dayAttr[colNum] = amtsNextMonth
+			_ = xf.SetCellStr(amtsSheetName, celladdr, "")
+		}
+	}
+
+	_ = xf.SetCellValue(amtsSheetName, xlsx.RcToAxis(amtsRowDate, amtsColDate), date.DateFrom(monthTimeSheet.WeekDate).ToTime())
+	row := amtsRowStart
+	for _, actor := range actors {
+		ats, exists := monthTimeSheet.ActorsTimes[actor.Id]
+		if !exists {
+			continue
+		}
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+0), actor.LastName)
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+1), actor.FirstName)
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+2), actor.Role)
+
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColCompany), actor.Company)
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColClient), strings.Join(actor.Client, ", "))
+
+	hoursLoop:
+		for dayNum, hour := range ats.Hours {
+			celladdr := xlsx.RcToAxis(row, amtsColMonthStart+dayNum)
+			switch dayAttr[dayNum] {
+			case amtsNextMonth:
+				break hoursLoop
+			case amtsPublicHoliday:
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursHolidays)
+			case amtsWeekEnd:
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursWeekEnd)
+			}
+			if !(dates[dayNum] >= actor.Period.Begin && !(actor.Period.End != "" && dates[dayNum] > actor.Period.End)) {
+				_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursOff)
+				continue hoursLoop
+			}
+			for _, holiday := range actor.Vacation {
+				if holiday.OverlapDate(dates[dayNum]) {
+					_ = xf.SetCellStyle(amtsSheetName, celladdr, celladdr, styleHoursHolidays)
+					continue hoursLoop
+				}
+			}
+			_ = xf.SetCellInt(amtsSheetName, celladdr, hour)
+		}
+		row++
+	}
+
 	return xf.Write(w)
 }

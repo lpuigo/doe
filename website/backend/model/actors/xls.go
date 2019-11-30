@@ -33,7 +33,12 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 
 	actors := []*Actor{}
 
-	for line, row := range xf.GetRows(sheetName) {
+	rows, err := xf.GetRows(sheetName)
+	if err != nil {
+		return nil, err
+	}
+
+	for line, row := range rows {
 		if line == 0 {
 			// skip header
 			continue
@@ -96,7 +101,11 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 }
 
 func getCellInt(xf *excelize.File, sheetname, axis string) (int, error) {
-	val, err := strconv.Atoi(xf.GetCellValue(sheetname, axis))
+	cellValue, err := xf.GetCellValue(sheetname, axis)
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.Atoi(cellValue)
 	if err != nil {
 		return 0, fmt.Errorf("misformated XLS file: cell %s!%s should contain int value", sheetname, axis)
 	}

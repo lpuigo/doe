@@ -144,9 +144,9 @@ func (ap *ActorsPersister) GetAllActors() []*Actor {
 	ap.RLock()
 	defer ap.RUnlock()
 
-	res := []*Actor{}
-	for _, ar := range ap.actors {
-		res = append(res, ar.Actor)
+	res := make([]*Actor, len(ap.actors))
+	for i, ar := range ap.actors {
+		res[i] = ar.Actor
 	}
 	return res
 }

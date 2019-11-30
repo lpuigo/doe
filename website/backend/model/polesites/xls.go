@@ -157,15 +157,15 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	if err != nil {
 		return nil, err
 	}
-	ps.Client = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2))
-	ps.Ref = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3))
-	ps.Manager = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4))
+	ps.Client, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2))
+	ps.Ref, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3))
+	ps.Manager, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4))
 	ps.OrderDate, err = getCellDate(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 5))
 	if err != nil {
 		return nil, err
 	}
-	ps.Status = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6))
-	ps.Comment = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7))
+	ps.Status, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6))
+	ps.Comment, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7))
 
 	//
 	// Read Poles Header & Info
@@ -175,7 +175,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	}
 	productKeys := map[int]string{}
 	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4} {
-		productKeys[col] = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
+		productKeys[col], _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
 	}
 	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
 		return ps, nil
@@ -186,7 +186,12 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	}
 
 	id := 0
-	for line, row := range xf.GetRows(sheetName) {
+
+	rows, err := xf.GetRows(sheetName)
+	if err != nil {
+		return nil, err
+	}
+	for line, row := range rows {
 		if line < rowPoleInfo {
 			continue
 		}
@@ -303,7 +308,10 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 }
 
 func checkValue(xf *excelize.File, sheetname, axis, value string) error {
-	foundValue := xf.GetCellValue(sheetname, axis)
+	foundValue, err := xf.GetCellValue(sheetname, axis)
+	if err != nil {
+		return err
+	}
 	if foundValue != value {
 		return fmt.Errorf("misformated XLS file: cell %s!%s should contain '%s' (found '%s' instead)",
 			sheetname, axis,
@@ -314,7 +322,11 @@ func checkValue(xf *excelize.File, sheetname, axis, value string) error {
 }
 
 func getCellInt(xf *excelize.File, sheetname, axis string) (int, error) {
-	val, err := strconv.Atoi(xf.GetCellValue(sheetname, axis))
+	foundValue, err := xf.GetCellValue(sheetname, axis)
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.Atoi(foundValue)
 	if err != nil {
 		return 0, fmt.Errorf("misformated XLS file: cell %s!%s should contain int value", sheetname, axis)
 	}
@@ -322,7 +334,11 @@ func getCellInt(xf *excelize.File, sheetname, axis string) (int, error) {
 }
 
 func getCellFloat(xf *excelize.File, sheetname, axis string) (float64, error) {
-	val, err := strconv.ParseFloat(xf.GetCellValue(sheetname, axis), 64)
+	foundValue, err := xf.GetCellValue(sheetname, axis)
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.ParseFloat(foundValue, 64)
 	if err != nil {
 		return 0, fmt.Errorf("misformated XLS file: cell %s!%s should contain float value", sheetname, axis)
 	}
@@ -330,7 +346,7 @@ func getCellFloat(xf *excelize.File, sheetname, axis string) (float64, error) {
 }
 
 func getCellDate(xf *excelize.File, sheetname, axis string) (string, error) {
-	foundValue := xf.GetCellValue(sheetname, axis)
+	foundValue, _ := xf.GetCellValue(sheetname, axis)
 	foundDate, err := time.Parse("01-02-06", foundValue)
 	if err != nil {
 		foundDate, err = time.Parse("1/2/06 15:04", foundValue)

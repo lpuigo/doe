@@ -90,6 +90,12 @@ func GetDayNum(d string) int {
 	return wd - 1
 }
 
+func NbDaysBetween(beg, end string) int {
+	b := DateFrom(beg)
+	e := DateFrom(end)
+	return int(float64(e.ToTime().Sub(b.ToTime()) / time.Duration(24*time.Hour)))
+}
+
 func GetMonth(d string) string {
 	return DateFrom(d).GetMonth().String()
 }
