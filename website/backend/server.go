@@ -34,6 +34,7 @@ const (
 	WorksitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
 	RipsitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
 	PolesitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	FoasitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Foasites`
 	UsersDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
 	ActorsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
 	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
@@ -53,6 +54,7 @@ func main() {
 			WorksitesDir:  WorksitesDir,
 			RipsitesDir:   RipsitesDir,
 			PolesitesDir:  PolesitesDir,
+			FoasitesDir:   FoasitesDir,
 			UsersDir:      UsersDir,
 			ActorsDir:     ActorsDir,
 			TimeSheetsDir: TimeSheetsDir,
@@ -139,6 +141,14 @@ func main() {
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/dictzip", withUserManager("DictZip", route.DictZip)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/export", withUserManager("GetPolesiteExport", route.GetPolesiteExport)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("UpdatePolesite", route.UpdatePolesite)).Methods("PUT")
+
+	// Foasites methods
+	router.HandleFunc("/api/foasites", withUserManager("GetFoaSitesInfo", route.GetFoaSitesInfo)).Methods("GET")
+	router.HandleFunc("/api/foasites/archive", withUserManager("GetFoaSitesArchive", route.GetFoaSitesArchive)).Methods("GET")
+	//router.HandleFunc("/api/foasites/stat/{freq}", withUserManager("GetFoaSitesStats", route.GetFoaSitesStats)).Methods("GET")
+	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("GetFoaSite", route.GetFoaSite)).Methods("GET")
+	router.HandleFunc("/api/foasites/{fsid:[0-9]+}/attach", withUserManager("GetFoaSiteAttachement", route.GetFoaSiteAttachement)).Methods("GET")
+	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("UpdateFoaSite", route.UpdateFoaSite)).Methods("PUT")
 
 	// Clients methods
 	router.HandleFunc("/api/clients/archive", withUserManager("GetClientsArchive", route.GetClientsArchive)).Methods("GET")

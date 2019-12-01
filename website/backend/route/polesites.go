@@ -35,7 +35,7 @@ func GetPolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	psid, err := strconv.Atoi(vars["psid"])
 	if err != nil {
-		AddError(w, logmsg, "mis-formatted Poleite id '"+vars["psid"]+"'", http.StatusBadRequest)
+		AddError(w, logmsg, "mis-formatted Polesite id '"+vars["psid"]+"'", http.StatusBadRequest)
 		return
 	}
 	psr := mgr.Polesites.GetById(psid)

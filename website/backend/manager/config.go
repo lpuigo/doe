@@ -4,6 +4,7 @@ type ManagerConfig struct {
 	WorksitesDir  string
 	RipsitesDir   string
 	PolesitesDir  string
+	FoasitesDir   string
 	UsersDir      string
 	ActorsDir     string
 	TimeSheetsDir string

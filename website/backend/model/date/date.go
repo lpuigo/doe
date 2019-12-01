@@ -35,6 +35,7 @@ func (d Date) ToTime() time.Time {
 	return time.Time(d)
 }
 
+// String returns format YYYY-MM-DD date string
 func (d Date) String() string {
 	return time.Time(d).Format(TimeJSLayout)
 }

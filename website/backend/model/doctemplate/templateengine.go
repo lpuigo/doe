@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/foasites"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
@@ -204,7 +205,7 @@ func (te *DocTemplateEngine) GetRipsiteXLSAttachement(w io.Writer, site *ripsite
 	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
-// GetRipsiteXLSAttachementName returns the name of the XLSx file pertaining to given Ripsite
+// GetPolesiteXLSAttachementName returns the name of the XLSx file pertaining to given Polesite
 func (te *DocTemplateEngine) GetPolesiteXLSAttachementName(site *polesites.PoleSite) string {
 	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.Ref)
 }
@@ -224,7 +225,27 @@ func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesi
 	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
-// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given items
+// GetFoaSiteXLSAttachementName returns the name of the XLSx file pertaining to given FoaSite
+func (te *DocTemplateEngine) GetFoaSiteXLSAttachementName(site *foasites.FoaSite) string {
+	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.Ref)
+}
+
+// GetFoaSiteXLSAttachement generates and writes on given writer the attachment data pertaining to given FoaSite
+func (te *DocTemplateEngine) GetFoaSiteXLSAttachement(w io.Writer, site *foasites.FoaSite, getClient clients.ClientByName, actorById clients.ActorById) error {
+	client := getClient(site.Client)
+	if client == nil {
+		return fmt.Errorf("unknown client '%s'", site.Client)
+	}
+
+	its, err := site.Itemize(client.Bpu)
+	if err != nil {
+		return fmt.Errorf("unable to create items: %s", err.Error())
+	}
+
+	return te.GetItemsXLSAttachement(w, its, actorById)
+}
+
+// GetItemsXLSAttachement generates and writes on given writer the attachment data pertaining to given items
 func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorById) error {
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
 	xf, err := excelize.OpenFile(file)

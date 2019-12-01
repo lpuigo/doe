@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
+	fs "github.com/lpuig/ewin/doe/website/backend/model/foasites"
 	ps "github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	rs "github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
@@ -18,6 +19,7 @@ type Manager struct {
 	Worksites      *ws.WorkSitesPersister
 	Ripsites       *rs.SitesPersister
 	Polesites      *ps.PoleSitesPersister
+	Foasites       *fs.FoaSitesPersister
 	Users          *users.UsersPersister
 	Actors         *actors.ActorsPersister
 	TimeSheets     *timesheets.TimeSheetsPersister
@@ -45,6 +47,12 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 	psp, err := ps.NewPoleSitesPersist(conf.PolesitesDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create Polesites persister: %s", err.Error())
+	}
+
+	// Init FoaSites persister
+	fsp, err := fs.NewFoaSitesPersist(conf.FoasitesDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create Foasites persister: %s", err.Error())
 	}
 
 	// Init Users persister
@@ -82,6 +90,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		Worksites:      wsp,
 		Ripsites:       rsp,
 		Polesites:      psp,
+		Foasites:       fsp,
 		Users:          up,
 		Actors:         ap,
 		TimeSheets:     tsp,
@@ -128,6 +137,12 @@ func (m *Manager) Reload() error {
 		return fmt.Errorf("could not populate Polesites: %s", err.Error())
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", m.Polesites.NbSites()))
+
+	err = m.Foasites.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate Foasites: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Foasites", m.Foasites.NbSites()))
 
 	err = m.Users.LoadDirectory()
 	if err != nil {
