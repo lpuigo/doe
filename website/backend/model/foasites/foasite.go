@@ -22,6 +22,25 @@ type FoaSite struct {
 	Foas []*Foa
 }
 
+func NewFoaSite() *FoaSite {
+	return &FoaSite{
+		Id:         -1,
+		Client:     "",
+		Ref:        "",
+		Manager:    "",
+		OrderDate:  "",
+		UpdateDate: "",
+		Status:     "",
+		Comment:    "",
+		Foas:       []*Foa{},
+	}
+}
+
+func (fs *FoaSite) AddFoa(f *Foa) {
+	f.Id = len(fs.Foas)
+	fs.Foas = append(fs.Foas, f)
+}
+
 func (fs *FoaSite) GetInfo() *fm.FoaSiteInfo {
 	fsi := fm.NewBEFoaSiteInfo()
 

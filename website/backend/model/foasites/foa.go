@@ -17,6 +17,16 @@ type Foa struct {
 	State *State
 }
 
+func NewFoa() *Foa {
+	return &Foa{
+		Id:    -1,
+		Ref:   "",
+		Insee: "",
+		Type:  "",
+		State: NewState(),
+	}
+}
+
 func (f *Foa) SearchString() string {
 	var searchBuilder strings.Builder
 	fmt.Fprintf(&searchBuilder, "foa%s:%s,", "Ref", strings.ToUpper(f.Ref))
