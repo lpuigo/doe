@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/adminmodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/foasitetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoicetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/invoiceupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/polesitetable"
@@ -39,6 +40,7 @@ func main() {
 		//ripsiteupdatemodal.RegisterComponent(),
 		worksitetable.RegisterComponent(),
 		ripsitetable.RegisterComponent(),
+		foasitetable.RegisterComponent(),
 		polesitetable.RegisterComponent(),
 		invoicetable.RegisterComponent(),
 		teamproductivitymodal.RegisterComponent(),
@@ -99,6 +101,7 @@ type MainPageModel struct {
 
 	WorksiteInfos []*fm.WorksiteInfo `js:"worksiteInfos"`
 	RipsiteInfos  []*fm.RipsiteInfo  `js:"ripsiteInfos"`
+	FoasiteInfos  []*fm.FoaSiteInfo  `js:"foasiteInfos"`
 	PolesiteInfos []*fm.PolesiteInfo `js:"polesiteInfos"`
 }
 
@@ -120,6 +123,7 @@ func (m *MainPageModel) ClearModes() {
 func (m *MainPageModel) ClearSiteInfos() {
 	m.WorksiteInfos = []*fm.WorksiteInfo{}
 	m.RipsiteInfos = []*fm.RipsiteInfo{}
+	m.FoasiteInfos = []*fm.FoaSiteInfo{}
 	m.PolesiteInfos = []*fm.PolesiteInfo{}
 }
 
@@ -141,6 +145,8 @@ func (m *MainPageModel) SetMode() {
 			m.SiteMode = "Orange"
 		} else if len(m.RipsiteInfos) > 0 {
 			m.SiteMode = "Rip"
+		} else if len(m.FoasiteInfos) > 0 {
+			m.SiteMode = "Foa"
 		} else if len(m.PolesiteInfos) > 0 {
 			m.SiteMode = "Poles"
 		}
@@ -183,6 +189,7 @@ func (m *MainPageModel) UserLogout() {
 func (m *MainPageModel) GetSiteInfos() {
 	go m.callGetWorkSiteInfos()
 	go m.callGetRipSiteInfos()
+	go m.callGetFoaSiteInfos()
 	go m.callGetPoleSiteInfos()
 }
 
@@ -192,6 +199,8 @@ func (m *MainPageModel) GetActiveSiteInfos() {
 		go m.callGetWorkSiteInfos()
 	case "Rip":
 		go m.callGetRipSiteInfos()
+	case "Foa":
+		go m.callGetFoaSiteInfos()
 	case "Poles":
 		go m.callGetPoleSiteInfos()
 	}
@@ -203,6 +212,10 @@ func (m *MainPageModel) GetWorkSiteInfos() {
 
 func (m *MainPageModel) GetRipSiteInfos() {
 	go m.callGetRipSiteInfos()
+}
+
+func (m *MainPageModel) GetFoaSiteInfos() {
+	go m.callGetFoaSiteInfos()
 }
 
 func (m *MainPageModel) GetPoleSiteInfos() {
@@ -434,6 +447,34 @@ func (m *MainPageModel) callGetRipSiteInfos() {
 		rsis = append(rsis, rs)
 	})
 	sites = rsis
+}
+
+func (m *MainPageModel) callGetFoaSiteInfos() {
+	req := xhr.NewRequest("GET", "/api/foasites")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+	sites := m.FoasiteInfos
+	//m.RipsiteInfos = nil
+	defer func() {
+		m.FoasiteInfos = sites
+		m.SetMode()
+	}()
+	//m.DispPrj = false
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(m.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(m.VM, req)
+		return
+	}
+	fsis := []*fm.FoaSiteInfo{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		rs := fm.NewFoaSiteInfoFromJS(item)
+		fsis = append(fsis, rs)
+	})
+	sites = fsis
 }
 
 func (m *MainPageModel) callGetPoleSiteInfos() {

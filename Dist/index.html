@@ -76,6 +76,7 @@
                     <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini" @change="CheckSiteMode">
                         <el-radio-button v-if="worksiteInfos.length > 0" label="Orange">Orange : {{worksiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="ripsiteInfos.length > 0" label="Rip">RIP : {{ripsiteInfos.length}}</el-radio-button>
+                        <el-radio-button v-if="foasiteInfos.length > 0" label="Foa">FOA : {{foasiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="polesiteInfos.length > 0" label="Poles">Poteaux : {{polesiteInfos.length}}</el-radio-button>
                     </el-radio-group>
 
@@ -93,9 +94,8 @@
                         <el-radio-button v-if="User.Permissions.Review" label="Review">Suivi</el-radio-button>
                     </el-radio-group>
 
-
-
                     <span v-if="SiteMode == 'Poles'"></span>
+                    <span v-if="SiteMode == 'Foa'"></span>
 
                     <!-- Actions Refresh / Stats / Admin actions -->
                     <el-button-group>
@@ -160,10 +160,17 @@
                         @new_ripsite=""
                 ></ripsite-table>
             </el-main>
-            <el-main v-if="SiteMode == 'Poles'" style="height:100%; padding: 0px 0px;">
+            <el-main v-if="SiteMode == 'Foa'" style="height:100%; padding: 0px 0px;">
 <!--
-                <pre>{{polesiteInfos}}</pre>
+                <pre>{{foasiteInfos}}</pre>
 -->
+                <foasite-table
+                        :foasiteinfos="foasiteInfos"
+                        :user="User"
+                        @new_foasite=""
+                ></foasite-table>
+            </el-main>
+            <el-main v-if="SiteMode == 'Poles'" style="height:100%; padding: 0px 0px;">
                 <polesite-table
                         :polesiteinfos="polesiteInfos"
                         :user="User"
