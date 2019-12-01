@@ -55,6 +55,25 @@ func (f *Foa) Clone() *Foa {
 	return &Foa{Object: json.Parse(json.Stringify(f))}
 }
 
+func (f *Foa) TotalBlockedDone() (total, blocked, done int) {
+	switch f.State.Status {
+	case foaconst.StateToDo:
+		total = 1
+	case foaconst.StateIncident:
+		total = 1
+		blocked = 1
+	case foaconst.StateDone:
+		total = 1
+		done = 1
+	case foaconst.StateAttachment:
+		total = 1
+		done = 1
+	case foaconst.StateCancelled:
+	default:
+	}
+	return
+}
+
 func FoaStateLabel(state string) string {
 	switch state {
 	case foaconst.StateToDo:
@@ -79,6 +98,16 @@ func GetStatesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(foaconst.StateDone, foaconst.LabelDone),
 		elements.NewValueLabel(foaconst.StateAttachment, foaconst.LabelAttachment),
 		elements.NewValueLabel(foaconst.StateCancelled, foaconst.LabelCancelled),
+	}
+}
+
+func GetFilterType() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(foaconst.FilterValueAll, foaconst.FilterLabelAll),
+		elements.NewValueLabel(foaconst.FilterValueRef, foaconst.FilterLabelRef),
+		elements.NewValueLabel(foaconst.FilterValueInsee, foaconst.FilterLabelInsee),
+		elements.NewValueLabel(foaconst.FilterValueType, foaconst.FilterLabelType),
+		elements.NewValueLabel(foaconst.FilterValueComment, foaconst.FilterLabelComment),
 	}
 }
 

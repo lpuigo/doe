@@ -22,7 +22,17 @@ type FoaSite struct {
 }
 
 func NewFoaSite() *FoaSite {
-	return &FoaSite{Object: tools.O()}
+	fs := &FoaSite{Object: tools.O()}
+	fs.Id = -1
+	fs.Client = ""
+	fs.Ref = ""
+	fs.Manager = ""
+	fs.OrderDate = ""
+	fs.UpdateDate = ""
+	fs.Status = ""
+	fs.Comment = ""
+	fs.Foas = []*Foa{}
+	return fs
 }
 
 func FoaSiteFromJS(o *js.Object) *FoaSite {
@@ -62,6 +72,16 @@ func (fs *FoaSite) Copy(ofs *FoaSite) {
 
 func (fs *FoaSite) Clone() *FoaSite {
 	return &FoaSite{Object: json.Parse(json.Stringify(fs))}
+}
+
+func (fs *FoaSite) GetProgress() (total, blocked, done int) {
+	for _, foa := range fs.Foas {
+		t, b, d := foa.TotalBlockedDone()
+		total += t
+		blocked += b
+		done += d
+	}
+	return
 }
 
 func FoaSiteStatusLabel(status string) string {

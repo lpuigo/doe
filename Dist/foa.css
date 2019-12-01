@@ -1,0 +1,116 @@
+/* ====================================================================================================================
+    === Actor Table style ===
+ */
+
+.el-table .actor-row-candidate {
+    background: #e1edff;
+}
+
+.el-table .actor-row-candidate:hover {
+    background: #d8e3f2;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-active {
+    background: #ffffff;
+}
+
+.el-table .actor-row-active:hover {
+    background: #f0f0f0;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-holiday {
+    background: #e1d4ff;
+}
+
+.el-table .actor-row-holiday:hover {
+    background: #d5c9f0;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-gone {
+    background: #cccccc;
+}
+
+.el-table .actor-row-gone:hover {
+    background: #bdbdbd;
+    transition: background-color .15s ease;
+}
+
+.el-table .actor-row-error {
+    background: #ff644d;
+}
+
+.el-table .actor-row-error:hover {
+    background: #ed5d4a;
+    transition: background-color .15s ease;
+}
+
+/* ====================================================================================================================
+    === Actor Calendar style ===
+ */
+
+.calendar-row {
+    display: flex !important;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0px 0px !important;
+}
+
+.calendar-row .calendar-slot {
+    flex-grow: 1;
+    margin: 1px 1px;
+    text-align: center;
+    border-style: solid;
+    border-width: 0px;
+    border-radius: 3px;
+    border-color: #696969;
+}
+
+.calendar-slot.header {
+    background: #eeeeee;
+}
+
+.calendar-slot.header.week-end {
+    background: #bbbbbb;
+}
+
+.calendar-slot.header.day-off {
+    background: #aa82b8;
+    color: #f8e6ff;
+}
+
+.calendar-slot.day-off {
+    background: #c394d4;
+}
+
+.calendar-slot.active.day-off {
+    background: #bbbbbb;
+}
+
+.calendar-slot.active {
+    background: #86d47f;
+}
+
+.calendar-slot.active.week-end {
+    background: #83b37d;
+}
+
+.calendar-slot.holiday {
+    background: #c394d4;
+}
+
+.calendar-slot.error {
+    background: #f0a878;
+}
+
+.calendar-slot.inactive {
+    background: #eeeeee;
+}
+
+.calendar-slot.today {
+    margin: 0px 1px;
+    border-width: 1px;
+}
