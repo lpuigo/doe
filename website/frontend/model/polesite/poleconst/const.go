@@ -59,15 +59,21 @@ const (
 	FilterLabelDict     string = "DICT"
 	FilterLabelDictInfo string = "DICT Info"
 
-	MaterialWood  string = "Bois"
-	MaterialMetal string = "Métal"
-	MaterialComp  string = "Composite"
+	MaterialWood          string = "Bois"
+	MaterialMetal         string = "Métal"
+	MaterialEnforcedMetal string = "Métal Renforcé"
+	MaterialComp          string = "Composite"
 
-	ProductCoated  string = "Enrobé"
-	ProductMoise   string = "Moisé"
-	ProductCouple  string = "Couplé"
-	ProductReplace string = "Remplacement"
-	ProductRemove  string = "Retrait"
+	ProductCoated           string = "Enrobé"
+	ProductHandDigging      string = "Implantation manuelle"
+	ProductMoise            string = "Moisé"
+	ProductCouple           string = "Couplé"
+	ProductReplace          string = "Remplacement"
+	ProductTrickyReplace    string = "Remplacement complexe"
+	ProductRemove           string = "Retrait"
+	ProductVacuumTruck      string = "Aspiratrice"
+	ProductReplenishment    string = "Réappro."
+	ProductFarReplenishment string = "Réappro. (>50km)"
 
 	OpacityBlur     float64 = 0.2
 	OpacityNormal   float64 = 0.5

@@ -215,6 +215,7 @@ func GetMaterialsValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.MaterialWood, poleconst.MaterialWood),
 		elements.NewValueLabel(poleconst.MaterialMetal, poleconst.MaterialMetal),
+		elements.NewValueLabel(poleconst.MaterialEnforcedMetal, poleconst.MaterialEnforcedMetal),
 		elements.NewValueLabel(poleconst.MaterialComp, poleconst.MaterialComp),
 	}
 }
@@ -222,10 +223,15 @@ func GetMaterialsValueLabel() []*elements.ValueLabel {
 func GetProductsValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
+		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
 		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
 		elements.NewValueLabel(poleconst.ProductCouple, poleconst.ProductCouple),
 		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
+		elements.NewValueLabel(poleconst.ProductTrickyReplace, poleconst.ProductTrickyReplace),
 		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
+		elements.NewValueLabel(poleconst.ProductVacuumTruck, poleconst.ProductVacuumTruck),
+		elements.NewValueLabel(poleconst.ProductReplenishment, poleconst.ProductReplenishment),
+		elements.NewValueLabel(poleconst.ProductFarReplenishment, poleconst.ProductFarReplenishment),
 	}
 }
 
