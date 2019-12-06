@@ -183,7 +183,7 @@ const template string = `<div>
 
         <el-collapse-item name="3">
             <template slot="title">
-                <h1 class="title">DT, DICT et DA</h1>
+                <h1 class="title">DT, DICT et DA&nbsp;<a v-if="editedpolemarker.Pole.DictRef != ''" :href="GetDICTUrl()" rel="noopener noreferrer" target="_blank">(Carte DICT.fr)</a></h1>
             </template>
             <!-- DT -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -584,4 +584,13 @@ func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
 
 func (pem *PoleEditModel) ChapterChange(vm *hvue.VM, val *js.Object) {
 	vm.Emit("update:chapters", val)
+}
+
+func (pem *PoleEditModel) GetDICTUrl(vm *hvue.VM) string {
+	pem = PoleEditModelFromJS(vm.Object)
+	if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
+		return ""
+	}
+	url := "https://apps.sogelink.fr/declaration/?tmstp=1574760154241#!/suivi/carto/302791299?idAgence=86986&filtre=" + pem.EditedPoleMarker.Pole.DictRef
+	return url
 }
