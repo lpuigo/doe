@@ -4,9 +4,9 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/foainfoupdate"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/foaupdate"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/foaupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/stateupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmfoa "github.com/lpuig/ewin/doe/website/frontend/model/foasite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/foasite/foaconst"
@@ -26,8 +26,8 @@ func main() {
 	hvue.NewVM(
 		ripsiteinfo.RegisterComponent(),
 		foainfoupdate.RegisterComponent(),
-		stateupdatemodal.RegisterComponent(),
-		rippullingupdate.RegisterComponent(),
+		foaupdatemodal.RegisterComponent(),
+		foaupdate.RegisterComponent(),
 		hvue.El("#foasites_app"),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
@@ -145,9 +145,9 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 }
 
 //
-func (mpm *MainPageModel) UpdateState(state *fmfoa.State) {
-	//sum := stateupdatemodal.StateUpdateModalModelFromJS(mpm.VM.Refs("StateUpdateModal"))
-	//sum.Show(state)
+func (mpm *MainPageModel) UpdateState(foas *fmfoa.FoaSite) {
+	sum := foaupdatemodal.FoaUpdateModalModelFromJS(mpm.VM.Refs("FoaUpdateModal"))
+	sum.Show(foas)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

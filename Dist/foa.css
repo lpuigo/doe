@@ -1,116 +1,69 @@
-/* ====================================================================================================================
-    === Actor Table style ===
+/* =====================================================================================================================
+   === Foa Row Style
  */
 
-.el-table .actor-row-candidate {
-    background: #e1edff;
+/* disable element ui hover*/
+.el-table--enable-row-transition .el-table__body tr:hover > td {
+    background-color: initial !important;
 }
 
-.el-table .actor-row-candidate:hover {
-    background: #d8e3f2;
-    transition: background-color .15s ease;
+.el-table--enable-row-transition .el-table__body tr:hover > td {
+    background-color: initial !important;
 }
 
-.el-table .actor-row-active {
+.el-table .foa-row-todo {
     background: #ffffff;
 }
 
-.el-table .actor-row-active:hover {
-    background: #f0f0f0;
+.el-table .foa-row-todo:hover {
+    background: #e6e6e6;
     transition: background-color .15s ease;
 }
 
-.el-table .actor-row-holiday {
-    background: #e1d4ff;
+.el-table .foa-row-incident {
+    background: #ff9580;
 }
 
-.el-table .actor-row-holiday:hover {
-    background: #d5c9f0;
+.el-table .foa-row-incident:hover {
+    background: #e68675;
     transition: background-color .15s ease;
 }
 
-.el-table .actor-row-gone {
-    background: #cccccc;
+.el-table .foa-row-done {
+    background: #d7f5d0;
 }
 
-.el-table .actor-row-gone:hover {
-    background: #bdbdbd;
+.el-table .foa-row-done:hover {
+    background: #bad4b4;
     transition: background-color .15s ease;
 }
 
-.el-table .actor-row-error {
-    background: #ff644d;
+.el-table .foa-row-attachment {
+    background: #d9d1ad;
 }
 
-.el-table .actor-row-error:hover {
-    background: #ed5d4a;
+.el-table .foa-row-attachment:hover {
+    background: #c2bb9b;
     transition: background-color .15s ease;
 }
 
-/* ====================================================================================================================
-    === Actor Calendar style ===
- */
-
-.calendar-row {
-    display: flex !important;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0px 0px !important;
+.el-table .foa-row-cancelled {
+    background: #e6e1e1;
+    color: #999696;
 }
 
-.calendar-row .calendar-slot {
-    flex-grow: 1;
-    margin: 1px 1px;
-    text-align: center;
-    border-style: solid;
-    border-width: 0px;
-    border-radius: 3px;
-    border-color: #696969;
+.el-table .foa-row-cancelled:hover {
+    background: #ccc8c8;
+    transition: background-color .15s ease;
 }
 
-.calendar-slot.header {
-    background: #eeeeee;
+.el-table .foa-row-error {
+    background: #ff6666;
 }
 
-.calendar-slot.header.week-end {
-    background: #bbbbbb;
+.el-table .foa-row-error:hover {
+    background: #d95757;
+    transition: background-color .15s ease;
 }
 
-.calendar-slot.header.day-off {
-    background: #aa82b8;
-    color: #f8e6ff;
-}
 
-.calendar-slot.day-off {
-    background: #c394d4;
-}
-
-.calendar-slot.active.day-off {
-    background: #bbbbbb;
-}
-
-.calendar-slot.active {
-    background: #86d47f;
-}
-
-.calendar-slot.active.week-end {
-    background: #83b37d;
-}
-
-.calendar-slot.holiday {
-    background: #c394d4;
-}
-
-.calendar-slot.error {
-    background: #f0a878;
-}
-
-.calendar-slot.inactive {
-    background: #eeeeee;
-}
-
-.calendar-slot.today {
-    margin: 0px 1px;
-    border-width: 1px;
-}

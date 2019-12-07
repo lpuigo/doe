@@ -74,6 +74,10 @@ func (f *Foa) TotalBlockedDone() (total, blocked, done int) {
 	return
 }
 
+func (f *Foa) GetRowStyle() string {
+	return FoaRowClassName(f.State.Status)
+}
+
 func FoaStateLabel(state string) string {
 	switch state {
 	case foaconst.StateToDo:
@@ -112,7 +116,6 @@ func GetFilterType() []*elements.ValueLabel {
 }
 
 func FoaRowClassName(status string) string {
-	var res string = ""
 	switch status {
 	case foaconst.StateToDo:
 		return "foa-row-todo"
@@ -124,9 +127,7 @@ func FoaRowClassName(status string) string {
 		return "foa-row-attachment"
 	case foaconst.StateCancelled:
 		return "foa-row-cancelled"
-
 	default:
-		res = "worksite-row-error"
+		return "foa-row-error"
 	}
-	return res
 }

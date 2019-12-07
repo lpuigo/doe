@@ -23,3 +23,29 @@ func NewState() *State {
 	ns.Comment = ""
 	return ns
 }
+
+// Copy copies attributes of os in s
+func (s *State) Copy(os *State) {
+	s.Status = os.Status
+	s.Actors = os.Actors[:]
+	s.Date = os.Date
+	s.Comment = os.Comment
+}
+
+func (s *State) IsCanceled() bool {
+	switch s.Status {
+	case foaconst.StateCancelled:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s *State) IsToDo() bool {
+	switch s.Status {
+	case foaconst.StateToDo:
+		return true
+	default:
+		return false
+	}
+}
