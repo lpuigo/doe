@@ -85,15 +85,25 @@ func (fum *FoaUpdateModel) SetSelected(f *fmfoa.Foa) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HTML Methods
 
+func (fum *FoaUpdateModel) HandleSelectionChange(vm *hvue.VM, val *js.Object) {
+	fum = FoaUpdateModelFromJS(vm.Object)
+	fum.SelectedFoas.Foas = []*fmfoa.Foa{}
+	val.Call("forEach", func(foa *fmfoa.Foa) {
+		fum.SelectedFoas.Foas = append(fum.SelectedFoas.Foas, foa)
+	})
+}
+
+func (fum *FoaUpdateModel) AddFoa(vm *hvue.VM) {
+	fum.VM.Emit("add-foa")
+}
+
 func (fum *FoaUpdateModel) EditFoa(vm *hvue.VM, f *fmfoa.Foa) {
 	fum.SetSelected(f)
 	fum.VM.Emit("update-state", fum.SelectedFoas, f)
-	fum.ClearSelection()
 }
 
 func (fum *FoaUpdateModel) EditSelectedFoas(vm *hvue.VM) {
 	fum.VM.Emit("update-state", fum.SelectedFoas, nil)
-	fum.ClearSelection()
 }
 
 func (fum *FoaUpdateModel) GetFilteredJunctions() []*fmfoa.Foa {
@@ -147,14 +157,6 @@ func (fum *FoaUpdateModel) FormatDate(r, c *js.Object, d string) string {
 
 func (fum *FoaUpdateModel) FormatStatus(r, c *js.Object, d string) string {
 	return fmfoa.FoaStateLabel(d)
-}
-
-func (fum *FoaUpdateModel) HandleSelectionChange(vm *hvue.VM, val *js.Object) {
-	fum = FoaUpdateModelFromJS(vm.Object)
-	fum.SelectedFoas.Foas = []*fmfoa.Foa{}
-	val.Call("forEach", func(foa *fmfoa.Foa) {
-		fum.SelectedFoas.Foas = append(fum.SelectedFoas.Foas, foa)
-	})
 }
 
 /*

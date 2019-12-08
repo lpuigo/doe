@@ -39,8 +39,13 @@ func FoaSiteFromJS(o *js.Object) *FoaSite {
 	return &FoaSite{Object: o}
 }
 
-func (ps *FoaSite) SearchInString() string {
-	return json.Stringify(ps)
+func (fs *FoaSite) SearchInString() string {
+	return json.Stringify(fs)
+}
+
+func (fs *FoaSite) AddFoa(foa *Foa) {
+	foa.Id = fs.getNextId()
+	fs.Foas = append(fs.Foas, foa)
 }
 
 func (fs *FoaSite) getNextId() int {

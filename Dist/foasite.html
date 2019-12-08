@@ -84,9 +84,11 @@
         <el-main style="height: 100%; padding: 5px 0px 0px 0px">
             <foa-info-update v-if="ActivityMode == 'Info'" v-model="Foasite" :user="User"></foa-info-update>
             <foa-update
+                    ref="foaUpdateComp"
                     v-if="ActivityMode == 'Edit'"
                     v-model="Foasite" :user="User" :filter="Filter" :filtertype="FilterType"
                     @update-state="UpdateState"
+                    @add-foa="AddNewFoa"
             ></foa-update>
         </el-main>
     </el-container>

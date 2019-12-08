@@ -12,7 +12,7 @@ const template string = `<el-container style="height: 100%">
 							:disabled="SelectedFoas.Foas.length == 0" 
 							@click="EditSelectedFoas()"
 					>Editer: {{SelectedFoas.Foas.length}}</el-button>
-					<el-button type="primary" icon="fas fa-plus icon--left" size="mini" @click="">Ajouter</el-button>
+					<el-button type="primary" icon="fas fa-plus icon--left" size="mini" @click="AddFoa()">Ajouter</el-button>
 				</el-button-group>
             </el-col>
         </el-row>

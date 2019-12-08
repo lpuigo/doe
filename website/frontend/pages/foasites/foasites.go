@@ -11,6 +11,7 @@ import (
 	fmfoa "github.com/lpuig/ewin/doe/website/frontend/model/foasite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/foasite/foaconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
@@ -145,12 +146,30 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 }
 
 //
-func (mpm *MainPageModel) UpdateState(foas *fmfoa.FoaSite, f *fmfoa.Foa) {
-	sum := foaupdatemodal.FoaUpdateModalModelFromJS(mpm.VM.Refs("FoaUpdateModal"))
-	if f != nil && f.Object != nil {
-		sum.CurrentState.Copy(f.State)
+func (mpm *MainPageModel) AddNewFoa() {
+	fumm := foaupdatemodal.FoaUpdateModalModelFromJS(mpm.VM.Refs("FoaUpdateModal"))
+	newFoa := fmfoa.NewFoa()
+	newFoa.State.Date = date.TodayAfter(0)
+	newFoa.Ref = "New Foa"
+	onApply := func() {
+		mpm.Foasite.AddFoa(newFoa)
 	}
-	sum.Show(foas)
+	fumm.ShowEdit(newFoa, onApply)
+}
+
+//
+func (mpm *MainPageModel) UpdateState(foas *fmfoa.FoaSite, f *fmfoa.Foa) {
+	fumm := foaupdatemodal.FoaUpdateModalModelFromJS(mpm.VM.Refs("FoaUpdateModal"))
+	foaUpdate := foaupdate.FoaUpdateModelFromJS(mpm.VM.Refs("foaUpdateComp"))
+	onApply := func() {
+		foaUpdate.ClearSelection()
+	}
+	if f != nil && f.Object != nil { // if f is not nil, Edit mode on single foa pointed in foas
+		fumm.SetModel(f)
+		fumm.ShowEdit(f, onApply)
+		return
+	}
+	fumm.Show(foas, onApply)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

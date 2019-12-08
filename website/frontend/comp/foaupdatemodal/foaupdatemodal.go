@@ -18,7 +18,7 @@ const template string = `
 <el-dialog
 		:visible.sync="visible" 
 		width="80%"
-		:before-close="HideWithControl"
+		:before-close="Hide"
 >
 	<!-- 
 		Modal Title
@@ -27,9 +27,9 @@ const template string = `
 		<el-row :gutter="10" type="flex" align="middle">
 			<el-col :span="24">
 				<h2 style="margin: 0 0">
-					<i class="far fa-edit icon--left"></i>Mise à jour: {{Foas.length}}
-					<span v-if="Foas.length > 1">FOAs</span>
-					<span v-else>FOA</span>
+					<i class="far fa-edit icon--left"></i>
+					<span v-if="Foas.length > 1">Mise à jour de {{Foas.length}} FOAs</span>
+					<span v-else>Mise à jour de 1 FOA</span>
 				</h2>
 			</el-col>
 		</el-row>
@@ -40,20 +40,54 @@ const template string = `
 		style="height: 100%;"		
 	-->
 	<div style="padding: 6px 6px;">
+		<div v-if="EditMode">
+			<!-- Insee & Ref & Type-->
+			<el-row :gutter="10" type="flex" align="middle" class="doublespaced">
+				<el-col :span="2" class="align-right">Code Insee :</el-col>
+				<el-col :span="5">
+					<el-input placeholder="Insee"
+							  v-model="EditedFoa.Insee" clearable size="mini"
+					></el-input>
+				</el-col>
+		
+				<el-col :span="3" class="align-right">Référence de la chambre :</el-col>
+				<el-col :span="5">
+					<el-input placeholder="Référence"
+							  v-model="EditedFoa.Ref" clearable size="mini"
+					></el-input>
+				</el-col>
+		
+				<el-col :span="3" class="align-right">Type de chambre :</el-col>
+				<el-col :span="5">
+					<el-input placeholder="Type"
+							  v-model="EditedFoa.Type" clearable size="mini"
+					></el-input>
+				</el-col>
+			</el-row>
+		</div>
+		<div v-else>
+			<el-row :gutter="10" type="flex" align="middle" class="doublespaced">
+				<el-col :span="3" class="align-right">
+						<span v-if="Foas.length > 1">FOAs à modifier:</span>
+						<span v-else>FOA à modifier</span>
+				</el-col>
+				<el-col :span="20">
+					<span>{{SelectedFOAList()}}</span>
+				</el-col>
+			</el-row>
+		</div>
+
 		<el-row :gutter="10" type="flex" align="middle" class="doublespaced">
-			<el-col :span="3" class="align-right">
-					<span v-if="Foas.length > 1">FOAs à modifier:</span>
-					<span v-else>FOA à modifier</span>
-			</el-col>
-			<el-col :span="20">
-				<span>{{SelectedFOAList()}}</span>
+			<el-col :span="4">					
+				<span v-if="Foas.length > 1">Mise à jour des états :</span>
+				<span v-else>Mise à jour de l'état :</span>
 			</el-col>
 		</el-row>
 
-		<el-row type="flex" align="middle" :gutter="10" style="width: 100%" class="doublespaced">
+		<el-row type="flex" align="middle" :gutter="10" style="width: 100%" class="spaced">
 			<!-- Actors -->
 			<el-col :span="6">
-				<el-select v-model="CurrentState.Actors" filterable multiple placeholder="Acteurs" size="mini" style="width: 100%"
+				<el-select v-model="EditedFoa.State.Actors" filterable multiple placeholder="Acteurs" size="mini" style="width: 100%"
 						   @clear="UpdateStatus()"
 						   @change="UpdateStatus()"
 						   :disabled="DisableTeam()"
@@ -73,7 +107,7 @@ const template string = `
 			<el-col :span="4">
 				<el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
 								style="width: 100%" type="date"
-								v-model="CurrentState.Date"
+								v-model="EditedFoa.State.Date"
 								value-format="yyyy-MM-dd"
 								:picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
 								:disabled="DisableDates()" :clearable="true"
@@ -83,7 +117,7 @@ const template string = `
 		
 			<!-- Status -->
 			<el-col :span="4">
-				<el-select v-model="CurrentState.Status" filterable
+				<el-select v-model="EditedFoa.State.Status" filterable
 						   size="mini" style="width: 100%"
 						   placeholder="Etat"
 						   @clear=""
@@ -101,7 +135,7 @@ const template string = `
 			<!-- Comment -->
 			<el-col :span="10">
 				<el-input type="textarea" autosize placeholder="Commentaire" size="mini"
-						  v-model="CurrentState.Comment"
+						  v-model="EditedFoa.State.Comment"
 				></el-input>
 			</el-col>
 		</el-row>
@@ -137,11 +171,12 @@ const template string = `
 type FoaUpdateModalModel struct {
 	*modal.ModalModel
 
-	Foas   []*fmfoa.Foa `js:"Foas"`
-	User   *fm.User     `js:"user"`
-	Client string       `js:"client"`
-
-	CurrentState *fmfoa.State `js:"CurrentState"`
+	Foas      []*fmfoa.Foa `js:"Foas"`
+	User      *fm.User     `js:"user"`
+	Client    string       `js:"client"`
+	EditMode  bool         `js:"EditMode"`
+	EditedFoa *fmfoa.Foa   `js:"EditedFoa"`
+	OnApply   func()       `js:"OnApply"`
 }
 
 func NewFoaUpdateModalModel(vm *hvue.VM) *FoaUpdateModalModel {
@@ -150,9 +185,10 @@ func NewFoaUpdateModalModel(vm *hvue.VM) *FoaUpdateModalModel {
 	fumm.Foas = []*fmfoa.Foa{}
 	fumm.User = fm.NewUser()
 	fumm.Client = ""
-
-	fumm.CurrentState = fmfoa.NewState()
-	fumm.CurrentState.Date = date.TodayAfter(0)
+	fumm.EditMode = false
+	fumm.EditedFoa = fmfoa.NewFoa()
+	fumm.EditedFoa.State.Date = date.TodayAfter(0)
+	fumm.OnApply = func() {}
 
 	return fumm
 }
@@ -183,41 +219,61 @@ func componentOption() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
-func (fumm *FoaUpdateModalModel) Show(foas *fmfoa.FoaSite) {
-	fumm.Foas = foas.Foas
-	fumm.ModalModel.Show()
+func (fumm *FoaUpdateModalModel) SetModel(foa *fmfoa.Foa) {
+	fumm.EditedFoa = foa.Clone()
 }
 
-func (fumm *FoaUpdateModalModel) HideWithControl() {
-	fumm.Hide()
+func (fumm *FoaUpdateModalModel) Show(selectedFoas *fmfoa.FoaSite, OnApply func()) {
+	fumm.EditMode = false
+	fumm.Foas = selectedFoas.Foas
+	fumm.ModalModel.Show()
+	fumm.OnApply = OnApply
+}
+
+func (fumm *FoaUpdateModalModel) ShowEdit(foa *fmfoa.Foa, OnApply func()) {
+	fumm.EditMode = true
+	fumm.EditedFoa = foa.Clone()
+	fumm.Foas = []*fmfoa.Foa{foa}
+	fumm.ModalModel.Show()
+	fumm.OnApply = OnApply
+}
+
+func (fumm *FoaUpdateModalModel) Hide() {
+	fumm.EditMode = false
+	fumm.ModalModel.Hide()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // HTML Methods
 
-func (fumm *FoaUpdateModalModel) UpdateStatus(vm *hvue.VM) {
-	fumm = FoaUpdateModalModelFromJS(vm.Object)
-	if fumm.CurrentState.IsCanceled() {
-		fumm.CurrentState.Date = ""
-		fumm.CurrentState.Actors = []string{}
-		return
-	}
-	if !tools.Empty(fumm.CurrentState.Date) && len(fumm.CurrentState.Actors) > 0 {
-		fumm.CurrentState.Status = foaconst.StateDone
-	}
-}
-
 func (fumm *FoaUpdateModalModel) ApplyChange(vm *hvue.VM) {
 	fumm = FoaUpdateModalModelFromJS(vm.Object)
-	for _, foa := range fumm.Foas {
-		foa.State.Copy(fumm.CurrentState)
+	if fumm.EditMode {
+		fumm.Foas[0].Copy(fumm.EditedFoa)
+	} else {
+		for _, foa := range fumm.Foas {
+			foa.State.Copy(fumm.EditedFoa.State)
+		}
 	}
+	fumm.OnApply()
 	fumm.Hide()
+}
+
+func (fumm *FoaUpdateModalModel) UpdateStatus(vm *hvue.VM) {
+	fumm = FoaUpdateModalModelFromJS(vm.Object)
+	if fumm.EditedFoa.State.IsCanceled() {
+		fumm.EditedFoa.State.Date = ""
+		fumm.EditedFoa.State.Actors = []string{}
+		return
+	}
+	if !tools.Empty(fumm.EditedFoa.State.Date) && len(fumm.EditedFoa.State.Actors) > 0 {
+		fumm.EditedFoa.State.Status = foaconst.StateDone
+	}
 }
 
 func (fumm *FoaUpdateModalModel) DisableDates(vm *hvue.VM) bool {
 	fumm = FoaUpdateModalModelFromJS(vm.Object)
-	if !fumm.CurrentState.IsCanceled() && len(fumm.CurrentState.Actors) > 0 {
+	if !fumm.EditedFoa.State.IsCanceled() && len(fumm.EditedFoa.State.Actors) > 0 {
 		return false
 	}
 	return true
@@ -225,7 +281,7 @@ func (fumm *FoaUpdateModalModel) DisableDates(vm *hvue.VM) bool {
 
 func (fumm *FoaUpdateModalModel) DisableTeam(vm *hvue.VM) bool {
 	fumm = FoaUpdateModalModelFromJS(vm.Object)
-	return fumm.CurrentState.IsCanceled()
+	return fumm.EditedFoa.State.IsCanceled()
 }
 
 func (fumm *FoaUpdateModalModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabled {

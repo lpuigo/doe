@@ -52,7 +52,14 @@ func (f *Foa) SearchString(filter string) string {
 }
 
 func (f *Foa) Clone() *Foa {
-	return &Foa{Object: json.Parse(json.Stringify(f))}
+	return FoaFromJs(json.Clone(f.Object))
+}
+
+func (f *Foa) Copy(of *Foa) {
+	f.Insee = of.Insee
+	f.Ref = of.Ref
+	f.Type = of.Type
+	f.State.Copy(of.State)
 }
 
 func (f *Foa) TotalBlockedDone() (total, blocked, done int) {
