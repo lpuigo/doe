@@ -27,7 +27,9 @@ const template string = `
 		<el-row :gutter="10" type="flex" align="middle">
 			<el-col :span="24">
 				<h2 style="margin: 0 0">
-					<i class="far fa-edit icon--left"></i>Mise à jour:
+					<i class="far fa-edit icon--left"></i>Mise à jour: {{Foas.length}}
+					<span v-if="Foas.length > 1">FOAs</span>
+					<span v-else>FOA</span>
 				</h2>
 			</el-col>
 		</el-row>
@@ -37,8 +39,18 @@ const template string = `
 		Modal Body
 		style="height: 100%;"		
 	-->
-	<el-container style="padding: 6px 6px;">
-		<el-row type="flex" align="middle" :gutter="10" style="width: 100%">
+	<div style="padding: 6px 6px;">
+		<el-row :gutter="10" type="flex" align="middle" class="doublespaced">
+			<el-col :span="3" class="align-right">
+					<span v-if="Foas.length > 1">FOAs à modifier:</span>
+					<span v-else>FOA à modifier</span>
+			</el-col>
+			<el-col :span="20">
+				<span>{{SelectedFOAList()}}</span>
+			</el-col>
+		</el-row>
+
+		<el-row type="flex" align="middle" :gutter="10" style="width: 100%" class="doublespaced">
 			<!-- Actors -->
 			<el-col :span="6">
 				<el-select v-model="CurrentState.Actors" filterable multiple placeholder="Acteurs" size="mini" style="width: 100%"
@@ -93,7 +105,7 @@ const template string = `
 				></el-input>
 			</el-col>
 		</el-row>
-	</el-container>
+	</div>
 	<!-- 
 		Body Action Bar
 	-->
@@ -125,7 +137,7 @@ const template string = `
 type FoaUpdateModalModel struct {
 	*modal.ModalModel
 
-	Foas   []*fmfoa.Foa `js:"Foa"`
+	Foas   []*fmfoa.Foa `js:"Foas"`
 	User   *fm.User     `js:"user"`
 	Client string       `js:"client"`
 
@@ -233,4 +245,17 @@ func (fumm *FoaUpdateModalModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDi
 func (fumm *FoaUpdateModalModel) GetStatuses(vm *hvue.VM) []*elements.ValueLabel {
 	fumm = FoaUpdateModalModelFromJS(vm.Object)
 	return fmfoa.GetStatesValueLabel()
+}
+
+func (fumm *FoaUpdateModalModel) SelectedFOAList(vm *hvue.VM) string {
+	fumm = FoaUpdateModalModelFromJS(vm.Object)
+	res := ""
+	last := len(fumm.Foas) - 1
+	for i, foa := range fumm.Foas {
+		res += foa.Insee + " - " + foa.Ref + " (" + foa.Type + ")"
+		if i != last {
+			res += ", "
+		}
+	}
+	return res
 }

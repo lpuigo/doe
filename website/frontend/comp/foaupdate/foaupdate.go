@@ -68,14 +68,32 @@ func FoaUpdateModelFromJS(o *js.Object) *FoaUpdateModel {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Utils Methods
+
+func (fum *FoaUpdateModel) ClearSelection() {
+	fum.SelectedFoas.Foas = []*fmfoa.Foa{}
+	fum.VM.Refs("foaTable").Call("clearSelection")
+}
+
+func (fum *FoaUpdateModel) SetSelected(f *fmfoa.Foa) {
+	fum.SelectedFoas.Foas = []*fmfoa.Foa{f}
+	foaTable := fum.VM.Refs("foaTable")
+	foaTable.Call("clearSelection")
+	foaTable.Call("toggleRowSelection", f, true)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HTML Methods
 
-func (fum *FoaUpdateModel) SetSelectedState(vm *hvue.VM, f *fmfoa.Foa) {
-	fum = FoaUpdateModelFromJS(vm.Object)
-	if len(fum.SelectedFoas.Foas) == 0 {
-		fum.SelectedFoas.Foas = []*fmfoa.Foa{f}
-	}
-	fum.VM.Emit("update-state", fum.SelectedFoas)
+func (fum *FoaUpdateModel) EditFoa(vm *hvue.VM, f *fmfoa.Foa) {
+	fum.SetSelected(f)
+	fum.VM.Emit("update-state", fum.SelectedFoas, f)
+	fum.ClearSelection()
+}
+
+func (fum *FoaUpdateModel) EditSelectedFoas(vm *hvue.VM) {
+	fum.VM.Emit("update-state", fum.SelectedFoas, nil)
+	fum.ClearSelection()
 }
 
 func (fum *FoaUpdateModel) GetFilteredJunctions() []*fmfoa.Foa {

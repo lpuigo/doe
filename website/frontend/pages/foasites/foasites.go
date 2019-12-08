@@ -145,8 +145,11 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 }
 
 //
-func (mpm *MainPageModel) UpdateState(foas *fmfoa.FoaSite) {
+func (mpm *MainPageModel) UpdateState(foas *fmfoa.FoaSite, f *fmfoa.Foa) {
 	sum := foaupdatemodal.FoaUpdateModalModelFromJS(mpm.VM.Refs("FoaUpdateModal"))
+	if f != nil && f.Object != nil {
+		sum.CurrentState.Copy(f.State)
+	}
 	sum.Show(foas)
 }
 
