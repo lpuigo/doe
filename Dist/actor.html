@@ -101,10 +101,12 @@
                 </div>
 
                 <span></span>
-                <el-popover placement="bottom" title="Compte-Rendu d'Activité"
-                            trigger="click"
-                            width="200"
-                            v-model="craVisible"
+                <el-popover
+                        v-if="User.Permissions.Invoice"
+                        placement="bottom" title="Compte-Rendu d'Activité"
+                        trigger="click"
+                        width="200"
+                        v-model="craVisible"
                 >
                      <el-date-picker
                             format="dd/MM/yyyy" size="mini" v-model="craMonth"
