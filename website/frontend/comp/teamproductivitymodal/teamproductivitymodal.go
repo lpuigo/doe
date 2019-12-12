@@ -56,7 +56,7 @@ type TeamProductivityModalModel struct {
 	SelectedSites map[string]bool                       `js:"SelectedSites"`
 	SiteColors    ripteamproductivitychart.SiteColorMap `js:"SiteColors"`
 
-	ActiveMode string `js:"ActiveMode"`
+	PeriodMode string `js:"PeriodMode"`
 	GroupMode  string `js:"GroupMode"`
 	InfoMode   string `js:"InfoMode"`
 }
@@ -78,7 +78,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	tpmm.SelectedSites = map[string]bool{}
 	tpmm.SiteColors = ripteamproductivitychart.SiteColorMap{}
 
-	tpmm.ActiveMode = "week"
+	tpmm.PeriodMode = "week"
 	tpmm.GroupMode = "activity"
 	tpmm.InfoMode = "prod"
 	return tpmm
@@ -104,16 +104,18 @@ func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
-	if tpmm.SiteMode == "Rip" {
-		go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.ActiveMode)
-		return
+	switch tpmm.SiteMode {
+	case "Rip":
+		go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.PeriodMode)
+	case "Poles":
+		go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.PeriodMode)
+	case "Foa":
+		go tpmm.callGetRipsitesStats("/api/foasites/stat/" + tpmm.PeriodMode)
+	case "Orange":
+		go tpmm.callGetWorksitesStats("/api/worksites/stat/" + tpmm.InfoMode + "/" + tpmm.PeriodMode)
+	default:
+		message.ErrorStr(tpmm.VM, "mode '"+tpmm.SiteMode+"' non pris en charge", false)
 	}
-	if tpmm.SiteMode == "Poles" {
-		go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.ActiveMode)
-		return
-	}
-	// tpmm.SiteMode == "Orange"
-	go tpmm.callGetWorksitesStats("/api/worksites/stat/" + tpmm.InfoMode + "/" + tpmm.ActiveMode)
 }
 
 func (tpmm *TeamProductivityModalModel) initSitesColors() {
@@ -162,7 +164,7 @@ func (tpmm *TeamProductivityModalModel) SiteCircleStyle(site string) string {
 }
 
 func (tpmm *TeamProductivityModalModel) GetActorsActivity() string {
-	return "/api/ripsites/actors/" + tpmm.ActiveMode
+	return "/api/ripsites/actors/" + tpmm.PeriodMode
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

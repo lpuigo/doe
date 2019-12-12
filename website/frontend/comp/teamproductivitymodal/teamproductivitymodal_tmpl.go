@@ -23,7 +23,7 @@ const template string = `
                 <el-radio-button label="site">Par site</el-radio-button>
                 <el-radio-button label="mean">Moyenne</el-radio-button>
             </el-radio-group>
-			<el-radio-group v-model="ActiveMode" size="mini" @change="RefreshStat">
+			<el-radio-group v-model="PeriodMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="week">Hebdo</el-radio-button>
                 <el-radio-button label="month">Mensuel</el-radio-button>
             </el-radio-group>
