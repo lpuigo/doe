@@ -87,7 +87,7 @@ func (fs *FoaSite) GetFoasNumbers() (total, blocked, done int) {
 	return
 }
 
-type IsFoasiteVisible func(s *FoaSite) bool
+type IsFoaSiteVisible func(s *FoaSite) bool
 
 // Itemize returns slice of item pertaining to polesite poles list
 func (fs *FoaSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
@@ -101,4 +101,37 @@ func (fs *FoaSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 		res = append(res, items...)
 	}
 	return res, nil
+}
+
+// AddStat adds Stats into values for given Polesite
+func (fs *FoaSite) AddStat(stats items.Stats, sc items.StatContext, currentBpu *bpu.Bpu, showprice bool) error {
+
+	addValue := func(date, serie string, actors []string, value float64) {
+		stats.AddStatValue(fs.Ref, fs.Client, date, "", serie, value)
+		if sc.ShowTeam && len(actors) > 0 {
+			value /= float64(len(actors))
+			for _, actName := range actors {
+				stats.AddStatValue(fs.Ref, fs.Client+" : "+actName, date, "", serie, value)
+			}
+		}
+	}
+
+	calcItems, err := fs.Itemize(currentBpu)
+	if err != nil {
+		return fmt.Errorf("error on foa stat itemize for '%s':%s", fs.Ref, err.Error())
+	}
+	for _, item := range calcItems {
+		if !item.Done {
+			continue
+		}
+		actorsName := make([]string, len(item.Actors))
+		for i, actId := range item.Actors {
+			actorsName[i] = sc.ActorById(actId)
+		}
+		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
+		if showprice {
+			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
+		}
+	}
+	return nil
 }

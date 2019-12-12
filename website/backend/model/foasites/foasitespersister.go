@@ -4,7 +4,9 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
+	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"io"
 	"path/filepath"
 	"sync"
@@ -171,31 +173,31 @@ func (fsp *FoaSitesPersister) CreateArchive(writer io.Writer) error {
 }
 
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-//func (fsp *FoaSitesPersister) GetStats(sc items.StatContext, isPSVisible IsFoaSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
-//	fsp.RLock()
-//	defer fsp.RUnlock()
-//
-//	// calc per Team/date/indicator values
-//	calcValues := make(items.Stats)
-//	for _, pr := range fsp.FoaSites {
-//		if isPSVisible(pr.FoaSite) {
-//			client := clientByName(pr.FoaSite.Client)
-//			if client == nil {
-//				continue
-//			}
-//			err := pr.AddStat(calcValues, sc, actorById, client.Bpu, showprice)
-//			if err != nil {
-//				return nil, err
-//			}
-//		}
-//	}
-//
-//	d1 := func(s items.StatKey) string { return s.Serie } // Bars Family
-//	d2 := func(s items.StatKey) string { return s.Team }  // Graphs
-//	d3 := func(s items.StatKey) string { return s.Site }  // side block
-//	f1 := items.KeepAll
-//	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-//	f2 := items.KeepAll
-//	f3 := items.KeepAll
-//	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
-//}
+func (fsp *FoaSitesPersister) GetStats(sc items.StatContext, isFSVisible IsFoaSiteVisible, showprice bool) (*rs.RipsiteStats, error) {
+	fsp.RLock()
+	defer fsp.RUnlock()
+
+	// calc per Team/date/indicator values
+	calcValues := items.NewStats()
+	for _, fsr := range fsp.FoaSites {
+		if isFSVisible(fsr.FoaSite) {
+			client := sc.ClientByName(fsr.FoaSite.Client)
+			if client == nil {
+				continue
+			}
+			err := fsr.AddStat(calcValues, sc, client.Bpu, showprice)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	d1 := func(s items.StatKey) string { return s.Serie } // Bars Family
+	d2 := func(s items.StatKey) string { return s.Team }  // Graphs
+	d3 := func(s items.StatKey) string { return s.Site }  // side block
+	f1 := items.KeepAll
+	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
+	f2 := items.KeepAll
+	f3 := items.KeepAll
+	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
+}

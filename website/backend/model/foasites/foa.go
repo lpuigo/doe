@@ -92,13 +92,8 @@ func (f *Foa) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, 
 		return nil, fmt.Errorf("can not define foa inventory Item: %s", err.Error())
 	}
 
-	info := fmt.Sprintf("Inventaire chambre %s %s", f.Ref, f.Insee)
-	if f.State.Comment != "" {
-		info += fmt.Sprintf("\nCmt: %s", f.State.Comment)
-	}
-
 	ref := f.ExtendedRef()
-
+	info := fmt.Sprintf("Inventaire chambre %s", ref)
 	it := items.NewItem(
 		client,
 		site,
@@ -114,6 +109,8 @@ func (f *Foa) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, 
 		done,
 		blocked,
 	)
+	it.Comment = f.State.Comment
+
 	it.Actors = f.State.Actors
 	res = append(res, it)
 

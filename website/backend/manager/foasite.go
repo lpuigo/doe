@@ -2,13 +2,16 @@ package manager
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	fs "github.com/lpuig/ewin/doe/website/backend/model/foasites"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
 )
 
 // visiblePolesiteFilter returns a filtering function on CurrentUser.Clients visibility
-func (m *Manager) visibleFoasiteFilter() fs.IsFoasiteVisible {
+func (m *Manager) visibleFoasiteFilter() fs.IsFoaSiteVisible {
 	if len(m.CurrentUser.Clients) == 0 {
 		return func(fs *fs.FoaSite) bool { return true }
 	}
@@ -37,6 +40,43 @@ func (m Manager) FoaSitesArchiveName() string {
 
 func (m Manager) CreateFoaSitesArchive(writer io.Writer) error {
 	return m.Foasites.CreateArchive(writer)
+}
+
+func (m Manager) GetFoaSitesStats(writer io.Writer, freq string) error {
+	maxVal := 12
+
+	var dateFor date.DateAggreg
+	switch freq {
+	case "week":
+		dateFor = func(d string) string {
+			return date.GetMonday(d)
+		}
+	case "month":
+		dateFor = func(d string) string {
+			return date.GetMonth(d)
+		}
+	default:
+		return fmt.Errorf("unsupported stat period '%s'", freq)
+	}
+
+	isActorVisible, err := m.genIsActorVisible()
+	if err != nil {
+		return err
+	}
+
+	statContext := items.StatContext{
+		MaxVal:        maxVal,
+		DateFor:       dateFor,
+		IsTeamVisible: isActorVisible,
+		ClientByName:  m.genGetClient(),
+		ActorById:     m.genActorById(),
+		ShowTeam:      false,
+	}
+	foaStats, err := m.Foasites.GetStats(statContext, m.visibleFoasiteFilter(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(foaStats)
 }
 
 func (m Manager) GetFoaSiteXLSAttachement(writer io.Writer, site *fs.FoaSite) error {

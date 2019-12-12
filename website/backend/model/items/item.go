@@ -13,6 +13,7 @@ type Item struct {
 	Info         string // BoxType + nbFO ...
 	Date         string
 	Team         string
+	Comment      string
 	Actors       []string
 	Article      *bpu.Article
 	Quantity     int

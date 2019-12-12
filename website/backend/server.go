@@ -145,7 +145,7 @@ func main() {
 	// Foasites methods
 	router.HandleFunc("/api/foasites", withUserManager("GetFoaSitesInfo", route.GetFoaSitesInfo)).Methods("GET")
 	router.HandleFunc("/api/foasites/archive", withUserManager("GetFoaSitesArchive", route.GetFoaSitesArchive)).Methods("GET")
-	//router.HandleFunc("/api/foasites/stat/{freq}", withUserManager("GetFoaSitesStats", route.GetFoaSitesStats)).Methods("GET")
+	router.HandleFunc("/api/foasites/stat/{freq}", withUserManager("GetFoaSitesStats", route.GetFoaSitesStats)).Methods("GET")
 	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("GetFoaSite", route.GetFoaSite)).Methods("GET")
 	router.HandleFunc("/api/foasites/{fsid:[0-9]+}/attach", withUserManager("GetFoaSiteAttachement", route.GetFoaSiteAttachement)).Methods("GET")
 	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("UpdateFoaSite", route.UpdateFoaSite)).Methods("PUT")

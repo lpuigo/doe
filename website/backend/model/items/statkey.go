@@ -17,6 +17,8 @@ type StatContext struct {
 	MaxVal        int
 	DateFor       date.DateAggreg
 	IsTeamVisible clients.IsTeamVisible
+	ClientByName  clients.ClientByName
+	ActorById     clients.ActorById
 	ShowTeam      bool
 }
 

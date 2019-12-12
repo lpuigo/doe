@@ -41,33 +41,31 @@ func GetFoaSitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request
 	logmsg.Response = http.StatusOK
 }
 
-//func GetFoaSitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-//	defer r.Body.Close()
-//	logmsg := logger.TimedEntry("Route").AddRequest("GetFoaSitesStats").AddUser(mgr.CurrentUser.Name)
-//	defer logmsg.Log()
-//
-//	w.Header().Set("Content-Type", "application/json")
-//
-//	var err error
-//
-//	vars := mux.Vars(r)
-//	freq := vars["freq"]
-//	switch freq {
-//	case "week":
-//		err = mgr.GetFoaSitesWeekStats(w)
-//	case "month":
-//		err = mgr.GetFoaSitesMonthStats(w)
-//	default:
-//		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
-//		return
-//	}
-//
-//	if err != nil {
-//		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//	logmsg.AddInfoResponse(fmt.Sprintf("%s foasite stats produced", freq), http.StatusOK)
-//}
+func GetFoaSitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetFoaSitesStats").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var err error
+
+	vars := mux.Vars(r)
+	freq := vars["freq"]
+	switch freq {
+	case "week", "month":
+		err = mgr.GetFoaSitesStats(w, freq)
+	default:
+		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("%s foasite stats produced", freq), http.StatusOK)
+}
 
 func GetFoaSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
