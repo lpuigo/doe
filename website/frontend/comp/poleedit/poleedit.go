@@ -82,7 +82,7 @@ const template string = `<div>
     <el-collapse v-model="chapters" @change="ChapterChange">
         <el-collapse-item name="1">
             <template slot="title">
-                <h1 class="title">Adresse: <span class="blue">{{editedpolemarker.Pole.Address}}</span></h1>
+                <h1 class="title">Adresse: <a v-if="editedlatlong != ''" :href="GetGMAPUrl(editedlatlong)" rel="noopener noreferrer" target="_blank">(GMap)</a><span class="blue"> {{editedpolemarker.Pole.Address}}</span></h1>
             </template>
             <!-- Lat / Long -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -584,6 +584,15 @@ func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
 
 func (pem *PoleEditModel) ChapterChange(vm *hvue.VM, val *js.Object) {
 	vm.Emit("update:chapters", val)
+}
+
+func (pem *PoleEditModel) GetGMAPUrl(vm *hvue.VM, gps string) string {
+	pem = PoleEditModelFromJS(vm.Object)
+	if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
+		return ""
+	}
+	url := "http://maps.google.com/maps?q=" + gps
+	return url
 }
 
 func (pem *PoleEditModel) GetDICTUrl(vm *hvue.VM) string {

@@ -125,8 +125,8 @@ func (ptm *PoleTableModel) PoleRefName(p *ps.Pole) string {
 }
 
 func (ptm *PoleTableModel) EndDate(d string, delay int) string {
-	if d == "" {
-		return ""
+	if tools.Empty(d) {
+		return "-"
 	}
 	return date.DateString(date.After(d, delay))
 }
