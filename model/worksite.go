@@ -73,7 +73,8 @@ func (ws *Worksite) inspectForInfo(wsi *fm.WorksiteInfo, priceByClientArticle fu
 	searchPt := func(t string, p PT) string {
 		return fmt.Sprintf("%s:%s, PT:%s, Address:%s, ", t, p.Ref, p.RefPt, p.Address)
 	}
-	wsi.Search = fmt.Sprintf("Job:%s, City:%s, ", ws.Ref, ws.City)
+	wsi.Search = fmt.Sprintf("Comment:%s, ", ws.Comment)
+	wsi.Search += fmt.Sprintf("Job:%s, City:%s, ", ws.Ref, ws.City)
 	wsi.Search += searchPt("PMZ", ws.Pmz) + searchPt("PA", ws.Pa)
 	if wsi.InvoiceName != "" {
 		wsi.Search += fmt.Sprintf("Invoice:%s, ", ws.InvoiceName)
