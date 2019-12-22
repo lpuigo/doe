@@ -7,12 +7,21 @@ import "github.com/gopherjs/gopherjs/js"
 // L is the primary leaflet javascript object.
 var L = js.Global.Get("L")
 
+const (
+	TileMaxNativeZoomLevel int = 19
+	TileMaxZoomLevel       int = 21
+)
+
 // OSMTileLayer returns OpenStreetMap standard TileLayer
 func OSMTileLayer() *TileLayer {
 	tileOption := DefaultTileLayerOptions()
+	tileOption.MaxNativeZoom = TileMaxNativeZoomLevel
+	tileOption.MaxZoom = TileMaxZoomLevel
 	tileOption.Attribution = `&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`
 	url := "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-	return NewTileLayer(url, tileOption)
+	tl := NewTileLayer(url, tileOption)
+	print("OSMTileLayer:", tl.Object)
+	return tl
 }
 
 const MapboxToken string = "pk.eyJ1IjoibGF1cmVudC1wdWlnIiwiYSI6ImNqeDgxazRqYzBmOGEzbnA3Z2lld3Rja2cifQ.Oq6cQfmK3uKYyVQffiIn_Q"
@@ -24,6 +33,8 @@ const MapboxToken string = "pk.eyJ1IjoibGF1cmVudC1wdWlnIiwiYSI6ImNqeDgxazRqYzBmO
 //  mapbox.light
 func MapBoxTileLayer(id string) *TileLayer {
 	tileOption := DefaultTileLayerOptions()
+	tileOption.MaxNativeZoom = TileMaxNativeZoomLevel
+	tileOption.MaxZoom = TileMaxZoomLevel
 	tileOption.Attribution = `&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> <a href="https://apps.mapbox.com/feedback/">Improve this map</a>`
 	tileOption.Id = id
 	tileOption.AccesToken = MapboxToken

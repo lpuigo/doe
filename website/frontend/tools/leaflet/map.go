@@ -39,9 +39,14 @@ func (m *Map) SetView(center *LatLng, zoom int) {
 	m.Object.Call("setView", center, zoom)
 }
 
-// SetView sets the center and zoom level of the map.
+// SetZoom sets the zoom level of the map.
 func (m *Map) SetZoom(zoom int) {
 	m.Object.Call("setZoom", zoom)
+}
+
+// SetMaxZoom sets the Max Zoom Level of the map.
+func (m *Map) SetMaxZoom(zoom int) {
+	m.Object.Call("setMaxZoom", zoom)
 }
 
 // FitBounds sets a map view that contains the given geographical bounds with the maximum zoom level possible.
