@@ -25,6 +25,7 @@ const template string = `
         <h3>Archive des <a href="/api/worksites/archive">Chantiers Orange</a></h3>
         <h3>Archive des <a href="/api/ripsites/archive">Chantiers RIP</a></h3>
         <h3>Archive des <a href="/api/polesites/archive">Chantiers Poteaux</a></h3>
+        <h3>Archive des <a href="/api/foasites/archive">Chantiers FOAs</a></h3>
 		<h4>&nbsp;</h4>
         <h3>Archive des <a href="/api/clients/archive">Clients</a></h3>
         <h3>Archive des <a href="/api/actors/archive">Equipes</a></h3>
