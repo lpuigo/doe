@@ -6,7 +6,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"io"
 	"path/filepath"
 	"sync"
@@ -64,17 +63,31 @@ func (fsp *FoaSitesPersister) LoadDirectory() error {
 }
 
 // GetAll returns all contained FoaSiteRecord for which keep(*FoaSite) == true
-func (fsp FoaSitesPersister) GetAll(keep func(*FoaSite) bool) []*FoaSiteRecord {
+func (fsp FoaSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible) []*FoaSiteRecord {
 	fsp.RLock()
 	defer fsp.RUnlock()
 
 	foaSiteRecords := []*FoaSiteRecord{}
 	for _, psr := range fsp.FoaSites {
-		if keep(psr.FoaSite) {
+		if isSiteVisible(psr.FoaSite) {
 			foaSiteRecords = append(foaSiteRecords, psr)
 		}
 	}
 	return foaSiteRecords
+}
+
+// GetItemizableSites returns all contained FoaSiteRecord as ItemizableSite for which isSiteVisible(*FoaSite) == true
+func (fsp FoaSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
+	fsp.RLock()
+	defer fsp.RUnlock()
+
+	iss := []items.ItemizableSite{}
+	for _, psr := range fsp.FoaSites {
+		if isSiteVisible(psr) {
+			iss = append(iss, psr)
+		}
+	}
+	return iss
 }
 
 // GetById returns the FoaSiteRecord with given Id (or nil if Id not found)
@@ -170,34 +183,4 @@ func (fsp *FoaSitesPersister) CreateArchive(writer io.Writer) error {
 	}
 
 	return zw.Close()
-}
-
-// GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (fsp *FoaSitesPersister) GetStats(sc items.StatContext, isFSVisible IsFoaSiteVisible, showprice bool) (*rs.RipsiteStats, error) {
-	fsp.RLock()
-	defer fsp.RUnlock()
-
-	// calc per Team/date/indicator values
-	calcValues := items.NewStats()
-	for _, fsr := range fsp.FoaSites {
-		if isFSVisible(fsr.FoaSite) {
-			client := sc.ClientByName(fsr.FoaSite.Client)
-			if client == nil {
-				continue
-			}
-			err := fsr.AddStat(calcValues, sc, client.Bpu, showprice)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	d1 := func(s items.StatKey) string { return s.Serie } // Bars Family
-	d2 := func(s items.StatKey) string { return s.Team }  // Graphs
-	d3 := func(s items.StatKey) string { return s.Site }  // side block
-	f1 := items.KeepAll
-	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-	f2 := items.KeepAll
-	f3 := items.KeepAll
-	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }

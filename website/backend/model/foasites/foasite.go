@@ -89,6 +89,18 @@ func (fs *FoaSite) GetFoasNumbers() (total, blocked, done int) {
 
 type IsFoaSiteVisible func(s *FoaSite) bool
 
+func (fs *FoaSite) GetRef() string {
+	return fs.Ref
+}
+
+func (fs *FoaSite) GetClient() string {
+	return fs.Client
+}
+
+func (fs *FoaSite) GetType() string {
+	return "foa"
+}
+
 // Itemize returns slice of item pertaining to polesite poles list
 func (fs *FoaSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}
