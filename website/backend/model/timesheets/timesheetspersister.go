@@ -1,12 +1,11 @@
 package timesheets
 
 import (
-	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -219,28 +218,17 @@ func (tsp *TimeSheetsPersister) UpdateTimeSheet(uts *TimeSheet) error {
 	return nil
 }
 
-// ArchiveName returns the ActorArchive file name with today's date
-func (tsp TimeSheetsPersister) ArchiveName() string {
-	return fmt.Sprintf("TimeSheets %s.zip", date.Today().String())
-}
-
-// CreateArchive writes a zipped archive of all contained Actors files to the given writer
-func (tsp *TimeSheetsPersister) CreateArchive(writer io.Writer) error {
+func (tsp *TimeSheetsPersister) GetAllSites() []archives.ArchivableRecord {
 	tsp.RLock()
 	defer tsp.RUnlock()
 
-	zw := zip.NewWriter(writer)
-
-	for _, tsr := range tsp.timeSheetRecords {
-		wfw, err := zw.Create(tsr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for timesheet %d", tsr.Id)
-		}
-		err = tsr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for timesheet %d", tsr.Id)
-		}
+	archivableSites := make([]archives.ArchivableRecord, len(tsp.timeSheetRecords))
+	for i, site := range tsp.timeSheetRecords {
+		archivableSites[i] = site
 	}
+	return archivableSites
+}
 
-	return zw.Close()
+func (tsp *TimeSheetsPersister) GetName() string {
+	return "TimeSheets"
 }

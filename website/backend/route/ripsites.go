@@ -180,22 +180,6 @@ func GetRipsitesActorsActivity(mgr *mgr.Manager, w http.ResponseWriter, r *http.
 	logmsg.AddInfoResponse(fmt.Sprintf("%s ripsites actors activity produced", freq), http.StatusOK)
 }
 
-func GetRipsitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetRipsitesArchive").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.RipsitesArchiveName()))
-	w.Header().Set("Content-Type", "application/zip")
-
-	err := mgr.CreateRipsitesArchive(w)
-	if err != nil {
-		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.Response = http.StatusOK
-}
-
 func MeasurementRipSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("MeasurementRipSite").AddUser(mgr.CurrentUser.Name)

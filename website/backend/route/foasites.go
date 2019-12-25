@@ -25,22 +25,6 @@ func GetFoaSitesInfo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg.Response = http.StatusOK
 }
 
-func GetFoaSitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetFoaSitesArchive").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.FoaSitesArchiveName()))
-	w.Header().Set("Content-Type", "application/zip")
-
-	err := mgr.CreateFoaSitesArchive(w)
-	if err != nil {
-		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.Response = http.StatusOK
-}
-
 func GetFoaSitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	logmsg := logger.TimedEntry("Route").AddRequest("GetFoaSitesStats").AddUser(mgr.CurrentUser.Name)

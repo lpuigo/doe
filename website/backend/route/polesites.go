@@ -117,22 +117,6 @@ func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	logmsg.AddInfoResponse(fmt.Sprintf("%s polesite stats produced", freq), http.StatusOK)
 }
 
-func GetPolesitesArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesitesArchive").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.PolesitesArchiveName()))
-	w.Header().Set("Content-Type", "application/zip")
-
-	err := mgr.CreatePolesitesArchive(w)
-	if err != nil {
-		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.Response = http.StatusOK
-}
-
 // GetPolesiteAttachement
 func GetPolesiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()

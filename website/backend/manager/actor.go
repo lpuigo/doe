@@ -13,14 +13,6 @@ func (m Manager) GetActors(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(actors)
 }
 
-func (m Manager) ActorsArchiveName() string {
-	return m.Actors.ArchiveName()
-}
-
-func (m Manager) CreateActorsArchive(writer io.Writer) error {
-	return m.Actors.CreateArchive(writer)
-}
-
 func (m Manager) GetActorsWorkingHoursRecordXLSName(monthDate string) string {
 	return fmt.Sprintf("CRA %s.xlsx", monthDate)
 }

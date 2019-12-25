@@ -1,14 +1,13 @@
 package polesites
 
 import (
-	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
-	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -147,32 +146,6 @@ func (psp PoleSitesPersister) findIndex(sr *PoleSiteRecord) int {
 	return -1
 }
 
-// ArchiveName returns the PoleSiteArchive file name with today's date
-func (psp PoleSitesPersister) ArchiveName() string {
-	return fmt.Sprintf("Polesites %s.zip", date.Today().String())
-}
-
-// CreateArchive writes a zipped archive of all contained Polesites files to the given writer
-func (psp *PoleSitesPersister) CreateArchive(writer io.Writer) error {
-	psp.RLock()
-	defer psp.RUnlock()
-
-	zw := zip.NewWriter(writer)
-
-	for _, sr := range psp.polesites {
-		wfw, err := zw.Create(sr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for polesite %d", sr.Id)
-		}
-		err = sr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for polesite %d", sr.Id)
-		}
-	}
-
-	return zw.Close()
-}
-
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
 func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPolesiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
 	psp.RLock()
@@ -201,4 +174,19 @@ func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPole
 	f2 := items.KeepAll
 	f3 := items.KeepAll
 	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
+}
+
+func (psp *PoleSitesPersister) GetAllSites() []archives.ArchivableRecord {
+	psp.RLock()
+	defer psp.RUnlock()
+
+	archivableSites := make([]archives.ArchivableRecord, len(psp.polesites))
+	for i, site := range psp.polesites {
+		archivableSites[i] = site
+	}
+	return archivableSites
+}
+
+func (psp *PoleSitesPersister) GetName() string {
+	return "Polesites"
 }

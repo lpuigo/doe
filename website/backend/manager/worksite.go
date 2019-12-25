@@ -71,11 +71,3 @@ func (m Manager) GetWorksitesStats(writer io.Writer, info, freq string) error {
 func (m Manager) GetWorksiteXLSAttachement(writer io.Writer, ws *model.Worksite) error {
 	return m.TemplateEngine.GetWorksiteXLSAttachment(writer, ws, m.genGetClient())
 }
-
-func (m Manager) WorksitesArchiveName() string {
-	return m.Worksites.ArchiveName()
-}
-
-func (m Manager) CreateWorksitesArchive(writer io.Writer) error {
-	return m.Worksites.CreateArchive(writer)
-}

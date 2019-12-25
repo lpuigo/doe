@@ -38,14 +38,6 @@ func (m Manager) GetPolesiteXLSAttachement(writer io.Writer, ps *ps.PoleSite) er
 	return m.TemplateEngine.GetPolesiteXLSAttachement(writer, ps, m.genGetClient(), m.genActorById())
 }
 
-func (m Manager) PolesitesArchiveName() string {
-	return m.Polesites.ArchiveName()
-}
-
-func (m Manager) CreatePolesitesArchive(writer io.Writer) error {
-	return m.Polesites.CreateArchive(writer)
-}
-
 // GetPolesitesWeekStats returns Polesites Stats per Week (JSON in writer) visibles by current user
 func (m Manager) GetPolesitesWeekStats(writer io.Writer) error {
 	df := func(d string) string {

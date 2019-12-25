@@ -34,14 +34,6 @@ func (m Manager) GetFoaSitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(fsis)
 }
 
-func (m Manager) FoaSitesArchiveName() string {
-	return m.Foasites.ArchiveName()
-}
-
-func (m Manager) CreateFoaSitesArchive(writer io.Writer) error {
-	return m.Foasites.CreateArchive(writer)
-}
-
 func (m Manager) GetFoaSitesStats(writer io.Writer, freq string) error {
 	maxVal := 12
 

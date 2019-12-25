@@ -80,19 +80,3 @@ func UpdateTimeSheet(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg.Response = http.StatusOK
 	logmsg.AddInfoResponse(fmt.Sprintf("TimeSheet for %s updated", weekDate), http.StatusOK)
 }
-
-func GetTimeSheetsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetTimeSheetsArchive").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TimeSheetsArchiveName()))
-	w.Header().Set("Content-Type", "application/zip")
-
-	err := mgr.CreateTimeSheetsArchive(w)
-	if err != nil {
-		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.Response = http.StatusOK
-}

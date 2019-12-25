@@ -40,14 +40,6 @@ func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
 	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient(), m.genActorById())
 }
 
-func (m Manager) RipsitesArchiveName() string {
-	return m.Ripsites.ArchiveName()
-}
-
-func (m Manager) CreateRipsitesArchive(writer io.Writer) error {
-	return m.Ripsites.CreateArchive(writer)
-}
-
 func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
 	maxVal := 12
 

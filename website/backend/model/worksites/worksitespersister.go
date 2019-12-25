@@ -1,14 +1,13 @@
 package worksites
 
 import (
-	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/model"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
-	"io"
 	"path/filepath"
 	"sort"
 	"sync"
@@ -311,28 +310,17 @@ func (wsp *WorkSitesPersister) GetStockStats(maxVal int, dateFor date.DateAggreg
 	return stockStats
 }
 
-// WorksitesArchiveName returns the WorksiteArchive file name with today's date
-func (wsp WorkSitesPersister) ArchiveName() string {
-	return fmt.Sprintf("Worksites %s.zip", date.Today().String())
-}
-
-// CreateWorksitesArchive writes a zipped archive of all contained Worksites files to the given writer
-func (wsp *WorkSitesPersister) CreateArchive(writer io.Writer) error {
+func (wsp *WorkSitesPersister) GetAllSites() []archives.ArchivableRecord {
 	wsp.RLock()
 	defer wsp.RUnlock()
 
-	zw := zip.NewWriter(writer)
-
-	for _, wsr := range wsp.workSites {
-		wfw, err := zw.Create(wsr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for worksite %d", wsr.Id)
-		}
-		err = wsr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for worksite %d", wsr.Id)
-		}
+	archivableSites := make([]archives.ArchivableRecord, len(wsp.workSites))
+	for i, site := range wsp.workSites {
+		archivableSites[i] = site
 	}
+	return archivableSites
+}
 
-	return zw.Close()
+func (wsp *WorkSitesPersister) GetName() string {
+	return "Worksites"
 }

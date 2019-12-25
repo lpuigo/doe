@@ -1,12 +1,10 @@
 package clients
 
 import (
-	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -180,28 +178,17 @@ func (cp *ClientsPersister) CalcPriceByClientArticleGetter() func(clientName, ar
 	}
 }
 
-// ArchiveName returns the PoleSiteArchive file name with today's date
-func (cp ClientsPersister) ArchiveName() string {
-	return fmt.Sprintf("Clients %s.zip", date.Today().String())
-}
-
-// CreateArchive writes a zipped archive of all contained Polesites files to the given writer
-func (cp *ClientsPersister) CreateArchive(writer io.Writer) error {
+func (cp *ClientsPersister) GetAllSites() []archives.ArchivableRecord {
 	cp.RLock()
 	defer cp.RUnlock()
 
-	zw := zip.NewWriter(writer)
-
-	for _, sr := range cp.clients {
-		wfw, err := zw.Create(sr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for client %d", sr.Id)
-		}
-		err = sr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for client %d", sr.Id)
-		}
+	archivableSites := make([]archives.ArchivableRecord, len(cp.clients))
+	for i, site := range cp.clients {
+		archivableSites[i] = site
 	}
+	return archivableSites
+}
 
-	return zw.Close()
+func (cp *ClientsPersister) GetName() string {
+	return "Clients"
 }

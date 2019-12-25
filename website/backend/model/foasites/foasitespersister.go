@@ -1,12 +1,11 @@
 package foasites
 
 import (
-	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -159,28 +158,17 @@ func (fsp FoaSitesPersister) findIndex(sr *FoaSiteRecord) int {
 	return -1
 }
 
-// ArchiveName returns the FoaSiteArchive file name with today's date
-func (fsp FoaSitesPersister) ArchiveName() string {
-	return fmt.Sprintf("FoaSites %s.zip", date.Today().String())
-}
-
-// CreateArchive writes a zipped archive of all contained FoaSites files to the given writer
-func (fsp *FoaSitesPersister) CreateArchive(writer io.Writer) error {
+func (fsp *FoaSitesPersister) GetAllSites() []archives.ArchivableRecord {
 	fsp.RLock()
 	defer fsp.RUnlock()
 
-	zw := zip.NewWriter(writer)
-
-	for _, sr := range fsp.FoaSites {
-		wfw, err := zw.Create(sr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for FoaSite %d", sr.Id)
-		}
-		err = sr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for FoaSite %d", sr.Id)
-		}
+	archivableSites := make([]archives.ArchivableRecord, len(fsp.FoaSites))
+	for i, site := range fsp.FoaSites {
+		archivableSites[i] = site
 	}
+	return archivableSites
+}
 
-	return zw.Close()
+func (fsp *FoaSitesPersister) GetName() string {
+	return "FoaSites"
 }

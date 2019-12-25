@@ -19,7 +19,7 @@ type StatContext struct {
 
 type IsItemizableSiteVisible func(site ItemizableSite) bool
 
-type ItemizableContener interface {
+type ItemizableContainer interface {
 	GetItemizableSites(IsItemizableSiteVisible) []ItemizableSite
 }
 
@@ -30,7 +30,7 @@ type ItemizableSite interface {
 	Itemize(*bpu.Bpu) ([]*Item, error)
 }
 
-func (sc StatContext) CalcStats(sites ItemizableContener, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
+func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
 	calcValues := NewStats()
 	for _, site := range sites.GetItemizableSites(isSiteVisible) {
 		if isSiteVisible(site) {

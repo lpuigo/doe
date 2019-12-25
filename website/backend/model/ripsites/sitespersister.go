@@ -1,14 +1,13 @@
 package ripsites
 
 import (
-	"archive/zip"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
-	"io"
 	"path/filepath"
 	"sync"
 	"time"
@@ -317,28 +316,17 @@ func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg,
 	return res, nil
 }
 
-// ArchiveName returns the SiteArchive file name with today's date
-func (sp SitesPersister) ArchiveName() string {
-	return fmt.Sprintf("Ripsites %s.zip", date.Today().String())
-}
-
-// CreateWorksitesArchive writes a zipped archive of all contained Worksites files to the given writer
-func (sp *SitesPersister) CreateArchive(writer io.Writer) error {
+func (sp *SitesPersister) GetAllSites() []archives.ArchivableRecord {
 	sp.RLock()
 	defer sp.RUnlock()
 
-	zw := zip.NewWriter(writer)
-
-	for _, sr := range sp.sites {
-		wfw, err := zw.Create(sr.GetFileName())
-		if err != nil {
-			return fmt.Errorf("could not create zip entry for site %d", sr.Id)
-		}
-		err = sr.Marshall(wfw)
-		if err != nil {
-			return fmt.Errorf("could not write zip entry for site %d", sr.Id)
-		}
+	archivableSites := make([]archives.ArchivableRecord, len(sp.sites))
+	for i, site := range sp.sites {
+		archivableSites[i] = site
 	}
+	return archivableSites
+}
 
-	return zw.Close()
+func (sp *SitesPersister) GetName() string {
+	return "Ripsites"
 }
