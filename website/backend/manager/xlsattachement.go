@@ -8,6 +8,8 @@ import (
 
 func (m Manager) GetItemizableSite(siteType string) (site items.ItemizableContainer, err error) {
 	switch siteType {
+	case "ripsites":
+		site = m.Ripsites
 	case "foasites":
 		site = m.Foasites
 	default:

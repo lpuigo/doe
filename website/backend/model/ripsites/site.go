@@ -27,6 +27,18 @@ type Site struct {
 	Measurements []*Measurement
 }
 
+func (s *Site) GetRef() string {
+	return s.Ref
+}
+
+func (s *Site) GetClient() string {
+	return s.Client
+}
+
+func (s *Site) GetType() string {
+	return "ripsite"
+}
+
 func (s *Site) GetInfo(clientByName clients.ClientByName) *fm.RipsiteInfo {
 	rsi := fm.NewBERipsiteInfo()
 

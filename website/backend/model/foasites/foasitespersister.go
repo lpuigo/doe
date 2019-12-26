@@ -75,7 +75,7 @@ func (fsp *FoaSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible
 	return foaSiteRecords
 }
 
-// GetItemizableSites returns all contained FoaSiteRecord as ItemizableSite for which isSiteVisible(*FoaSite) == true
+// GetItemizableSites returns all contained FoaSiteRecord as ItemizableSite for which isSiteVisible(*ItemizableSite) == true
 func (fsp *FoaSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
 	fsp.RLock()
 	defer fsp.RUnlock()

@@ -316,6 +316,28 @@ func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg,
 	return res, nil
 }
 
+// GetItemizableSites returns all contained RipSiteRecord as ItemizableSite for which isSiteVisible(*ItemizableSite) == true
+func (sp *SitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
+	sp.Lock()
+	defer sp.Unlock()
+
+	rss := []items.ItemizableSite{}
+	for _, rsr := range sp.sites {
+		if isSiteVisible(rsr) {
+			rss = append(rss, rsr)
+		}
+	}
+	return rss
+}
+
+func (sp *SitesPersister) GetItemizableSiteById(id int) items.ItemizableSite {
+	site := sp.GetById(id)
+	if site == nil {
+		return nil // force untyped nil to enable (return == nil) test
+	}
+	return site
+}
+
 func (sp *SitesPersister) GetAllSites() []archives.ArchivableRecord {
 	sp.RLock()
 	defer sp.RUnlock()

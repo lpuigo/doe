@@ -36,10 +36,6 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(rsis)
 }
 
-func (m Manager) GetRipsiteXLSAttachement(writer io.Writer, rs *rs.Site) error {
-	return m.TemplateEngine.GetRipsiteXLSAttachement(writer, rs, m.genGetClient(), m.genActorById())
-}
-
 func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
 	maxVal := 12
 
