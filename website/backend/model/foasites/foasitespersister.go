@@ -62,7 +62,7 @@ func (fsp *FoaSitesPersister) LoadDirectory() error {
 }
 
 // GetAll returns all contained FoaSiteRecord for which keep(*FoaSite) == true
-func (fsp FoaSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible) []*FoaSiteRecord {
+func (fsp *FoaSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible) []*FoaSiteRecord {
 	fsp.RLock()
 	defer fsp.RUnlock()
 
@@ -76,7 +76,7 @@ func (fsp FoaSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible)
 }
 
 // GetItemizableSites returns all contained FoaSiteRecord as ItemizableSite for which isSiteVisible(*FoaSite) == true
-func (fsp FoaSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
+func (fsp *FoaSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
 	fsp.RLock()
 	defer fsp.RUnlock()
 
@@ -87,6 +87,14 @@ func (fsp FoaSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizable
 		}
 	}
 	return iss
+}
+
+func (fsp *FoaSitesPersister) GetItemizableSiteById(id int) items.ItemizableSite {
+	site := fsp.GetById(id)
+	if site == nil {
+		return nil // force untyped nil to enable (return == nil) test
+	}
+	return site
 }
 
 // GetById returns the FoaSiteRecord with given Id (or nil if Id not found)

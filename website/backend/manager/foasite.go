@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
-	fs "github.com/lpuig/ewin/doe/website/backend/model/foasites"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"io"
@@ -69,8 +68,4 @@ func (m Manager) GetFoaSitesStats(writer io.Writer, freq string) error {
 		return err
 	}
 	return json.NewEncoder(writer).Encode(foaStats)
-}
-
-func (m Manager) GetFoaSiteXLSAttachement(writer io.Writer, site *fs.FoaSite) error {
-	return m.TemplateEngine.GetFoaSiteXLSAttachement(writer, site, m.genGetClient(), m.genActorById())
 }

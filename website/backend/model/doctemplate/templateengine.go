@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
-	"github.com/lpuig/ewin/doe/website/backend/model/foasites"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
@@ -225,16 +224,11 @@ func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesi
 	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
-// GetFoaSiteXLSAttachementName returns the name of the XLSx file pertaining to given FoaSite
-func (te *DocTemplateEngine) GetFoaSiteXLSAttachementName(site *foasites.FoaSite) string {
-	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.Ref)
-}
-
-// GetFoaSiteXLSAttachement generates and writes on given writer the attachment data pertaining to given FoaSite
-func (te *DocTemplateEngine) GetFoaSiteXLSAttachement(w io.Writer, site *foasites.FoaSite, getClient clients.ClientByName, actorById clients.ActorById) error {
-	client := getClient(site.Client)
+// GetSiteXLSAttachement generates and writes on given writer the attachment data pertaining to given FoaSite
+func (te *DocTemplateEngine) GetItemizableSiteXLSAttachement(w io.Writer, site items.ItemizableSite, getClient clients.ClientByName, actorById clients.ActorById) error {
+	client := getClient(site.GetClient())
 	if client == nil {
-		return fmt.Errorf("unknown client '%s'", site.Client)
+		return fmt.Errorf("unknown client '%s'", site.GetClient())
 	}
 
 	its, err := site.Itemize(client.Bpu)

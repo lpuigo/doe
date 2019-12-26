@@ -21,6 +21,7 @@ type IsItemizableSiteVisible func(site ItemizableSite) bool
 
 type ItemizableContainer interface {
 	GetItemizableSites(IsItemizableSiteVisible) []ItemizableSite
+	GetItemizableSiteById(int) ItemizableSite
 }
 
 type ItemizableSite interface {

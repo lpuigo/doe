@@ -76,34 +76,6 @@ func GetFoaSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg.AddInfoResponse(fmt.Sprintf("foasite Id %d (%s) returned", psr.Id, psr.Ref), http.StatusOK)
 }
 
-func GetFoaSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("GetFoaSiteAttachement").AddUser(mgr.CurrentUser.Name)
-	defer logmsg.Log()
-
-	reqFoaSiteId := mux.Vars(r)["fsid"]
-	rfsid, err := strconv.Atoi(reqFoaSiteId)
-	if err != nil {
-		AddError(w, logmsg, "mis-formatted FoaSite id '"+reqFoaSiteId+"'", http.StatusBadRequest)
-		return
-	}
-	psr := mgr.Foasites.GetById(rfsid)
-	if psr == nil {
-		AddError(w, logmsg, fmt.Sprintf("FoaSite with id %d does not exist", rfsid), http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", mgr.TemplateEngine.GetFoaSiteXLSAttachementName(psr.FoaSite)))
-	w.Header().Set("Content-Type", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-	err = mgr.GetFoaSiteXLSAttachement(w, psr.FoaSite)
-	if err != nil {
-		AddError(w, logmsg, "could not generate FoaSite XLS Attachment file. "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Attachment XLS produced for FoaSite id %d (%s)", rfsid, psr.FoaSite.Ref), http.StatusOK)
-}
-
 func UpdateFoaSite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg := logger.TimedEntry("Route").AddRequest("UpdateFoaSite").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
