@@ -34,10 +34,6 @@ func (m Manager) GetPolesitesInfo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(psis)
 }
 
-func (m Manager) GetPolesiteXLSAttachement(writer io.Writer, ps *ps.PoleSite) error {
-	return m.TemplateEngine.GetPolesiteXLSAttachement(writer, ps, m.genGetClient(), m.genActorById())
-}
-
 // GetPolesitesWeekStats returns Polesites Stats per Week (JSON in writer) visibles by current user
 func (m Manager) GetPolesitesWeekStats(writer io.Writer) error {
 	df := func(d string) string {

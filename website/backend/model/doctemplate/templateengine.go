@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
-	"github.com/lpuig/ewin/doe/website/backend/model/polesites"
 	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
@@ -181,26 +180,6 @@ func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *model.Worksite) e
 	}
 
 	return zw.Close()
-}
-
-// GetPolesiteXLSAttachementName returns the name of the XLSx file pertaining to given Polesite
-func (te *DocTemplateEngine) GetPolesiteXLSAttachementName(site *polesites.PoleSite) string {
-	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.Ref)
-}
-
-// GetRipsiteXLSAttachement generates and writes on given writer the attachment data pertaining to given Ripsite
-func (te *DocTemplateEngine) GetPolesiteXLSAttachement(w io.Writer, site *polesites.PoleSite, getClient clients.ClientByName, actorById clients.ActorById) error {
-	client := getClient(site.Client)
-	if client == nil {
-		return fmt.Errorf("unknown client '%s'", site.Client)
-	}
-
-	its, err := site.Itemize(client.Bpu)
-	if err != nil {
-		return fmt.Errorf("unable to create items: %s", err.Error())
-	}
-
-	return te.GetItemsXLSAttachement(w, its, actorById)
 }
 
 // GetSiteXLSAttachement generates and writes on given writer the attachment data pertaining to given FoaSite

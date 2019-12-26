@@ -27,6 +27,18 @@ type PoleSite struct {
 	Poles []*Pole
 }
 
+func (ps *PoleSite) GetRef() string {
+	return ps.Ref
+}
+
+func (ps *PoleSite) GetClient() string {
+	return ps.Client
+}
+
+func (ps *PoleSite) GetType() string {
+	return "polesite"
+}
+
 func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 	psi := fm.NewBEPolesiteInfo()
 

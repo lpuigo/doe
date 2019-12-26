@@ -176,6 +176,27 @@ func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPole
 	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }
 
+func (psp *PoleSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {
+	psp.RLock()
+	defer psp.RUnlock()
+
+	pss := []items.ItemizableSite{}
+	for _, psr := range psp.polesites {
+		if isSiteVisible(psr) {
+			pss = append(pss, psr)
+		}
+	}
+	return pss
+}
+
+func (psp *PoleSitesPersister) GetItemizableSiteById(id int) items.ItemizableSite {
+	site := psp.GetById(id)
+	if site == nil {
+		return nil // force untyped nil to enable (return == nil) test
+	}
+	return site
+}
+
 func (psp *PoleSitesPersister) GetAllSites() []archives.ArchivableRecord {
 	psp.RLock()
 	defer psp.RUnlock()

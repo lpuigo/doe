@@ -10,6 +10,8 @@ func (m Manager) GetItemizableSite(siteType string) (site items.ItemizableContai
 	switch siteType {
 	case "ripsites":
 		site = m.Ripsites
+	case "polesites":
+		site = m.Polesites
 	case "foasites":
 		site = m.Foasites
 	default:
