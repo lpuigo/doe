@@ -143,6 +143,9 @@ func main() {
 	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("GetFoaSite", route.GetFoaSite)).Methods("GET")
 	router.HandleFunc("/api/foasites/{fsid:[0-9]+}", withUserManager("UpdateFoaSite", route.UpdateFoaSite)).Methods("PUT")
 
+	// Archives methods
+	router.HandleFunc("/api/{recordtype}/archive", withUserManager("GetRecordsArchive", route.GetRecordsArchive)).Methods("GET")
+
 	// Attachements methods
 	router.HandleFunc("/api/{sitetype}/{id:[0-9]+}/attach", withUserManager("GetFoaSiteAttachement", route.GetItemizableSiteAttachement)).Methods("GET")
 
@@ -157,7 +160,6 @@ func main() {
 
 	// Administration methods
 	router.HandleFunc("/api/admin/reload", withUserManager("ReloadPersister", route.ReloadPersister)).Methods("GET")
-	router.HandleFunc("/api/{recordtype}/archive", withUserManager("GetRecordsArchive", route.GetRecordsArchive)).Methods("GET")
 
 	// Static Files serving
 	router.PathPrefix(conf.AssetsRoot).Handler(http.StripPrefix(conf.AssetsRoot, http.FileServer(http.Dir(conf.AssetsDir))))

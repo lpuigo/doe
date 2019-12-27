@@ -64,13 +64,13 @@ func (psp *PoleSitesPersister) LoadDirectory() error {
 }
 
 // GetAll returns all contained PoleSiteRecord for which keep(sr.Site) == true
-func (psp PoleSitesPersister) GetAll(keep func(s *PoleSite) bool) []*PoleSiteRecord {
+func (psp PoleSitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible) []*PoleSiteRecord {
 	psp.RLock()
 	defer psp.RUnlock()
 
 	srs := []*PoleSiteRecord{}
 	for _, psr := range psp.polesites {
-		if keep(psr.PoleSite) {
+		if isSiteVisible(psr.PoleSite) {
 			srs = append(srs, psr)
 		}
 	}

@@ -101,10 +101,8 @@ func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	freq := vars["freq"]
 	switch freq {
-	case "week":
-		err = mgr.GetPolesitesWeekStats(w)
-	case "month":
-		err = mgr.GetPolesitesMonthStats(w)
+	case "week", "month":
+		err = mgr.GetPolesitesStats(w, freq)
 	default:
 		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
 		return

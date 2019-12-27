@@ -9,24 +9,10 @@ import (
 	"io"
 )
 
-// visiblePolesiteFilter returns a filtering function on CurrentUser.Clients visibility
-func (m *Manager) visibleFoaItemizableSiteFilter() items.IsItemizableSiteVisible {
-	if len(m.CurrentUser.Clients) == 0 {
-		return func(site items.ItemizableSite) bool { return true }
-	}
-	isVisible := make(map[string]bool)
-	for _, client := range m.CurrentUser.Clients {
-		isVisible[client] = true
-	}
-	return func(site items.ItemizableSite) bool {
-		return isVisible[site.GetClient()]
-	}
-}
-
 // GetFoaSitesInfo returns array of FoaSiteInfos (JSON in writer) visibles by current user
 func (m Manager) GetFoaSitesInfo(writer io.Writer) error {
 	fsis := []*fm.FoaSiteInfo{}
-	for _, fsr := range m.Foasites.GetAll(m.visibleFoaItemizableSiteFilter()) {
+	for _, fsr := range m.Foasites.GetAll(m.visibleItemizableSiteByClientFilter()) {
 		fsis = append(fsis, fsr.FoaSite.GetInfo())
 	}
 
@@ -63,7 +49,7 @@ func (m Manager) GetFoaSitesStats(writer io.Writer, freq string) error {
 		ActorById:     m.genActorById(),
 		ShowTeam:      false,
 	}
-	foaStats, err := statContext.CalcStats(m.Foasites, m.visibleFoaItemizableSiteFilter(), m.CurrentUser.Permissions["Invoice"])
+	foaStats, err := statContext.CalcStats(m.Foasites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err
 	}
