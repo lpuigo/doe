@@ -321,6 +321,8 @@ func GetRowStyle(actor *actor.Actor) string {
 		return "actor-row-holiday"
 	case actorconst.StateGone:
 		return "actor-row-gone"
+	case actorconst.StateDefection:
+		return "actor-row-defection"
 	default:
 		return "actor-row-error"
 	}
@@ -336,6 +338,8 @@ func GetStateLabel(state string) string {
 		return actorconst.StateLabelOnHoliday
 	case actorconst.StateGone:
 		return actorconst.StateLabelGone
+	case actorconst.StateDefection:
+		return actorconst.StateLabelDefection
 	default:
 		return "Erreur"
 	}

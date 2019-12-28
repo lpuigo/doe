@@ -5,11 +5,13 @@ const (
 	StateActive    string = "10 Active"
 	StateOnHoliday string = "20 On Holiday"
 	StateGone      string = "90 Gone"
+	StateDefection string = "91 Defection"
 
 	StateLabelCandidate string = "Candidat"
 	StateLabelActive    string = "Actif"
 	StateLabelOnHoliday string = "En Congés"
 	StateLabelGone      string = "Parti"
+	StateLabelDefection string = "Défection"
 )
 
 const (

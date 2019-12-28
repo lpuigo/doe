@@ -83,7 +83,7 @@ const template string = `<el-dialog
         <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
             <el-col :span="3" class="align-right">Date d'embauche :</el-col>
             <el-col :span="9">
-                <el-date-picker :clearable="false" :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
+                <el-date-picker :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
                                 placeholder="Date" size="mini"
                                 style="width: 100%"
                                 type="date"
@@ -94,7 +94,7 @@ const template string = `<el-dialog
 
             <el-col :span="3" class="align-right">Date de départ :</el-col>
             <el-col :span="9">
-                <el-date-picker :clearable="false" :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
+                <el-date-picker :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
                                 placeholder="Date" size="mini"
                                 style="width: 100%"
                                 type="date"

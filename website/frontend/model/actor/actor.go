@@ -101,6 +101,8 @@ func (a *Actor) UpdateState() {
 	today := date.TodayAfter(0)
 	holidayPeriod := a.GetNextVacation()
 	switch {
+	case a.Period.Begin == "" && a.Period.End == "":
+		a.State = actorconst.StateDefection
 	case a.Period.Begin == "" || a.Period.Begin > today:
 		a.State = actorconst.StateCandidate
 	case a.Period.End != "" && a.Period.End < today:

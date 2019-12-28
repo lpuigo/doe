@@ -38,6 +38,16 @@
     transition: background-color .15s ease;
 }
 
+.el-table .actor-row-defection {
+    background: #cccccc;
+    color: #888;
+}
+
+.el-table .actor-row-defection:hover {
+    background: #bdbdbd;
+    transition: background-color .15s ease;
+}
+
 .el-table .actor-row-error {
     background: #ff644d;
 }
