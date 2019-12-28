@@ -21,6 +21,7 @@ const (
         :data="filteredActors"
 		:default-sort = "{prop: 'Client', order: 'ascending'}"
         :row-class-name="TableRowClassName" height="100%" size="mini"
+		@row-dblclick="HandleDoubleClickedRow"
 >
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
@@ -367,4 +368,8 @@ func (atm *ActorsTableModel) EditActor(vm *hvue.VM, act *actor.Actor) {
 
 func (atm *ActorsTableModel) EditActorVacancy(vm *hvue.VM, act *actor.Actor) {
 	vm.Emit("edit-actor-vacancy", act)
+}
+
+func (atm *ActorsTableModel) HandleDoubleClickedRow(vm *hvue.VM, act *actor.Actor) {
+	atm.EditActor(vm, act)
 }

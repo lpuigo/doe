@@ -32,6 +32,7 @@ const (
                 :data="filteredActors"
                 :default-sort = "{prop: 'Client', order: 'ascending'}"
                 height="100%" size="mini"
+				@row-dblclick="HandleDoubleClickedRow"
         >
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
@@ -296,4 +297,8 @@ func (acm *ActorsCalendarModel) CurrentDateRange() string {
 
 func (acm *ActorsCalendarModel) DateOf(i int) string {
 	return date.Day(date.After(acm.CurrentDate, i))
+}
+
+func (acm *ActorsCalendarModel) HandleDoubleClickedRow(vm *hvue.VM, act *actor.Actor) {
+	acm.EditActorVacancy(vm, act)
 }

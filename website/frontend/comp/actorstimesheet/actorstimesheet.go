@@ -56,6 +56,7 @@ const (
                 :data="filteredActors"
                 :default-sort = "{prop: 'Client', order: 'ascending'}"
                 height="100%" size="mini"
+				@row-dblclick="HandleDoubleClickedRow"
         >
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
@@ -382,6 +383,10 @@ func (atsm *ActorsTimeSheetModel) HandleCurrentDateAfter() {
 		atsm.CurrentDateAfter()
 		atsm.GetTimeSheet()
 	})
+}
+
+func (atsm *ActorsTimeSheetModel) HandleDoubleClickedRow(vm *hvue.VM, act *actor.Actor) {
+	atsm.EditActorVacancy(vm, act)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
