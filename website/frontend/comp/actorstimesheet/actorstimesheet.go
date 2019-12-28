@@ -237,6 +237,9 @@ func (atsm *ActorsTimeSheetModel) GetInRangeActors() []*actor.Actor {
 	rangeEnd := atsm.CurrentRangeEnd()
 	res := []*actor.Actor{}
 	for _, act := range atsm.Actors {
+		if act.Period.Begin == "" {
+			continue // Defected actors
+		}
 		if act.Period.Begin > rangeEnd {
 			continue // actors came in after current period
 		}

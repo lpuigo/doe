@@ -261,6 +261,9 @@ func (atm *ActorsTableModel) SortDate(attrib1, attrib2 string) func(obj *js.Obje
 
 func (atm *ActorsTableModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
 	prop := col.Get("property").String()
+	if prop == "Client" {
+		return strings.Contains(p.Get(prop).String(), value)
+	}
 	return p.Get(prop).String() == value
 }
 
@@ -281,10 +284,20 @@ func (atm *ActorsTableModel) FilterList(vm *hvue.VM, prop string) []*elements.Va
 
 	for _, act := range atm.Actors {
 		attrib := act.Object.Get(prop).String()
-		if _, exist := count[attrib]; !exist {
-			attribs = append(attribs, attrib)
+		var attrs []string
+		switch prop {
+		case "Client":
+			attrs = strings.Split(attrib, ",")
+		default:
+			attrs = []string{attrib}
 		}
-		count[attrib]++
+		for _, a := range attrs {
+			if _, exist := count[a]; !exist {
+				attribs = append(attribs, a)
+			}
+			count[a]++
+		}
+
 	}
 	sort.Strings(attribs)
 	res := []*elements.ValText{}

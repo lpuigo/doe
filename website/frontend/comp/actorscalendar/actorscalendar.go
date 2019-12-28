@@ -169,6 +169,9 @@ func (acm *ActorsCalendarModel) GetInRangeActors() []*actor.Actor {
 	rangeEnd := acm.CurrentRangeEnd()
 	res := []*actor.Actor{}
 	for _, act := range acm.Actors {
+		if act.Period.Begin == "" {
+			continue // Defected actors
+		}
 		if act.Period.Begin > rangeEnd {
 			continue // actors came in after current period
 		}
