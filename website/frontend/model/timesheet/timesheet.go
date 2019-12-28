@@ -36,6 +36,17 @@ func (at *ActorsTime) Equals(oat *ActorsTime) bool {
 	return true
 }
 
+// NbActiveDays returns the numbers of days with recorded hours (hours > 0) (Saturdays are ignored)
+func (at *ActorsTime) NbActiveDays() int {
+	ad := 0
+	for i, hour := range at.Hours {
+		if hour > 0 && i < 5 {
+			ad++
+		}
+	}
+	return ad
+}
+
 type TimeSheet struct {
 	*js.Object
 

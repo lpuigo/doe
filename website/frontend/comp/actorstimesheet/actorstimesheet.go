@@ -21,7 +21,7 @@ const (
 	template string = `<el-container style="height: 100%">
     <el-header style="height: auto; padding: 0px">
         <el-row type="flex" align="middle">
-            <el-col :offset="10" :span="2">
+            <el-col :offset="8" :span="2">
                 <el-button-group>
                     <el-tooltip content="Enregistrer les temps saisis" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-cloud-upload-alt icon--medium" @click="HandleSaveTimeSheet"
@@ -33,12 +33,12 @@ const (
                     </el-tooltip>
                 </el-button-group>
             </el-col>
-            <el-col :offset="2" :span="1">
+            <el-col :offset="1" :span="1">
                 <el-tooltip content="Dernière semaine passée" placement="bottom" effect="light" open-delay=500>
                 	<el-button icon="fas fa-chevron-down" size="mini" @click="HandleResetCurrentDate()"></el-button>
 				</el-tooltip>
             </el-col>
-            <el-col :span="10">
+            <el-col :span="5">
                 <el-tooltip content="Semaine précédente" placement="bottom" effect="light" open-delay=500>
                 	<el-button icon="fas fa-chevron-left" size="mini" @click="HandleCurrentDateBefore()"></el-button>
 				</el-tooltip>
@@ -46,6 +46,9 @@ const (
                 <el-tooltip content="Semaine suivante" placement="bottom" effect="light" open-delay=500>
                 	<el-button icon="fas fa-chevron-right" size="mini" @click="HandleCurrentDateAfter()"></el-button>
 				</el-tooltip>
+            </el-col>
+            <el-col :span="6">
+				<el-progress :text-inside="true" :stroke-width="20" :percentage="GetInputPct()"></el-progress>
             </el-col>
         </el-row>
     </el-header>
@@ -56,7 +59,6 @@ const (
                 :data="filteredActors"
                 :default-sort = "{prop: 'Client', order: 'ascending'}"
                 height="100%" size="mini"
-				@row-dblclick="HandleDoubleClickedRow"
         >
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
@@ -185,6 +187,7 @@ type ActorsTimeSheetModel struct {
 	DateRange   int    `js:"DateRange"`
 
 	TimeSheet       *timesheet.TimeSheet `js:"TimeSheet"`
+	ProgressWorking map[int]int          `js:"ProgressWorking"`
 	TimesheetLoaded bool                 `js:"TimesheetLoaded"`
 	Reference       string               `js:"Reference"`
 	Dirty           bool                 `js:"Dirty"`
@@ -195,6 +198,7 @@ func NewActorsTimeSheetModel(vm *hvue.VM) *ActorsTimeSheetModel {
 	acm.ResetCurrentDate()
 	acm.DateRange = 6
 	acm.TimeSheet = timesheet.NewTimeSheet()
+	acm.ProgressWorking = make(map[int]int)
 	acm.TimesheetLoaded = false
 	acm.Reference = ""
 	acm.Dirty = true
@@ -252,6 +256,24 @@ func (atsm *ActorsTimeSheetModel) GetInRangeActors() []*actor.Actor {
 	return res
 }
 
+func (atsm *ActorsTimeSheetModel) GetInputPct() float64 {
+	twd := 0
+	tad := 0
+	for actId, wd := range atsm.ProgressWorking {
+		actTimes, exist := atsm.TimeSheet.ActorsTimes[actId]
+		if !exist {
+			continue
+		}
+		twd += wd
+		tad += actTimes.NbActiveDays()
+	}
+	if twd == 0 {
+		return 100.0
+
+	}
+	return float64(tad*1000/twd) / 10.0
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Format & Style Functions
 
@@ -276,71 +298,6 @@ func (atsm *ActorsTimeSheetModel) GetHeaderClassState(vm *hvue.VM) []string {
 		if i == today {
 			res[i] += " today"
 		}
-	}
-	return res
-}
-
-func (atsm *ActorsTimeSheetModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []string {
-	atsm = ActorsTimeSheetModelFromJS(vm.Object)
-	rangeStart := atsm.CurrentDate
-	rangeEnd := atsm.CurrentRangeEnd()
-	rangeLength := atsm.DateRange
-
-	today := int(date.NbDaysBetween(rangeStart, date.TodayAfter(0)))
-
-	// arrival / departure
-	arrival := 0
-	if act.Period.Begin > rangeStart {
-		// Actor arrived afterward
-		arrival = int(date.NbDaysBetween(rangeStart, act.Period.Begin))
-	}
-
-	departure := rangeLength
-	if !tools.Empty(act.Period.End) && act.Period.End <= rangeEnd {
-		// Actor left before period end
-		departure -= int(date.NbDaysBetween(act.Period.End, rangeEnd))
-	}
-
-	// Vancancy
-	isVas := make([]bool, rangeLength)
-	for _, vacPeriod := range act.Vacation {
-		if vacPeriod.End < rangeStart || vacPeriod.Begin > rangeEnd {
-			continue
-		}
-		vacPeriodBeg := 0
-		vacPeriodEnd := rangeLength
-		if vacPeriod.Begin > rangeStart {
-			vacPeriodBeg = int(date.NbDaysBetween(rangeStart, vacPeriod.Begin))
-		}
-		if vacPeriod.End < rangeEnd {
-			vacPeriodEnd -= int(date.NbDaysBetween(vacPeriod.End, rangeEnd))
-		}
-		for i := vacPeriodBeg; i < vacPeriodEnd; i++ {
-			isVas[i] = true
-		}
-	}
-
-	// calc class array
-	res := make([]string, rangeLength)
-	for i := 0; i < rangeLength; i++ {
-		day := date.After(rangeStart, i)
-		if i == today {
-			res[i] = "today "
-		}
-		switch {
-		case !(i >= arrival && i < departure):
-			res[i] += "inactive "
-			continue
-		case atsm.User.IsDayOff(day):
-			res[i] += "day-off "
-			continue
-		case isVas[i]:
-			res[i] += "holiday "
-			continue
-		case i%7 > 4:
-			res[i] += "week-end "
-		}
-		res[i] += "active "
 	}
 	return res
 }
@@ -440,6 +397,7 @@ func (atsm *ActorsTimeSheetModel) GetTimeSheet() {
 	atsm.TimesheetLoaded = false
 	callback := func() {
 		atsm.SetReference()
+		atsm.ProgressWorking = make(map[int]int)
 		atsm.TimesheetLoaded = true
 	}
 	go atsm.callGetTimeSheet(callback)
@@ -457,7 +415,15 @@ func (atsm *ActorsTimeSheetModel) GetActorsTime(id int) *timesheet.ActorsTime {
 
 func (atsm *ActorsTimeSheetModel) GetActiveDays(vm *hvue.VM, act *actor.Actor) []int {
 	atsm = ActorsTimeSheetModelFromJS(vm.Object)
-	return act.GetActiveDays(atsm.CurrentDate, atsm.User.DaysOff)
+	activeDays := act.GetActiveDays(atsm.CurrentDate, atsm.User.DaysOff)
+	pw := 0
+	for i, val := range activeDays {
+		if val == 1 && i < 5 {
+			pw++
+		}
+	}
+	atsm.Get("ProgressWorking").SetIndex(act.Id, pw)
+	return activeDays
 }
 
 func (atsm *ActorsTimeSheetModel) GetActiveHours(id int) string {
