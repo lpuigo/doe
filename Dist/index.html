@@ -72,14 +72,34 @@
                         <h2 class="content">EWIN Services</h2>
                     </el-row>
 
-                    <!-- Select Orange / RIP / Poles mode -->
+                    <!-- Select Orange / RIP / Poles / FOA mode -->
+                    <el-dropdown v-if="User.Permissions.Update || User.Permissions.Review" trigger="click" @command="CheckSiteMode">
+                        <el-button size="mini">
+                            <strong>{{SiteModeLabel()}}</strong><i class="el-icon-arrow-down el-icon--right"></i>
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item v-if="worksiteInfos.length > 0" command="Orange">
+                                <strong>Orange</strong> : {{worksiteInfos.length}}
+                            </el-dropdown-item>
+                            <el-dropdown-item v-if="ripsiteInfos.length > 0" command="Rip">
+                                RIP : {{ripsiteInfos.length}}
+                            </el-dropdown-item>
+                            <el-dropdown-item v-if="foasiteInfos.length > 0" command="Foa">
+                                FOA : {{foasiteInfos.length}}
+                            </el-dropdown-item>
+                            <el-dropdown-item v-if="polesiteInfos.length > 0" command="Poles">
+                                Poteaux : {{polesiteInfos.length}}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+<!--
                     <el-radio-group v-if="User.Permissions.Update || User.Permissions.Review" v-model="SiteMode" size="mini" @change="CheckSiteMode">
                         <el-radio-button v-if="worksiteInfos.length > 0" label="Orange">Orange : {{worksiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="ripsiteInfos.length > 0" label="Rip">RIP : {{ripsiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="foasiteInfos.length > 0" label="Foa">FOA : {{foasiteInfos.length}}</el-radio-button>
                         <el-radio-button v-if="polesiteInfos.length > 0" label="Poles">Poteaux : {{polesiteInfos.length}}</el-radio-button>
                     </el-radio-group>
-
+-->
                     <!-- Select Billing / Create / Update / Review modes -->
                     <el-radio-group v-if="SiteMode == 'Orange'" v-model="ActiveMode" size="mini">
                         <el-radio-button v-if="User.Permissions.Invoice" label="Invoice">Factures</el-radio-button>

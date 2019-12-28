@@ -12,6 +12,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"sort"
 	"strconv"
+	"time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,7 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Computed("filteredWorksites", func(vm *hvue.VM) interface{} {
 			wtm := &InvoiceTableModel{Object: vm.Object}
 			if wtm.Filter == "" {
-				return wtm.Worksiteinfos
+				return wtm.GetSizeLimitedResult(wtm.Worksiteinfos)
 			}
 			res := []*fm.WorksiteInfo{}
 			for _, ws := range wtm.Worksiteinfos {
@@ -42,7 +43,7 @@ func componentOptions() []hvue.ComponentOption {
 					res = append(res, ws)
 				}
 			}
-			return res
+			return wtm.GetSizeLimitedResult(res)
 		}),
 		hvue.Filter("DateFormat", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
 			return date.DateString(value.String())
@@ -58,6 +59,7 @@ type InvoiceTableModel struct {
 
 	Worksiteinfos []*fm.WorksiteInfo `js:"worksiteinfos"`
 	Filter        string             `js:"filter"`
+	SizeLimit     int                `js:"SizeLimit"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -66,8 +68,39 @@ func NewInvoiceTableModel(vm *hvue.VM) *InvoiceTableModel {
 	wtm := &InvoiceTableModel{Object: tools.O()}
 	wtm.Worksiteinfos = nil
 	wtm.Filter = ""
+	wtm.SetSizeLimit()
 	wtm.VM = vm
 	return wtm
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 30
+	sizeLimitTimer       = 300
+)
+
+func (itm *InvoiceTableModel) GetSizeLimitedResult(res []*fm.WorksiteInfo) []*fm.WorksiteInfo {
+	if len(res) == itm.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		itm.ResetSizeLimit(len(res))
+		return res[len(res)-sizeLimitDefault:]
+	}
+	return res
+}
+
+func (itm *InvoiceTableModel) SetSizeLimit() {
+	itm.SizeLimit = -1
+}
+
+func (itm *InvoiceTableModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		itm.SizeLimit = size
+	}()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -12,6 +12,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"sort"
 	"strconv"
+	"time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@ func ComponentOptions() []hvue.ComponentOption {
 		hvue.Computed("filteredWorksites", func(vm *hvue.VM) interface{} {
 			wtm := &WorksiteTableModel{Object: vm.Object}
 			if wtm.Filter == "" {
-				return wtm.Worksiteinfos
+				return wtm.GetSizeLimitedResult(wtm.Worksiteinfos)
 			}
 			res := []*fm.WorksiteInfo{}
 			for _, ws := range wtm.Worksiteinfos {
@@ -48,7 +49,7 @@ func ComponentOptions() []hvue.ComponentOption {
 					res = append(res, ws)
 				}
 			}
-			return res
+			return wtm.GetSizeLimitedResult(res)
 		}),
 		hvue.Filter("DateFormat", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
 			return date.DateString(value.String())
@@ -65,6 +66,7 @@ type WorksiteTableModel struct {
 	Worksiteinfos     []*fm.WorksiteInfo `js:"worksiteinfos"`
 	EnableAddWorksite bool               `js:"enable_add_worksite"`
 	Filter            string             `js:"filter"`
+	SizeLimit         int                `js:"SizeLimit"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -74,6 +76,7 @@ func NewWorksiteTableModel(vm *hvue.VM) *WorksiteTableModel {
 	wtm.Worksiteinfos = nil
 	wtm.EnableAddWorksite = false
 	wtm.Filter = ""
+	wtm.SetSizeLimit()
 	wtm.VM = vm
 	return wtm
 }
@@ -148,6 +151,36 @@ func (wtm *WorksiteTableModel) SortStatus(a, b *worksite.Worksite) int {
 		return 0
 	}
 	return 1
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 30
+	sizeLimitTimer       = 300
+)
+
+func (wtm *WorksiteTableModel) GetSizeLimitedResult(res []*fm.WorksiteInfo) []*fm.WorksiteInfo {
+	if len(res) == wtm.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		wtm.ResetSizeLimit(len(res))
+		return res[len(res)-sizeLimitDefault:]
+	}
+	return res
+}
+
+func (wtm *WorksiteTableModel) SetSizeLimit() {
+	wtm.SizeLimit = -1
+}
+
+func (wtm *WorksiteTableModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		wtm.SizeLimit = size
+	}()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

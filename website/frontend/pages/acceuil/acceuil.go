@@ -58,6 +58,10 @@ func main() {
 			}
 			return mpm.User.Name
 		}),
+		hvue.Computed("SiteModeLabel", func(vm *hvue.VM) interface{} {
+			mpm := &MainPageModel{Object: vm.Object}
+			return mpm.SiteModeLabel()
+		}),
 		hvue.Computed("ReviewWorksiteInfos", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			return mpm.GetReviewableWorsiteInfos()
@@ -130,7 +134,8 @@ func (m *MainPageModel) ClearSiteInfos() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Methods
 
-func (m *MainPageModel) CheckSiteMode() {
+func (m *MainPageModel) CheckSiteMode(mode string) {
+	m.SiteMode = mode
 	if m.SiteMode == "Orange" && m.User.Permissions["Create"] {
 		m.ActiveMode = "Create"
 	} else {
@@ -336,6 +341,21 @@ func (m *MainPageModel) GetBillableWorksiteNb() int {
 		if worksite.WorksiteIsBillable(wsi.Status) {
 			res += 1
 		}
+	}
+	return res
+}
+
+func (m *MainPageModel) SiteModeLabel() string {
+	var res string
+	switch m.SiteMode {
+	case "Orange":
+		res = "Orange : " + strconv.Itoa(len(m.WorksiteInfos))
+	case "Rip":
+		res = "Rip : " + strconv.Itoa(len(m.RipsiteInfos))
+	case "Foa":
+		res = "Foa : " + strconv.Itoa(len(m.FoasiteInfos))
+	case "Poles":
+		res = "Poteaux : " + strconv.Itoa(len(m.PolesiteInfos))
 	}
 	return res
 }
