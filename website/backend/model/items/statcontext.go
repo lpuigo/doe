@@ -34,15 +34,13 @@ type ItemizableSite interface {
 func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
 	calcValues := NewStats()
 	for _, site := range sites.GetItemizableSites(isSiteVisible) {
-		if isSiteVisible(site) {
-			client := sc.ClientByName(site.GetClient())
-			if client == nil {
-				continue
-			}
-			err := sc.addStat(calcValues, site, client.Bpu, showprice)
-			if err != nil {
-				return nil, err
-			}
+		client := sc.ClientByName(site.GetClient())
+		if client == nil {
+			continue
+		}
+		err := sc.addStat(calcValues, site, client.Bpu, showprice)
+		if err != nil {
+			return nil, err
 		}
 	}
 
