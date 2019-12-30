@@ -43,8 +43,7 @@
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
                     <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay=500>
-                        <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(false)"
-                                   :disabled="!IsDirty"></el-button>
+                        <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(false)"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
@@ -121,7 +120,7 @@
                     </div>
 
                     <el-tooltip slot="reference" content="Edition du CRA" placement="bottom" effect="light" open-delay=500>
-                        <el-button class="icon" icon="far fa-file-excel icon--medium" size="mini" :disabled="craVisible"></el-button>
+                        <el-button class="icon" icon="far fa-file-excel icon--medium" size="mini" :disabled="craVisible || IsDirty"></el-button>
                     </el-tooltip>
                 </el-popover>
                 <span></span>

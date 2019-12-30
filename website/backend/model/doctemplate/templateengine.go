@@ -323,6 +323,7 @@ const (
 	amtsColComment    int = 39
 	amtsColCompany    int = 41
 	amtsColClient     int = 42
+	amtsColId         int = 43
 
 	amtsColWEHeaderTpl       int = 44
 	amtsColWEHoursTpl        int = 45
@@ -392,6 +393,7 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColCompany), actor.Company)
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColClient), strings.Join(actor.Client, ", "))
+		_ = xf.SetCellInt(amtsSheetName, xlsx.RcToAxis(row, amtsColId), actor.Id)
 
 		countHour = 0
 		countExtraHour = 0

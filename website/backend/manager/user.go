@@ -50,7 +50,7 @@ func (m *Manager) genActorInfoById() clients.ActorInfoById {
 	}
 }
 
-// GetCurrentUserClientsName returns Clients' names visible by current user (if user has no client, returns all clients)
+// GetCurrentUserClientsName returns Clients' names visible by current user (if user has no client, returns empty list)
 func (m Manager) GetCurrentUserClientsName() []string {
 	if m.CurrentUser == nil {
 		return nil
@@ -58,11 +58,7 @@ func (m Manager) GetCurrentUserClientsName() []string {
 	if len(m.CurrentUser.Clients) > 0 {
 		return m.CurrentUser.Clients
 	}
-	clientsNames := []string{}
-	for _, client := range m.Clients.GetAllClients() {
-		clientsNames = append(clientsNames, client.Name)
-	}
-	return clientsNames
+	return []string{}
 }
 
 // GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)

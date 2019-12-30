@@ -70,10 +70,14 @@ func (a *Actor) IsActiveOnDateRange(dr date.DateStringRange) bool {
 	return true
 }
 
-func (a *Actor) WorksForClient(client ...string) bool {
-	for _, clt := range a.Client {
-		for _, cl := range client {
-			if clt == cl {
+// WorksForClient returns true if actor works for one of given clients (true if clients slice is empty)
+func (a *Actor) WorksForClient(clients ...string) bool {
+	if len(clients) == 0 {
+		return true
+	}
+	for _, actorClient := range a.Client {
+		for _, client := range clients {
+			if actorClient == client {
 				return true
 			}
 
