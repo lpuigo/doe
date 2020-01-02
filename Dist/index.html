@@ -78,17 +78,17 @@
                             <strong>{{SiteModeLabel()}}</strong><i class="el-icon-arrow-down el-icon--right"></i>
                         </el-button>
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item v-if="worksiteInfos.length > 0" command="Orange">
-                                <strong>Orange</strong> : {{worksiteInfos.length}}
+                            <el-dropdown-item v-if="worksiteInfos.length > 0 && SiteMode != 'Orange'" command="Orange">
+                                Orange : <strong style="color: dodgerblue">{{worksiteInfos.length}}</strong>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="ripsiteInfos.length > 0" command="Rip">
-                                RIP : {{ripsiteInfos.length}}
+                            <el-dropdown-item v-if="ripsiteInfos.length > 0 && SiteMode != 'Rip'" command="Rip">
+                                RIP : <strong style="color: dodgerblue">{{ripsiteInfos.length}}</strong>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="foasiteInfos.length > 0" command="Foa">
-                                FOA : {{foasiteInfos.length}}
+                            <el-dropdown-item v-if="foasiteInfos.length > 0 && SiteMode != 'Foa'" command="Foa">
+                                FOA : <strong style="color: dodgerblue">{{foasiteInfos.length}}</strong>
                             </el-dropdown-item>
-                            <el-dropdown-item v-if="polesiteInfos.length > 0" command="Poles">
-                                Poteaux : {{polesiteInfos.length}}
+                            <el-dropdown-item v-if="polesiteInfos.length > 0 && SiteMode != 'Poles'" command="Poles">
+                                Poteaux : <strong style="color: dodgerblue">{{polesiteInfos.length}}</strong>
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
