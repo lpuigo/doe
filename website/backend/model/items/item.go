@@ -12,6 +12,7 @@ type Item struct {
 	Name         string // PTxxx, Cablezzz, ...
 	Info         string // BoxType + nbFO ...
 	Date         string
+	AttachDate   string
 	Team         string
 	Comment      string
 	Actors       []string
@@ -22,9 +23,10 @@ type Item struct {
 	Todo         bool
 	Done         bool
 	Blocked      bool
+	Billed       bool
 }
 
-func NewItem(client, site, activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done, blocked bool) *Item {
+func NewItem(client, site, activity, name, info, date, team string, chapter *bpu.Article, quantity, workQuantity int, todo, done, blocked, billed bool) *Item {
 	return &Item{
 		Client:       client,
 		Site:         site,
@@ -41,6 +43,7 @@ func NewItem(client, site, activity, name, info, date, team string, chapter *bpu
 		Todo:         todo,
 		Done:         done,
 		Blocked:      blocked,
+		Billed:       billed,
 	}
 }
 
@@ -52,6 +55,7 @@ func (i *Item) Clone() *Item {
 		Name:         i.Name,
 		Info:         i.Info,
 		Date:         i.Date,
+		AttachDate:   i.AttachDate,
 		Team:         i.Team,
 		Actors:       i.Actors,
 		Article:      i.Article,
@@ -61,6 +65,7 @@ func (i *Item) Clone() *Item {
 		Todo:         i.Todo,
 		Done:         i.Done,
 		Blocked:      i.Blocked,
+		Billed:       i.Billed,
 	}
 }
 
@@ -90,7 +95,8 @@ func (i *Item) String() string {
 	Todo: %t
 	Done: %t
 	Blocked: %t
-`, i.Client, i.Site, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done, i.Blocked)
+	Billed: %t
+`, i.Client, i.Site, i.Activity, i.Name, i.Info, i.Date, i.Team, i.Article.Name, i.Quantity, i.Todo, i.Done, i.Blocked, i.Billed)
 }
 
 // Price returns the price for the given item

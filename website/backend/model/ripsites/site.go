@@ -252,11 +252,6 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			return nil, err
 		}
 		todo, done, blocked := pulling.State.GetTodoDoneBlocked()
-		//actors := []string{}
-		//for _, actorId := range pulling.State.Actors {
-		//	actors = append(actors, actorById(actorId))
-		//}
-		//actorsString := strings.Join(actors, ", ")
 
 		l, u, a, b := pulling.GetTotalDists()
 		// Item for underground cable pulling
@@ -278,6 +273,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				todo,
 				done,
 				blocked,
+				false,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -302,6 +298,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				todo,
 				done,
 				blocked,
+				false,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -326,6 +323,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 				todo,
 				done,
 				blocked,
+				false,
 			)
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
@@ -344,11 +342,6 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, junction := range s.Junctions {
 		todo, done, blocked := junction.State.GetTodoDoneBlocked()
-		//actors := []string{}
-		//for _, actorId := range junction.State.Actors {
-		//	actors = append(actors, actorById(actorId))
-		//}
-		//actorsString := strings.Join(actors, ", ")
 
 		node, nodeFound := s.Nodes[junction.NodeName]
 		if !nodeFound {
@@ -395,12 +388,12 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			info += fmt.Sprintf(" (%dFO)", boxSize)
 		}
 
-		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done, blocked)
+		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done, blocked, false)
 		item.Actors = junction.State.Actors
 		res = append(res, item)
 
 		if optArticle != nil {
-			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done, blocked)
+			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done, blocked, false)
 			item2.Actors = junction.State.Actors
 			res = append(res, item2)
 		}
@@ -429,7 +422,7 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
-		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done, blocked)
+		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done, blocked, false)
 		item.Actors = measurement.State.Actors
 		res = append(res, item)
 	}
@@ -491,37 +484,3 @@ const (
 	RipStatSerieWork  string = "Work"
 	RipStatSeriePrice string = "Price"
 )
-
-// AddStat adds nb of El installed per date (in map[date]nbEl) by visible Client & Client : Teams
-//func (s *Site) AddStat(stats items.Stats, sc items.StatContext,
-//	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
-//
-//	addValue := func(date, serie string, actors []string, value float64) {
-//		stats.AddStatValue(s.Ref, s.Client, date, "", serie, value)
-//		if sc.ShowTeam && len(actors) > 0 {
-//			value /= float64(len(actors))
-//			for _, actName := range actors {
-//				stats.AddStatValue(s.Ref, s.Client+" : "+actName, date, "", serie, value)
-//			}
-//		}
-//	}
-//
-//	calcItems, err := s.Itemize(currentBpu, actorById)
-//	if err != nil {
-//		return fmt.Errorf("error on ripsite stat itemize for '%s':%s", s.Ref, err.Error())
-//	}
-//	for _, item := range calcItems {
-//		if !item.Done {
-//			continue
-//		}
-//		actorsName := make([]string, len(item.Actors))
-//		for i, actId := range item.Actors {
-//			actorsName[i] = actorById(actId)
-//		}
-//		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
-//		if showprice {
-//			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
-//		}
-//	}
-//	return nil
-//}

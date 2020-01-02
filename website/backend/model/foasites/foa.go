@@ -36,21 +36,23 @@ func (f *Foa) SearchString() string {
 	return searchBuilder.String()
 }
 
-func (p *Foa) IsTodo() bool {
-	switch p.State.Status {
+func (f *Foa) IsTodo() bool {
+	switch f.State.Status {
 	case foaconst.StateToDo:
 		return true
 	case foaconst.StateIncident:
 		return true
 	case foaconst.StateDone:
 		return true
+	case foaconst.StateAttachment:
+		return true
 	default:
 		return false
 	}
 }
 
-func (p *Foa) IsDone() bool {
-	switch p.State.Status {
+func (f *Foa) IsDone() bool {
+	switch f.State.Status {
 	case foaconst.StateDone:
 		return true
 	default:
@@ -58,9 +60,18 @@ func (p *Foa) IsDone() bool {
 	}
 }
 
-func (p *Foa) IsBlocked() bool {
-	switch p.State.Status {
+func (f *Foa) IsBlocked() bool {
+	switch f.State.Status {
 	case foaconst.StateIncident:
+		return true
+	default:
+		return false
+	}
+}
+
+func (f *Foa) IsBilled() bool {
+	switch f.State.Status {
+	case foaconst.StateAttachment:
 		return true
 	default:
 		return false
@@ -85,7 +96,7 @@ func (f *Foa) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, 
 
 	foaArticles := currentBpu.GetCategoryArticles(activityFoa)
 
-	todo, done, blocked := f.IsTodo(), f.IsDone(), f.IsBlocked()
+	todo, done, blocked, billed := f.IsTodo(), f.IsDone(), f.IsBlocked(), f.IsBilled()
 
 	article, err := foaArticles.GetArticleFor(catFoaInventory, 1)
 	if err != nil {
@@ -108,6 +119,7 @@ func (f *Foa) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item, 
 		todo,
 		done,
 		blocked,
+		billed,
 	)
 	it.Comment = f.State.Comment
 

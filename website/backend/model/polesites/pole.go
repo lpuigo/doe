@@ -71,6 +71,8 @@ func (p *Pole) IsTodo() bool {
 		return true
 	case poleconst.StateDone:
 		return true
+	case poleconst.StateAttachment:
+		return true
 	//case poleconst.StateCancelled:
 	default:
 		return false
@@ -110,6 +112,23 @@ func (p *Pole) IsBlocked() bool {
 	}
 }
 
+func (p *Pole) IsBilled() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	//case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateToDo:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	//case poleconst.StateDone:
+	case poleconst.StateAttachment:
+		return true
+	//case poleconst.StateCancelled:
+	default:
+		return false
+	}
+}
+
 const (
 	activityPole    string = "Poteaux"
 	catPoleCreation string = "Création"
@@ -128,7 +147,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 
 	poleArticles := currentBpu.GetCategoryArticles(activityPole)
 
-	todo, done, blocked := p.IsTodo(), p.IsDone(), p.IsBlocked()
+	todo, done, blocked, billed := p.IsTodo(), p.IsDone(), p.IsBlocked(), p.IsBilled()
 
 	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
 	if err != nil {
@@ -136,10 +155,6 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 	}
 
 	info := fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
-	if p.Comment != "" {
-		info += fmt.Sprintf("\nCmt: %s", p.Comment)
-		//strings.ReplaceAll(info, "\n", "\r\n")
-	}
 
 	ref := p.ExtendedRef()
 
@@ -157,8 +172,13 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 		todo,
 		done,
 		blocked,
+		billed,
 	)
+	it.Comment = p.Comment
 	it.Actors = p.Actors
+	if billed {
+		it.AttachDate = p.AttachmentDate
+	}
 	res = append(res, it)
 
 	for _, product := range p.Product {
@@ -181,8 +201,12 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 			todo,
 			done,
 			blocked,
+			billed,
 		)
 		it.Actors = p.Actors
+		if billed {
+			it.AttachDate = p.AttachmentDate
+		}
 		res = append(res, it)
 	}
 

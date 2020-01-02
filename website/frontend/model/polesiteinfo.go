@@ -19,6 +19,7 @@ type PolesiteInfo struct {
 	NbPole        int    `js:"NbPole"`
 	NbPoleBlocked int    `js:"NbPoleBlocked"`
 	NbPoleDone    int    `js:"NbPoleDone"`
+	NbPoleBilled  int    `js:"NbPoleBilled"`
 	Search        string `js:"Search"`
 }
 

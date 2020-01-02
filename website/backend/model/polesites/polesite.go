@@ -51,7 +51,7 @@ func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 	psi.Status = ps.Status
 	psi.Comment = ps.Comment
 
-	psi.NbPole, psi.NbPoleBlocked, psi.NbPoleDone = ps.GetPolesNumbers()
+	psi.NbPole, psi.NbPoleBlocked, psi.NbPoleDone, psi.NbPoleBilled = ps.GetPolesNumbers()
 
 	var searchBuilder strings.Builder
 	fmt.Fprintf(&searchBuilder, "%s:%s,", "Client", strings.ToUpper(ps.Client))
@@ -68,7 +68,7 @@ func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 }
 
 // GetPolesNumbers returns total, blocked and done number of Pullings
-func (ps *PoleSite) GetPolesNumbers() (total, blocked, done int) {
+func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 	for _, p := range ps.Poles {
 		switch p.State {
 		//case poleconst.StateNotSubmitted:
@@ -85,9 +85,12 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done int) {
 		case poleconst.StateIncident:
 			total++
 			blocked++
-		case poleconst.StateDone, poleconst.StateAttachment:
+		case poleconst.StateDone:
 			total++
 			done++
+		case poleconst.StateAttachment:
+			total++
+			billed++
 			//case poleconst.StateCancelled:
 		}
 	}

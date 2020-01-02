@@ -245,15 +245,27 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 8), item.Price())
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 9), item.WorkQuantity)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 10), item.Work())
-		if item.Done {
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Oui")
+		switch {
+		case item.Billed:
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Attachement")
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), strings.Join(actors, "\n"))
-			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), item.Date)
-		} else {
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), date.DateFrom(item.Date).ToTime())
+			if attachDate, err := date.ParseDate(item.AttachDate); err == nil {
+				xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 14), attachDate.ToTime())
+			}
+		case item.Done:
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "Fait")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), strings.Join(actors, "\n"))
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), date.DateFrom(item.Date).ToTime())
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 14), "")
+		default:
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 11), "")
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 12), "")
 			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 13), "")
+			xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 14), "")
 		}
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 15), item.Comment)
+
 	}
 	xf.UpdateLinkedValue()
 	return xf.Write(w)
