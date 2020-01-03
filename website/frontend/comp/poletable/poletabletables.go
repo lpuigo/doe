@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,6 +64,7 @@ type PoleTableModel struct {
 	Filter     string       `js:"filter"`
 	FilterType string       `js:"filtertype"`
 	Context    *Context     `js:"context"`
+	SizeLimit  int          `js:"SizeLimit"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -74,6 +76,7 @@ func NewPoleTableModel(vm *hvue.VM) *PoleTableModel {
 	rtm.Filter = ""
 	rtm.FilterType = ""
 	rtm.Context = NewContext("")
+	rtm.SetSizeLimit()
 	rtm.VM = vm
 	return rtm
 }
@@ -186,11 +189,41 @@ func (ptm *PoleTableModel) SortState(a, b *ps.Pole) int {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 30
+	sizeLimitTimer       = 300
+)
+
+func (ptm *PoleTableModel) GetSizeLimitedResult(res []*ps.Pole) []*ps.Pole {
+	if len(res) == ptm.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		ptm.ResetSizeLimit(len(res))
+		return res[len(res)-sizeLimitDefault:]
+	}
+	return res
+}
+
+func (ptm *PoleTableModel) SetSizeLimit() {
+	ptm.SizeLimit = -1
+}
+
+func (ptm *PoleTableModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		ptm.SizeLimit = size
+	}()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Row Filtering Related Methods
 
 func (ptm *PoleTableModel) GetFilteredPole() []*ps.Pole {
 	if ptm.FilterType == poleconst.FilterValueAll && ptm.Filter == "" {
-		return ptm.Polesite.Poles
+		return ptm.GetSizeLimitedResult(ptm.Polesite.Poles)
 	}
 
 	res := []*ps.Pole{}
@@ -207,7 +240,7 @@ func (ptm *PoleTableModel) GetFilteredPole() []*ps.Pole {
 			res = append(res, pole)
 		}
 	}
-	return res
+	return ptm.GetSizeLimitedResult(res)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
