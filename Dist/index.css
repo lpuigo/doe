@@ -456,7 +456,7 @@ pre {
 .twovalues-progressbar .outer {
     height: 5px;
     border-radius: 100px;
-    background-color: #ebeef5;
+    background-color: #e6e6e6;
     border-radius: 100px;
     overflow: hidden;
     position: relative;
@@ -476,6 +476,10 @@ pre {
 
 .twovalues-progressbar .inprogress {
     background-color: #409eff;
+}
+
+.twovalues-progressbar .inprogress2 {
+    background-color: #4c8c2b;
 }
 
 .twovalues-progressbar .complete {

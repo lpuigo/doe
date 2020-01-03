@@ -14,8 +14,9 @@ const template = `
     <div v-if="showProgressBar" class="small-font">
 		<twovalues-progressbar 
 			height="5px"
-			:pct1="progressPct"
-			:pct2="progressKo"
+			pct1=0
+			:pct2="progressPct"
+			:pct3="progressKo"
 		></twovalues-progressbar>
         <span>{{ progressText }}</span>
     </div>
@@ -40,13 +41,13 @@ func ComponentOptions() []hvue.ComponentOption {
 			return NewWorksiteProgressBarModel(vm)
 		}),
 		hvue.MethodsOf(&WorksiteProgressBarModel{}),
-		hvue.Computed("progressPct", func(vm *hvue.VM) interface{} {
-			wspb := &WorksiteProgressBarModel{Object: vm.Object}
-			return wspb.ProgressPct()
-		}),
 		hvue.Computed("showProgressBar", func(vm *hvue.VM) interface{} {
 			wspb := &WorksiteProgressBarModel{Object: vm.Object}
 			return wspb.mustShow()
+		}),
+		hvue.Computed("progressPct", func(vm *hvue.VM) interface{} {
+			wspb := &WorksiteProgressBarModel{Object: vm.Object}
+			return wspb.ProgressPct()
 		}),
 		hvue.Computed("progressText", func(vm *hvue.VM) interface{} {
 			wspb := &WorksiteProgressBarModel{Object: vm.Object}
@@ -94,6 +95,8 @@ func (wspbm *WorksiteProgressBarModel) ProgressPct() (pctOK float64) {
 	valKO := float64(wsi.NbElBlocked)
 	if wspbm.Measure {
 		valOK = float64(wsi.NbElMeasured)
+		totNb -= valKO
+		valKO = 0
 	}
 	pctOK = valOK * 100.0 / totNb
 	wspbm.ProgressOK = pctOK

@@ -69,7 +69,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
                     label="Avancement" width="180px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
-                    <ripsiteinfo-progress-bar :total="scope.row.NbPole" :blocked="scope.row.NbPoleBlocked" :done="scope.row.NbPoleDone"></ripsiteinfo-progress-bar>
+                    <ripsiteinfo-progress-bar :total="scope.row.NbPole" :blocked="scope.row.NbPoleBlocked" :billed="scope.row.NbPoleBilled" :done="scope.row.NbPoleDone"></ripsiteinfo-progress-bar>
                 </template>
             </el-table-column>
 
