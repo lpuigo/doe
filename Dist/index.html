@@ -75,7 +75,7 @@
                     <!-- Select Orange / RIP / Poles / FOA mode -->
                     <el-dropdown v-if="User.Permissions.Update || User.Permissions.Review" trigger="click" @command="CheckSiteMode">
                         <el-button size="mini">
-                            <strong>{{SiteModeLabel()}}</strong><i class="el-icon-arrow-down el-icon--right"></i>
+                            <strong>{{SiteModeLabel()}}</strong><i class="fas fa-caret-down icon--right"></i>
                         </el-button>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item v-if="worksiteInfos.length > 0 && SiteMode != 'Orange'" command="Orange">
