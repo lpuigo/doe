@@ -261,6 +261,7 @@ const template string = `<div>
                                 :key="item.value"
                                 :label="item.label"
                                 :value="item.value"
+								:disabled="item.disabled"
                         ></el-option>
                     </el-select>
                 </el-col>
@@ -383,6 +384,9 @@ func componentOptions() []hvue.ComponentOption {
 			"ShowAttachmentDate",
 			func(vm *hvue.VM) interface{} {
 				pem := PoleEditModelFromJS(vm.Object)
+				if !pem.User.HasPermissionInvoice() {
+					return false
+				}
 				stateShow := pem.EditedPoleMarker.Pole.State == poleconst.StateDone || pem.EditedPoleMarker.Pole.State == poleconst.StateAttachment
 				return stateShow && !tools.Empty(pem.EditedPoleMarker.Pole.Date)
 			}),
@@ -463,8 +467,9 @@ func (pem *PoleEditModel) FormatState(s string) string {
 	return polesite.PoleStateLabel(s)
 }
 
-func (pem *PoleEditModel) GetStates() []*elements.ValueLabel {
-	return polesite.GetStatesValueLabel()
+func (pem *PoleEditModel) GetStates(vm *hvue.VM) []*elements.ValueLabelDisabled {
+	pem = PoleEditModelFromJS(vm.Object)
+	return polesite.GetStatesValueLabel(pem.User.HasPermissionInvoice())
 }
 
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {

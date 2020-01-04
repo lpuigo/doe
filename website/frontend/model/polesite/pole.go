@@ -156,6 +156,19 @@ func (p *Pole) GetTitle() string {
 	return title
 }
 
+func (p *Pole) IsDone() bool {
+	return p.State == poleconst.StateDone
+}
+
+func (p *Pole) IsAttachment() bool {
+	return p.State == poleconst.StateAttachment
+}
+
+func (p *Pole) SetAttachmentDate(d string) {
+	p.AttachmentDate = d
+	p.State = poleconst.StateAttachment
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.FilterValueAll, poleconst.FilterLabelAll),
@@ -197,17 +210,17 @@ func PoleStateLabel(state string) string {
 	}
 }
 
-func GetStatesValueLabel() []*elements.ValueLabel {
-	return []*elements.ValueLabel{
-		elements.NewValueLabel(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted),
-		elements.NewValueLabel(poleconst.StateNoGo, poleconst.LabelNoGo),
-		elements.NewValueLabel(poleconst.StateDictToDo, poleconst.LabelDictToDo),
-		elements.NewValueLabel(poleconst.StateToDo, poleconst.LabelToDo),
-		elements.NewValueLabel(poleconst.StateHoleDone, poleconst.LabelHoleDone),
-		elements.NewValueLabel(poleconst.StateIncident, poleconst.LabelIncident),
-		elements.NewValueLabel(poleconst.StateDone, poleconst.LabelDone),
-		elements.NewValueLabel(poleconst.StateAttachment, poleconst.LabelAttachment),
-		elements.NewValueLabel(poleconst.StateCancelled, poleconst.LabelCancelled),
+func GetStatesValueLabel(showAttachment bool) []*elements.ValueLabelDisabled {
+	return []*elements.ValueLabelDisabled{
+		elements.NewValueLabelDisabled(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted, false),
+		elements.NewValueLabelDisabled(poleconst.StateNoGo, poleconst.LabelNoGo, false),
+		elements.NewValueLabelDisabled(poleconst.StateDictToDo, poleconst.LabelDictToDo, false),
+		elements.NewValueLabelDisabled(poleconst.StateToDo, poleconst.LabelToDo, false),
+		elements.NewValueLabelDisabled(poleconst.StateHoleDone, poleconst.LabelHoleDone, false),
+		elements.NewValueLabelDisabled(poleconst.StateIncident, poleconst.LabelIncident, false),
+		elements.NewValueLabelDisabled(poleconst.StateDone, poleconst.LabelDone, false),
+		elements.NewValueLabelDisabled(poleconst.StateAttachment, poleconst.LabelAttachment, !showAttachment),
+		elements.NewValueLabelDisabled(poleconst.StateCancelled, poleconst.LabelCancelled, false),
 	}
 }
 
