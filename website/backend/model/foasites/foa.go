@@ -55,6 +55,8 @@ func (f *Foa) IsDone() bool {
 	switch f.State.Status {
 	case foaconst.StateDone:
 		return true
+	case foaconst.StateAttachment:
+		return true
 	default:
 		return false
 	}

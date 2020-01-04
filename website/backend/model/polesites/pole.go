@@ -89,6 +89,8 @@ func (p *Pole) IsDone() bool {
 	//case poleconst.StateIncident:
 	case poleconst.StateDone:
 		return true
+	case poleconst.StateAttachment:
+		return true
 	//case poleconst.StateCancelled:
 	default:
 		return false
