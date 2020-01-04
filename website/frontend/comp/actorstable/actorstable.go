@@ -61,7 +61,7 @@ const (
         <template slot-scope="scope">
             <div class="header-menu-container on-hover">
             	<span>{{scope.row.Ref}}</span>
-				<i v-if="user.Permissions.Invoice" class="show link fas fa-edit" @click="EditActor(scope.row)"></i>
+				<i v-if="user.Permissions.HR" class="show link fas fa-edit" @click="EditActor(scope.row)"></i>
             </div>
         </template>
 	</el-table-column>
@@ -371,5 +371,10 @@ func (atm *ActorsTableModel) EditActorVacancy(vm *hvue.VM, act *actor.Actor) {
 }
 
 func (atm *ActorsTableModel) HandleDoubleClickedRow(vm *hvue.VM, act *actor.Actor) {
-	atm.EditActor(vm, act)
+	atm = ActorsTableModelFromJS(vm.Object)
+	if atm.User.HasPermissionHR() {
+		atm.EditActor(vm, act)
+		return
+	}
+	atm.EditActorVacancy(vm, act)
 }
