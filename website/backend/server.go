@@ -147,7 +147,7 @@ func main() {
 	router.HandleFunc("/api/{recordtype}/archive", withUserManager("GetRecordsArchive", route.GetRecordsArchive)).Methods("GET")
 
 	// Attachements methods
-	router.HandleFunc("/api/{sitetype}/{id:[0-9]+}/attach", withUserManager("GetFoaSiteAttachement", route.GetItemizableSiteAttachement)).Methods("GET")
+	router.HandleFunc("/api/{sitetype}/{id:[0-9]+}/attach", withUserManager("GetSiteAttachement", route.GetItemizableSiteAttachement)).Methods("GET")
 
 	// Actors methods
 	router.HandleFunc("/api/actors", withUserManager("GetActors", route.GetActors)).Methods("GET")

@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -235,6 +236,7 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 				actors = append(actors, act)
 			}
 		}
+		sort.Strings(actors)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 1), item.Client)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 2), item.Site)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 3), item.Activity)
