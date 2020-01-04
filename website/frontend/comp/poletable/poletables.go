@@ -221,28 +221,3 @@ func (ptm *PoleTablesModel) SetAttachments(vm *hvue.VM) {
 	message.NotifySuccess(ptm.VM, "Passage en attachement", msg)
 	ptm.AttachmentVisible = false
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Row Filtering Related Methods
-
-//func (ptm *PoleTablesModel) GetFilteredPole() []*ps.Pole {
-//	if ptm.FilterType == poleconst.FilterValueAll && ptm.Filter == "" {
-//		return ptm.Polesite.Poles
-//	}
-//
-//	res := []*ps.Pole{}
-//	expected := strings.ToUpper(ptm.Filter)
-//	filter := func(p *ps.Pole) bool {
-//		sis := p.SearchString(ptm.FilterType)
-//		if sis == "" {
-//			return false
-//		}
-//		return strings.Contains(strings.ToUpper(sis), expected)
-//	}
-//	for _, pole := range ptm.Polesite.Poles {
-//		if filter(pole) {
-//			res = append(res, pole)
-//		}
-//	}
-//	return res
-//}
