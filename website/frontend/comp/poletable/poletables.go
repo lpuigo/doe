@@ -3,6 +3,7 @@ package poletable
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/ripprogressbar"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	ps "github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
@@ -63,7 +64,10 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
                         <el-button type="primary" plain class="icon" icon="fas fa-paperclip icon--medium" size="mini" :disabled="context.attachmentVisible"></el-button>
                     </el-tooltip>
                 </el-popover>
-            </el-col> 
+            </el-col>
+			<el-col :offset="7" :span="8">
+				<ripsiteinfo-progress-bar height="10px" :total="statNbPole" :blocked="statNbPoleBlocked" :billed="statNbPoleBilled" :done="statNbPoleDone"></ripsiteinfo-progress-bar>
+			</el-col>
         </el-row>
     </el-header>
     <div style="height: 100%;overflow-x: hidden;overflow-y: auto;padding: 0px 0px; margin-top: 8px">
@@ -106,6 +110,7 @@ func RegisterComponent() hvue.ComponentOption {
 
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
+		ripprogressbar.RegisterComponent(),
 		registerComponentTable("creation"),
 		registerComponentTable("followup"),
 		registerComponentTable("billing"),
@@ -121,6 +126,10 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Computed("IsAttachmentDisabled", func(vm *hvue.VM) interface{} {
 			ptm := &PoleTablesModel{Object: vm.Object}
 			return ptm.CheckAttachmentDisabled()
+		}),
+		hvue.Computed("statNbPole", func(vm *hvue.VM) interface{} {
+			ptm := &PoleTablesModel{Object: vm.Object}
+			return ptm.CalcStat()
 		}),
 		hvue.MethodsOf(&PoleTablesModel{}),
 	}
@@ -138,6 +147,10 @@ type PoleTablesModel struct {
 	FilterType string       `js:"filtertype"`
 	Context    *Context     `js:"context"`
 
+	StatNbPoleBlocked int `js:"statNbPoleBlocked"`
+	StatNbPoleDone    int `js:"statNbPoleDone"`
+	StatNbPoleBilled  int `js:"statNbPoleBilled"`
+
 	VM *hvue.VM `js:"VM"`
 }
 
@@ -149,17 +162,16 @@ func NewPoleTablesModel(vm *hvue.VM) *PoleTablesModel {
 	ptm.FilterType = ""
 	ptm.Context = NewContext("")
 
+	ptm.StatNbPoleBlocked = 0
+	ptm.StatNbPoleDone = 0
+	ptm.StatNbPoleBilled = 0
+
 	ptm.VM = vm
 	return ptm
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Actions related Methods
-
-func (ptm *PoleTablesModel) ChangeMode(vm *hvue.VM) {
-	ptm = &PoleTablesModel{Object: vm.Object}
-	vm.Emit("update:context", ptm.Context)
-}
+// Comp Methods
 
 func (ptm *PoleTablesModel) CheckAttachmentDisabled() bool {
 	if tools.Empty(ptm.Context.AttachmentDate) {
@@ -190,6 +202,36 @@ func (ptm *PoleTablesModel) CountPoleInAttachmentRange() int {
 		nbApplied++
 	}
 	return nbApplied
+}
+
+func (ptm *PoleTablesModel) CalcStat() int {
+	var tot, done, billed, blocked int
+	for _, pole := range ptm.Polesite.Poles {
+		if !pole.IsToDo() {
+			continue
+		}
+		tot++
+		switch {
+		case pole.IsAttachment():
+			billed++
+		case pole.IsDone():
+			done++
+		case pole.IsBlocked():
+			blocked++
+		}
+	}
+	ptm.StatNbPoleBilled = billed
+	ptm.StatNbPoleBlocked = blocked
+	ptm.StatNbPoleDone = done
+	return tot
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Actions related Methods
+
+func (ptm *PoleTablesModel) ChangeMode(vm *hvue.VM) {
+	ptm = &PoleTablesModel{Object: vm.Object}
+	vm.Emit("update:context", ptm.Context)
 }
 
 func (ptm *PoleTablesModel) SetAttachments(vm *hvue.VM) {

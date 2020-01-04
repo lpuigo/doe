@@ -156,8 +156,39 @@ func (p *Pole) GetTitle() string {
 	return title
 }
 
+func (p *Pole) IsToDo() bool {
+	switch p.State {
+	case poleconst.StateNotSubmitted:
+		return false
+	//case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateToDo:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	//case poleconst.StateDone:
+	//case poleconst.StateAttachment:
+	case poleconst.StateCancelled:
+		return false
+	default:
+		return true
+	}
+}
+
 func (p *Pole) IsDone() bool {
 	return p.State == poleconst.StateDone
+}
+
+func (p *Pole) IsBlocked() bool {
+	switch p.State {
+	case poleconst.StateNoGo:
+		return true
+	case poleconst.StateDictToDo:
+		return true
+	case poleconst.StateIncident:
+		return true
+	default:
+		return false
+	}
 }
 
 func (p *Pole) IsAttachment() bool {

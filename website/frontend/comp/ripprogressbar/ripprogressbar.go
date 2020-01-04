@@ -9,7 +9,7 @@ import (
 )
 
 const template = `
-<div>
+<div style="width: 100%">
     <div v-if="showProgressBar" class="small-font">
 		<twovalues-progressbar 
 			:height="height"
@@ -110,17 +110,24 @@ func (rpbm *RipsiteProgressBarModel) Format() (res string) {
 		res = "-"
 		return
 	}
-	if rpbm.Billed > 0 {
-		res = strconv.Itoa(rpbm.Billed)
-		if rpbm.Done > 0 {
-			res += " + "
+	if rpbm.Billed+rpbm.Done+rpbm.Blocked == 0 {
+		res = "0"
+	} else {
+		if rpbm.Billed > 0 {
+			res = strconv.Itoa(rpbm.Billed)
 		}
-	}
-	if rpbm.Done > 0 {
-		res += strconv.Itoa(rpbm.Done)
-	}
-	if rpbm.Blocked > 0 {
-		res += " + " + strconv.Itoa(rpbm.Blocked)
+		if rpbm.Done > 0 {
+			if res != "" {
+				res += " + "
+			}
+			res += strconv.Itoa(rpbm.Done)
+		}
+		if rpbm.Blocked > 0 {
+			if res != "" {
+				res += " + "
+			}
+			res += strconv.Itoa(rpbm.Blocked)
+		}
 	}
 	res += " / " + strconv.Itoa(rpbm.Total)
 	pct := 0.0

@@ -96,20 +96,20 @@ html, body {
 }
 
 .el-table .pole-row-done {
-    background: #d7f5d0;
+    background: #cef5c4;
 }
 
 .el-table .pole-row-done:hover {
-    background: #bad4b4;
+    background: #b2d4a9;
     transition: background-color .15s ease;
 }
 
 .el-table .pole-row-attachment {
-    background: #d9d1ad;
+    background: #b2cca3;
 }
 
 .el-table .pole-row-attachment:hover {
-    background: #c2bb9b;
+    background: #93a887;
     transition: background-color .15s ease;
 }
 
