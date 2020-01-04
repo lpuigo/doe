@@ -242,6 +242,13 @@ func (mpm *MainPageModel) TablePoleSelected(context *poletable.Context) {
 	mpm.SelectPole(pm)
 }
 
+// TablePoleSelected handles selected pole via PoleTable Component
+func (mpm *MainPageModel) HandleTablePolesiteUptade(msg string) {
+	message.NotifySuccess(mpm.VM, "Mise à jour", msg)
+	mpm.RefreshMap()
+
+}
+
 // CenterOnPole handles center-on-pole via PoleTable Component
 func (mpm *MainPageModel) CenterOnPole(p *polesite.Pole) {
 	if mpm.ActiveMode != "Map" {

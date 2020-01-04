@@ -6,8 +6,6 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	ps "github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
-	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"strconv"
 )
 
@@ -34,12 +32,12 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
                         placement="bottom" title="Passage en Attachement"
                         trigger="click"
                         width="400"
-                        v-model="attachmentVisible"
+                        v-model="context.attachmentVisible"
                 >
 					<div style="margin: 10px 0 5px">Intervale d'activité : <span v-if="attachmentApplied > 0" style="color: dodgerblue">{{attachmentApplied}} éléments concernés</span></div>
-					<el-checkbox v-model="attachmentOverride" size="mini" @change="CountPoleInAttachmentRange">Inclure les éléments déjà attachés</el-checkbox>
+					<el-checkbox v-model="context.attachmentOverride" size="mini" @change="CountPoleInAttachmentRange">Inclure les éléments déjà attachés</el-checkbox>
 					<el-date-picker
-							v-model="attachmentRange"
+							v-model="context.attachmentRange"
 							type="daterange" unlink-panels size="mini" style="width: 100%"
 							:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
 							value-format="yyyy-MM-dd"
@@ -50,19 +48,19 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
 					></el-date-picker>
 					<div style="margin: 10px 0 5px">Date de l'attachement :</div>
                     <el-date-picker
-                            format="dd/MM/yyyy" size="mini" v-model="attachmentDate"
+                            format="dd/MM/yyyy" size="mini" v-model="context.attachmentDate"
                             style="width: 100%" type="date"
                             value-format="yyyy-MM-dd"
                             placeholder="Date">
                     </el-date-picker>
 					<!-- :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}" -->
                     <div style="text-align: right; margin: 15px 0px 0px 0px">
-                        <el-button size="mini" type="text" @click="attachmentVisible = false">Annuler</el-button>
+                        <el-button size="mini" type="text" @click="context.attachmentVisible = false">Annuler</el-button>
                         <el-button size="mini" type="primary"  :disabled="IsAttachmentDisabled" @click="SetAttachments()">Appliquer</el-button>
                     </div>
 
                     <el-tooltip slot="reference" content="Attachements" placement="bottom" effect="light" open-delay=500>
-                        <el-button type="primary" plain class="icon" icon="fas fa-paperclip icon--medium" size="mini" :disabled="attachmentVisible"></el-button>
+                        <el-button type="primary" plain class="icon" icon="fas fa-paperclip icon--medium" size="mini" :disabled="context.attachmentVisible"></el-button>
                     </el-tooltip>
                 </el-popover>
             </el-col> 
@@ -140,29 +138,19 @@ type PoleTablesModel struct {
 	FilterType string       `js:"filtertype"`
 	Context    *Context     `js:"context"`
 
-	AttachmentVisible  bool     `js:"attachmentVisible"`
-	AttachmentRange    []string `js:"attachmentRange"`
-	AttachmentDate     string   `js:"attachmentDate"`
-	AttachmentOverride bool     `js:"attachmentOverride"`
-
 	VM *hvue.VM `js:"VM"`
 }
 
 func NewPoleTablesModel(vm *hvue.VM) *PoleTablesModel {
-	rtm := &PoleTablesModel{Object: tools.O()}
-	rtm.Polesite = ps.NewPolesite()
-	rtm.User = fm.NewUser()
-	rtm.Filter = ""
-	rtm.FilterType = ""
-	rtm.Context = NewContext("")
+	ptm := &PoleTablesModel{Object: tools.O()}
+	ptm.Polesite = ps.NewPolesite()
+	ptm.User = fm.NewUser()
+	ptm.Filter = ""
+	ptm.FilterType = ""
+	ptm.Context = NewContext("")
 
-	rtm.AttachmentVisible = false
-	rtm.AttachmentDate = date.TodayAfter(0)
-	rtm.AttachmentRange = []string{"", ""}
-	rtm.AttachmentOverride = false
-
-	rtm.VM = vm
-	return rtm
+	ptm.VM = vm
+	return ptm
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,20 +162,20 @@ func (ptm *PoleTablesModel) ChangeMode(vm *hvue.VM) {
 }
 
 func (ptm *PoleTablesModel) CheckAttachmentDisabled() bool {
-	if tools.Empty(ptm.AttachmentDate) {
+	if tools.Empty(ptm.Context.AttachmentDate) {
 		return true
 	}
-	if tools.Empty(ptm.AttachmentRange[0]) && tools.Empty(ptm.AttachmentRange[0]) {
+	if tools.Empty(ptm.Context.AttachmentRange[0]) && tools.Empty(ptm.Context.AttachmentRange[0]) {
 		return true
 	}
 	return false
 }
 
 func (ptm *PoleTablesModel) IsPoleInAttachmentRange(pole *ps.Pole) bool {
-	if !(!tools.Empty(pole.Date) && pole.Date >= ptm.AttachmentRange[0] && pole.Date <= ptm.AttachmentRange[1]) {
+	if !(!tools.Empty(pole.Date) && pole.Date >= ptm.Context.AttachmentRange[0] && pole.Date <= ptm.Context.AttachmentRange[1]) {
 		return false
 	}
-	return !(!pole.IsDone() && !(ptm.AttachmentOverride && pole.IsAttachment()))
+	return !(!pole.IsDone() && !(ptm.Context.AttachmentOverride && pole.IsAttachment()))
 }
 
 func (ptm *PoleTablesModel) CountPoleInAttachmentRange() int {
@@ -211,13 +199,13 @@ func (ptm *PoleTablesModel) SetAttachments(vm *hvue.VM) {
 		if !ptm.IsPoleInAttachmentRange(pole) {
 			continue
 		}
-		pole.SetAttachmentDate(ptm.AttachmentDate)
+		pole.SetAttachmentDate(ptm.Context.AttachmentDate)
 		nbApplied++
 	}
 	msg := "Attachement appliqué sur " + strconv.Itoa(nbApplied) + " élément"
 	if nbApplied > 1 {
 		msg += "s"
 	}
-	message.NotifySuccess(ptm.VM, "Passage en attachement", msg)
-	ptm.AttachmentVisible = false
+	vm.Emit("polesite-updated", msg)
+	ptm.Context.AttachmentVisible = false
 }

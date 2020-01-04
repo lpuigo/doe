@@ -151,6 +151,7 @@
                         :filtertype="FilterType"
                         :context.sync="TableContext"
                         @update:context="TablePoleSelected"
+                        @polesite-updated="HandleTablePolesiteUptade"
                 ></pole-table>
             </el-main>
         </el-container>
