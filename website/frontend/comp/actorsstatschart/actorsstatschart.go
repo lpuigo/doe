@@ -5,6 +5,7 @@ import (
 	"github.com/huckridgesw/hvue"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,6 +39,17 @@ func componentOption() []hvue.ComponentOption {
 			asc.SetChart(asc.Stats)
 		}),
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Tools Functions
+
+func convertDates(dates []string) []string {
+	res := make([]string, len(dates))
+	for i, d := range dates {
+		res[i] = date.DateString(d)
+	}
+	return res
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +91,7 @@ func (asc *ActorsStatsChart) SetChart(ts *rs.TeamStats) {
 			//	"dateTimeLabelFormats": js.M{
 			//		"day": "%e %b",
 			//	},
-			"categories": ts.Dates,
+			"categories": convertDates(ts.Dates),
 			//"tickPixelInterval" : 400,
 		},
 		"yAxis": asc.getAxis(),

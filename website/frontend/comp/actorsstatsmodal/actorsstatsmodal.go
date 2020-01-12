@@ -45,7 +45,7 @@ const template string = `<el-dialog
                 <el-button icon="fas fa-chevron-right" size="mini" @click="CurrentDateAfter()"></el-button>
             </el-col>
         </el-row>
-		<actors-stats-chart ref="Chart" :stats="Stats"></actors-stats-chart>
+		<actors-stats-chart ref="Chart" :stats="Stats" style="margin-top: 5px"></actors-stats-chart>
     </div>
 
     <!-- 
@@ -183,97 +183,13 @@ func (asmm *ActorsStatsModalModel) CalcDates() []string {
 	return res
 }
 
-func (asmm *ActorsStatsModalModel) CalcValues(stats *rs.TeamStats) {
-	nbDates := len(stats.Dates)
-	if nbDates == 0 {
-		return
-	}
-	startDate := stats.Dates[0]
-	endDate := stats.Dates[nbDates-1]
-	dateIndex := map[string]int{}
-	for index, day := range stats.Dates {
-		dateIndex[day] = index + 1
-	}
-	nbEmployees := make([]float64, nbDates)
-	nbActing := make([]float64, nbDates)
+func (asmm *ActorsStatsModalModel) CalcStatsValues(stats *rs.TeamStats) {
+	cs := actor.NewCalendarSeeker(stats.Dates)
 	for _, actr := range asmm.Actors {
-		// has left before period
-		if actr.Period.End != "" && actr.Period.End < startDate {
-			continue
-		}
-		if actr.Period.Begin == "" {
-			continue
-		}
-		// has come after period
-		if date.GetMonday(actr.Period.Begin) > endDate {
-			continue
-		}
-
-		// calc arrival date
-		pos := dateIndex[date.GetMonday(actr.Period.Begin)] - 1
-		if pos >= 0 {
-			nbEmployees[pos]++
-		} else {
-			nbEmployees[0]++
-		}
-
-		if actr.Period.End != "" {
-			pos := dateIndex[date.GetMonday(actr.Period.End)] - 1
-			if pos >= 0 {
-				nbEmployees[pos]--
-			}
-		}
-
-		// calc Vacations
-		for _, vac := range actr.Vacation {
-			if !(vac.Begin != "" && vac.End != "") {
-				continue
-			}
-			// skip vacation out of range
-			vacBegin := date.GetMonday(vac.Begin)
-			if !(vac.End >= startDate && vacBegin <= endDate) {
-				continue
-			}
-			// calc first week of vacation
-			posBeg := dateIndex[vacBegin] - 1
-			if posBeg >= 0 {
-				// vacation starts in date range
-				if vacBegin != vac.Begin {
-					vacStartDay := date.NbDaysBetween(vacBegin, vac.Begin)
-					if vacStartDay < 5 {
-						nbActing[posBeg] -= (5 - vacStartDay) / 5
-					}
-				} else {
-					nbActing[posBeg]--
-				}
-			} // else posBeg = -1 already set
-
-			// calc last week of vacation
-			vacEnd := date.GetMonday(vac.End)
-			posEnd := dateIndex[vacEnd] - 1
-			if posEnd >= 0 {
-				vacEndDay := date.NbDaysBetween(vacEnd, vac.End)
-				if vacEndDay >= 5 {
-					posEnd++
-				} else {
-					nbActing[posEnd] = vacEndDay / 5
-				}
-			} else {
-				posEnd = nbDates
-			}
-
-			/// then fill weeks between beg and end
-			for i := posBeg + 1; i < posEnd; i++ {
-				nbActing[i]--
-			}
-		}
+		cs.Append(actr)
 	}
-	for i := 0; i < nbDates; i++ {
-		if i > 0 {
-			nbEmployees[i] += nbEmployees[i-1]
-		}
-		nbActing[i] += nbEmployees[i]
-	}
+	nbEmployees, nbActing := cs.CalcStats()
+
 	values := map[string]map[string][]float64{}
 	values["employees"] = map[string][]float64{
 		"employés": nbEmployees,
@@ -288,5 +204,5 @@ func (asmm *ActorsStatsModalModel) CalcStats() {
 	asmm.Stats = rs.NewTeamStats()
 	asmm.Stats.Dates = asmm.CalcDates()
 	asmm.Stats.Team = "Ewin Services"
-	asmm.CalcValues(asmm.Stats)
+	asmm.CalcStatsValues(asmm.Stats)
 }
