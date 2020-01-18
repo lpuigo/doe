@@ -420,7 +420,7 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 		max(lat, long)
 	}
 
-	expected := strings.ToUpper(mpm.Filter)
+	expected := strings.ToUpper(strings.Trim(mpm.Filter, " "))
 	filter := func(pm *polemap.PoleMarker) bool {
 		sis := pm.Pole.SearchString(mpm.FilterType)
 		if sis == "" {

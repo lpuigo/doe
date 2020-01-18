@@ -227,7 +227,7 @@ func (ptm *PoleTableModel) GetFilteredPole() []*ps.Pole {
 	}
 
 	res := []*ps.Pole{}
-	expected := strings.ToUpper(ptm.Filter)
+	expected := strings.ToUpper(strings.Trim(ptm.Filter, " "))
 	filter := func(p *ps.Pole) bool {
 		sis := p.SearchString(ptm.FilterType)
 		if sis == "" {

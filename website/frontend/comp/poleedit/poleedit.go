@@ -208,7 +208,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DictDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
-                                    :clearable="false"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -229,7 +228,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DaStartDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
-                                    :clearable="false"
                     ></el-date-picker>
                 </el-col>
                 <el-col :span="9">
@@ -238,7 +236,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DaEndDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
-                                    :clearable="false"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -298,7 +295,6 @@ const template string = `<div>
                                     style="width: 100%" type="date"
                                     v-model="editedpolemarker.Pole.AspiDate"
                                     value-format="yyyy-MM-dd"
-                                    :clearable="false"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -322,7 +318,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.Date"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                    :clearable="false"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -336,7 +331,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.AttachmentDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                    :clearable="false"
                                     @change="UpdateState()"
                     ></el-date-picker>
                 </el-col>
