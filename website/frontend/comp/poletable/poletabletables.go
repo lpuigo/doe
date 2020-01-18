@@ -20,24 +20,24 @@ import (
 // Comp Registration
 
 func registerComponentTable(tableType string) hvue.ComponentOption {
-	var tableComponent hvue.ComponentOption
+	var tableTemplate hvue.ComponentOption
 	switch tableType {
 	case "creation":
-		tableComponent = hvue.Template(template_creation)
+		tableTemplate = hvue.Template(template_creation)
 	case "followup":
-		tableComponent = hvue.Template(template_followup)
+		tableTemplate = hvue.Template(template_followup)
 	case "billing":
-		tableComponent = hvue.Template(template_billing)
+		tableTemplate = hvue.Template(template_billing)
 	default:
-		tableComponent = hvue.Template("<span>Mode '" + tableType + "' non défini</span>")
+		tableTemplate = hvue.Template("<span>Mode '" + tableType + "' non défini</span>")
 	}
-	return hvue.Component("pole-table-"+tableType, componentOptionsTable(tableComponent)...)
+	return hvue.Component("pole-table-"+tableType, componentOptionsTable(tableTemplate)...)
 }
 
-func componentOptionsTable(tableComponent hvue.ComponentOption) []hvue.ComponentOption {
+func componentOptionsTable(tableTemplate hvue.ComponentOption) []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripprogressbar.RegisterComponent(),
-		tableComponent,
+		tableTemplate,
 		hvue.Props("user", "polesite", "filter", "filtertype", "context"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleTableModel(vm)

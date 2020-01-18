@@ -75,10 +75,10 @@ func PoleFromJS(o *js.Object) *Pole {
 
 func (p *Pole) Duplicate(suffix string, offset float64) *Pole {
 	np := NewPole()
-	np.Ref = p.Ref + suffix
+	np.Ref = p.Ref
 	np.City = p.City
 	np.Address = p.Address
-	np.Sticker = p.Sticker
+	np.Sticker = p.Sticker + suffix
 	np.Lat = p.Lat + offset
 	np.Long = p.Long + offset
 	np.State = p.State
