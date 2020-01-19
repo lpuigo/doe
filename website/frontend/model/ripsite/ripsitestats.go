@@ -42,6 +42,7 @@ func (rs *RipsiteStats) CreateTeamStats(showSite map[string]bool) []*TeamStats {
 	totStats := NewTeamStats()
 	totStats.Team = "Total"
 	totStats.Dates = date.ConvertDates(rs.Dates)
+	totStats.IsClientTeam = true
 	totValues := make(map[string]map[string][]float64)
 	for serie, _ := range rs.Values {
 		vals := make([]float64, len(rs.Dates))
@@ -50,16 +51,23 @@ func (rs *RipsiteStats) CreateTeamStats(showSite map[string]bool) []*TeamStats {
 		totValues[serie] = svals
 	}
 	currentTeam := ""
+	prevTS := NewTeamStats()
 	for numTeam, team := range rs.Teams {
 		isTeamClient := false
 		if !(currentTeam != "" && strings.HasPrefix(team, currentTeam)) {
 			currentTeam = team
 			isTeamClient = true
+		} else {
+			prevTS.HasTeams = true
 		}
 		teamHasData := false
 		ts := NewTeamStats()
+		if isTeamClient {
+			prevTS = ts
+		}
 		ts.Team = team
 		ts.Dates = totStats.Dates
+		ts.IsClientTeam = isTeamClient
 		for serie, _ := range rs.Values {
 			//ts.Values[serie] = rs.Values[serie][numTeam]
 			datas := map[string][]float64{}

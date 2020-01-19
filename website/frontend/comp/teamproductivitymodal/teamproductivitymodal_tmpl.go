@@ -59,9 +59,19 @@ const template string = `
                 </el-aside>
                 <el-main style="height: 100%">
                     <div style="height: 100%;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
-                        <div v-for="(ts, index) in RipTeamStats" :key="ts">
+                        <div v-for="(ts, index) in GetClientTeams()" :key="ts">
                             <h3>{{ts.Team}}</h3>
-                            <ripteam-productivity-chart :stats="ts" :colors="SiteColors"></ripteam-productivity-chart>
+                            <ripteam-productivity-chart :stats="ts" :colors="SiteColors" heigth="250px"></ripteam-productivity-chart>
+							<el-switch v-if="ts.HasTeams"
+									v-model="ts.ShowTeams"
+									active-text="Détail des acteurs"
+							></el-switch>
+							<div v-if="ts.ShowTeams">
+								<div v-for="(cts, index) in GetSubTeams(ts.Team)" :key="cts">
+									<h4>{{cts.Team}}</h4>
+									<ripteam-productivity-chart :stats="cts" :colors="SiteColors" heigth="180px"></ripteam-productivity-chart>
+								</div>
+							</div>
                         </div>
                     </div>
                 </el-main>

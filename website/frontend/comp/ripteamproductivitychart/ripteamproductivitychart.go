@@ -28,7 +28,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOption() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("stats", "colors"),
+		hvue.Props("stats", "colors", "heigth"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewTeamProductivityChart(vm)
 		}),
@@ -48,6 +48,7 @@ type TeamProductivityChart struct {
 	VM     *hvue.VM      `js:"VM"`
 	Stats  *rs.TeamStats `js:"stats"`
 	Colors SiteColorMap  `js:"colors"`
+	Heigth string        `js:"heigth"`
 }
 
 func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
@@ -55,11 +56,13 @@ func NewTeamProductivityChart(vm *hvue.VM) *TeamProductivityChart {
 	tpc.VM = vm
 	tpc.Stats = rs.NewTeamStats()
 	tpc.Colors = nil
+	tpc.Heigth = "250px"
 	return tpc
 }
 
-func (tpc *TeamProductivityChart) SetStyle() string {
-	return "width:100%; height:250px;"
+func (tpc *TeamProductivityChart) SetStyle(vm *hvue.VM) string {
+	tpc = &TeamProductivityChart{Object: vm.Object}
+	return "width:100%; height:" + tpc.Heigth + ";"
 }
 
 func (tpc *TeamProductivityChart) setColumnChart() {

@@ -12,6 +12,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
+	"strings"
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +181,28 @@ func (tpmm *TeamProductivityModalModel) SiteCircleStyle(site string) string {
 
 func (tpmm *TeamProductivityModalModel) GetActorsActivity() string {
 	return "/api/ripsites/actors/" + tpmm.PeriodMode
+}
+
+func (tpmm *TeamProductivityModalModel) GetClientTeams(vm *hvue.VM) []*rs.TeamStats {
+	tpmm = TeamProductivityModalModelFromJS(vm.Object)
+	res := []*rs.TeamStats{}
+	for _, stat := range tpmm.RipTeamStats {
+		if stat.IsClientTeam {
+			res = append(res, stat)
+		}
+	}
+	return res
+}
+
+func (tpmm *TeamProductivityModalModel) GetSubTeams(vm *hvue.VM, clientTeam string) []*rs.TeamStats {
+	tpmm = TeamProductivityModalModelFromJS(vm.Object)
+	res := []*rs.TeamStats{}
+	for _, stat := range tpmm.RipTeamStats {
+		if stat.Team != clientTeam && strings.HasPrefix(stat.Team, clientTeam) {
+			res = append(res, stat)
+		}
+	}
+	return res
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
