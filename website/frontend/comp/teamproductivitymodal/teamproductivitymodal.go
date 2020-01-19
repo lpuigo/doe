@@ -102,6 +102,21 @@ func (tpmm *TeamProductivityModalModel) Show(user *fm.User, siteMode string) {
 	tpmm.ModalModel.Show()
 }
 
+func (tpmm *TeamProductivityModalModel) ModeName() string {
+	switch tpmm.SiteMode {
+	case "Rip":
+		return "RIP"
+	case "Poles":
+		return "Poteaux"
+	case "Foa":
+		return "FOA"
+	case "Orange":
+		return "Supersonic"
+	default:
+		return ""
+	}
+}
+
 func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
 	switch tpmm.SiteMode {

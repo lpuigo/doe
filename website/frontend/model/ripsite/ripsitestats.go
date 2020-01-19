@@ -3,6 +3,8 @@ package ripsite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"strings"
 )
 
 type RipsiteStats struct {
@@ -11,7 +13,7 @@ type RipsiteStats struct {
 	Dates  []string                          `js:"Dates"`
 	Teams  []string                          `js:"Teams"`
 	Sites  map[string]bool                   `js:"Sites"`
-	Values map[string][]map[string][]float64 `js:"Values"` // map[measurement][teamNum][site][dateNum]int{}
+	Values map[string][]map[string][]float64 `js:"Values"` // map[measurement][teamNum][site][dateNum]float64{}
 }
 
 func NewRipsiteStats() *RipsiteStats {
@@ -35,23 +37,52 @@ func RipsiteStatsFromJs(o *js.Object) *RipsiteStats {
 	return &RipsiteStats{Object: o}
 }
 
-func (rs *RipsiteStats) CreateTeamStats(sites map[string]bool) []*TeamStats {
-	res := make([]*TeamStats, len(rs.Teams))
-	for i, team := range rs.Teams {
+func (rs *RipsiteStats) CreateTeamStats(showSite map[string]bool) []*TeamStats {
+	res := []*TeamStats{}
+	totStats := NewTeamStats()
+	totStats.Team = "Total"
+	totStats.Dates = date.ConvertDates(rs.Dates)
+	totValues := make(map[string]map[string][]float64)
+	for serie, _ := range rs.Values {
+		vals := make([]float64, len(rs.Dates))
+		svals := map[string][]float64{}
+		svals["Total"] = vals
+		totValues[serie] = svals
+	}
+	currentTeam := ""
+	for numTeam, team := range rs.Teams {
+		isTeamClient := false
+		if !(currentTeam != "" && strings.HasPrefix(team, currentTeam)) {
+			currentTeam = team
+			isTeamClient = true
+		}
+		teamHasData := false
 		ts := NewTeamStats()
 		ts.Team = team
-		ts.Dates = rs.Dates
-		for mes, _ := range rs.Values {
-			//ts.Values[mes] = rs.Values[mes][i]
+		ts.Dates = totStats.Dates
+		for serie, _ := range rs.Values {
+			//ts.Values[serie] = rs.Values[serie][numTeam]
 			datas := map[string][]float64{}
-			for site, data := range rs.Values[mes][i] {
-				if sites[site] {
+			totVals := totValues[serie]["Total"]
+			for site, data := range rs.Values[serie][numTeam] {
+				if showSite[site] {
+					teamHasData = true
 					datas[site] = data
+					if isTeamClient {
+						for i, val := range data {
+							totVals[i] += val
+						}
+					}
 				}
 			}
-			ts.Get("Values").Set(mes, datas)
+			ts.Get("Values").Set(serie, datas)
+			totValues[serie]["Total"] = totVals
 		}
-		res[i] = ts
+		if teamHasData {
+			res = append(res, ts)
+		}
 	}
+	totStats.Values = totValues
+	res = append([]*TeamStats{totStats}, res...)
 	return res
 }

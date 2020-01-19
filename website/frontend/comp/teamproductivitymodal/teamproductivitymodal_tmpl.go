@@ -12,7 +12,7 @@ const template string = `
 	<span slot="title">
         <div class="header-menu-container">
             <h2 style="margin: 0 0">
-                <i class="fas fa-chart-line icon--left"></i>Productivité des équipes
+                <i class="fas fa-chart-line icon--left"></i>Productivité des équipes {{ModeName()}}
             </h2>
             <el-radio-group v-if="SiteMode=='Orange'" v-model="InfoMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="prod">Production</el-radio-button>

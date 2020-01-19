@@ -66,6 +66,15 @@ func DateString(v string) string {
 	return "-"
 }
 
+// ConvertDates convert []string (js format YYYY-MM-DD) to []string (format DD/MM/YYYY)
+func ConvertDates(dates []string) []string {
+	res := make([]string, len(dates))
+	for i, d := range dates {
+		res[i] = DateString(d)
+	}
+	return res
+}
+
 func Day(v string) string {
 	if strings.Contains(v, "-") {
 		d := strings.Split(v, "-")

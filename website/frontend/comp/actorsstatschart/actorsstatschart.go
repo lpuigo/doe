@@ -44,14 +44,6 @@ func componentOption() []hvue.ComponentOption {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Tools Functions
 
-func convertDates(dates []string) []string {
-	res := make([]string, len(dates))
-	for i, d := range dates {
-		res[i] = date.DateString(d)
-	}
-	return res
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Model Methods
 
@@ -91,7 +83,7 @@ func (asc *ActorsStatsChart) SetChart(ts *rs.TeamStats) {
 			//	"dateTimeLabelFormats": js.M{
 			//		"day": "%e %b",
 			//	},
-			"categories": convertDates(ts.Dates),
+			"categories": date.ConvertDates(ts.Dates),
 			//"tickPixelInterval" : 400,
 		},
 		"yAxis": asc.getAxis(),
