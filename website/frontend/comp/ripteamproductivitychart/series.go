@@ -28,6 +28,8 @@ func SetColor(sites map[string]bool, workCM, priceCM ColorMap) SiteColorMap {
 	pHue := priceCM.HueStart
 	wSC := siteColors{}
 	pSC := siteColors{}
+	wSC["Total"] = hsl(wHue-30.0, workCM.Light, workCM.Saturation)
+	pSC["Total"] = hsl(pHue-30.0, priceCM.Light, priceCM.Saturation)
 	for site, _ := range sites {
 		wSC[site] = hsl(wHue, workCM.Light, workCM.Saturation)
 		pSC[site] = hsl(pHue, priceCM.Light, priceCM.Saturation)
