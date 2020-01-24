@@ -587,9 +587,9 @@ func (pem *PoleEditModel) ChapterChange(vm *hvue.VM, val *js.Object) {
 
 func (pem *PoleEditModel) GetGMAPUrl(vm *hvue.VM, gps string) string {
 	pem = PoleEditModelFromJS(vm.Object)
-	if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
-		return ""
-	}
+	//if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
+	//	return ""
+	//}
 	url := "http://maps.google.com/maps?q=" + gps
 	return url
 }
