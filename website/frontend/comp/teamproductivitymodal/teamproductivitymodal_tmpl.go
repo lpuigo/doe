@@ -63,14 +63,13 @@ const template string = `
                         <div v-for="(ts, index) in GetClientTeams()" :key="ts">
                             <h3>{{ts.Team}}</h3>
                             <ripteam-productivity-chart :stats="ts" :colors="SiteColors" heigth="250px"></ripteam-productivity-chart>
-							<el-switch v-if="ts.HasTeams"
-									v-model="ts.ShowTeams"
-									active-text="Détail des acteurs"
-							></el-switch>
-							<div v-if="ts.ShowTeams">
-								<div v-for="(cts, index) in GetSubTeams(ts.Team)" :key="cts">
-									<h4>{{cts.Team}}</h4>
-									<ripteam-productivity-chart :stats="cts" :colors="SiteColors" heigth="180px"></ripteam-productivity-chart>
+							<div v-if="ts.HasTeams" style="margin-top: 5px; padding-left: 5px ;border-left: 5px solid darkgrey">
+								<el-switch v-model="ts.ShowTeams" active-text="Détail des acteurs"></el-switch>
+								<div v-if="ts.ShowTeams">
+									<div v-for="(cts, index) in GetSubTeams(ts.Team)" :key="cts">
+										<h4>{{cts.Team}}</h4>
+										<ripteam-productivity-chart :stats="cts" :colors="SiteColors" heigth="180px"></ripteam-productivity-chart>
+									</div>
 								</div>
 							</div>
                         </div>
