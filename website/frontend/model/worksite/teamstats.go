@@ -8,9 +8,12 @@ import (
 type TeamStats struct {
 	*js.Object
 
-	Team   string           `js:"Team"`
-	Dates  []string         `js:"Dates"`
-	Values map[string][]int `js:"Values"`
+	Team         string           `js:"Team"`
+	Dates        []string         `js:"Dates"`
+	Values       map[string][]int `js:"Values"`
+	IsClientTeam bool             `js:"IsClientTeam"`
+	HasTeams     bool             `js:"HasTeams"`
+	ShowTeams    bool             `js:"ShowTeams"`
 }
 
 func NewTeamStats() *TeamStats {
@@ -18,5 +21,8 @@ func NewTeamStats() *TeamStats {
 	ts.Team = ""
 	ts.Dates = []string{}
 	ts.Values = make(map[string][]int)
+	ts.IsClientTeam = false
+	ts.HasTeams = false
+	ts.ShowTeams = false
 	return ts
 }

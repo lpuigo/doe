@@ -112,7 +112,7 @@ func (tpmm *TeamProductivityModalModel) ModeName() string {
 	case "Foa":
 		return "FOA"
 	case "Orange":
-		return "Supersonic"
+		return "Orange"
 	default:
 		return ""
 	}
@@ -181,6 +181,28 @@ func (tpmm *TeamProductivityModalModel) SiteCircleStyle(site string) string {
 
 func (tpmm *TeamProductivityModalModel) GetActorsActivity() string {
 	return "/api/ripsites/actors/" + tpmm.PeriodMode
+}
+
+func (tpmm *TeamProductivityModalModel) GetClientOrangeTeams(vm *hvue.VM) []*worksite.TeamStats {
+	tpmm = TeamProductivityModalModelFromJS(vm.Object)
+	res := []*worksite.TeamStats{}
+	for _, stat := range tpmm.TeamStats {
+		if stat.IsClientTeam {
+			res = append(res, stat)
+		}
+	}
+	return res
+}
+
+func (tpmm *TeamProductivityModalModel) GetSubOrangeTeams(vm *hvue.VM, clientTeam string) []*worksite.TeamStats {
+	tpmm = TeamProductivityModalModelFromJS(vm.Object)
+	res := []*worksite.TeamStats{}
+	for _, stat := range tpmm.TeamStats {
+		if stat.Team != clientTeam && strings.HasPrefix(stat.Team, clientTeam) {
+			res = append(res, stat)
+		}
+	}
+	return res
 }
 
 func (tpmm *TeamProductivityModalModel) GetClientTeams(vm *hvue.VM) []*rs.TeamStats {

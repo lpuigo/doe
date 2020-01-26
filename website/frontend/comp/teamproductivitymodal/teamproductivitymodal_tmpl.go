@@ -42,9 +42,18 @@ const template string = `
 	<div v-loading="loading" style="height: 65vh;overflow-x: hidden;overflow-y: auto;padding-right: 6px;">
 		<div v-if="!loading" style="height: 100%">
 			<div v-if="SiteMode == 'Orange'">
-				<div v-for="(ts, index) in TeamStats" :key="index">
+				<div v-for="(ts, index) in GetClientOrangeTeams()" :key="index">
 					<h3>{{ts.Team}}</h3>
 					<team-productivity-chart :stats="ts"></team-productivity-chart>			
+					<div v-if="ts.HasTeams" style="margin-top: 5px; padding-left: 5px ;border-left: 5px solid darkgrey">
+						<el-switch v-model="ts.ShowTeams" active-text="Détail des équipes"></el-switch>
+						<div v-if="ts.ShowTeams">
+							<div v-for="(cts, index) in GetSubOrangeTeams(ts.Team)" :key="cts">
+								<h4>{{cts.Team}}</h4>
+								<team-productivity-chart :stats="cts"></team-productivity-chart>
+							</div>
+						</div>
+					</div>
 				</div>	
 			</div>
 			<el-container v-else style="height: 100%">

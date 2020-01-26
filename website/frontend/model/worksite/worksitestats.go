@@ -3,6 +3,7 @@ package worksite
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"strings"
 )
 
 const (
@@ -45,10 +46,23 @@ func WorksiteStatsFromJs(o *js.Object) *WorksiteStats {
 
 func (ws *WorksiteStats) CreateTeamStats() []*TeamStats {
 	res := make([]*TeamStats, len(ws.Teams))
+	currentTeam := ""
+	prevTS := NewTeamStats()
 	for i, team := range ws.Teams {
+		isTeamClient := false
+		if !(currentTeam != "" && strings.HasPrefix(team, currentTeam)) {
+			currentTeam = team
+			isTeamClient = true
+		} else {
+			prevTS.HasTeams = true
+		}
 		ts := NewTeamStats()
+		if isTeamClient {
+			prevTS = ts
+		}
 		ts.Team = team
 		ts.Dates = ws.Dates
+		ts.IsClientTeam = isTeamClient
 		for mes, _ := range ws.Values {
 			//ts.Values[mes] = ws.Values[mes][i]
 			ts.Get("Values").Set(mes, ws.Values[mes][i])
