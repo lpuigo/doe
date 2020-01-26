@@ -38,9 +38,16 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 
 func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
 	maxVal := 12
+	dayIncr := 7
 
 	var dateFor date.DateAggreg
 	switch freq {
+	case "day":
+		maxVal = 15
+		dayIncr = 1
+		dateFor = func(d string) string {
+			return d
+		}
 	case "week":
 		dateFor = func(d string) string {
 			return date.GetMonday(d)
@@ -59,15 +66,18 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 	}
 
 	statContext := items.StatContext{
+		DayIncr:       dayIncr,
 		MaxVal:        maxVal,
 		DateFor:       dateFor,
 		IsTeamVisible: isActorVisible,
+		ClientByName:  m.genGetClient(),
+		ActorById:     m.genActorById(),
 		ShowTeam:      !m.CurrentUser.Permissions["Review"],
 	}
 
 	switch groupBy {
 	case "activity", "site":
-		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorById(), m.CurrentUser.Permissions["Invoice"], groupBy)
+		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.CurrentUser.Permissions["Invoice"], groupBy)
 		if err != nil {
 			return err
 		}

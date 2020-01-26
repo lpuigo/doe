@@ -176,12 +176,12 @@ func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName 
 }
 
 // GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool, groupBy string) (*rs.RipsiteStats, error) {
+func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, showprice bool, groupBy string) (*rs.RipsiteStats, error) {
 	sp.RLock()
 	defer sp.RUnlock()
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
+	sitesItems, err := sp.getSitesItems(isRSVisible, sc.ClientByName)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 		}
 		actorsName := make([]string, len(item.Actors))
 		for i, actId := range item.Actors {
-			actorsName[i] = actorById(actId)
+			actorsName[i] = sc.ActorById(actId)
 		}
 		dateFor := sc.DateFor(item.Date)
 		switch groupBy {

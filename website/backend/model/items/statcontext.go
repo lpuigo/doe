@@ -9,6 +9,7 @@ import (
 )
 
 type StatContext struct {
+	DayIncr       int
 	MaxVal        int
 	DateFor       date.DateAggreg
 	IsTeamVisible clients.IsTeamVisible

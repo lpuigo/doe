@@ -63,7 +63,7 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 	endReached := false
 	for !endReached {
 		dateset[curStringDate] = 1
-		curDate = curDate.AddDays(7)
+		curDate = curDate.AddDays(sc.DayIncr)
 		curStringDate = sc.DateFor(curDate.String())
 		endReached = curStringDate > endStringDate
 	}
@@ -82,10 +82,6 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 	ws := rs.NewBERipsiteStats()
 	ws.Dates = dates // d4
 	sitesmap := map[string]bool{}
-	for _, site := range sites {
-		sitesmap[site] = true
-	}
-	ws.Sites = sitesmap // d3
 
 	for _, teamName := range teams {
 		teamActivity := 0.0
@@ -108,6 +104,7 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 					siteData[dateNum] = val
 				}
 				if siteActivity > 0 {
+					sitesmap[site] = true
 					values[serie][site] = siteData
 				}
 			}
@@ -121,6 +118,7 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 			ws.Values[serie] = append(ws.Values[serie], values[serie]) // d1
 		}
 	}
+	ws.Sites = sitesmap // d3
 
 	return ws
 }
