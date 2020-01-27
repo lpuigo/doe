@@ -2,8 +2,10 @@ package polesites
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/lpuig/ewin/doe/website/backend/model/polesites/test"
@@ -138,7 +140,12 @@ func Test_ToXLS(t *testing.T) {
 
 func TestPolesiteFromXLS(t *testing.T) {
 	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025\2020-01-24 Plans\Fiitelcom SRO 88-025-336.xlsx`
-	psXlsResFile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025\2020-01-24 Plans\Fiitelcom SRO 88-025-336 gps.xlsx`
+
+	path := filepath.Dir(psXlsfile)
+	inFile := filepath.Base(psXlsfile)
+	suffix := filepath.Ext(inFile)
+	outFile := strings.TrimSuffix(inFile, suffix) + " gps" + suffix
+
 	xf, err := os.Open(psXlsfile)
 	if err != nil {
 		t.Fatalf("could not open file: %s", err.Error())
@@ -149,7 +156,7 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
 
-	xfr, err := os.Create(psXlsResFile)
+	xfr, err := os.Create(filepath.Join(path, outFile))
 	if err != nil {
 		t.Fatalf("could not create file: %s", err.Error())
 	}
@@ -159,7 +166,15 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("ToXLS return unexpected: %s", err.Error())
 	}
 
-	je := json.NewEncoder(os.Stdout)
-	je.SetIndent("", "\t")
-	je.Encode(ps)
+	jsonOutFile := filepath.Join(path, fmt.Sprintf("%06d.json", ps.Id))
+	ojf, err := os.Create(jsonOutFile)
+	if err != nil {
+		t.Fatalf("could not create file: %s", err.Error())
+	}
+	defer ojf.Close()
+	je := json.NewEncoder(ojf)
+	err = je.Encode(ps)
+	if err != nil {
+		t.Fatalf("could not encode polesite: %s", err.Error())
+	}
 }
