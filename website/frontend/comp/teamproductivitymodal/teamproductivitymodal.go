@@ -128,6 +128,9 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	case "Foa":
 		go tpmm.callGetRipsitesStats("/api/foasites/stat/" + tpmm.PeriodMode)
 	case "Orange":
+		if tpmm.PeriodMode == "day" {
+			tpmm.PeriodMode = "week"
+		}
 		go tpmm.callGetWorksitesStats("/api/worksites/stat/" + tpmm.InfoMode + "/" + tpmm.PeriodMode)
 	default:
 		message.ErrorStr(tpmm.VM, "mode '"+tpmm.SiteMode+"' non pris en charge", false)
