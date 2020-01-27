@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	testXLSFile string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians\Axians Moselle\Chantier FOA\2019-11-07 CCPHVA_TRE\TABLEAU SUIVI.xlsx`
+	testXLSFile string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians\Axians Moselle\Chantier FOA\2019-12-20 CCSMS_SAR\TABLEAU SUIVI FOA CCSMS_SAR 2.xlsx`
+	//testXLSFile string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians\Axians Moselle\Chantier FOA\2019-11-07 CCPHVA_TRE\TABLEAU SUIVI.xlsx`
 	//testXLSFile string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians\Axians Moselle\Chantier FOA\2019-11-28 CCSMS_SAR\TABLEAU_SUIVI_FOA.xlsx`
 )
 
@@ -26,6 +27,6 @@ func TestNewFoaSiteFromXLS(t *testing.T) {
 	jsonEnconder.SetIndent("", "\t")
 	err = jsonEnconder.Encode(nfs)
 	if err != nil {
-		t.Fatalf("FoaSite.Endode returned unexpected error: %v", err)
+		t.Fatalf("FoaSite.Encode returned unexpected error: %v", err)
 	}
 }

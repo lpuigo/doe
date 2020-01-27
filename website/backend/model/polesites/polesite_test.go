@@ -137,8 +137,8 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `test/Sogetrel 01 Pont A Mousson.xlsx`
-	psXlsResFile := `test/Sogetrel 01 Pont A Mousson gps.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025\2020-01-24 Plans\Fiitelcom SRO 88-025-336.xlsx`
+	psXlsResFile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025\2020-01-24 Plans\Fiitelcom SRO 88-025-336 gps.xlsx`
 	xf, err := os.Open(psXlsfile)
 	if err != nil {
 		t.Fatalf("could not open file: %s", err.Error())
@@ -160,6 +160,6 @@ func TestPolesiteFromXLS(t *testing.T) {
 	}
 
 	je := json.NewEncoder(os.Stdout)
-	//je.SetIndent("", "\t")
+	je.SetIndent("", "\t")
 	je.Encode(ps)
 }

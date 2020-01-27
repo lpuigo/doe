@@ -15,14 +15,14 @@ import (
 )
 
 const (
-	rowPolesiteHeader int = 0
-	rowPolesiteInfo   int = 1
-	rowPoleHeader     int = 3
-	rowPoleInfo       int = 4
+	rowPolesiteHeader int = 1
+	rowPolesiteInfo   int = 2
+	rowPoleHeader     int = 4
+	rowPoleInfo       int = 5
 )
 
 const (
-	colPoleId int = iota
+	colPoleId int = iota + 1
 	colPoleRef
 	colPoleCity
 	colPoleAddress
@@ -51,23 +51,23 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetSheetName(xf.GetSheetName(1), sheetName)
 
 	// Set PoleSite infos
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 0), "polesite")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 1), "Id")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 2), "Client")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 3), "Ref")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 4), "Manager")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 5), "OrderDate")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 6), "Status")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 7), "Comment")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 1), "polesite")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 2), "Id")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 3), "Client")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 4), "Ref")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 5), "Manager")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 6), "OrderDate")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 7), "Status")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 8), "Comment")
 
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 0), "polesite")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 1), ps.Id)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2), ps.Client)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3), ps.Ref)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4), ps.Manager)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 5), date.DateFrom(ps.OrderDate).ToTime())
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6), ps.Status)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7), ps.Comment)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 1), "polesite")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2), ps.Id)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3), ps.Client)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4), ps.Ref)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 5), ps.Manager)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6), date.DateFrom(ps.OrderDate).ToTime())
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7), ps.Status)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 8), ps.Comment)
 
 	// Set Poles infos
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleId), "pole")
@@ -145,32 +145,32 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	//
 	// Read PoleSite Header & Info
 	//
-	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPolesiteHeader, 0), "polesite"); err != nil {
+	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPolesiteHeader, 1), "polesite"); err != nil {
 		return nil, err
 	}
-	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 0), "polesite"); err != nil {
+	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 1), "polesite"); err != nil {
 		return nil, err
 	}
 
 	var ps *PoleSite = &PoleSite{}
-	ps.Id, err = getCellInt(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 1))
+	ps.Id, err = getCellInt(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2))
 	if err != nil {
 		return nil, err
 	}
-	ps.Client, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 2))
-	ps.Ref, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3))
-	ps.Manager, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4))
-	ps.OrderDate, err = getCellDate(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 5))
+	ps.Client, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 3))
+	ps.Ref, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 4))
+	ps.Manager, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 5))
+	ps.OrderDate, err = getCellDate(xf, sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6))
 	if err != nil {
 		return nil, err
 	}
-	ps.Status, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 6))
-	ps.Comment, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7))
+	ps.Status, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7))
+	ps.Comment, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 8))
 
 	//
 	// Read Poles Header & Info
 	//
-	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleHeader, 0), "pole"); err != nil {
+	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleHeader, 1), "pole"); err != nil {
 		return nil, err
 	}
 	productKeys := map[int]string{}
@@ -191,20 +191,30 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	if err != nil {
 		return nil, err
 	}
-	for line, row := range rows {
-		if line < rowPoleInfo {
+
+	line := 0
+	row := []string{}
+	getCol := func(col int) string {
+		if col > len(row) {
+			return ""
+		}
+		return row[col-1]
+	}
+
+	for line, row = range rows {
+		if line+1 < rowPoleInfo {
 			continue
 		}
-		if row[colPoleId] != "pole" {
+		if getCol(colPoleId) != "pole" {
 			continue
 		}
 
-		lat, errlat := strconv.ParseFloat(row[colPoleLat], 64)
-		long, errlong := strconv.ParseFloat(row[colPoleLong], 64)
+		lat, errlat := strconv.ParseFloat(getCol(colPoleLat), 64)
+		long, errlong := strconv.ParseFloat(getCol(colPoleLong), 64)
 		geomsg := ""
 		if errlat != nil && errlong != nil {
 			// Perform Geoloc Search
-			addr := row[colPoleAddress]
+			addr := getCol(colPoleAddress)
 			res := []nominatim.Geoloc{}
 			if addr == "" {
 				goto GeolocDone
@@ -224,78 +234,78 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		GeolocDone:
 		} else {
 			if errlat != nil {
-				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), row[colPoleLat], errlat.Error())
+				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), getCol(colPoleLat), errlat.Error())
 			}
 			if errlong != nil {
-				return nil, fmt.Errorf("%s: could not parse longitude '%s': %s", cellCoord(colPoleLong, line), row[colPoleLong], errlong.Error())
+				return nil, fmt.Errorf("%s: could not parse longitude '%s': %s", cellCoord(colPoleLong, line), getCol(colPoleLong), errlong.Error())
 			}
 		}
-		state := row[colPoleState]
+		state := getCol(colPoleState)
 		if state == "" {
 			state = poleconst.StateNotSubmitted
 		}
 		height := 8
-		if row[colPoleHeight] != "" {
-			height, err = strconv.Atoi(row[colPoleHeight])
+		if getCol(colPoleHeight) != "" {
+			height, err = strconv.Atoi(getCol(colPoleHeight))
 			if err != nil {
-				return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), row[colPoleHeight], err.Error())
+				return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), getCol(colPoleHeight), err.Error())
 			}
 		}
-		pdate, err := parseDate(row[colPoleDate])
+		pdate, err := parseDate(getCol(colPoleDate))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleDate, line), err.Error())
 		}
-		adate, err := parseDate(row[colPoleAttachmentDate])
+		adate, err := parseDate(getCol(colPoleAttachmentDate))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleAttachmentDate, line), err.Error())
 		}
-		aspdate, err := parseDate(row[colPoleAspiDate])
+		aspdate, err := parseDate(getCol(colPoleAspiDate))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleAspiDate, line), err.Error())
 		}
-		dddate, err := parseDate(row[colPoleDictDate])
+		dddate, err := parseDate(getCol(colPoleDictDate))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleDictDate, line), err.Error())
 		}
 		actors := []string{}
-		if row[colPoleActors] != "" {
-			actors = strings.Split(row[colPoleActors], ",")
+		if getCol(colPoleActors) != "" {
+			actors = strings.Split(getCol(colPoleActors), ",")
 			for i, actor := range actors {
 				actors[i] = strings.Trim(actor, " ")
 			}
 		}
 		products := []string{}
 		for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4} {
-			if row[col] == "1" {
+			if getCol(col) == "1" {
 				products = append(products, productKeys[col])
 			}
 		}
 
-		comment := row[colPoleComment]
+		comment := getCol(colPoleComment)
 		if geomsg != "" {
 			comment += "\n" + geomsg
 		}
 
 		pole := &Pole{
 			Id:             id,
-			Ref:            row[colPoleRef],
-			City:           row[colPoleCity],
-			Address:        row[colPoleAddress],
+			Ref:            getCol(colPoleRef),
+			City:           getCol(colPoleCity),
+			Address:        getCol(colPoleAddress),
 			Lat:            lat,
 			Long:           long,
 			State:          state,
 			Actors:         actors,
 			Date:           pdate,
 			AttachmentDate: adate,
-			Sticker:        row[colPoleSticker],
-			DtRef:          row[colPoleDtRef],
-			DictRef:        row[colPoleDictRef],
+			Sticker:        getCol(colPoleSticker),
+			DtRef:          getCol(colPoleDtRef),
+			DictRef:        getCol(colPoleDictRef),
 			DictDate:       dddate,
-			DictInfo:       row[colPoleDictInfo],
+			DictInfo:       getCol(colPoleDictInfo),
 			Height:         height,
-			Material:       row[colPoleMaterial],
+			Material:       getCol(colPoleMaterial),
 			AspiDate:       aspdate,
-			Kizeo:          row[colPoleKizeo],
+			Kizeo:          getCol(colPoleKizeo),
 			Comment:        comment,
 			Product:        products,
 		}
