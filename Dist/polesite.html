@@ -71,7 +71,7 @@
 
                 <el-button-group>
                     <el-tooltip content="Recentrer la carte" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"></el-button>
+                        <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini" :disabled="ActiveMode!='Map'"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
