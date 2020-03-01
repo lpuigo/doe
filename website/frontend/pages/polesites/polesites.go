@@ -195,9 +195,12 @@ func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
 }
 
 func (mpm *MainPageModel) UnSelectPole(refresh bool) {
-	if mpm.SelectedPoleMarker != nil && mpm.SelectedPoleMarker.Object != nil {
-		mpm.SelectedPoleMarker.EndEditMode(refresh)
+	if mpm.IsPoleSelected {
+		mpm.CloseEditPole()
 	}
+	//if mpm.SelectedPoleMarker != nil && mpm.SelectedPoleMarker.Object != nil {
+	//	mpm.SelectedPoleMarker.EndEditMode(refresh)
+	//}
 }
 
 func (mpm *MainPageModel) DictZipArchiveURL() string {
