@@ -37,6 +37,16 @@ const template string = `<div>
         <el-popover placement="bottom" width="360" title="Duplication du poteau"
                     v-model="VisibleDuplicatePole">
             <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6">
+                    <el-checkbox v-model="DuplicateContext.DoIncrement">Incrément</el-checkbox>
+                </el-col>
+                <el-col v-if="DuplicateContext.DoIncrement" :span="18">
+                    <el-input-number placeholder="Incrément"
+                                     v-model="DuplicateContext.Increment" controls-position="right" :min="-20" :max="20" clearable size="mini"
+                    ></el-input-number>
+                </el-col>
+            </el-row>
             <div style="text-align: right; margin: 0; margin-top: 10px">
                 <el-button size="mini" @click="VisibleDuplicatePole = false">Annuler</el-button>
                 <el-button type="warning" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
@@ -396,7 +406,10 @@ type PoleEditModel struct {
 	VisibleDeletePole    bool                `js:"VisibleDeletePole"`
 	VisibleLatLong       bool                `js:"VisibleLatLong"`
 	VisibleDuplicatePole bool                `js:"VisibleDuplicatePole"`
-	ActiveChapter        []string            `js:"chapters"`
+
+	DuplicateContext *DuplicateContext `js:"DuplicateContext"`
+
+	ActiveChapter []string `js:"chapters"`
 
 	User     *fm.User           `js:"user"`
 	Polesite *polesite.Polesite `js:"polesite"`
@@ -416,6 +429,9 @@ func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem.VisibleDeletePole = false
 	pem.VisibleLatLong = false
 	pem.VisibleDuplicatePole = false
+
+	pem.DuplicateContext = NewDuplicateContext()
+
 	pem.ActiveChapter = []string{}
 
 	pem.User = fm.NewUser()
@@ -577,8 +593,9 @@ func (pem *PoleEditModel) DeletePole(vm *hvue.VM) {
 
 func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
+	pem.DuplicateContext.Model = pem.EditedPoleMarker
 	pem.VisibleDuplicatePole = false
-	pem.VM.Emit("duplicate-pole", pem.EditedPoleMarker)
+	pem.VM.Emit("duplicate-pole", pem.DuplicateContext)
 }
 
 func (pem *PoleEditModel) ChapterChange(vm *hvue.VM, val *js.Object) {

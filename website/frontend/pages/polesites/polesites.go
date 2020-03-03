@@ -166,7 +166,6 @@ func (mpm *MainPageModel) UpdateMap() {
 
 // RefreshMap refreshes current Poles Array in PoleMap component
 func (mpm *MainPageModel) RefreshMap() {
-	//mpm.PolesGroup = mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles, mpm.PolesGroup)
 	mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles)
 }
 
@@ -416,11 +415,12 @@ func (mpm *MainPageModel) CreatePole(vm *hvue.VM) {
 }
 
 //
-func (mpm *MainPageModel) DuplicatePole(vm *hvue.VM, pm *js.Object) {
+func (mpm *MainPageModel) DuplicatePole(vm *hvue.VM, dc *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
+	duplicateContext := poleedit.DuplicateContextFromJS(dc)
+	//pmToDuplicate := polemap.PoleMarkerFromJS(dc)
+	newPole := duplicateContext.Model.Pole.Duplicate(duplicateContext.NewName(), 0.0001)
 
-	pmToDuplicate := polemap.PoleMarkerFromJS(pm)
-	newPole := pmToDuplicate.Pole.Duplicate(" (copy)", 0.0001)
 	mpm.AddPole(newPole)
 }
 
