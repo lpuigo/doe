@@ -333,11 +333,16 @@ func (mpm *MainPageModel) TablePoleSelected(context *poletable.Context) {
 	mpm.SelectPole(pm)
 }
 
-// TablePoleSelected handles selected pole via PoleTable Component
+// HandleTablePolesiteUpdate handles selected pole via PoleTable Component
 func (mpm *MainPageModel) HandleTablePolesiteUpdate(msg string) {
 	message.NotifySuccess(mpm.VM, "Mise à jour", msg)
 	mpm.RefreshMap()
 
+}
+
+// HandleArchiveRefsGroup handles Archive Refs Group command via PoleTable Component
+func (mpm *MainPageModel) HandleArchiveRefsGroup() {
+	go mpm.callArchiveRefsGroup(mpm.Polesite, mpm.RefreshMap)
 }
 
 // CenterOnPole handles center-on-pole via PoleTable Component
@@ -520,6 +525,30 @@ func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite) {
 		return
 	}
 
-	message.SuccesStr(mpm.VM, "Chantier sauvegardé")
 	mpm.Reference = json.Stringify(ups)
+	message.SuccesStr(mpm.VM, "Chantier sauvegardé")
+}
+
+func (mpm *MainPageModel) callArchiveRefsGroup(ups *polesite.Polesite, callback func()) {
+	if mpm.Dirty {
+		message.ConfirmWarning(mpm.VM, "Sauvegarder des modifications avant d'archiver les groupes finalisés ?", func() { mpm.SavePolesite(mpm.VM) })
+		return
+	}
+
+	req := xhr.NewRequest("GET", "/api/polesites/"+strconv.Itoa(ups.Id)+"/archivecompleted")
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(json.Stringify(ups))
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	mpm.callGetPolesite(ups.Id, func() {
+		message.SuccesStr(mpm.VM, "Groupes finalisés archivés")
+		callback()
+	})
 }

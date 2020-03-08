@@ -146,6 +146,26 @@ func (psp PoleSitesPersister) findIndex(sr *PoleSiteRecord) int {
 	return -1
 }
 
+// ArchiveCompletedPoleRefs extracts all completed ref group from given PoleSiteRecord and move them to an new archive PoleSiteRecord
+//
+// Completed ref group is identified if all pertaining poles a either in attached or cancelled states
+func (psp *PoleSitesPersister) ArchiveCompletedPoleRefs(psr *PoleSiteRecord) error {
+	// init archive PoleSiteRecord
+	archivePoleSite := NewPoleSiteRecord()
+	archivePoleSite.PoleSite = psr.PoleSite.CloneInfoForArchive()
+
+	nbap := psr.MoveCompletedGroupTo(archivePoleSite.PoleSite)
+	if nbap == 0 {
+		return nil
+	}
+	err := psp.Update(psr)
+	if err != nil {
+		return err
+	}
+	psp.Add(archivePoleSite)
+	return nil
+}
+
 // GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
 func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPolesiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
 	psp.RLock()

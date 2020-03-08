@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
@@ -197,4 +198,58 @@ func (ps *PoleSite) DictZipArchive(w io.Writer) error {
 	}
 
 	return zw.Close()
+}
+
+// CloneInfoForArchive returns a empty PoleSite with duplicated PoleSite data
+func (ps *PoleSite) CloneInfoForArchive() *PoleSite {
+	nps := &PoleSite{
+		Id:         -1,
+		Client:     ps.Client,
+		Ref:        ps.Ref + " " + date.Today().String(),
+		Manager:    ps.Manager,
+		OrderDate:  ps.OrderDate,
+		UpdateDate: date.Today().String(),
+		Status:     ps.Status,
+		Comment:    fmt.Sprintf("Archive de %s au %s", ps.Ref, date.Today().ToDDMMYYYY()),
+		Poles:      []*Pole{},
+	}
+	return nps
+}
+
+// MoveCompletedGroupTo moves poles sharing the same ref and all having a terminal status (Attachement ou Cancelled) to the given PoleSite, and returns archived pole number
+func (ps *PoleSite) MoveCompletedGroupTo(aps *PoleSite) int {
+	doArchive := make(map[string]bool)
+
+	for _, pole := range ps.Poles {
+		doArchivePole := pole.IsArchivable()
+		if doArchiveRef, found := doArchive[pole.Ref]; !found {
+			doArchive[pole.Ref] = doArchivePole // first encountered pole state sets initial pertaining ref state
+		} else {
+			if doArchiveRef && !doArchivePole {
+				doArchive[pole.Ref] = false
+			}
+		}
+	}
+
+	apid := 0
+	unArchivedPoles := []*Pole{}
+	for _, pole := range ps.Poles {
+		doArch := doArchive[pole.Ref]
+		if strings.HasPrefix(pole.Ref, "Dépôt") && pole.IsArchivable() {
+			doArch = true
+		}
+		if doArch {
+			pole.Id = apid
+			apid++
+			aps.Poles = append(aps.Poles, pole)
+		} else {
+			unArchivedPoles = append(unArchivedPoles, pole)
+		}
+	}
+
+	if apid > 0 {
+		ps.Poles = unArchivedPoles
+	}
+
+	return apid
 }

@@ -27,45 +27,53 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
                     </el-tooltip>
                 </el-radio-group>
             </el-col> 
-            <el-col :offset="0" :span="1">
-                <el-popover
-                        v-if="context.Mode == 'billing' && user.Permissions.Invoice"
-                        placement="bottom" title="Passage en Attachement"
-                        trigger="click"
-                        width="400"
-                        v-model="context.attachmentVisible"
-                >
-					<div style="margin: 10px 0 5px">Intervale d'activité : <span v-if="attachmentApplied > 0" style="color: dodgerblue">{{attachmentApplied}} éléments concernés</span></div>
-					<el-checkbox v-model="context.attachmentOverride" size="mini" @change="CountPoleInAttachmentRange">Inclure les éléments déjà attachés</el-checkbox>
-					<el-date-picker
-							v-model="context.attachmentRange"
-							type="daterange" unlink-panels size="mini" style="width: 100%"
-							:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
-							value-format="yyyy-MM-dd"
-							range-separator="à"
-							start-placeholder="Début"
-							end-placeholder="Fin"
-							@change="CountPoleInAttachmentRange">
-					></el-date-picker>
-					<div style="margin: 10px 0 5px">Date de l'attachement :</div>
-                    <el-date-picker
-                            format="dd/MM/yyyy" size="mini" v-model="context.attachmentDate"
-                            style="width: 100%" type="date"
-                            value-format="yyyy-MM-dd"
-                            placeholder="Date">
-                    </el-date-picker>
-					<!-- :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}" -->
-                    <div style="text-align: right; margin: 15px 0px 0px 0px">
-                        <el-button size="mini" type="text" @click="context.attachmentVisible = false">Annuler</el-button>
-                        <el-button size="mini" type="primary"  :disabled="IsAttachmentDisabled" @click="SetAttachments()">Appliquer</el-button>
-                    </div>
+            <el-col :offset="0" :span="2">
+				<div v-if="context.Mode == 'billing' && user.Permissions.Invoice" >
+					<el-popover
+							placement="bottom" title="Passage en Attachement"
+							trigger="click"
+							width="400"
+							v-model="context.attachmentVisible"
+					>
+						<div style="margin: 10px 0 5px">Intervale d'activité : <span v-if="attachmentApplied > 0" style="color: dodgerblue">{{attachmentApplied}} éléments concernés</span></div>
+						<el-checkbox v-model="context.attachmentOverride" size="mini" @change="CountPoleInAttachmentRange">Inclure les éléments déjà attachés</el-checkbox>
+						<el-date-picker
+								v-model="context.attachmentRange"
+								type="daterange" unlink-panels size="mini" style="width: 100%"
+								:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
+								value-format="yyyy-MM-dd"
+								range-separator="à"
+								start-placeholder="Début"
+								end-placeholder="Fin"
+								@change="CountPoleInAttachmentRange">
+						></el-date-picker>
+						<div style="margin: 10px 0 5px">Date de l'attachement :</div>
+						<el-date-picker
+								format="dd/MM/yyyy" size="mini" v-model="context.attachmentDate"
+								style="width: 100%" type="date"
+								value-format="yyyy-MM-dd"
+								placeholder="Date">
+						</el-date-picker>
+						<!-- :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}" -->
+						<div style="text-align: right; margin: 15px 0px 0px 0px">
+							<el-button size="mini" type="text" @click="context.attachmentVisible = false">Annuler</el-button>
+							<el-button size="mini" type="primary"  :disabled="IsAttachmentDisabled" @click="SetAttachments()">Appliquer</el-button>
+						</div>
+	
+						<el-tooltip slot="reference" content="Attachements" placement="bottom" effect="light" open-delay=500>
+							<el-button type="primary" plain class="icon" icon="fas fa-paperclip icon--medium" size="mini" :disabled="context.attachmentVisible"></el-button>
+						</el-tooltip>
+					</el-popover>
 
-                    <el-tooltip slot="reference" content="Attachements" placement="bottom" effect="light" open-delay=500>
-                        <el-button type="primary" plain class="icon" icon="fas fa-paperclip icon--medium" size="mini" :disabled="context.attachmentVisible"></el-button>
-                    </el-tooltip>
-                </el-popover>
+					<el-tooltip content="Archivage des groupes finalisés" placement="bottom" effect="light" open-delay="500">
+						<el-button
+							type="warning" plain class="icon" icon="fas fa-folder-minus icon--medium" size="mini"
+							@click="ArchiveRefGroup()"
+						></el-button>
+					</el-tooltip>
+				</div>
             </el-col>
-			<el-col :offset="7" :span="8">
+			<el-col :offset="6" :span="8">
 				<ripsiteinfo-progress-bar height="10px" :total="statNbPole" :blocked="statNbPoleBlocked" :billed="statNbPoleBilled" :done="statNbPoleDone"></ripsiteinfo-progress-bar>
 			</el-col>
         </el-row>
@@ -250,4 +258,9 @@ func (ptm *PoleTablesModel) SetAttachments(vm *hvue.VM) {
 	}
 	vm.Emit("polesite-updated", msg)
 	ptm.Context.AttachmentVisible = false
+}
+
+func (ptm *PoleTablesModel) ArchiveRefGroup(vm *hvue.VM) {
+	ptm = &PoleTablesModel{Object: vm.Object}
+	vm.Emit("polesite-archive-refsgroup")
 }

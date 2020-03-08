@@ -144,6 +144,32 @@ func GetPolesiteExport(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	logmsg.AddInfoResponse(fmt.Sprintf("Export XLS produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
 }
 
+// ArchiveCompletedPoleRefs
+func ArchiveCompletedPoleRefs(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("ArchiveCompletedPoleRefs").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+
+	err = mgr.Polesites.ArchiveCompletedPoleRefs(psr)
+	if err != nil {
+		AddError(w, logmsg, "could not archive completed ref poles: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("completed for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
+}
+
 // DictZip
 func DictZip(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()

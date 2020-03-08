@@ -131,6 +131,24 @@ func (p *Pole) IsBilled() bool {
 	}
 }
 
+func (p *Pole) IsArchivable() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	//case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateToDo:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	//case poleconst.StateDone:
+	case poleconst.StateAttachment:
+		return true
+	case poleconst.StateCancelled:
+		return true
+	default:
+		return false
+	}
+}
+
 const (
 	activityPole    string = "Poteaux"
 	catPoleCreation string = "Création"
