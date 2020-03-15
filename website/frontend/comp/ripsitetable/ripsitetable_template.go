@@ -39,7 +39,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 			></el-table-column>
 
 			<el-table-column
-					label="Référence" sortable
+					label="Référence" sortable :sort-by="['Ref']"
 					width="120px" :resizable=true :show-overflow-tooltip=true
 			>        
 				<template slot-scope="scope">

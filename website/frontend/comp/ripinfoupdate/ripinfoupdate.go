@@ -7,6 +7,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 )
 
 const template string = `
@@ -46,6 +47,25 @@ const template string = `
                             :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                             :clearable="false"
             ></el-date-picker>
+        </el-col>
+    </el-row>
+
+	<!-- Status -->
+    <el-row v-if="user.Permissions.Invoice" :gutter="10" type="flex" align="middle" class="doublespaced">
+        <el-col :span="3" class="align-right">Statut Chantier :</el-col>
+        <el-col :span="8">
+			<el-select v-model="value.Status" placeholder="Statut" size="mini" style="width: 100%"
+					   @clear=""
+					   @change=""
+			>
+				<el-option
+						v-for="item in GetStates()"
+						:key="item.value"
+						:label="item.label"
+						:value="item.value"
+				>
+				</el-option>
+			</el-select>
         </el-col>
     </el-row>
 
@@ -288,4 +308,12 @@ func (rium *RipInfoUpdateModel) SetMeasurementStats() int {
 	rium.MeasurementFiberDone = fibers.Done
 
 	return fibers.Total
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Data Items Related Methods
+
+func (rium *RipInfoUpdateModel) GetStates(vm *hvue.VM) []*elements.ValueLabel {
+	//rium := RipInfoUpdateModelFromJS(vm.Object)
+	return fmrip.GetStatesValueLabel()
 }

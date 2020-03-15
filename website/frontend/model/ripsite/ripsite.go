@@ -201,6 +201,16 @@ func (rs *Ripsite) GetMeasurementProgresses() (nodes, fibers Progress) {
 	return
 }
 
+func GetStatesValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(ripconst.RsStatusNew, RipsiteStatusLabel(ripconst.RsStatusNew)),
+		elements.NewValueLabel(ripconst.RsStatusInProgress, RipsiteStatusLabel(ripconst.RsStatusInProgress)),
+		elements.NewValueLabel(ripconst.RsStatusBlocked, RipsiteStatusLabel(ripconst.RsStatusBlocked)),
+		elements.NewValueLabel(ripconst.RsStatusCancelled, RipsiteStatusLabel(ripconst.RsStatusCancelled)),
+		elements.NewValueLabel(ripconst.RsStatusDone, RipsiteStatusLabel(ripconst.RsStatusDone)),
+	}
+}
+
 func RipsiteStatusLabel(status string) string {
 	switch status {
 	case ripconst.RsStatusNew:

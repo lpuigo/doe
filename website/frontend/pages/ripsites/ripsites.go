@@ -58,13 +58,6 @@ func main() {
 			mpm.Dirty = (mpm.Reference != json.Stringify(mpm.Ripsite))
 			return mpm.Dirty
 		}),
-		//hvue.Computed("ShowTable", func(vm *hvue.VM) interface{} {
-		//	mpm := &MainPageModel{Object: vm.Object}
-		//	if mpm.ActiveMode != "Table" {
-		//		return "display: none;"
-		//	}
-		//	return ""
-		//}),
 	)
 
 	js.Global.Set("mpm", mpm)
