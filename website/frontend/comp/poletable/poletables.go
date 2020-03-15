@@ -50,7 +50,7 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
 						<div style="margin: 10px 0 5px">Date de l'attachement :</div>
 						<el-date-picker
 								format="dd/MM/yyyy" size="mini" v-model="context.attachmentDate"
-								style="width: 100%" type="date"
+								style="width: 100%" type="date" :picker-options="{firstDayOfWeek:1}"
 								value-format="yyyy-MM-dd"
 								placeholder="Date">
 						</el-date-picker>
