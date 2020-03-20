@@ -253,7 +253,7 @@ const template string = `<div>
 
         <el-collapse-item name="4">
             <template slot="title">
-                <h1 class="title">Etat: <span class="blue">{{FormatState(editedpolemarker.Pole.State)}} {{FormatDate(editedpolemarker.Pole.Date)}}</span></h1>
+                <h1 class="title">Etat: <span class="blue">{{FormatState(editedpolemarker.Pole)}}</span></h1>
             </template>
             <!-- Status -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -473,8 +473,16 @@ func (pem *PoleEditModel) FormatDate(d string) string {
 	return date.DateString(d)
 }
 
-func (pem *PoleEditModel) FormatState(s string) string {
-	return polesite.PoleStateLabel(s)
+func (pem *PoleEditModel) FormatState(p *polesite.Pole) string {
+	res := polesite.PoleStateLabel(p.State)
+	switch p.State {
+	case poleconst.StateAttachment:
+		return res + " (Fait le " + date.DateString(p.Date) + ")"
+	case poleconst.StateDone:
+		return res + " le " + date.DateString(p.Date)
+	default:
+		return res
+	}
 }
 
 func (pem *PoleEditModel) GetStates(vm *hvue.VM) []*elements.ValueLabelDisabled {
