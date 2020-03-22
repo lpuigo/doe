@@ -65,7 +65,15 @@ const template string = `<el-dialog
 							end-placeholder="Fin"
 							@change="ApplyChange()">
 					></el-date-picker>
+				</template>
+			</el-table-column>
 
+			<el-table-column label="Commentaire">
+				<template slot-scope="scope">
+					<el-input
+							type="textarea" placeholder="Raison du congé"
+							v-model="scope.row.Comment" @input="ApplyChange()">
+					</el-input>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -94,12 +102,14 @@ const template string = `<el-dialog
 
 type VacDates struct {
 	*js.Object
-	Dates []string `js:"Dates"`
+	Dates   []string `js:"Dates"`
+	Comment string   `js:"Comment"`
 }
 
-func NewVacDates(beg, end string) *VacDates {
+func NewVacDates(beg, end, cmt string) *VacDates {
 	vd := &VacDates{Object: tools.O()}
 	vd.Dates = []string{beg, end}
+	vd.Comment = cmt
 	return vd
 }
 
@@ -176,15 +186,15 @@ func (vemm *ActorVacancyEditModalModel) SortDates() {
 func (vemm *ActorVacancyEditModalModel) UpdateDates() {
 	vemm.VacationDates = []*VacDates{}
 	for _, vacPeriod := range vemm.CurrentActor.Vacation {
-		vemm.VacationDates = append(vemm.VacationDates, NewVacDates(vacPeriod.Begin, vacPeriod.End))
+		vemm.VacationDates = append(vemm.VacationDates, NewVacDates(vacPeriod.Begin, vacPeriod.End, vacPeriod.Comment))
 	}
 	vemm.SortDates()
 }
 
 func (vemm *ActorVacancyEditModalModel) UpdateVacation() {
-	vemm.CurrentActor.Vacation = []*date.DateRange{}
+	vemm.CurrentActor.Vacation = []*date.DateRangeComment{}
 	for _, vacDates := range vemm.VacationDates {
-		vemm.CurrentActor.Vacation = append(vemm.CurrentActor.Vacation, date.NewDateRangeFrom(vacDates.Dates[0], vacDates.Dates[1]))
+		vemm.CurrentActor.Vacation = append(vemm.CurrentActor.Vacation, date.NewDateRangeCommentFrom(vacDates.Dates[0], vacDates.Dates[1], vacDates.Comment))
 	}
 }
 
@@ -222,7 +232,7 @@ func (vemm *ActorVacancyEditModalModel) DatesComplete() bool {
 
 func (vemm *ActorVacancyEditModalModel) AddDates(vm *hvue.VM) {
 	vemm = ActorVacancyEditModalModelFromJS(vm.Object)
-	vemm.VacationDates = append([]*VacDates{NewVacDates("", "")}, vemm.VacationDates...)
+	vemm.VacationDates = append([]*VacDates{NewVacDates("", "", "")}, vemm.VacationDates...)
 	vemm.UpdateVacation()
 }
 

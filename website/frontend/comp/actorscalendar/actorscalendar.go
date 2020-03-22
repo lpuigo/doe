@@ -88,8 +88,14 @@ const (
                         <div v-for="(dayClass, index) in GetClassStateFor(scope.row)"
                             :key="index"
                             class="calendar-slot"
-                            :class="dayClass"
-                        >&nbsp;</div>
+                            :class="dayClass.Class"
+                        >
+							<el-tooltip v-if="dayClass.Comment != ''" placement="top" open-delay=200>
+								<div slot="content">{{dayClass.Comment}}</div>
+								<i class="fas fa-info icon--small"></i>
+							</el-tooltip>
+							<span v-else>&nbsp;</span>
+                        </div>
                     </div>
                 </template>
             </el-table-column>
@@ -211,7 +217,7 @@ func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
 	return res
 }
 
-func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []string {
+func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []*CalendarDayInfo {
 	acm = ActorsCalendarModelFromJS(vm.Object)
 	rangeStart := acm.CurrentDate
 	rangeEnd := acm.CurrentRangeEnd()
@@ -234,6 +240,7 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 
 	// Vacancy
 	isVas := make([]bool, rangeLength)
+	vaCmts := make([]string, rangeLength)
 	for _, vacPeriod := range act.Vacation {
 		if vacPeriod.End < rangeStart || vacPeriod.Begin > rangeEnd {
 			continue
@@ -248,30 +255,33 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 		}
 		for i := vacPeriodBeg; i < vacPeriodEnd; i++ {
 			isVas[i] = true
+			vaCmts[i] = vacPeriod.Comment
 		}
 	}
 
 	// calc class array
-	res := make([]string, rangeLength)
+	res := make([]*CalendarDayInfo, rangeLength)
 	for i := 0; i < rangeLength; i++ {
+		res[i] = NewCalendarDayInfo()
 		day := date.After(rangeStart, i)
 		if i == today {
-			res[i] = "today "
+			res[i].Class = "today "
 		}
 		switch {
 		case !(i >= arrival && i < departure):
-			res[i] += "inactive "
+			res[i].Class += "inactive "
 			continue
 		case acm.User.IsDayOff(day):
-			res[i] += "day-off "
+			res[i].Class += "day-off "
 			continue
 		case isVas[i]:
-			res[i] += "holiday "
+			res[i].Class += "holiday "
+			res[i].Comment = vaCmts[i]
 			continue
 		case i%7 > 4:
-			res[i] += "week-end "
+			res[i].Class += "week-end "
 		}
-		res[i] += "active "
+		res[i].Class += "active "
 	}
 	return res
 }

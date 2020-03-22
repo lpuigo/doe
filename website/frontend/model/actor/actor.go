@@ -13,18 +13,18 @@ import (
 type Actor struct {
 	*js.Object
 
-	Id        int               `js:"Id"`
-	Ref       string            `js:"Ref"`
-	FirstName string            `js:"FirstName"`
-	LastName  string            `js:"LastName"`
-	State     string            `js:"State"`
-	Period    *date.DateRange   `js:"Period"`
-	Company   string            `js:"Company"`
-	Contract  string            `js:"Contract"`
-	Role      string            `js:"Role"`
-	Vacation  []*date.DateRange `js:"Vacation"`
-	Client    []string          `js:"Client"`
-	Comment   string            `js:"Comment"`
+	Id        int                      `js:"Id"`
+	Ref       string                   `js:"Ref"`
+	FirstName string                   `js:"FirstName"`
+	LastName  string                   `js:"LastName"`
+	State     string                   `js:"State"`
+	Period    *date.DateRange          `js:"Period"`
+	Company   string                   `js:"Company"`
+	Contract  string                   `js:"Contract"`
+	Role      string                   `js:"Role"`
+	Vacation  []*date.DateRangeComment `js:"Vacation"`
+	Client    []string                 `js:"Client"`
+	Comment   string                   `js:"Comment"`
 }
 
 func NewActor() *Actor {
@@ -38,7 +38,7 @@ func NewActor() *Actor {
 	na.Company = ""
 	na.Contract = ""
 	na.Role = ""
-	na.Vacation = []*date.DateRange{}
+	na.Vacation = []*date.DateRangeComment{}
 	na.Client = []string{}
 	na.Comment = ""
 	return na
@@ -63,9 +63,9 @@ func (a *Actor) Clone(oa *Actor) {
 	a.Company = oa.Company
 	a.Contract = oa.Contract
 	a.Role = oa.Role
-	a.Vacation = []*date.DateRange{}
+	a.Vacation = []*date.DateRangeComment{}
 	for _, vac := range oa.Vacation {
-		a.Vacation = append(a.Vacation, date.NewDateRangeFrom(vac.Begin, vac.End))
+		a.Vacation = append(a.Vacation, date.NewDateRangeCommentFrom(vac.Begin, vac.End, vac.Comment))
 	}
 	a.Client = oa.Client[:]
 	a.Comment = oa.Comment

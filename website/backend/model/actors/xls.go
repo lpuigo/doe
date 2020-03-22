@@ -67,15 +67,18 @@ func FromXLS(r io.Reader) ([]*Actor, error) {
 			clients[i] = strings.Trim(clt, " \t")
 		}
 
-		vacs := []date.DateStringRange{}
-		for c := colActorVacation; c < len(row); c += 2 {
+		vacs := []date.DateStringRangeComment{}
+		for c := colActorVacation; c < len(row); c += 3 {
 			beg := getValue(c)
 			if beg == "" {
 				break
 			}
-			vacs = append(vacs, date.DateStringRange{
-				Begin: beg,
-				End:   getValue(c + 1),
+			vacs = append(vacs, date.DateStringRangeComment{
+				DateStringRange: date.DateStringRange{
+					Begin: beg,
+					End:   getValue(c + 1),
+				},
+				Comment: getValue(c + 2),
 			})
 		}
 

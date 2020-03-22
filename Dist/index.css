@@ -143,6 +143,10 @@ pre {
     font-size: 1.25em
 }
 
+.icon--small {
+    font-size: 0.8em
+}
+
 .icon--right {
     margin-left: .3em
 }

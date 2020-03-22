@@ -16,7 +16,7 @@ type Actor struct {
 	Company   string
 	Contract  string
 	Role      string
-	Vacation  []date.DateStringRange
+	Vacation  []date.DateStringRangeComment
 	Client    []string
 	Comment   string
 }
@@ -31,7 +31,7 @@ func NewActor(firstName, lastName, company string) *Actor {
 		Period:    date.DateStringRange{},
 		Company:   company,
 		Role:      "",
-		Vacation:  []date.DateStringRange{},
+		Vacation:  []date.DateStringRangeComment{},
 		Client:    []string{},
 		Comment:   "",
 	}
@@ -112,11 +112,15 @@ func (a *Actor) GetActivityInfoFor(dr date.DateStringRange) (int, string) {
 	}
 	dur := activity.Duration()
 	for _, vdr := range a.Vacation {
-		onHoliday := activity.Overlap(vdr)
+		onHoliday := activity.Overlap(vdr.DateStringRange)
 		if onHoliday.IsEmpty() {
 			continue
 		}
-		comments = append(comments, fmt.Sprintf("En congés du %s au %s", date.ToDDMMYYYY(vdr.Begin), date.ToDDMMYYYY(vdr.End)))
+		cmt := fmt.Sprintf("En congés du %s au %s", date.ToDDMMYYYY(vdr.Begin), date.ToDDMMYYYY(vdr.End))
+		if vdr.Comment != "" {
+			cmt += fmt.Sprintf(" (%s)", vdr.Comment)
+		}
+		comments = append(comments, cmt)
 		dur -= onHoliday.Duration()
 	}
 	if dur < 0 {

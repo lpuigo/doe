@@ -70,7 +70,7 @@
 }
 
 .calendar-row .calendar-slot {
-    flex-grow: 1;
+    flex: 1 1 0;
     margin: 1px 1px;
     text-align: center;
     border-style: solid;
