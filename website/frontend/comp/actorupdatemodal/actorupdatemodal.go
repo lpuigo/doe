@@ -34,16 +34,16 @@ const template string = `<el-dialog
     <div style="height: 45vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
         <!-- Last & First Name -->
         <el-row :gutter="10" align="middle" class="spaced" type="flex">
-            <el-col :span="3" class="align-right">Nom :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Nom :</el-col>
+            <el-col :span="8">
                 <el-input @change="CheckName"
                           clearable placeholder="Nom" size="mini"
                           v-model="current_actor.LastName"
                 ></el-input>
             </el-col>
 
-            <el-col :span="3" class="align-right">Prénom :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Prénom :</el-col>
+            <el-col :span="8">
                 <el-input @change="CheckName"
                           clearable placeholder="Prénom" size="mini"
                           v-model="current_actor.FirstName"
@@ -53,18 +53,8 @@ const template string = `<el-dialog
 
         <!-- Company & Contract Name -->
         <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
-            <el-col :span="3" class="align-right">Société :</el-col>
-            <el-col :span="9">
-                <el-input @change="CheckName"
-                          clearable placeholder="Nom" size="mini"
-                          v-model="current_actor.Company"
-                ></el-input>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="10" align="middle" class="spaced" type="flex">
-            <el-col :span="3" class="align-right">Contrat :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Contrat :</el-col>
+            <el-col :span="8">
                 <el-select filterable allow-create clearable placeholder="Contrat" size="mini"
                            v-model="current_actor.Contract"
                            @change="CheckName" style="width: 100%"
@@ -77,12 +67,20 @@ const template string = `<el-dialog
                     </el-option>
                 </el-select>
             </el-col>
+
+            <el-col :span="4" class="align-right">Société :</el-col>
+            <el-col :span="8">
+                <el-input @change="CheckName"
+                          clearable placeholder="Nom" size="mini"
+                          v-model="current_actor.Company"
+                ></el-input>
+            </el-col>
         </el-row>
 
         <!-- Start / Leave Dates -->
         <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
-            <el-col :span="3" class="align-right">Date d'embauche :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Premier jour d'activité :</el-col>
+            <el-col :span="8">
                 <el-date-picker :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
                                 placeholder="Date" size="mini"
                                 style="width: 100%"
@@ -92,8 +90,8 @@ const template string = `<el-dialog
                 ></el-date-picker>
             </el-col>
 
-            <el-col :span="3" class="align-right">Date de départ :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Dernier jour d'activité :</el-col>
+            <el-col :span="8">
                 <el-date-picker :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
                                 placeholder="Date" size="mini"
                                 style="width: 100%"
@@ -106,8 +104,8 @@ const template string = `<el-dialog
 
         <!-- Client & Role -->
         <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
-            <el-col :span="3" class="align-right">Client(s) :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Client(s) :</el-col>
+            <el-col :span="8">
                 <el-select multiple placeholder="Client" size="mini"
                            v-model="current_actor.Client"
                            style="width: 100%"
@@ -121,8 +119,8 @@ const template string = `<el-dialog
                 </el-select>
             </el-col>
 
-            <el-col :span="3" class="align-right">Rôle :</el-col>
-            <el-col :span="9">
+            <el-col :span="4" class="align-right">Rôle :</el-col>
+            <el-col :span="8">
                 <el-select filterable allow-create clearable placeholder="Rôle" size="mini"
                            v-model="current_actor.Role"
                            @change="CheckName" style="width: 100%"
@@ -139,8 +137,8 @@ const template string = `<el-dialog
 
         <!-- Comment -->
         <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
-            <el-col :span="3" class="align-right">Commentaire :</el-col>
-            <el-col :span="21">
+            <el-col :span="4" class="align-right">Commentaire :</el-col>
+            <el-col :span="20">
                 <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 5}" placeholder="Commentaire"
                           v-model="current_actor.Comment" clearable size="mini"
                 ></el-input>
