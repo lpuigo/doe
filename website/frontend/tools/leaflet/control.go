@@ -37,3 +37,19 @@ func (cl *ControlLayers) AddOverlay(layer *Layer, name string) {
 func (cl *ControlLayers) RemoveLayer(layer *Layer) {
 	cl.Call("removeLayer", layer)
 }
+
+// ControlScale is a leaflet Control.Scale object: https://leafletjs.com/reference-1.6.0.html#control-scale.
+type ControlScale struct {
+	Control
+}
+
+func NewControlScale() *ControlScale {
+	scaleOpt := js.M{
+		"metric":         true,
+		"imperial":       false,
+		"updateWhenIdle": true,
+	}
+	return &ControlScale{
+		Control{L.Get("control").Call("scale", scaleOpt)},
+	}
+}
