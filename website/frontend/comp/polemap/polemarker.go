@@ -88,7 +88,7 @@ func (pm *PoleMarker) UpdateFromState() {
 }
 
 func (pm *PoleMarker) UpdateTitle() {
-	pm.Marker.UpdateToolTip(pm.Pole.Ref)
+	pm.Marker.UpdateToolTip(pm.Pole.GetTitle())
 }
 
 func (pm *PoleMarker) UpdateMarkerLatLng() {

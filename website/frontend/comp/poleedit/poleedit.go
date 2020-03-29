@@ -64,7 +64,7 @@ const template string = `<div>
         <el-col :span="18">
             <el-input placeholder="Référence"
                       v-model="editedpolemarker.Pole.Ref" clearable size="mini"
-					  @change="UpdateTooltip()"
+					  @input="UpdateTooltip()"
             ></el-input>
         </el-col>
     </el-row>
@@ -75,6 +75,7 @@ const template string = `<div>
         <el-col :span="18">
             <el-input placeholder="Etiquette"
                       v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
+					  @input="UpdateTooltip()"
             ></el-input>
         </el-col>
     </el-row>
