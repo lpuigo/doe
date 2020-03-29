@@ -57,11 +57,13 @@ func (llm *LeafletMap) Init() {
 	llm.Map = leaflet.NewMap("LeafLetMap", mapOption)
 	osmlayer := leaflet.OSMTileLayer()
 	//satlayer := leaflet.MapBoxTileLayer("mapbox.satellite")
+	mplayer := leaflet.MapBoxTileLayer("mapbox.streets")
 	satlayer := leaflet.MapBoxTileLayer("mapbox.streets-satellite")
 
 	baseMaps := js.M{
-		"Plan":      osmlayer,
-		"Satellite": satlayer,
+		"Plan":        osmlayer,
+		"Plan MapBox": mplayer,
+		"Satellite":   satlayer,
 	}
 	osmlayer.AddTo(llm.Map)
 

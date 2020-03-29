@@ -209,10 +209,11 @@ func (mpm *MainPageModel) DictZipArchiveURL() string {
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
 func (mpm *MainPageModel) ApplyFilterOnMap() {
 	poleMap := mpm.GetPoleMap()
-	defer poleMap.PoleMarkersGroup.Refresh()
+	//defer poleMap.PoleMarkersGroup.Refresh()
+	defer poleMap.RefreshGroup()
 
 	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
-		for _, poleMarker := range poleMap.PoleMarkers {
+		for _, poleMarker := range poleMap.GetPoleMarkers() {
 			poleMarker.SetOpacity(poleconst.OpacityNormal)
 		}
 		//mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
@@ -256,7 +257,7 @@ func (mpm *MainPageModel) ApplyFilterOnMap() {
 		return strings.Contains(strings.ToUpper(sis), expected)
 	}
 	found := false
-	for _, poleMarker := range poleMap.PoleMarkers {
+	for _, poleMarker := range poleMap.GetPoleMarkers() {
 		if filter(poleMarker) {
 			minmax(poleMarker)
 			poleMarker.SetOpacity(poleconst.OpacityFiltered)

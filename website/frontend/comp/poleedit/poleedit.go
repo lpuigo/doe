@@ -502,8 +502,8 @@ func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 			ep.Pole.State = poleconst.StateAttachment
 		}
 	}
-	ep.UpdateFromState()
-	ep.Refresh()
+	//ep.UpdateFromState()
+	ep.RefreshState()
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {

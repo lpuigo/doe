@@ -10,6 +10,7 @@ import (
 type PoleMarker struct {
 	leaflet.Marker
 	Pole *polesite.Pole `js:"Pole"`
+	Map  *PoleMap       `js:"Map"`
 }
 
 func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
@@ -19,6 +20,7 @@ func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
 func NewPoleMarker(option *leaflet.MarkerOptions, pole *polesite.Pole) *PoleMarker {
 	np := &PoleMarker{Marker: *leaflet.NewMarker(pole.Lat, pole.Long, option)}
 	np.Pole = pole
+	np.Map = nil
 	return np
 }
 
@@ -41,6 +43,10 @@ func (pm *PoleMarker) EndEditMode(refresh bool) {
 	if refresh {
 		pm.Refresh()
 	}
+}
+
+func (pm *PoleMarker) RefreshState() {
+	pm.Map.RefreshPoles(pm.Map.Poles)
 }
 
 const (
