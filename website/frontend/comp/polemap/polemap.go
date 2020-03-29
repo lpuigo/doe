@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const template string = `
@@ -94,6 +95,14 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 	poleMarker.On("dragend", func(o *js.Object) {
 		poleMarker := PoleMarkerFromJS(o.Get("target"))
 		poleMarker.Pole.Lat, poleMarker.Pole.Long = poleMarker.GetLatLong().ToFloats()
+	})
+	poleMarker.On("mouseover", func(o *js.Object) {
+		poleMarker := PoleMarkerFromJS(o.Get("target"))
+		poleMarker.Map.ShowPoleInfo(poleMarker)
+	})
+	poleMarker.On("mouseout", func(o *js.Object) {
+		poleMarker := PoleMarkerFromJS(o.Get("target"))
+		poleMarker.Map.HidePoleInfo()
 	})
 
 	return poleMarker
@@ -198,4 +207,23 @@ func (pm *PoleMap) GetCenter() *leaflet.LatLng {
 
 func (pm *PoleMap) FitBounds(min, max *leaflet.LatLng) {
 	pm.LeafletMap.Map.FitBounds(min, max)
+}
+
+func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
+	pole := poleMarker.Pole
+	html := "<h4>" + pole.GetTitle() + "</h4>"
+	html += `<p class="right">` + pole.Material + " " + strconv.Itoa(pole.Height) + "m" + "</p>"
+	html += strings.Join(pole.Product, ", ") + "<br />"
+
+	if pole.Comment != "" {
+		html += `<p><span class="title">Commentaire: </span>` + pole.Comment + "</p>"
+	}
+	if pole.DictInfo != "" {
+		html += `<p><span class="title">Info DICT: </span>` + pole.DictInfo + "</p>"
+	}
+	pm.ControlInfo.Update(html)
+}
+
+func (pm *PoleMap) HidePoleInfo() {
+	pm.ControlInfo.Update("")
 }

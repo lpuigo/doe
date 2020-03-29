@@ -184,10 +184,10 @@ func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
 	mpm.GetPoleMap().CenterOn(lat, long, 20)
 }
 
-func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker) {
+func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker, drag bool) {
 	mpm.SelectedPoleMarker = pm
 	mpm.TableContext.SelectedPole = pm.Pole.Id
-	pm.StartEditMode()
+	pm.StartEditMode(drag)
 	mpm.IsPoleSelected = true
 
 	pm.CenterOnMap(20)
@@ -197,9 +197,6 @@ func (mpm *MainPageModel) UnSelectPole(refresh bool) {
 	if mpm.IsPoleSelected {
 		mpm.CloseEditPole()
 	}
-	//if mpm.SelectedPoleMarker != nil && mpm.SelectedPoleMarker.Object != nil {
-	//	mpm.SelectedPoleMarker.EndEditMode(refresh)
-	//}
 }
 
 func (mpm *MainPageModel) DictZipArchiveURL() string {
@@ -321,7 +318,7 @@ func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
 func (mpm *MainPageModel) MarkerClick(poleMarkerObj, event *js.Object) {
 	pm := polemap.PoleMarkerFromJS(poleMarkerObj)
 	mpm.UnSelectPole(true)
-	mpm.SelectPole(pm)
+	mpm.SelectPole(pm, event.Get("originalEvent").Get("ctrlKey").Bool())
 }
 
 // TablePoleSelected handles selected pole via PoleTable Component
@@ -331,7 +328,7 @@ func (mpm *MainPageModel) TablePoleSelected(context *poletable.Context) {
 		return
 	}
 	mpm.UnSelectPole(true)
-	mpm.SelectPole(pm)
+	mpm.SelectPole(pm, false)
 }
 
 // HandleTablePolesiteUpdate handles selected pole via PoleTable Component
@@ -355,7 +352,7 @@ func (mpm *MainPageModel) CenterOnPole(p *polesite.Pole) {
 	}
 	pm := mpm.GetPoleMarker(p)
 	mpm.UnSelectPole(true)
-	mpm.SelectPole(pm)
+	mpm.SelectPole(pm, false)
 }
 
 // SwitchActiveMode handles ActiveMode change
@@ -407,7 +404,7 @@ func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
 		message.ErrorStr(mpm.VM, "Impossible de selectionner le nouveau poteau", false)
 		return
 	}
-	mpm.SelectPole(newPoleMarker)
+	mpm.SelectPole(newPoleMarker, true)
 }
 
 //

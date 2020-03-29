@@ -179,7 +179,7 @@ const template string = `<div>
                 <el-col :span="18">
                     <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
                                @clear=""
-                               @change=""
+                               @change="UpdateProduct"
                     >
                         <el-option
                                 v-for="item in GetProducts()"
@@ -281,7 +281,7 @@ const template string = `<div>
                 <el-col :span="18">
                     <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"
                                @clear=""
-                               @change=""
+                               @change="UpdateActors"
                     >
                         <el-option
                                 v-for="item in GetActors()"
@@ -467,6 +467,33 @@ func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
 	return res
 }
 
+func (pem *PoleEditModel) UpdateActors(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	client := pem.User.GetClientByName(pem.Polesite.Client)
+	if client == nil {
+		return
+	}
+	actors := make(map[string]string)
+	for _, actor := range client.Actors {
+		actors[strconv.Itoa(actor.Id)] = actor.GetRef()
+	}
+	pem.EditedPoleMarker.Pole.Get("Actors").Call("sort", func(a, b string) int {
+		// check if actors are not known
+		if actors[a] == "" && actors[b] == "" {
+			return 0
+		}
+		if !(actors[a] != "" && actors[b] != "") {
+			return 1
+		}
+		// compare known actors
+		if actors[a] < actors[b] {
+			return -1
+		}
+		return 1
+	})
+	pem.EditedPoleMarker.Pole.Get("Product").Call("sort")
+}
+
 func (pem *PoleEditModel) FormatDate(d string) string {
 	if d == "" {
 		return ""
@@ -491,6 +518,11 @@ func (pem *PoleEditModel) GetStates(vm *hvue.VM) []*elements.ValueLabelDisabled 
 	return polesite.GetStatesValueLabel(pem.User.HasPermissionInvoice())
 }
 
+func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.Pole.Get("Product").Call("sort")
+}
+
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker
@@ -503,7 +535,8 @@ func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 		}
 	}
 	//ep.UpdateFromState()
-	ep.RefreshState()
+	pem.EditedPoleMarker = ep.RefreshState()
+	pem.VM.Emit("update:editedpolemarker", pem.EditedPoleMarker)
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {

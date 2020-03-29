@@ -31,9 +31,11 @@ func DefaultPoleMarker() *PoleMarker {
 	return np
 }
 
-func (pm *PoleMarker) StartEditMode() {
+func (pm *PoleMarker) StartEditMode(drag bool) {
 	pm.SetOpacity(poleconst.OpacitySelected)
-	pm.SetDraggable(true)
+	if drag {
+		pm.SetDraggable(true)
+	}
 	pm.Refresh()
 }
 
@@ -45,8 +47,14 @@ func (pm *PoleMarker) EndEditMode(refresh bool) {
 	}
 }
 
-func (pm *PoleMarker) RefreshState() {
+func (pm *PoleMarker) Refresh() {
+	pm.Remove()
+	pm.AddTo(pm.Map.Map)
+}
+
+func (pm *PoleMarker) RefreshState() *PoleMarker {
 	pm.Map.RefreshPoles(pm.Map.Poles)
+	return pm.Map.GetPoleMarkerById(pm.Pole.Id)
 }
 
 const (
@@ -80,7 +88,7 @@ func (pm *PoleMarker) UpdateFromState() {
 		class = "green"
 	case poleconst.StateAttachment:
 		html = pmHtmlPlain
-		class = "purple"
+		class = "darkgreen"
 	case poleconst.StateCancelled:
 		html = pmHtmlPlain
 		class = ""

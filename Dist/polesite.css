@@ -27,6 +27,10 @@ html, body {
     color: #2ee62e;
 }
 
+.darkgreen {
+    color: #229922;
+}
+
 .purple {
     color: #d85ce6;
 }
@@ -142,4 +146,40 @@ html, body {
     transition: background-color .15s ease;
 }
 
+
+/* =====================================================================================================================
+   === Control Info Style
+ */
+
+.control-info {
+    padding: 6px 8px;
+    font: 12px/14px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.control-info.hidden {
+    display: none;
+}
+
+.control-info p {
+    margin: 5px 0 5px;
+}
+
+.control-info p.right {
+    text-align: right;
+}
+
+
+.control-info h4 {
+    margin: 0 0 5px;
+    color: #777;
+    text-align: center;
+}
+
+.control-info span.title {
+    color: #777;
+}
 

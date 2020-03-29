@@ -53,3 +53,32 @@ func NewControlScale() *ControlScale {
 		Control{L.Get("control").Call("scale", scaleOpt)},
 	}
 }
+
+// ControlInfo is a leaflet Control dedicated to display info
+type ControlInfo struct {
+	Control
+	Div *js.Object `js:"_div"`
+}
+
+func NewControlInfo() *ControlInfo {
+	ci := &ControlInfo{Control: Control{L.Call("control")}}
+	ci.Div = nil
+	ci.Set("onAdd", ci.onAdd)
+	return ci
+}
+
+func (ci *ControlInfo) onAdd(m *Map) *js.Object {
+	ci.Div = L.Get("DomUtil").Call("create", "div", "control-info")
+	//ci.Set("_div", L.Get("DomUtil").Call("create", "div", "control-info"))
+	ci.Update("")
+	return ci.Get("_div")
+}
+
+func (ci *ControlInfo) Update(html string) {
+	if html == "" {
+		L.Get("DomUtil").Call("addClass", ci.Div, "hidden")
+		return
+	}
+	L.Get("DomUtil").Call("removeClass", ci.Div, "hidden")
+	ci.Div.Set("innerHTML", html)
+}

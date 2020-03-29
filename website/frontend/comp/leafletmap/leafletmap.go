@@ -41,6 +41,7 @@ type LeafletMap struct {
 
 	Map           *leaflet.Map           `js:"Map"`
 	ControlLayers *leaflet.ControlLayers `js:"ControlLayers"`
+	ControlInfo   *leaflet.ControlInfo   `js:"ControlInfo"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -48,6 +49,8 @@ type LeafletMap struct {
 func NewLeafletMap(vm *hvue.VM) *LeafletMap {
 	llm := &LeafletMap{Object: tools.O()}
 	llm.VM = vm
+	llm.ControlLayers = nil
+	llm.ControlInfo = nil
 	return llm
 }
 
@@ -71,7 +74,10 @@ func (llm *LeafletMap) Init() {
 	llm.ControlLayers.AddTo(llm.Map)
 
 	leaflet.NewControlScale().AddTo(llm.Map)
-	//llm.SetView(leaflet.NewLatLng(0, 0), 3)
+
+	llm.ControlInfo = leaflet.NewControlInfo()
+	llm.ControlInfo.AddTo(llm.Map)
+
 	llm.SetView(leaflet.NewLatLng(48, 5), 6)
 
 }
