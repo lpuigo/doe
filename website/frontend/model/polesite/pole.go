@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
@@ -100,22 +101,22 @@ func (p *Pole) Duplicate(newname string, offset float64) *Pole {
 	return np
 }
 
-func (p *Pole) SwitchState() {
-	switch p.State {
-	case poleconst.StateNotSubmitted:
-		p.State = poleconst.StateToDo
-	case poleconst.StateToDo:
-		p.State = poleconst.StateHoleDone
-	case poleconst.StateHoleDone:
-		p.State = poleconst.StateIncident
-	case poleconst.StateIncident:
-		p.State = poleconst.StateDone
-	case poleconst.StateDone:
-		p.State = poleconst.StateCancelled
-	case poleconst.StateCancelled:
-		p.State = poleconst.StateNotSubmitted
-	}
-}
+//func (p *Pole) SwitchState() {
+//	switch p.State {
+//	case poleconst.StateNotSubmitted:
+//		p.State = poleconst.StateToDo
+//	case poleconst.StateToDo:
+//		p.State = poleconst.StateHoleDone
+//	case poleconst.StateHoleDone:
+//		p.State = poleconst.StateIncident
+//	case poleconst.StateIncident:
+//		p.State = poleconst.StateDone
+//	case poleconst.StateDone:
+//		p.State = poleconst.StateCancelled
+//	case poleconst.StateCancelled:
+//		p.State = poleconst.StateNotSubmitted
+//	}
+//}
 
 func (p *Pole) SearchString(filter string) string {
 	searchItem := func(prefix, typ, value string) string {
@@ -160,9 +161,13 @@ func (p *Pole) IsToDo() bool {
 	switch p.State {
 	case poleconst.StateNotSubmitted:
 		return false
-	//case poleconst.StateNoGo:
+	case poleconst.StateNoGo:
+		return false
 	//case poleconst.StateDictToDo:
+	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
+	//case poleconst.StateNoAccess:
+	//case poleconst.StateDenseNetwork:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
 	//case poleconst.StateDone:
@@ -174,21 +179,69 @@ func (p *Pole) IsToDo() bool {
 	}
 }
 
-func (p *Pole) IsDone() bool {
-	return p.State == poleconst.StateDone
+func (p *Pole) IsDoable() bool {
+	switch p.State {
+	case poleconst.StateNotSubmitted:
+		return false
+	case poleconst.StateNoGo:
+		return false
+	case poleconst.StateDictToDo:
+		return false
+	//case poleconst.StatePermissionPending:
+	//case poleconst.StateToDo:
+	//case poleconst.StateNoAccess:
+	//case poleconst.StateDenseNetwork:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	case poleconst.StateDone:
+		return false
+	case poleconst.StateAttachment:
+		return false
+	case poleconst.StateCancelled:
+		return false
+	default:
+		return true
+	}
 }
 
-func (p *Pole) IsBlocked() bool {
+func (p *Pole) IsInStateToBeChecked() bool {
 	switch p.State {
-	case poleconst.StateNoGo:
-		return true
 	case poleconst.StateDictToDo:
+		return true
+	case poleconst.StatePermissionPending:
+		return true
+	case poleconst.StateToDo:
+		return true
+	case poleconst.StateNoAccess:
+		return true
+	case poleconst.StateDenseNetwork:
+		return true
+	case poleconst.StateHoleDone:
 		return true
 	case poleconst.StateIncident:
 		return true
 	default:
 		return false
 	}
+}
+
+func (p *Pole) IsBlocked() bool {
+	switch p.State {
+	//case poleconst.StateNoGo:
+	//	return true
+	case poleconst.StateDictToDo:
+		return true
+	case poleconst.StatePermissionPending:
+		return true
+	case poleconst.StateIncident:
+		return true
+	default:
+		return false
+	}
+}
+
+func (p *Pole) IsDone() bool {
+	return p.State == poleconst.StateDone
 }
 
 func (p *Pole) IsAttachment() bool {
@@ -198,6 +251,78 @@ func (p *Pole) IsAttachment() bool {
 func (p *Pole) SetAttachmentDate(d string) {
 	p.AttachmentDate = d
 	p.State = poleconst.StateAttachment
+}
+
+// CheckState updates pole state according to DICT and DA value (depending on current date) if pole is Actually To Do
+func (p *Pole) CheckState() {
+	today := date.TodayAfter(0)
+
+	testDICTandDAdates := func() {
+		if tools.Empty(p.DictRef) {
+			p.SetState(poleconst.StateDictToDo)
+			return
+		}
+		if tools.Empty(p.DictDate) {
+			p.SetState(poleconst.StateDictToDo)
+			return
+		}
+		if !(p.DictDate <= today && today <= date.After(p.DictDate, poleconst.DictValidityDuration)) {
+			p.SetState(poleconst.StatePermissionPending)
+			return
+		}
+		p.SetState(poleconst.StateToDo)
+		if !tools.Empty(p.DaStartDate) && today < p.DaStartDate {
+			p.SetState(poleconst.StatePermissionPending)
+			return
+		}
+		if !tools.Empty(p.DaEndDate) && p.DaEndDate < today {
+			p.SetState(poleconst.StatePermissionPending)
+			return
+		}
+	}
+
+	if p.IsInStateToBeChecked() {
+		testDICTandDAdates()
+	}
+}
+
+func (p *Pole) SetState(state string) {
+	switch state {
+	case poleconst.StateToDo:
+		switch {
+		case p.HasProduct(poleconst.ProductDenseNetwork):
+			p.State = poleconst.StateDenseNetwork
+		case p.HasProduct(poleconst.ProductNoAccess):
+			p.State = poleconst.StateNoAccess
+		default:
+			p.State = state
+		}
+	case poleconst.StateDenseNetwork:
+		p.AddProduct(poleconst.ProductDenseNetwork)
+		p.State = state
+	case poleconst.StateNoAccess:
+		p.AddProduct(poleconst.ProductNoAccess)
+		p.State = state
+	default:
+		p.State = state
+	}
+}
+
+func (p *Pole) HasProduct(prd string) bool {
+	for _, product := range p.Product {
+		if product == prd {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Pole) AddProduct(prd string) {
+	if p.HasProduct(prd) {
+		return
+	}
+	p.Product = append(p.Product, prd)
+	p.Get("Product").Call("sort")
 }
 
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
@@ -224,8 +349,14 @@ func PoleStateLabel(state string) string {
 		return poleconst.LabelNoGo
 	case poleconst.StateDictToDo:
 		return poleconst.LabelDictToDo
+	case poleconst.StatePermissionPending:
+		return poleconst.LabelPermissionPending
 	case poleconst.StateToDo:
 		return poleconst.LabelToDo
+	case poleconst.StateNoAccess:
+		return poleconst.LabelNoAccess
+	case poleconst.StateDenseNetwork:
+		return poleconst.LabelDenseNetwork
 	case poleconst.StateHoleDone:
 		return poleconst.LabelHoleDone
 	case poleconst.StateIncident:
@@ -246,7 +377,10 @@ func GetStatesValueLabel(showAttachment bool) []*elements.ValueLabelDisabled {
 		elements.NewValueLabelDisabled(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted, false),
 		elements.NewValueLabelDisabled(poleconst.StateNoGo, poleconst.LabelNoGo, false),
 		elements.NewValueLabelDisabled(poleconst.StateDictToDo, poleconst.LabelDictToDo, false),
+		elements.NewValueLabelDisabled(poleconst.StatePermissionPending, poleconst.LabelPermissionPending, false),
 		elements.NewValueLabelDisabled(poleconst.StateToDo, poleconst.LabelToDo, false),
+		elements.NewValueLabelDisabled(poleconst.StateNoAccess, poleconst.LabelNoAccess, false),
+		elements.NewValueLabelDisabled(poleconst.StateDenseNetwork, poleconst.LabelDenseNetwork, false),
 		elements.NewValueLabelDisabled(poleconst.StateHoleDone, poleconst.LabelHoleDone, false),
 		elements.NewValueLabelDisabled(poleconst.StateIncident, poleconst.LabelIncident, false),
 		elements.NewValueLabelDisabled(poleconst.StateDone, poleconst.LabelDone, false),
@@ -273,7 +407,8 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
 		elements.NewValueLabel(poleconst.ProductTrickyReplace, poleconst.ProductTrickyReplace),
 		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
-		elements.NewValueLabel(poleconst.ProductVacuumTruck, poleconst.ProductVacuumTruck),
+		elements.NewValueLabel(poleconst.ProductNoAccess, poleconst.ProductNoAccess),
+		elements.NewValueLabel(poleconst.ProductDenseNetwork, poleconst.ProductDenseNetwork),
 		elements.NewValueLabel(poleconst.ProductReplenishment, poleconst.ProductReplenishment),
 		elements.NewValueLabel(poleconst.ProductFarReplenishment, poleconst.ProductFarReplenishment),
 	}
@@ -285,11 +420,17 @@ func PoleRowClassName(status string) string {
 	case poleconst.StateNotSubmitted:
 		return "pole-row-not-submitted"
 	case poleconst.StateNoGo:
-		return "pole-row-nogo"
+		return "pole-row-not-submitted"
 	case poleconst.StateDictToDo:
+		return "pole-row-nogo"
+	case poleconst.StatePermissionPending:
 		return "pole-row-nogo"
 	case poleconst.StateToDo:
 		return "pole-row-todo"
+	case poleconst.StateNoAccess:
+		return "pole-row-todo-tricky"
+	case poleconst.StateDenseNetwork:
+		return "pole-row-todo-tricky"
 	case poleconst.StateHoleDone:
 		return "pole-row-hole-done"
 	case poleconst.StateIncident:

@@ -127,11 +127,11 @@ func (ptm *PoleTableModel) PoleRefName(p *ps.Pole) string {
 	return res
 }
 
-func (ptm *PoleTableModel) EndDate(d string, delay int) string {
+func (ptm *PoleTableModel) DictEndDate(d string) string {
 	if tools.Empty(d) {
 		return "-"
 	}
-	return date.DateString(date.After(d, delay))
+	return date.DateString(date.After(d, poleconst.DictValidityDuration))
 }
 
 func (ptm *PoleTableModel) FormatDate(r, c *js.Object, d string) string {

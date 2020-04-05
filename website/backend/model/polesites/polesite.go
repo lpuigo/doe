@@ -73,13 +73,18 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 	for _, p := range ps.Poles {
 		switch p.State {
 		//case poleconst.StateNotSubmitted:
-		case poleconst.StateNoGo:
-			total++
-			blocked++
+		//case poleconst.StateNoGo:
 		case poleconst.StateDictToDo:
 			total++
 			blocked++
+		case poleconst.StatePermissionPending:
+			total++
+			blocked++
 		case poleconst.StateToDo:
+			total++
+		case poleconst.StateNoAccess:
+			total++
+		case poleconst.StateDenseNetwork:
 			total++
 		case poleconst.StateHoleDone:
 			total++

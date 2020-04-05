@@ -1,6 +1,10 @@
 package poleconst
 
 const (
+	DictValidityDuration int = 90
+)
+
+const (
 	PsStatusNew        string = "00 New"
 	PsStatusInProgress string = "20 InProgress"
 	PsStatusBlocked    string = "90 Blocked"
@@ -15,25 +19,31 @@ const (
 )
 
 const (
-	StateNotSubmitted string = "00 Not Submitted"
-	StateNoGo         string = "05 NoGo"
-	StateDictToDo     string = "08 DICT To Do"
-	StateToDo         string = "10 To Do"
-	StateHoleDone     string = "20 Hole Done"
-	StateIncident     string = "25 Incident"
-	StateDone         string = "90 Done"
-	StateAttachment   string = "95 Attachment"
-	StateCancelled    string = "99 Cancelled"
+	StateNotSubmitted      string = "00 Not Submitted"
+	StateNoGo              string = "05 NoGo"
+	StateDictToDo          string = "08 DICT To Do"
+	StatePermissionPending string = "09 Permission Pending"
+	StateToDo              string = "10 To Do"
+	StateNoAccess          string = "12 No Access"
+	StateDenseNetwork      string = "14 Dense Network"
+	StateHoleDone          string = "20 Hole Done"
+	StateIncident          string = "25 Incident"
+	StateDone              string = "90 Done"
+	StateAttachment        string = "95 Attachment"
+	StateCancelled         string = "99 Cancelled"
 
-	LabelNotSubmitted string = "Non soumis"
-	LabelNoGo         string = "NoGo Client"
-	LabelDictToDo     string = "DICT à faire"
-	LabelToDo         string = "A faire"
-	LabelHoleDone     string = "Trou fait"
-	LabelIncident     string = "Incident"
-	LabelDone         string = "Fait"
-	LabelAttachment   string = "Attach. fait"
-	LabelCancelled    string = "Annulé"
+	LabelNotSubmitted      string = "Non soumis"
+	LabelNoGo              string = "NoGo Client"
+	LabelDictToDo          string = "DICT à faire"
+	LabelPermissionPending string = "Attente Permission"
+	LabelToDo              string = "A faire"
+	LabelNoAccess          string = "Inaccessible"
+	LabelDenseNetwork      string = "Réseaux denses"
+	LabelHoleDone          string = "Trou fait"
+	LabelIncident          string = "Incident"
+	LabelDone              string = "Fait"
+	LabelAttachment        string = "Attach. fait"
+	LabelCancelled         string = "Annulé"
 
 	FilterValueAll      string = ""
 	FilterValueRef      string = "REF:"
@@ -63,6 +73,7 @@ const (
 	MaterialMetal         string = "Métal"
 	MaterialEnforcedMetal string = "Métal Renforcé"
 	MaterialComp          string = "Composite"
+	MaterialEnforcedComp  string = "Composite Renforcé"
 
 	ProductCoated           string = "Enrobé"
 	ProductHandDigging      string = "Implantation manuelle"
@@ -71,7 +82,8 @@ const (
 	ProductReplace          string = "Remplacement"
 	ProductTrickyReplace    string = "Remplacement complexe"
 	ProductRemove           string = "Retrait"
-	ProductVacuumTruck      string = "Aspiratrice"
+	ProductNoAccess         string = "Inaccessible"
+	ProductDenseNetwork     string = "Réseaux denses"
 	ProductReplenishment    string = "Réappro."
 	ProductFarReplenishment string = "Réappro. (>50km)"
 

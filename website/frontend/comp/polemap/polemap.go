@@ -5,6 +5,9 @@ import (
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/leafletmap"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
+	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 	"sort"
 	"strconv"
@@ -211,7 +214,7 @@ func (pm *PoleMap) FitBounds(min, max *leaflet.LatLng) {
 
 func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
 	pole := poleMarker.Pole
-	html := "<h4>" + pole.GetTitle() + "</h4>"
+	html := "<h4>" + polesite.PoleStateLabel(pole.State) + ": " + pole.GetTitle() + "</h4>"
 	html += `<p class="right">` + pole.Material + " " + strconv.Itoa(pole.Height) + "m" + "</p>"
 	html += strings.Join(pole.Product, ", ") + "<br />"
 
@@ -220,6 +223,17 @@ func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
 	}
 	if pole.DictInfo != "" {
 		html += `<p><span class="title">Info DICT: </span>` + pole.DictInfo + "</p>"
+	}
+	if pole.IsDoable() {
+		html += `<br /><p><span class="title">DICT: </span> du ` + date.DateString(pole.DictDate) + " au " + date.DateString(date.After(pole.DictDate, poleconst.DictValidityDuration)) + "</p>"
+		daInfo := ""
+		if !(tools.Empty(pole.DaStartDate) && tools.Empty(pole.DaEndDate)) {
+			daInfo = "du " + date.DateString(pole.DaStartDate) + " au " + date.DateString(pole.DaEndDate)
+			html += `<p><span class="title">DA: </span>` + daInfo + "</p>"
+		}
+	}
+	if !(!pole.IsDone() && !pole.IsAttachment()) {
+		html += `<br /><p><span class="title">Réalisé:</span> le ` + date.DateString(pole.Date) + "</p>"
 	}
 	pm.ControlInfo.Update(html)
 }

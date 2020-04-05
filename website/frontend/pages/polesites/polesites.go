@@ -504,6 +504,7 @@ func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 	}
 	mpm.Polesite = polesite.PolesiteFromJS(req.Response)
 	mpm.Reference = json.Stringify(req.Response)
+	mpm.Polesite.CheckPolesStatus()
 	newTitle := mpm.Polesite.Ref + " - " + mpm.Polesite.Client
 	js.Global.Get("document").Set("title", newTitle)
 }

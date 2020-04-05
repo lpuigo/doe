@@ -60,6 +60,8 @@ func (pm *PoleMarker) RefreshState() *PoleMarker {
 const (
 	pmHtmlPin     string = `<i class="fas fa-map-pin fa-3x"></i>`
 	pmHtmlPlain   string = `<i class="fas fa-map-marker fa-3x"></i>`
+	pmHtmlBolt    string = `<i class="fas fa-bolt fa-3x"></i>`
+	pmHtmlExclam  string = `<i class="fas fa-exclamation fa-3x"></i>`
 	pmHtmlHole    string = `<i class="fas fa-map-marker-alt fa-3x"></i>`
 	pmHtmlOutline string = `<i class="el-icon-location-outline" style="font-size: 3.3em"></i>`
 )
@@ -74,8 +76,17 @@ func (pm *PoleMarker) UpdateFromState() {
 	case poleconst.StateNoGo:
 		html = pmHtmlOutline
 		class = "red"
+	case poleconst.StatePermissionPending:
+		html = pmHtmlOutline
+		class = "orange"
 	case poleconst.StateToDo:
 		html = pmHtmlPlain
+		class = "blue"
+	case poleconst.StateNoAccess:
+		html = pmHtmlExclam
+		class = "blue"
+	case poleconst.StateDenseNetwork:
+		html = pmHtmlBolt
 		class = "blue"
 	case poleconst.StateHoleDone:
 		html = pmHtmlHole

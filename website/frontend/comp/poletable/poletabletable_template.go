@@ -52,7 +52,7 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
                 align="center"
         >
             <template slot-scope="scope">
-                <span>{{EndDate(scope.row.DictDate, 90)}}</span>
+                <span>{{DictEndDate(scope.row.DictDate)}}</span>
             </template>
         </el-table-column>
 
@@ -192,7 +192,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
                 align="center"	:formatter="FormatDate"
         >
             <template slot-scope="scope">
-                <span>{{EndDate(scope.row.DictDate, 90)}}</span>
+                <span>{{DictEndDate(scope.row.DictDate)}}</span>
             </template>
         </el-table-column>
 
@@ -332,7 +332,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
                 align="center"	:formatter="FormatDate"
         >
             <template slot-scope="scope">
-                <span>{{EndDate(scope.row.DictDate, 90)}}</span>
+                <span>{{DictEndDate(scope.row.DictDate)}}</span>
             </template>
         </el-table-column>
 

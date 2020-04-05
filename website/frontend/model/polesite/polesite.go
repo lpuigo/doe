@@ -88,6 +88,12 @@ func (ps *Polesite) Clone() *Polesite {
 	return &Polesite{Object: json.Parse(json.Stringify(ps))}
 }
 
+func (ps *Polesite) CheckPolesStatus() {
+	for _, pole := range ps.Poles {
+		pole.CheckState()
+	}
+}
+
 func PolesiteStatusLabel(status string) string {
 	switch status {
 	case poleconst.PsStatusNew:

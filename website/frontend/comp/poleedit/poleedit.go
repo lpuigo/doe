@@ -211,6 +211,7 @@ const template string = `<div>
                 <el-col :span="10">
                     <el-input placeholder="Référence DICT"
                               v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
+							  @change="CheckPermissions()"
                     ></el-input>
                 </el-col>
                 <el-col :span="8">
@@ -219,6 +220,7 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DictDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
+									@change="CheckPermissions()"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -239,6 +241,7 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DaStartDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
+									@change="CheckPermissions()"
                     ></el-date-picker>
                 </el-col>
                 <el-col :span="9">
@@ -247,6 +250,7 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.DaEndDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1}"
+									@change="CheckPermissions()"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -520,12 +524,31 @@ func (pem *PoleEditModel) GetStates(vm *hvue.VM) []*elements.ValueLabelDisabled 
 
 func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
-	pem.EditedPoleMarker.Pole.Get("Product").Call("sort")
+	ep := pem.EditedPoleMarker.Pole
+	ep.Get("Product").Call("sort")
+	if ep.State == poleconst.StateToDo || ep.State == poleconst.StateDenseNetwork || ep.State == poleconst.StateNoAccess {
+		ep.SetState(poleconst.StateToDo)
+		pem.UpdateState(vm)
+	}
+}
+
+func (pem *PoleEditModel) CheckPermissions(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	ep := pem.EditedPoleMarker
+	currentState := ep.Pole.State
+	ep.Pole.CheckState()
+	print("CheckPermissions", ep.Pole.State)
+	if ep.Pole.State != currentState {
+		pem.UpdateState(vm)
+	}
+	print("CheckPermissions", ep.Pole.State)
 }
 
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker
+	ep.Pole.SetState(ep.Pole.State)
+	ep.Pole.CheckState()
 	if ep.Pole.State == poleconst.StateDone {
 		if tools.Empty(ep.Pole.Date) {
 			ep.Pole.Date = date.TodayAfter(0)

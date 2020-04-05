@@ -81,12 +81,21 @@ html, body {
     transition: background-color .15s ease;
 }
 
+.el-table .pole-row-todo-tricky {
+    background: #fff9e6;
+}
+
+.el-table .pole-row-todo-tricky:hover {
+    background: #e6e0d1;
+    transition: background-color .15s ease;
+}
+
 .el-table .pole-row-hole-done {
-    background: #e5f5e1;
+    background: #e9f5e6;
 }
 
 .el-table .pole-row-hole-done:hover {
-    background: #cedbca;
+    background: #cfd9cc;
     transition: background-color .15s ease;
 }
 
