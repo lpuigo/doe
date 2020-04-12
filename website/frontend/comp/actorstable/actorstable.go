@@ -23,6 +23,12 @@ const (
         :row-class-name="TableRowClassName" height="100%" size="mini"
 		@row-dblclick="HandleDoubleClickedRow"
 >
+	<el-table-column
+			label="N°" width="40px" align="right"
+			type="index"
+			index=1 
+	></el-table-column>
+        
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
@@ -263,7 +269,13 @@ func (atm *ActorsTableModel) SortDate(attrib1, attrib2 string) func(obj *js.Obje
 func (atm *ActorsTableModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
 	prop := col.Get("property").String()
 	if prop == "Client" {
-		return strings.Contains(p.Get(prop).String(), value)
+		clients := strings.Split(p.Get(prop).String(), ",")
+		for _, c := range clients {
+			if c == value {
+				return true
+			}
+		}
+		return false
 	}
 	return p.Get(prop).String() == value
 }

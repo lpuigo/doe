@@ -35,12 +35,11 @@ const (
 				@row-dblclick="HandleDoubleClickedRow"
         >
             <el-table-column
-                    :resizable="true" :show-overflow-tooltip=true 
-                    prop="Company" label="Société" width="110px"
-                    sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
-                    :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+                    label="N°" width="40px" align="right"
+                    type="index"
+                    index=1 
             ></el-table-column>
-            
+        
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Client" label="Clients" width="160px"
@@ -71,6 +70,13 @@ const (
                     </div>
                 </template>
             </el-table-column>
+            
+            <el-table-column
+                    :resizable="true" :show-overflow-tooltip=true 
+                    prop="Company" label="Société" width="110px"
+                    sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
+                    :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+            ></el-table-column>
             
             <el-table-column
             >
