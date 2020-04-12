@@ -67,24 +67,27 @@ const template string = `<el-container style="height: 100%">
 					width="200px" :resizable="true" :show-overflow-tooltip=true
 			>
 				<template slot-scope="scope">
-					<el-popover placement="bottom-start" title="Evenements de mesure:"
-								trigger="hover"
-								width="600"
-								open-delay="400"
-					>
-						<el-row :gutter="5" v-for="(nodename, index) in scope.row.NodeNames" :key="index" >
-							<el-col :span="7">
-								<div>{{index+1}} - {{nodename}}</div>
-							</el-col>
-							<el-col :span="3">
-								<span>{{GetNode(nodename).DistFromPm}} m</span>
-							</el-col>
-							<el-col :span="14">
-								<span>{{GetNode(nodename).Address}}</span>
-							</el-col>
-						</el-row>
-						<span slot="reference">{{scope.row.DestNodeName}}</span>
-					</el-popover>
+					<div class="header-menu-container">
+						{{scope.row.DestNodeName}}
+						<el-popover placement="bottom-start" title="Evenements de mesure:"
+									trigger="hover"
+									width="600"
+									open-delay="400"
+						>
+							<el-row :gutter="5" v-for="(nodename, index) in scope.row.NodeNames" :key="index" >
+								<el-col :span="7">
+									<div>{{index+1}} - {{nodename}}</div>
+								</el-col>
+								<el-col :span="3">
+									<span>{{GetNode(nodename).DistFromPm}} m</span>
+								</el-col>
+								<el-col :span="14">
+									<span>{{GetNode(nodename).Address}}</span>
+								</el-col>
+							</el-row>
+							<i slot="reference" class="fas fa-info-circle "></i>
+						</el-popover>
+					</div>
 				</template>
 			</el-table-column>
 			<el-table-column

@@ -12,6 +12,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func RegisterComponent() hvue.ComponentOption {
@@ -32,6 +33,10 @@ func componentOptions() []hvue.ComponentOption {
 			rpum := RipJunctionUpdateModelFromJS(vm.Object)
 			return rpum.GetFilteredJunctions()
 		}),
+		//hvue.Computed("filteredJunctionsTree", func(vm *hvue.VM) interface{} {
+		//	rpum := RipJunctionUpdateModelFromJS(vm.Object)
+		//	return rpum.GetFilteredJunctionsTree()
+		//}),
 		//hvue.Filter("FormatTronconRef", func(vm *hvue.VM, value *js.Object, args ...*js.Object) interface{} {
 		//	rpum := RipJunctionUpdateModelFromJS(vm.Object)
 		//	t := &fm.Troncon{Object: value}
@@ -46,24 +51,24 @@ func componentOptions() []hvue.ComponentOption {
 type RipJunctionUpdateModel struct {
 	*js.Object
 
-	Ripsite *fmrip.Ripsite `js:"value"`
-	//ReferenceRipsite *fmrip.Ripsite `js:"refRipsite"`
-	User       *fm.User `js:"user"`
-	Filter     string   `js:"filter"`
-	FilterType string   `js:"filtertype"`
+	Ripsite    *fmrip.Ripsite `js:"value"`
+	User       *fm.User       `js:"user"`
+	Filter     string         `js:"filter"`
+	FilterType string         `js:"filtertype"`
+	SizeLimit  int            `js:"SizeLimit"`
 
 	VM *hvue.VM `js:"VM"`
 }
 
 func NewRipJunctionUpdateModel(vm *hvue.VM) *RipJunctionUpdateModel {
-	rpum := &RipJunctionUpdateModel{Object: tools.O()}
-	rpum.VM = vm
-	rpum.Ripsite = fmrip.NewRisite()
-	//rpum.ReferenceWorksite = nil
-	rpum.User = nil
-	rpum.Filter = ""
-	rpum.FilterType = ripconst.FilterValueAll
-	return rpum
+	rjum := &RipJunctionUpdateModel{Object: tools.O()}
+	rjum.VM = vm
+	rjum.Ripsite = fmrip.NewRisite()
+	rjum.User = nil
+	rjum.Filter = ""
+	rjum.FilterType = ripconst.FilterValueAll
+	rjum.SetSizeLimit()
+	return rjum
 }
 
 func RipJunctionUpdateModelFromJS(o *js.Object) *RipJunctionUpdateModel {
@@ -76,7 +81,7 @@ func (rjum *RipJunctionUpdateModel) SetSelectedState(junction *fmrip.Junction) {
 
 func (rjum *RipJunctionUpdateModel) GetFilteredJunctions() []*fmrip.Junction {
 	if rjum.FilterType == ripconst.FilterValueAll && rjum.Filter == "" {
-		return rjum.Ripsite.Junctions
+		return rjum.GetSizeLimitedResult(rjum.Ripsite.Junctions)
 	}
 	res := []*fmrip.Junction{}
 	expected := strings.ToUpper(rjum.Filter)
@@ -93,8 +98,80 @@ func (rjum *RipJunctionUpdateModel) GetFilteredJunctions() []*fmrip.Junction {
 			res = append(res, junction)
 		}
 	}
+	return rjum.GetSizeLimitedResult(res)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 15
+	sizeLimitTimer       = 200
+)
+
+func (rjum *RipJunctionUpdateModel) GetSizeLimitedResult(res []*fmrip.Junction) []*fmrip.Junction {
+	if len(res) == rjum.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		rjum.ResetSizeLimit(len(res))
+		return res[:sizeLimitDefault]
+	}
 	return res
 }
+
+func (rjum *RipJunctionUpdateModel) SetSizeLimit() {
+	rjum.SizeLimit = -1
+}
+
+func (rjum *RipJunctionUpdateModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		rjum.SizeLimit = size
+	}()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Component Methods
+
+//func (rjum *RipJunctionUpdateModel) GetFilteredJunctionsTree() []*fmrip.JunctionNode {
+//	return rjum.GetJunctionsTree()
+//}
+//
+//func (rjum *RipJunctionUpdateModel) GetJunctionsTree() []*fmrip.JunctionNode {
+//	junctionNodeByTronconName := make(map[string]*fmrip.JunctionNode)
+//	junctionNodeByNodeName := make(map[string]*fmrip.JunctionNode)
+//	junctionNodeHasParent := make(map[string]bool)
+//	// init all junctionNodes
+//	for _, junction := range rjum.Ripsite.Junctions {
+//		jn := fmrip.NewJunctionNode(junction)
+//		junctionNodeByNodeName[junction.NodeName] = jn
+//		junctionNodeByTronconName[rjum.Ripsite.Nodes[junction.NodeName].TronconInName] = jn
+//	}
+//
+//	// parent all JunctionNodes
+//	for _, junction := range rjum.Ripsite.Junctions {
+//		jn := junctionNodeByNodeName[junction.NodeName]
+//		for _, ope := range junction.Operations {
+//			cjn, found := junctionNodeByTronconName[ope.TronconName]
+//			if !found {
+//				continue
+//			}
+//			jn.AddChild(cjn)
+//			junctionNodeHasParent[cjn.NodeName] = true
+//		}
+//	}
+//
+//	// Seek root Nodes
+//	res := []*fmrip.JunctionNode{}
+//	for _, junction := range rjum.Ripsite.Junctions {
+//		if junctionNodeHasParent[junction.NodeName] {
+//			continue
+//		}
+//		res = append(res, junctionNodeByNodeName[junction.NodeName])
+//	}
+//	return res
+//}
 
 func (rjum *RipJunctionUpdateModel) TableRowClassName(rowInfo *js.Object) string {
 	junction := &fmrip.Junction{Object: rowInfo.Get("row")}
@@ -114,7 +191,7 @@ func (rjum *RipJunctionUpdateModel) GetNode(vm *hvue.VM, junction *fmrip.Junctio
 func (rjum *RipJunctionUpdateModel) GetNodeDesc(vm *hvue.VM, junction *fmrip.Junction) string {
 	rjum = RipJunctionUpdateModelFromJS(vm.Object)
 	node := rjum.Ripsite.Nodes[junction.NodeName]
-	return node.Name + " - " + node.Ref
+	return node.Name + " (Ref: " + node.Ref + ")"
 }
 
 func (rjum *RipJunctionUpdateModel) GetNodeType(vm *hvue.VM, junction *fmrip.Junction) string {
@@ -166,46 +243,3 @@ func (rjum *RipJunctionUpdateModel) GetNodeAttr(vm *hvue.VM, col string) func(a 
 		return node.Get(col).String()
 	}
 }
-
-/*
-func (rjum *RipJunctionUpdateModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
-	prop := col.Get("property").String()
-	print("FilterHandler", prop, p.Get(prop).String())
-	return p.Get(prop).String() == value
-}
-
-func (rjum *RipJunctionUpdateModel) FilterList(vm *hvue.VM, prop string) []*elements.ValText {
-	rjum = RipJunctionUpdateModelFromJS(vm.Object)
-	count := map[string]int{}
-	attribs := []string{}
-
-	var translate func(string) string
-	switch prop {
-	case "State.Status":
-		translate = func(val string) string {
-			return fmrip.GetStatusLabel(val)
-		}
-	default:
-		translate = func(val string) string { return val }
-	}
-
-	for _, junction := range rjum.GetFilteredJunctions() {
-		attrib := junction.Object.Get(prop).String()
-		if _, exist := count[attrib]; !exist {
-			attribs = append(attribs, attrib)
-		}
-		count[attrib]++
-	}
-	sort.Strings(attribs)
-	res := []*elements.ValText{}
-	for _, a := range attribs {
-		fa := a
-		if fa == "" {
-			fa = "Vide"
-		}
-		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
-	}
-	return res
-}
-
-*/

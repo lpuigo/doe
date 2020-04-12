@@ -84,3 +84,18 @@ func (j *Junction) SearchString(filter string) string {
 	}
 	return res
 }
+
+type JunctionNode struct {
+	*Junction
+	Children []*JunctionNode `js:"children"`
+}
+
+func NewJunctionNode(j *Junction) *JunctionNode {
+	jn := &JunctionNode{Junction: j}
+	jn.Children = []*JunctionNode{}
+	return jn
+}
+
+func (jn *JunctionNode) AddChild(j *JunctionNode) {
+	jn.Children = append(jn.Children, j)
+}

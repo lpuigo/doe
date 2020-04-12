@@ -12,6 +12,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func RegisterComponent() hvue.ComponentOption {
@@ -56,7 +57,8 @@ type RipMeasurementUpdateModel struct {
 	MeasurementActors  []string           `js:"measurementActors"`
 	MeasurementSummary *fmrip.Measurement `js:"measurementSummary"`
 
-	VM *hvue.VM `js:"VM"`
+	SizeLimit int      `js:"SizeLimit"`
+	VM        *hvue.VM `js:"VM"`
 }
 
 func NewRipMeasurementUpdateModel(vm *hvue.VM) *RipMeasurementUpdateModel {
@@ -69,6 +71,7 @@ func NewRipMeasurementUpdateModel(vm *hvue.VM) *RipMeasurementUpdateModel {
 	rmum.UploadVisible = false
 	rmum.MeasurementActors = []string{}
 	rmum.MeasurementSummary = fmrip.NewMeasurement()
+	rmum.SetSizeLimit()
 	return rmum
 }
 
@@ -97,7 +100,7 @@ func (rmum *RipMeasurementUpdateModel) GetPct(vm *hvue.VM, value int) string {
 
 func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measurement {
 	if rmum.FilterType == ripconst.FilterValueAll && rmum.Filter == "" {
-		return rmum.Ripsite.Measurements
+		return rmum.GetSizeLimitedResult(rmum.Ripsite.Measurements)
 	}
 	res := []*fmrip.Measurement{}
 	expected := strings.ToUpper(rmum.Filter)
@@ -114,8 +117,41 @@ func (rmum *RipMeasurementUpdateModel) GetFilteredMeasurements() []*fmrip.Measur
 			res = append(res, meas)
 		}
 	}
+	return rmum.GetSizeLimitedResult(res)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 15
+	sizeLimitTimer       = 300
+)
+
+func (rmum *RipMeasurementUpdateModel) GetSizeLimitedResult(res []*fmrip.Measurement) []*fmrip.Measurement {
+	if len(res) == rmum.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		rmum.ResetSizeLimit(len(res))
+		return res[:sizeLimitDefault]
+	}
 	return res
 }
+
+func (rmum *RipMeasurementUpdateModel) SetSizeLimit() {
+	rmum.SizeLimit = -1
+}
+
+func (rmum *RipMeasurementUpdateModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		rmum.SizeLimit = size
+	}()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Component Methods
 
 func (rmum *RipMeasurementUpdateModel) TableRowClassName(rowInfo *js.Object) string {
 	meas := &fmrip.Measurement{Object: rowInfo.Get("row")}
