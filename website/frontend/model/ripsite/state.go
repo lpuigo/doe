@@ -39,6 +39,15 @@ func (s *State) IsDone() bool {
 	}
 }
 
+func (s *State) IsMeasured() bool {
+	switch s.Status {
+	case ripconst.StateDone, ripconst.StateWarning1, ripconst.StateWarning2, ripconst.StateBlocked:
+		return true
+	default:
+		return false
+	}
+}
+
 func (s *State) IsBlocked() bool {
 	return s.Status == ripconst.StateBlocked
 }

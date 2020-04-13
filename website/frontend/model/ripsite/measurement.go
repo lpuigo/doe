@@ -5,6 +5,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
+	"strings"
 )
 
 type Measurement struct {
@@ -99,4 +100,47 @@ func (m *Measurement) SearchString(filter string) string {
 
 func (m *Measurement) GetNbFiber() int {
 	return m.NbFiber
+}
+
+type Warning struct {
+	WarnLvl string
+	Dist    float64
+}
+
+func (m *Measurement) ParseComment() []Warning {
+	res := []Warning{}
+	// Split multiple msg per line
+	msgs := strings.Split(m.State.Comment, "\n")
+	for _, msg := range msgs {
+		// Split "Fib. #999: " from actual msg
+		parts := strings.Split(msg, ": ")
+		if len(parts) != 2 {
+			continue
+		}
+		warnmsg := parts[1]
+		// split diff warn msg on same fiber
+		for _, wmsg := range strings.Split(warnmsg, ", ") {
+			// Get distance (msg should be "some text[ à 99.9db]"
+			newWarn := Warning{}
+			distparts := strings.Split(wmsg, " à ")
+			if len(distparts) > 1 {
+				newWarn.Dist = js.Global.Call("parseFloat", distparts[1]).Float()
+			}
+			curWarnMsg := "undef"
+			switch {
+			case strings.Contains(distparts[0], "KO Max Splice"):
+				curWarnMsg = "KO Splice"
+			case strings.Contains(distparts[0], "Warn2 Max Splice"):
+				curWarnMsg = "Warn2"
+			case strings.Contains(distparts[0], "Warn1 Max Splice"):
+				curWarnMsg = "Warn1"
+			case strings.Contains(distparts[0], "Max Connector"):
+				curWarnMsg = "KO Connector"
+			}
+			newWarn.WarnLvl = curWarnMsg
+
+			res = append(res, newWarn)
+		}
+	}
+	return res
 }

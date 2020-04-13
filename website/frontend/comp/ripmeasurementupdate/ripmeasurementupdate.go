@@ -53,9 +53,11 @@ type RipMeasurementUpdateModel struct {
 	Filter     string         `js:"filter"`
 	FilterType string         `js:"filtertype"`
 
-	UploadVisible      bool               `js:"uploadVisible"`
-	MeasurementActors  []string           `js:"measurementActors"`
-	MeasurementSummary *fmrip.Measurement `js:"measurementSummary"`
+	UploadVisible       bool                 `js:"uploadVisible"`
+	AnalysisVisible     bool                 `js:"analysisVisible"`
+	MeasurementActors   []string             `js:"measurementActors"`
+	MeasurementSummary  *fmrip.Measurement   `js:"measurementSummary"`
+	MeasurementAnalysis []*fmrip.Measurement `js:"measurementAnalysis"`
 
 	SizeLimit int      `js:"SizeLimit"`
 	VM        *hvue.VM `js:"VM"`
@@ -69,8 +71,10 @@ func NewRipMeasurementUpdateModel(vm *hvue.VM) *RipMeasurementUpdateModel {
 	rmum.Filter = ""
 	rmum.FilterType = ripconst.FilterValueAll
 	rmum.UploadVisible = false
+	rmum.AnalysisVisible = false
 	rmum.MeasurementActors = []string{}
 	rmum.MeasurementSummary = fmrip.NewMeasurement()
+	rmum.MeasurementAnalysis = []*fmrip.Measurement{}
 	rmum.SetSizeLimit()
 	return rmum
 }
@@ -176,12 +180,6 @@ func (rmum *RipMeasurementUpdateModel) GetDestNodeDist(vm *hvue.VM, meas *fmrip.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Upload Methods
 
-//func (rmum *RipMeasurementUpdateModel) GetTeams(vm *hvue.VM) []*elements.ValueLabel {
-//	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
-//	return rmum.User.GetTeamValueLabelsFor(rmum.Ripsite.Client)
-//}
-//
-
 func (rmum *RipMeasurementUpdateModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabled {
 	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
 	client := rmum.User.GetClientByName(rmum.Ripsite.Client)
@@ -226,4 +224,97 @@ func (rmum *RipMeasurementUpdateModel) BeforeUpload(vm *hvue.VM, file *js.Object
 		return false
 	}
 	return true
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Analysis Methods
+
+func (rmum *RipMeasurementUpdateModel) Analyse(vm *hvue.VM) {
+	rmum = RipMeasurementUpdateModelFromJS(vm.Object)
+
+	measAnalysis := make(map[string]*fmrip.Measurement)
+	for _, meas := range rmum.Ripsite.Measurements {
+		if !meas.State.IsMeasured() {
+			continue
+		}
+		if tools.Empty(meas.State.Comment) {
+			continue
+		}
+		for _, warning := range meas.ParseComment() {
+			nearestNode := rmum.getClosestNode(meas, warning.Dist)
+			nodedefect, found := measAnalysis[nearestNode]
+			if !found {
+				nodedefect = fmrip.NewMeasurement()
+				nodedefect.DestNodeName = nearestNode
+				measAnalysis[nearestNode] = nodedefect
+			}
+			switch warning.WarnLvl {
+			case "KO Splice":
+				nodedefect.NbKO++
+			case "Warn2":
+				nodedefect.NbWarn2++
+			case "Warn1":
+				nodedefect.NbWarn1++
+			case "KO Connector":
+				nodedefect.NbKO++
+			}
+			destNodeFound := false
+			for _, destNode := range nodedefect.NodeNames {
+				if destNode == meas.DestNodeName {
+					destNodeFound = true
+					break
+				}
+			}
+			if !destNodeFound {
+				nodedefect.NodeNames = append(nodedefect.NodeNames, meas.DestNodeName)
+			}
+		}
+	}
+	res := []*fmrip.Measurement{}
+	for _, meas := range measAnalysis {
+		res = append(res, meas)
+	}
+	rmum.MeasurementAnalysis = res
+	rmum.Get("measurementAnalysis").Call("sort", func(a, b *fmrip.Measurement) int {
+		if a.NbKO > b.NbKO {
+			return -1
+		}
+		if a.NbKO < b.NbKO {
+			return 1
+		}
+		if a.NbWarn2 > b.NbWarn2 {
+			return -1
+		}
+		if a.NbWarn2 < b.NbWarn2 {
+			return 1
+		}
+		if a.NbWarn1 > b.NbWarn1 {
+			return -1
+		}
+		if a.NbWarn1 < b.NbWarn1 {
+			return 1
+		}
+		return 0
+	})
+	rmum.AnalysisVisible = true
+}
+
+func (rmum *RipMeasurementUpdateModel) getClosestNode(meas *fmrip.Measurement, dist float64) string {
+	actDist := -1.0
+	nearestNode := ""
+	for _, node := range meas.NodeNames {
+		newDist := float64(rmum.Ripsite.Nodes[node].DistFromPm) - dist
+		if newDist < 0 {
+			newDist = -newDist
+		}
+		if !(nearestNode != "" && newDist >= actDist) {
+			actDist = newDist
+			nearestNode = node
+		}
+	}
+	return nearestNode
+}
+
+func (rmum *RipMeasurementUpdateModel) GetAnalysisDestNodes(vm *hvue.VM, meas *fmrip.Measurement) string {
+	return strings.Join(meas.NodeNames, ", ")
 }

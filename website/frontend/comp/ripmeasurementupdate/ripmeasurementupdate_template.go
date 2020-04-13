@@ -3,7 +3,7 @@ package ripmeasurementupdate
 const template string = `<el-container style="height: 100%">
     <el-header style="height: auto; padding: 0px">
         <el-row type="flex" align="middle">
-            <el-col :span="4">
+            <el-col :span="4" class="header-menu-container">
                 <el-popover placement="right" title="Chargement d'un fichier ZIP de mesures :"
                             trigger="click"
                             width="400"
@@ -38,6 +38,38 @@ const template string = `<el-container style="height: 100%">
                     </el-upload>
                     <el-button slot="reference" type="primary" size="mini" style="margin-left: 5px">Mesures...</el-button>
                 </el-popover>
+                <el-popover placement="bottom" title="Analyse des défauts mesurés :"
+                            width="600" 
+                            v-model="analysisVisible"
+                >
+					<el-table
+							:data="measurementAnalysis" show-summary
+							border max-height="600" style="width: 100%"
+					>
+						<el-table-column
+								prop="DestNodeName" label="BPE"
+								width="150"
+						></el-table-column>
+						<el-table-column
+								prop="NbKO" label="KO"
+								width="60"
+						></el-table-column>
+						<el-table-column
+								prop="NbWarn2" label="Warn2"
+								width="60"
+						></el-table-column>
+						<el-table-column
+								prop="NbWarn1" label="Warn1"
+								width="60"
+						></el-table-column>
+						<el-table-column
+								label="Pbo(s) concerné(s)"
+						>
+							<template slot-scope="scope">{{GetAnalysisDestNodes(scope.row)}}</template>	
+						</el-table-column>
+					</el-table>
+					<el-button slot="reference" type="primary" size="mini" style="margin-left: 5px" @click="Analyse">Analyse...</el-button>
+				</el-popover>
             </el-col>
             <el-col :offset="3" :span="3">
                 <span>Nb Fibres total: {{NbTotFiber}}</span>            
