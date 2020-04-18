@@ -49,7 +49,7 @@ func TestProcessImgList(t *testing.T) {
 
 	ProcessImgList(l, 12, func(il *ImgLog) {
 		//err := ChangeQuality(il.Path, 40)
-		err := ReduceChangeQuality(il, il.Init.Width/2, il.Init.Height/2, 70)
+		err := ResizeChangeQuality(il, il.Init.Width/2, il.Init.Height/2, 70)
 		if err != nil {
 			il.Err = fmt.Errorf("could not change quality for %s: %v\n", il.Path, err)
 			return

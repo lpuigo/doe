@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func Config(file string) (config image.Config, err error) {
+func ImageConfig(file string) (config image.Config, err error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return
@@ -18,8 +18,8 @@ func Config(file string) (config image.Config, err error) {
 	return
 }
 
-type FileInfo struct {
-}
+//type FileInfo struct {
+//}
 
 func readImg(file string) (image.Image, error) {
 	f, err := os.Open(file)
@@ -48,44 +48,49 @@ func saveImg(file string, img image.Image, quality int) error {
 	return nil
 }
 
-func ChangeQuality(file string, quality int) error {
+func swapSaveImg(il *ImgLog, img image.Image, quality int) error {
+	tmpFile := il.Path + "_tmp"
+	err := saveImg(tmpFile, img, quality)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(il.Path); err != nil {
+		return fmt.Errorf("error removing initial file: %v\n", err)
+	}
+	if err := os.Rename(tmpFile, il.Path); err != nil {
+		return fmt.Errorf("error renaming temp file: %v\n", err)
+	}
+	il.Result, err = GetImageInfo(il.Path)
+	if err != nil {
+		return err
+	}
+	t := il.Init.Info.ModTime()
+	return os.Chtimes(il.Path, t, t)
+}
+
+func ChangeQuality(il *ImgLog, quality int) error {
+	file := il.Path
 	img, err := readImg(file)
 	if err != nil {
 		return err
 	}
-	tmpFile := file + "_tmp"
-	err = saveImg(tmpFile, img, quality)
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(file); err != nil {
-		return fmt.Errorf("error removing initial file: %v\n", err)
-	}
-	if err := os.Rename(tmpFile, file); err != nil {
-		return fmt.Errorf("error renaming temp file: %v\n", err)
-	}
-	return nil
+	return swapSaveImg(il, img, quality)
 }
 
-func ReduceChangeQuality(il *ImgLog, w, h, quality int) error {
+func ResizeChangeQuality(il *ImgLog, w, h, quality int) error {
 	img, err := readImg(il.Path)
 	if err != nil {
 		return err
 	}
+	resImg := imaging.Sharpen(imaging.Resize(img, w, h, imaging.Lanczos), 1) // imaging.NearestNeighbor / imaging.Linear / imaging.CatmullRom
+	return swapSaveImg(il, resImg, quality)
+}
 
-	resImg := imaging.Sharpen(imaging.Resize(img, w, h, imaging.Box), 1) // imaging.NearestNeighbor / imaging.Linear / imaging.CatmullRom
-
-	tmpFile := il.Path + "_tmp"
-	err = saveImg(tmpFile, resImg, quality)
+func Sharpen(il *ImgLog, quality int) error {
+	img, err := readImg(il.Path)
 	if err != nil {
 		return err
 	}
-	//if err := os.Remove(file); err != nil {
-	//	return fmt.Errorf("error removing initial file: %v\n", err)
-	//}
-	if err := os.Rename(tmpFile, il.Path); err != nil {
-		return fmt.Errorf("error renaming temp file: %v\n", err)
-	}
-	t := il.Init.Info.ModTime()
-	return os.Chtimes(il.Path, t, t)
+	resImg := imaging.Sharpen(img, 1) // imaging.NearestNeighbor / imaging.Linear / imaging.CatmullRom
+	return swapSaveImg(il, resImg, quality)
 }
