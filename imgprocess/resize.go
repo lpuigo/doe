@@ -21,16 +21,13 @@ func ImageConfig(file string) (config image.Config, err error) {
 //type FileInfo struct {
 //}
 
-func readImg(file string) (image.Image, error) {
-	f, err := os.Open(file)
+func readImg(il *ImgLog) (image.Image, error) {
+	img, err := imaging.Open(il.Path, imaging.AutoOrientation(true))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error opening file:%v\n", err)
 	}
-	defer f.Close()
-
-	img, _, err := image.Decode(f) // Image Struct
-	if err != nil {
-		return nil, fmt.Errorf("error decoding file:%v\n", err)
+	if img.Bounds().Size().X != il.Init.Width {
+		il.Init.Width, il.Init.Height = il.Init.Height, il.Init.Width
 	}
 	return img, nil
 }
@@ -69,25 +66,25 @@ func swapSaveImg(il *ImgLog, img image.Image, quality int) error {
 }
 
 func ChangeQuality(il *ImgLog, quality int) error {
-	file := il.Path
-	img, err := readImg(file)
+	img, err := readImg(il)
+
 	if err != nil {
 		return err
 	}
 	return swapSaveImg(il, img, quality)
 }
 
-func ResizeChangeQuality(il *ImgLog, w, h, quality int) error {
-	img, err := readImg(il.Path)
+func ResizeChangeQuality(il *ImgLog, ratio, quality int) error {
+	img, err := readImg(il)
 	if err != nil {
 		return err
 	}
-	resImg := imaging.Sharpen(imaging.Resize(img, w, h, imaging.Lanczos), 1) // imaging.NearestNeighbor / imaging.Linear / imaging.CatmullRom
+	resImg := imaging.Resize(img, il.Init.Width/ratio, il.Init.Height/ratio, imaging.Lanczos) // imaging.NearestNeighbor / imaging.Linear / imaging.CatmullRom
 	return swapSaveImg(il, resImg, quality)
 }
 
 func Sharpen(il *ImgLog, quality int) error {
-	img, err := readImg(il.Path)
+	img, err := readImg(il)
 	if err != nil {
 		return err
 	}

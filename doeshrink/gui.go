@@ -22,6 +22,7 @@ type GuiContext struct {
 const (
 	ParallelRoutine = 12
 	MaxDim          = 3200
+	ResizeRatio     = 2
 	MaxSize         = 1024 * 1024
 	Quality         = 75
 )
@@ -145,7 +146,7 @@ func (gc GuiContext) Process(path string) {
 		shortPath := subPath(path, il.Path)
 		switch {
 		case il.DoResize:
-			err := imp.ResizeChangeQuality(il, il.Init.Width/2, il.Init.Height/2, Quality)
+			err := imp.ResizeChangeQuality(il, ResizeRatio, Quality)
 			if err != nil {
 				il.Err = fmt.Errorf("  could not resize %s: %v", shortPath, err)
 				gc.Logln(il.Err.Error())
