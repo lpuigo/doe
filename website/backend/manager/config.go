@@ -7,6 +7,7 @@ type ManagerConfig struct {
 	FoasitesDir   string
 	UsersDir      string
 	ActorsDir     string
+	ActorInfosDir string
 	TimeSheetsDir string
 	CalendarFile  string
 	ClientsDir    string

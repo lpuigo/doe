@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
+	"github.com/lpuig/ewin/doe/website/backend/model/actorinfos"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
@@ -22,6 +23,7 @@ type Manager struct {
 	Foasites       *fs.FoaSitesPersister
 	Users          *users.UsersPersister
 	Actors         *actors.ActorsPersister
+	ActorInfos     *actorinfos.ActorInfosPersister
 	TimeSheets     *timesheets.TimeSheetsPersister
 	DaysOff        *Calendar
 	Clients        *clients.ClientsPersister
@@ -67,7 +69,13 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		return nil, fmt.Errorf("could not create actors: %s", err.Error())
 	}
 
-	// Init Actors persister
+	// Init ActorInfos persister
+	aip, err := actorinfos.NewActorInfosPersister(conf.ActorInfosDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create actorinfos: %s", err.Error())
+	}
+
+	// Init TimeSheets persister
 	tsp, err := timesheets.NewTimeSheetsPersister(conf.TimeSheetsDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not create timesheets: %s", err.Error())
@@ -93,6 +101,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		Foasites:       fsp,
 		Users:          up,
 		Actors:         ap,
+		ActorInfos:     aip,
 		TimeSheets:     tsp,
 		DaysOff:        NewCalendar(conf.CalendarFile),
 		Clients:        cp,
@@ -155,6 +164,12 @@ func (m *Manager) Reload() error {
 		return fmt.Errorf("could not populate actor: %s", err.Error())
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Actors", m.Actors.NbActors()))
+
+	err = m.ActorInfos.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate actorinfo: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d ActorInfos", m.ActorInfos.NbActorInfos()))
 
 	err = m.TimeSheets.LoadDirectory()
 	if err != nil {

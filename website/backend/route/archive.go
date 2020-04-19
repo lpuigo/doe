@@ -30,6 +30,8 @@ func GetRecordsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 		sites = mgr.Clients
 	case "actors":
 		sites = mgr.Actors
+	case "actorinfos":
+		sites = mgr.ActorInfos
 	case "timesheet":
 		sites = mgr.TimeSheets
 	default:

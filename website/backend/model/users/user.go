@@ -17,3 +17,7 @@ func NewUser(name string) *User {
 		Permissions: make(map[string]bool),
 	}
 }
+
+func (u *User) HasPermissionHR() bool {
+	return u.Permissions["HR"]
+}

@@ -37,6 +37,7 @@ const (
 	FoasitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Foasites`
 	UsersDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
 	ActorsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
+	ActorInfosDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actorinfos`
 	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
 	CalendarFile  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
 	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
@@ -57,6 +58,7 @@ func main() {
 			FoasitesDir:   FoasitesDir,
 			UsersDir:      UsersDir,
 			ActorsDir:     ActorsDir,
+			ActorInfosDir: ActorInfosDir,
 			TimeSheetsDir: TimeSheetsDir,
 			CalendarFile:  CalendarFile,
 			ClientsDir:    ClientsDir,
@@ -154,6 +156,10 @@ func main() {
 	router.HandleFunc("/api/actors", withUserManager("GetActors", route.GetActors)).Methods("GET")
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")
 	router.HandleFunc("/api/actors/whrecord/{month:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetActorsWorkingHoursRecord", route.GetActorsWorkingHoursRecord)).Methods("GET")
+
+	// ActorInfos methods
+	router.HandleFunc("/api/actorinfos", withUserManager("GetActorInfos", route.GetActorInfos)).Methods("GET")
+	router.HandleFunc("/api/actorinfos", withUserManager("UpdateActorInfos", route.UpdateActorInfos)).Methods("PUT")
 
 	// TimeSheets methods
 	router.HandleFunc("/api/timesheet/{week:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetTimeSheet", route.GetTimeSheet)).Methods("GET")
