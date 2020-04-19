@@ -12,12 +12,14 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actorinfo"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
+	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -45,7 +47,8 @@ func main() {
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
 			mpm.Dirty = mpm.CheckReference()
-			return mpm.Dirty
+			mpm.ActorInfosDirty = mpm.CheckActorInfosReference()
+			return mpm.Dirty || mpm.ActorInfosDirty
 		}),
 	)
 
@@ -58,12 +61,16 @@ type MainPageModel struct {
 	VM   *hvue.VM `js:"VM"`
 	User *fm.User `js:"User"`
 
-	ActiveMode string         `js:"ActiveMode"`
-	Filter     string         `js:"Filter"`
-	FilterType string         `js:"FilterType"`
-	Actors     []*actor.Actor `js:"Actors"`
-	Reference  string         `js:"Reference"`
-	Dirty      bool           `js:"Dirty"`
+	ActiveMode          string                       `js:"ActiveMode"`
+	Filter              string                       `js:"Filter"`
+	FilterType          string                       `js:"FilterType"`
+	Actors              []*actor.Actor               `js:"Actors"`
+	Reference           string                       `js:"Reference"`
+	Dirty               bool                         `js:"Dirty"`
+	ActorInfos          []*actorinfo.ActorInfo       `js:"ActorInfos"`
+	ActorInfosByActorId map[int]*actorinfo.ActorInfo `js:"ActorInfosByActorId"`
+	ActorInfosReference string                       `js:"ActorInfosReference"`
+	ActorInfosDirty     bool                         `js:"ActorInfosDirty"`
 
 	CraVisible bool   `js:"craVisible"`
 	CraMonth   string `js:"craMonth"`
@@ -76,9 +83,16 @@ func NewMainPageModel() *MainPageModel {
 	mpm.ActiveMode = "Calendar"
 	mpm.Filter = ""
 	mpm.FilterType = ""
+
 	mpm.Actors = []*actor.Actor{}
 	mpm.Reference = ""
 	mpm.Dirty = false
+
+	mpm.ActorInfos = []*actorinfo.ActorInfo{}
+	mpm.ActorInfosByActorId = make(map[int]*actorinfo.ActorInfo)
+	mpm.ActorInfosReference = ""
+	mpm.ActorInfosDirty = false
+
 	mpm.CraVisible = false
 	mpm.CraMonth = date.GetFirstOfMonth(date.TodayAfter(-7))
 
@@ -92,6 +106,8 @@ func (mpm *MainPageModel) PreventLeave() bool {
 	return mpm.Dirty
 }
 
+// Ref for Actors
+
 func (mpm *MainPageModel) GetReference() string {
 	return json.Stringify(mpm.Actors)
 }
@@ -100,9 +116,24 @@ func (mpm *MainPageModel) SetReference() {
 	mpm.Reference = mpm.GetReference()
 }
 
-// CheckReference returns true when some data has change
+// CheckReference returns true when some Actors has changed
 func (mpm *MainPageModel) CheckReference() bool {
 	return mpm.Reference != json.Stringify(mpm.Actors)
+}
+
+// Ref for ActorInfos
+
+func (mpm *MainPageModel) GetActorInfosReference() string {
+	return json.Stringify(mpm.ActorInfos)
+}
+
+func (mpm *MainPageModel) SetActorInfosReference() {
+	mpm.ActorInfosReference = mpm.GetActorInfosReference()
+}
+
+// CheckActorInfosReference returns true when some ActorInfos has changed
+func (mpm *MainPageModel) CheckActorInfosReference() bool {
+	return mpm.ActorInfosReference != json.Stringify(mpm.ActorInfos)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +153,7 @@ func (mpm *MainPageModel) AddActor() {
 }
 
 func (mpm *MainPageModel) LoadActors(init bool) {
-	updateLoadedActors := func() {
+	onLoadedActors := func() {
 		mpm.SetReference()
 		for _, act := range mpm.Actors {
 			act.UpdateState()
@@ -131,18 +162,59 @@ func (mpm *MainPageModel) LoadActors(init bool) {
 		if init && mpm.CheckReference() {
 			mpm.SaveActors(mpm.VM)
 		}
+		mpm.LoadActorInfos()
 	}
-	go mpm.callGetActors(updateLoadedActors)
+	go mpm.callGetActors(onLoadedActors)
 }
 
 func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
 
-	updateActors := func() {
-		mpm.LoadActors(false)
+	if mpm.Dirty {
+		onUpdatedActors := func() {
+			//mpm.LoadActors(false)
+			mpm.SetReference()
+		}
+		go mpm.callUpdateActors(onUpdatedActors)
 	}
 
-	go mpm.callUpdateActors(updateActors)
+	if mpm.ActorInfosDirty {
+		mpm.SaveActorInfos(vm)
+	}
+}
+
+func (mpm *MainPageModel) LoadActorInfos() {
+	if !(mpm.User.Connected && mpm.User.HasPermissionHR()) {
+		return
+	}
+
+	onLoadedActorInfos := func() {
+		mpm.SetActorInfosReference()
+		mpm.updateActorInfosByActorId()
+	}
+
+	go mpm.callGetActorInfos(onLoadedActorInfos)
+}
+
+func (mpm *MainPageModel) updateActorInfosByActorId() {
+	actorInfoByActorId := make(map[int]*actorinfo.ActorInfo)
+	for _, actInf := range mpm.ActorInfos {
+		actorInfoByActorId[actInf.ActorId] = actInf
+	}
+	mpm.ActorInfosByActorId = actorInfoByActorId
+}
+
+func (mpm *MainPageModel) SaveActorInfos(vm *hvue.VM) {
+	mpm = &MainPageModel{Object: vm.Object}
+	if !(mpm.User.Connected && mpm.User.HasPermissionHR()) {
+		return
+	}
+
+	onUpdatedActorInfos := func() {
+		mpm.SetActorInfosReference()
+	}
+
+	go mpm.callUpdateActorInfos(onUpdatedActorInfos)
 }
 
 // SwitchActiveMode handles ActiveMode change
@@ -215,6 +287,8 @@ func (mpm *MainPageModel) callGetUser(callback func()) {
 	mpm.User.Connected = true
 	callback()
 }
+
+// WS Actors
 
 func (mpm *MainPageModel) callGetActors(callback func()) {
 	req := xhr.NewRequest("GET", "/api/actors")
@@ -294,4 +368,82 @@ func makeDictActors(actors []*actor.Actor) map[int]*actor.Actor {
 		res[act.Id] = act
 	}
 	return res
+}
+
+// WS ActorInfos
+
+func (mpm *MainPageModel) callGetActorInfos(callback func()) {
+	req := xhr.NewRequest("GET", "/api/actorinfos")
+	req.Timeout = tools.LongTimeOut
+	req.ResponseType = xhr.JSON
+
+	actorinfos := mpm.ActorInfos
+	success := false
+	defer func() {
+		mpm.ActorInfos = actorinfos
+		if success {
+			callback()
+		}
+	}()
+
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	loadedActorInfos := []*actorinfo.ActorInfo{}
+	req.Response.Call("forEach", func(item *js.Object) {
+		actinf := actorinfo.NewActorInfoFromJS(item)
+		loadedActorInfos = append(loadedActorInfos, actinf)
+	})
+	success = true
+	actorinfos = loadedActorInfos
+}
+
+func (mpm *MainPageModel) callUpdateActorInfos(callback func()) {
+	updatedActorInfos := mpm.getUpdatedActors()
+	defer callback()
+	if len(updatedActorInfos) == 0 {
+		message.ErrorStr(mpm.VM, "Could not find any updated actors", false)
+		return
+	}
+
+	req := xhr.NewRequest("PUT", "/api/actorinfos")
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(json.Stringify(updatedActorInfos))
+	if err != nil {
+		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(mpm.VM, req)
+		return
+	}
+	nbUpd := len(updatedActorInfos)
+	msg := " modification sauvegardée"
+	if nbUpd > 1 {
+		msg = " modifications sauvegardées"
+	}
+	message.NotifySuccess(mpm.VM, "Informations Equipes", strconv.Itoa(nbUpd)+msg)
+}
+
+func (mpm *MainPageModel) getUpdatedActorInfos() []*actorinfo.ActorInfo {
+	refActors := make(map[int]*actorinfo.ActorInfo)
+	json.Parse(mpm.ActorInfosReference).Call("forEach", func(item *js.Object) {
+		act := actorinfo.NewActorInfoFromJS(item)
+		refActors[act.ActorId] = act
+	})
+	udpActorInfos := []*actorinfo.ActorInfo{}
+	for _, actInf := range mpm.ActorInfos {
+		refact := refActors[actInf.ActorId]
+		if !(refact != nil && json.Stringify(actInf) == json.Stringify(refact)) {
+			udpActorInfos = append(udpActorInfos, actInf)
+		}
+	}
+	return udpActorInfos
 }

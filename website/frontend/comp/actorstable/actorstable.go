@@ -28,7 +28,7 @@ const (
 			type="index"
 			index=1 
 	></el-table-column>
-        
+
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
