@@ -9,8 +9,9 @@ import (
 
 type PoleMarker struct {
 	leaflet.Marker
-	Pole *polesite.Pole `js:"Pole"`
-	Map  *PoleMap       `js:"Map"`
+	Pole      *polesite.Pole `js:"Pole"`
+	Map       *PoleMap       `js:"Map"`
+	Draggable bool           `js:"Draggable"`
 }
 
 func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
@@ -21,6 +22,7 @@ func NewPoleMarker(option *leaflet.MarkerOptions, pole *polesite.Pole) *PoleMark
 	np := &PoleMarker{Marker: *leaflet.NewMarker(pole.Lat, pole.Long, option)}
 	np.Pole = pole
 	np.Map = nil
+	np.Draggable = false
 	return np
 }
 
@@ -36,15 +38,23 @@ func (pm *PoleMarker) StartEditMode(drag bool) {
 	if drag {
 		pm.SetDraggable(true)
 	}
+	pm.Map.PoleLine.SetTarget(pm)
 	pm.Refresh()
 }
 
 func (pm *PoleMarker) EndEditMode(refresh bool) {
 	pm.SetOpacity(poleconst.OpacityNormal)
 	pm.SetDraggable(false)
+	pm.Map.PoleLine.Reinit()
 	if refresh {
 		pm.Refresh()
 	}
+}
+
+func (pm *PoleMarker) SetDraggable(drag bool) {
+	pm.Draggable = drag
+	pm.Marker.SetDraggable(pm.Draggable)
+	pm.Refresh()
 }
 
 func (pm *PoleMarker) Refresh() {

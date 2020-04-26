@@ -36,7 +36,6 @@ const template string = `<div>
         
         <el-popover placement="bottom" width="360" title="Duplication du poteau"
                     v-model="VisibleDuplicatePole">
-            <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6">
                     <el-checkbox v-model="DuplicateContext.DoIncrement">Incrément</el-checkbox>
@@ -47,6 +46,7 @@ const template string = `<div>
                     ></el-input-number>
                 </el-col>
             </el-row>
+            <p>Confirmez la duplication du poteau {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
             <div style="text-align: right; margin: 0; margin-top: 10px">
                 <el-button size="mini" @click="VisibleDuplicatePole = false">Annuler</el-button>
                 <el-button type="warning" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
@@ -64,7 +64,6 @@ const template string = `<div>
         <el-col :span="18">
             <el-input placeholder="Référence"
                       v-model="editedpolemarker.Pole.Ref" clearable size="mini"
-					  @input="UpdateTooltip()"
             ></el-input>
         </el-col>
     </el-row>
@@ -75,7 +74,6 @@ const template string = `<div>
         <el-col :span="18">
             <el-input placeholder="Etiquette"
                       v-model="editedpolemarker.Pole.Sticker" clearable size="mini"
-					  @input="UpdateTooltip()"
             ></el-input>
         </el-col>
     </el-row>
@@ -95,6 +93,13 @@ const template string = `<div>
             <template slot="title">
                 <h1 class="title">Adresse: <a v-if="editedlatlong != ''" :href="GetGMAPUrl(editedlatlong)" rel="noopener noreferrer" target="_blank">(GMap)</a><span class="blue"> {{editedpolemarker.Pole.Address}}</span></h1>
             </template>
+            <!-- Déplacable -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :offset="6" :span="18">
+                    <el-checkbox v-model="editedpolemarker.Draggable" @change="UpdatePoleDrag()">Marqueur déplaçable</el-checkbox>
+                </el-col>
+            </el-row>
+        
             <!-- Lat / Long -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6" class="align-right">Lat / Long:</el-col>
@@ -612,6 +617,11 @@ func (pem *PoleEditModel) errMsgDegLatLong(value string) {
 func (pem *PoleEditModel) setDegLatLong() {
 	pem.EditedLat = latlong.DecToDeg(pem.EditedPoleMarker.Pole.Lat)
 	pem.EditedLong = latlong.DecToDeg(pem.EditedPoleMarker.Pole.Long)
+}
+
+func (pem *PoleEditModel) UpdatePoleDrag(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.SetDraggable(pem.EditedPoleMarker.Draggable)
 }
 
 func (pem *PoleEditModel) UpdatePoleLatLong(vm *hvue.VM, value string) {

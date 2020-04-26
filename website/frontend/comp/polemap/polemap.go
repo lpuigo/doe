@@ -53,6 +53,7 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleMap struct {
 	leafletmap.LeafletMap
+	PoleLine         *PoleLine                      `js:"PoleLine"`
 	Poles            []*polesite.Pole               `js:"poles"`
 	PoleMarkers      map[string][]*PoleMarker       `js:"PoleMarkers"`
 	PoleMarkersGroup map[string]*leaflet.LayerGroup `js:"PoleMarkersGroup"`
@@ -67,6 +68,7 @@ func newPoleMap(vm *hvue.VM) *PoleMap {
 	pm := PoleMapFromJS(vm.Object)
 	pm.LeafletMap.VM = vm
 	pm.LeafletMap.Init()
+	pm.PoleLine = NewPoleLine(pm)
 	pm.Poles = nil
 	pm.initPoleMarkersGroups()
 	//pm.PoleOverlays = make(map[string]*leaflet.Layer)
@@ -85,7 +87,7 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 	mOption := leaflet.DefaultMarkerOption()
 	mOption.Icon = &ico.Icon
 	mOption.Opacity = 0.5
-	mOption.Title = pole.GetTitle()
+	//mOption.Title = pole.GetTitle()
 
 	poleMarker := NewPoleMarker(mOption, pole)
 	poleMarker.Map = pm
@@ -95,8 +97,22 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 		poleMarker := PoleMarkerFromJS(o.Get("sourceTarget"))
 		pm.VM.Emit("marker-click", poleMarker, o)
 	})
+	poleMarker.On("contextmenu", func(o *js.Object) {
+		poleMarker := PoleMarkerFromJS(o.Get("sourceTarget"))
+		poleMarker.Map.PoleLine.SetPivot(poleMarker)
+		poleMarker.Map.PoleLine.Draw()
+	})
+	poleMarker.On("move", func(o *js.Object) {
+		poleMarker := PoleMarkerFromJS(o.Get("target"))
+		poleMarker.Map.RefreshPivotLine(o)
+	})
 	poleMarker.On("dragend", func(o *js.Object) {
 		poleMarker := PoleMarkerFromJS(o.Get("target"))
+		if poleMarker.Map.PoleLine.IsDrawn {
+			poleMarker.SetLatLng(poleMarker.Map.PoleLine.RoundedPos)
+			poleMarker.Refresh()
+			return
+		}
 		poleMarker.Pole.Lat, poleMarker.Pole.Long = poleMarker.GetLatLong().ToFloats()
 	})
 	poleMarker.On("mouseover", func(o *js.Object) {
@@ -240,4 +256,16 @@ func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
 
 func (pm *PoleMap) HidePoleInfo() {
 	pm.ControlInfo.Update("")
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PoleLine related methods
+
+func (pm *PoleMap) DisablePoleLine() {
+	pm.PoleLine.Reinit()
+}
+
+func (pm *PoleMap) RefreshPivotLine(moveEvent *js.Object) {
+	latlng := leaflet.LatLngFromJS(moveEvent.Get("latlng"))
+	pm.PoleLine.RefreshTargetPos(latlng)
 }

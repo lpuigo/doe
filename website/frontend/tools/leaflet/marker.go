@@ -44,7 +44,12 @@ func (m *Marker) UpdateToolTip(text string) {
 }
 
 func (m *Marker) SetDraggable(drag bool) {
-	m.Object.Get("options").Set("draggable", drag)
+	if drag {
+		m.Object.Get("dragging").Call("enable")
+		return
+	}
+	m.Object.Get("dragging").Call("disable")
+	m.Object.Get("options").Set("draggable", false)
 }
 
 func (m *Marker) SetOpacity(op float64) {
@@ -80,7 +85,9 @@ type MarkerOptions struct {
 }
 
 func DefaultMarkerOption() *MarkerOptions {
-	return &MarkerOptions{Object: tools.O()}
+	mo := &MarkerOptions{Object: tools.O()}
+	mo.Keyboard = false
+	return mo
 }
 
 // Icon is a leaflet Icon object: https://leafletjs.com/reference-1.5.0.html#icon.

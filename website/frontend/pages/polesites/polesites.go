@@ -89,6 +89,7 @@ type MainPageModel struct {
 	FilterType string             `js:"FilterType"`
 	Polesite   *polesite.Polesite `js:"Polesite"`
 	//PolesGroup         *leaflet.LayerGroup `js:"PolesGroup"`
+
 	SelectedPoleMarker *polemap.PoleMarker `js:"SelectedPoleMarker"`
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
 	ActiveChapter      []string            `js:"ActiveChapter"`
@@ -112,6 +113,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.FilterType = poleconst.FilterValueAll
 	mpm.Polesite = polesite.NewPolesite()
 	//mpm.PolesGroup = nil
+
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
 	mpm.ActiveChapter = []string{}
@@ -195,6 +197,7 @@ func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker, drag bool) {
 
 func (mpm *MainPageModel) UnSelectPole(refresh bool) {
 	if mpm.IsPoleSelected {
+		mpm.GetPoleMap().DisablePoleLine()
 		mpm.CloseEditPole()
 	}
 }

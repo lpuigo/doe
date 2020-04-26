@@ -24,6 +24,10 @@ func (ll *LatLng) ToFloats() (lat, long float64) {
 	return
 }
 
+func (ll *LatLng) DistanceTo(dest *LatLng) float64 {
+	return ll.Call("distanceTo", dest).Float()
+}
+
 // LatLng specifies a point in latitude and longitude
 type LatLngBounds struct {
 	*js.Object

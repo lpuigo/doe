@@ -39,9 +39,24 @@ func DefaultPathOptions() *PathOptions {
 	}
 }
 
-// Polyline is a leaflet polyline object: http://leafletjs.com/reference-1.0.2.html#polyline.
+// Polyline is a leaflet polyline object: https://leafletjs.com/reference-1.6.0.html#polyline.
 type Polyline struct {
 	Path
+}
+
+// NewPolygon creates a new polygon.
+func NewPolyline(latlngs []*LatLng, opt *PathOptions) *Polyline {
+	return &Polyline{
+		Path: Path{
+			Layer: Layer{
+				Object: L.Call("polyline", latlngs, opt),
+			},
+		},
+	}
+}
+
+func (pl *Polyline) SetLatLngs(latlngs []*LatLng) {
+	pl.Object.Call("setLatLngs", latlngs)
 }
 
 // Polygon is a leaflet polygon object: http://leafletjs.com/reference-1.0.2.html#polygon.

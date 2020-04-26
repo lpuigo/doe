@@ -82,6 +82,18 @@ func (l *Layer) On(event string, handler func(*js.Object)) {
 	l.Call("on", event, handler)
 }
 
+func (l *Layer) BindTooltip(content interface{}, option ToolTypeOption) {
+	l.Call("bindTooltip", content, option)
+}
+
+func (l *Layer) SetTooltipContent(content interface{}) {
+	l.Call("setTooltipContent", content)
+}
+
+func (l *Layer) UnBindTooltip() {
+	l.Call("unbindTooltip")
+}
+
 // LayerGroup is a leaflet LayerGroup: https://leafletjs.com/reference-1.5.0.html#layergroup.
 type LayerGroup struct {
 	Layer

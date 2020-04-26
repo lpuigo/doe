@@ -12,12 +12,14 @@ type DuplicateContext struct {
 	Model       *polemap.PoleMarker `js:"Model"`
 	DoIncrement bool                `js:"DoIncrement"`
 	Increment   int                 `js:"Increment"`
+	Distance    float64             `js:"Distance"`
 }
 
 func NewDuplicateContext() *DuplicateContext {
 	dp := &DuplicateContext{Object: tools.O()}
 	dp.DoIncrement = false
 	dp.Increment = 5
+	dp.Distance = 35.0
 
 	return dp
 }
