@@ -13,7 +13,7 @@ func WriteXlsReport(file string, recs []*PoleRecord) error {
 		sheet:  "Report",
 		curRow: 1,
 	}
-	rw.file.SetSheetName(rw.file.GetSheetName(1), rw.sheet)
+	rw.file.SetSheetName(rw.file.GetSheetName(0), rw.sheet)
 
 	// Write Header
 	err := rw.writeHeader()
@@ -43,7 +43,7 @@ func ReadXlsReport(file string) ([]*PoleRecord, error) {
 	}
 	rp := reportParser{
 		file:   xlsFile,
-		sheet:  xlsFile.GetSheetName(1),
+		sheet:  xlsFile.GetSheetName(0),
 		curRow: 1,
 	}
 

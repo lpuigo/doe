@@ -12,7 +12,7 @@ func NewParserFile(xlsfile string) (*xlsPoleParser, error) {
 		return nil, err
 	}
 
-	sheet := xlsf.GetSheetName(1)
+	sheet := xlsf.GetSheetName(0)
 	rows, err := xlsf.Rows(sheet)
 	if err != nil {
 		return nil, err

@@ -87,17 +87,29 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 		colName := xpp.colNames[i+1]
 		switch colName {
 		case "Date de réponse":
-			times := strings.Split(value, " ")
-			if len(times) != 2 {
-				fmt.Printf("could not get date time info at %s\n", coord)
+			datefloat, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				// Date is strinig format, parse it
+				times := strings.Split(value, " ")
+				if len(times) != 2 {
+					fmt.Printf("could not get date time info at %s: '%s'\n", coord, value)
+					continue
+				}
+				hour = times[1]
+				dates, err := time.Parse("1/02/06", times[0])
+				if err != nil {
+					return nil, fmt.Errorf("could not parse date at %s: %s, %s\n", coord, times[0], err.Error())
+				}
+				date = dates.Format("2006-01-02")
 				continue
 			}
-			hour = times[1]
-			dates, err := time.Parse("1/02/06", times[0])
+			datetime, err := excelize.ExcelDateToTime(datefloat, false)
 			if err != nil {
-				return nil, fmt.Errorf("could not parse date at %s: %s, %s\n", coord, times[0], err.Error())
+				fmt.Printf("could not get date time info at %s: '%f'\n", coord, datefloat)
+				continue
 			}
-			date = dates.Format("2006-01-02")
+			date = datetime.Format("2006-01-02")
+			hour = datetime.Format("15:04")
 		case "SRO":
 			sro = value
 		case "Référence Poteau":

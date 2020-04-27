@@ -10,7 +10,7 @@ import (
 
 const (
 	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\FiitelCom\`
-	jobs                string = `2020-04-24 Extract Fiitelcom 2`
+	jobs                string = `2020-04-27 Extract Fiitelcom`
 	report              string = `2020-04-24 Report`
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + jobs + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
