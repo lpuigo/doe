@@ -18,7 +18,7 @@ func GetItemizableSiteAttachement(mgr *mgr.Manager, w http.ResponseWriter, r *ht
 	reqSiteId := mux.Vars(r)["id"]
 	rsid, err := strconv.Atoi(reqSiteId)
 	if err != nil {
-		AddError(w, logmsg, "mis-formatted FoaSite id '"+reqSiteId+"'", http.StatusBadRequest)
+		AddError(w, logmsg, "mis-formatted site id '"+reqSiteId+"'", http.StatusBadRequest)
 		return
 	}
 

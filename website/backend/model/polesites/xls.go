@@ -48,7 +48,7 @@ const (
 func ToXLS(w io.Writer, ps *PoleSite) error {
 	xf := excelize.NewFile()
 	sheetName := ps.Ref
-	xf.SetSheetName(xf.GetSheetName(1), sheetName)
+	xf.SetSheetName(xf.GetSheetName(0), sheetName)
 
 	// Set PoleSite infos
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 1), "polesite")
@@ -141,7 +141,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	if err != nil {
 		return nil, err
 	}
-	sheetName := xf.GetSheetName(1)
+	sheetName := xf.GetSheetName(0)
 	//
 	// Read PoleSite Header & Info
 	//

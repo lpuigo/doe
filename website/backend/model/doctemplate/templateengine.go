@@ -207,7 +207,7 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 	}
 
 	found := xf.GetSheetIndex(sheetName)
-	if found == 0 {
+	if found == -1 {
 		return fmt.Errorf("could not find EWIN sheet")
 	}
 
