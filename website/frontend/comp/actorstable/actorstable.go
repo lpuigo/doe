@@ -186,7 +186,7 @@ func (atm *ActorsTableModel) GetFilteredActors() []*actor.Actor {
 // Format & Style Functions
 
 func (atm *ActorsTableModel) TableRowClassName(rowInfo *js.Object) string {
-	actor := actor.NewActorFromJS(rowInfo.Get("row"))
+	actor := actor.ActorFromJS(rowInfo.Get("row"))
 	return GetRowStyle(actor)
 }
 

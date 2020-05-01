@@ -16,6 +16,7 @@
     <!-- -->
     <actor-update-modal
             ref="ActorEditModal"
+            @edited-actor="HandleEditedActor"
     ></actor-update-modal>
 
     <!-- -->
@@ -48,7 +49,7 @@
                 </el-button-group>
 
                 <el-button-group size="mini">
-                    <el-tooltip content="Taille des Equipes" placement="bottom" effect="light" open-delay=500>
+                    <el-tooltip content="Evolution des Equipes" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-chart-line icon--medium" @click="ShowActorsStats()"></el-button>
                     </el-tooltip>
                 </el-button-group>
@@ -73,6 +74,9 @@
                     </el-tooltip>
                     <el-tooltip content="Informations Acteurs" placement="bottom" effect="light" open-delay=500>
                         <el-radio-button label="Table"><i class="fas fa-user-check icon--medium"></i></el-radio-button>
+                    </el-tooltip>
+                    <el-tooltip v-if="User.Permissions.HR" content="Informations RH Acteurs" placement="bottom" effect="light" open-delay=500>
+                        <el-radio-button label="HRTable"><i class="fas fa-id-card icon--medium"></i></el-radio-button>
                     </el-tooltip>
                 </el-radio-group>
 
@@ -154,6 +158,12 @@
                           @edit-actor="ShowEditActor"
                           @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-table>
+            <actorinfos-table v-if="ActiveMode=='HRTable'"
+                          v-model="Actors"
+                          :user="User"
+                          :filter="Filter" :filtertype="FilterType"
+                          @edit-actor="ShowEditActor"
+            ></actorinfos-table>
         </el-main>
     </el-container>
 </div>

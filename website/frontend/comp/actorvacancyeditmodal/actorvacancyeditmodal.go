@@ -57,7 +57,7 @@ const template string = `<el-dialog
 				<template slot-scope="scope">
 					<el-date-picker
 							v-model="scope.row.Dates"
-							type="daterange" unlink-panels size="small" style="width: 100%"
+							type="daterange" unlink-panels size="mini" style="width: 100%"
 							:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
 							value-format="yyyy-MM-dd"
 							range-separator="au"
@@ -71,7 +71,7 @@ const template string = `<el-dialog
 			<el-table-column label="Commentaire">
 				<template slot-scope="scope">
 					<el-input
-							type="textarea" placeholder="Raison du congé"
+							type="textarea" placeholder="Raison du congé" size="mini"
 							v-model="scope.row.Comment" @input="ApplyChange()">
 					</el-input>
 				</template>

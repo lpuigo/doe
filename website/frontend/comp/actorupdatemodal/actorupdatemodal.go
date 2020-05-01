@@ -3,7 +3,9 @@ package actorupdatemodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strings"
 )
@@ -136,7 +138,7 @@ const template string = `<el-dialog
         </el-row>
 
         <!-- Comment -->
-        <el-row :gutter="10" align="middle" class="doublespaced" type="flex">
+        <el-row :gutter="10" align="top" class="doublespaced" type="flex">
             <el-col :span="4" class="align-right">Commentaire :</el-col>
             <el-col :span="20">
                 <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 5}" placeholder="Commentaire"
@@ -144,6 +146,39 @@ const template string = `<el-dialog
                 ></el-input>
             </el-col>
         </el-row>
+
+ 		<el-divider></el-divider>
+
+        <!-- Salary -->
+        <el-row :gutter="10" align="top" class="doublespaced" type="flex">
+            <el-col :span="4" class="align-right">Salaire Net :</el-col>
+            <el-col :span="20">
+				<el-table 
+						:data="current_actor.Info.Salary"
+						height="100" size="mini"
+				>
+					<el-table-column label="" width="180">
+						<template slot="header" slot-scope="scope">
+							<el-button type="success" plain icon="fas fa-user-plus" circle size="mini" @click="AddSalary()"></el-button>
+						</template>
+						<template slot-scope="scope">
+							<el-button type="danger" icon="fas fa-user-minus" circle size="mini" @click="RemoveSalary(scope.$index)"></el-button>
+						</template>
+					</el-table-column>
+					<el-table-column
+						label="Date" prop="Date" width="180"
+					></el-table-column>
+					<el-table-column
+						label="Montant" prop="Amount" width="180"
+					></el-table-column>
+					<el-table-column
+						label="Commentaire" prop="Comment"
+					></el-table-column>
+				</el-table>
+            </el-col>
+        </el-row>
+		
+
     </div>
 
     <!-- 
@@ -216,7 +251,7 @@ func (aumm *ActorUpdateModalModel) CheckName(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 
 	aumm.CurrentActor.LastName = strings.Trim(strings.ToUpper(aumm.CurrentActor.LastName), " \t")
-	aumm.CurrentActor.FirstName = strings.Trim(aumm.CurrentActor.FirstName, " \t")
+	aumm.CurrentActor.FirstName = strings.Trim(strings.Title(aumm.CurrentActor.FirstName), " \t")
 	aumm.CurrentActor.Ref = aumm.CurrentActor.LastName + " " + aumm.CurrentActor.FirstName
 
 	aumm.CurrentActor.Company = strings.Trim(strings.ToUpper(aumm.CurrentActor.Company), " \t")
@@ -246,4 +281,28 @@ func (aumm *ActorUpdateModalModel) GetClientList(vm *hvue.VM) []*elements.ValueL
 		res = append(res, elements.NewValueLabel(client.Name, client.Name))
 	}
 	return res
+}
+
+func (aumm *ActorUpdateModalModel) ConfirmChange(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.ActorModalModel.ConfirmChange()
+	vm.Emit("edited-actor", aumm.EditedActor)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// ActorInfos Tools Button Methods
+
+func (aumm *ActorUpdateModalModel) AddSalary(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	nd := actor.NewDateAmountComment()
+	nd.Date = date.TodayAfter(0)
+	nd.Amount = 100.0 + float64(len(aumm.CurrentActor.Info.Salary))
+	nd.Comment = "test"
+	aumm.CurrentActor.Info.Salary = append(actor.EarningHistory{*nd}, aumm.CurrentActor.Info.Salary...)
+	//aumm.CurrentActor.Info.Get("Salary").Call("unshift", nd)
+}
+
+func (aumm *ActorUpdateModalModel) RemoveSalary(vm *hvue.VM, pos int) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.CurrentActor.Info.Get("Salary").Call("splice", pos, 1)
 }

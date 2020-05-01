@@ -25,6 +25,7 @@ type Actor struct {
 	Vacation  []*date.DateRangeComment `js:"Vacation"`
 	Client    []string                 `js:"Client"`
 	Comment   string                   `js:"Comment"`
+	Info      *ActorInfo               `js:"Info"`
 }
 
 func NewActor() *Actor {
@@ -41,15 +42,16 @@ func NewActor() *Actor {
 	na.Vacation = []*date.DateRangeComment{}
 	na.Client = []string{}
 	na.Comment = ""
+	na.Info = NewActorInfoForActor(na)
 	return na
 }
 
-func NewActorFromJS(obj *js.Object) *Actor {
+func ActorFromJS(obj *js.Object) *Actor {
 	return &Actor{Object: obj}
 }
 
 func (a *Actor) Copy() *Actor {
-	return NewActorFromJS(json.Parse(json.Stringify(a.Object)))
+	return ActorFromJS(json.Parse(json.Stringify(a.Object)))
 }
 
 func (a *Actor) Clone(oa *Actor) {
@@ -69,6 +71,7 @@ func (a *Actor) Clone(oa *Actor) {
 	}
 	a.Client = oa.Client[:]
 	a.Comment = oa.Comment
+	a.Info.Clone(oa.Info)
 }
 
 func (a *Actor) SearchString(filter string) string {
