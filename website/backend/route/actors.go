@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
-	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/actorinfos"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 )
@@ -37,14 +37,14 @@ func UpdateActors(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	updatedActors := []*actors.Actor{}
+	updatedActors := []*actorinfos.ActorHr{}
 	err := json.NewDecoder(r.Body).Decode(&updatedActors)
 	if err != nil {
 		AddError(w, logmsg, fmt.Sprintf("misformatted request body :%v", err.Error()), http.StatusBadRequest)
 		return
 	}
 
-	err = mgr.Actors.UpdateActors(updatedActors)
+	err = mgr.UpdateActors(updatedActors)
 	if err != nil {
 		AddError(w, logmsg, fmt.Sprintf("error updating actors:%v", err.Error()), http.StatusInternalServerError)
 		return

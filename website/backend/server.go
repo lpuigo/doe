@@ -157,9 +157,9 @@ func main() {
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")
 	router.HandleFunc("/api/actors/whrecord/{month:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetActorsWorkingHoursRecord", route.GetActorsWorkingHoursRecord)).Methods("GET")
 
-	// ActorInfos methods
-	router.HandleFunc("/api/actorinfos", withUserManager("GetActorInfos", route.GetActorInfos)).Methods("GET")
-	router.HandleFunc("/api/actorinfos", withUserManager("UpdateActorInfos", route.UpdateActorInfos)).Methods("PUT")
+	//// ActorInfos methods
+	//router.HandleFunc("/api/actorinfos", withUserManager("GetActorInfos", route.GetActorInfos)).Methods("GET")
+	//router.HandleFunc("/api/actorinfos", withUserManager("UpdateActorInfos", route.UpdateActorInfos)).Methods("PUT")
 
 	// TimeSheets methods
 	router.HandleFunc("/api/timesheet/{week:[0-9]{4}-[0-9]{2}-[0-9]{2}}", withUserManager("GetTimeSheet", route.GetTimeSheet)).Methods("GET")
