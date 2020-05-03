@@ -38,3 +38,14 @@ const (
 	FilterLabelClient  string = "Client"
 	FilterLabelComment string = "Commentaire"
 )
+
+const (
+	InfoTrainingMedic         string = "Visite Med."
+	InfoTrainingProBTP        string = "ProBTP"
+	InfoTrainingAIPR          string = "AIPR"
+	InfoTrainingElec          string = "Prox. Elec."
+	InfoTrainingCacesChantier string = "Sign. Chantier"
+	InfoTrainingCacesGrue     string = "Caces Grue"
+	InfoTrainingCacesHauteur  string = "Caces Hauteur"
+	InfoTrainingCacesNacelle  string = "Caces Nacelle"
+)

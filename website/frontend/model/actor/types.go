@@ -32,6 +32,28 @@ func NewDateAmountComment() *DateAmountComment {
 	return nd
 }
 
+func DateAmountCommentFromJs(o *js.Object) *DateAmountComment {
+	return &DateAmountComment{DateComment: DateComment{Object: o}}
+}
+
+func CompareDateAmountComment(a, b DateAmountComment) int {
+	if a.Date > b.Date {
+		return -1
+	}
+	if a.Date == b.Date {
+		return 0
+	}
+	return 1
+}
+
+func (dac *DateAmountComment) Copy() *DateAmountComment {
+	res := NewDateAmountComment()
+	res.Date = dac.Date
+	res.Comment = dac.Comment
+	res.Amount = dac.Amount
+	return res
+}
+
 // Type Events reflects ewin/doe/website/backend/model/actorinfos.Events
 // Events type is dedicated for date-defined event. key is the event name (ex : ProBTP, Caces Nacelle, ...)
 type Events map[string]DateComment
