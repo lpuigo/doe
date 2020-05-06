@@ -197,7 +197,7 @@ func (rjum *RipJunctionUpdateModel) GetNodeDesc(vm *hvue.VM, junction *fmrip.Jun
 func (rjum *RipJunctionUpdateModel) GetNodeType(vm *hvue.VM, junction *fmrip.Junction) string {
 	rjum = RipJunctionUpdateModelFromJS(vm.Object)
 	node := rjum.Ripsite.Nodes[junction.NodeName]
-	return node.Type + ": " + node.BoxType
+	return node.BoxType
 }
 
 func (rjum *RipJunctionUpdateModel) GetTronconDesc(vm *hvue.VM, junction *fmrip.Junction) string {

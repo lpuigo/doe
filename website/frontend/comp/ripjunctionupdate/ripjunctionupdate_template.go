@@ -39,7 +39,7 @@ const template_flat string = `
     >
         <template slot-scope="scope"> 
             <div>{{GetNode(scope.row).Address}}</div>
-        </template>
+        </template>	
     </el-table-column>
     
     <el-table-column
@@ -111,32 +111,35 @@ const template string = `
 >
     <el-table-column
             label="Noeud"
-            width="500px" :resizable="true" :show-overflow-tooltip=true
+            width="300px" :resizable="true" :show-overflow-tooltip=true
     >
         <template slot-scope="scope">
 			<div class="header-menu-container">
-				{{GetNodeDesc(scope.row)}}
-				<el-popover placement="bottom-start" width="400"
-							title="Opérations à réaliser:"
-							trigger="hover"
-				>
-					<el-row v-for="(ope, index) in scope.row.Operations" :key="index" :gutter="5">
-						<el-col :span="14">
-							<div v-if="ope.TronconName">{{index+1}} - {{ope.Type}}<i class="icon--right fas fa-arrow-right icon--left"></i>{{ope.TronconName}}</div>
-							<div v-else>{{index+1}} - {{ope.Type}}</div>
-						</el-col>
-						<el-col :span="10">
-							<span>{{ope.NbFiber}} fibre(s)</span>
-						</el-col>
-					</el-row>
-					<i slot="reference" class="fas fa-info-circle "></i>
-				</el-popover>
+				<span>{{GetNodeDesc(scope.row)}}</span>
+				<span>{{GetNodeType(scope.row)}}
+					<el-popover placement="bottom" width="400"
+								title="Opérations à réaliser:"
+								trigger="hover"
+					>
+						<div style="margin-bottom: 8px">{{GetNode(scope.row).Address}}</div>
+						<el-row v-for="(ope, index) in scope.row.Operations" :key="index" :gutter="5">
+							<el-col :span="14">
+								<div v-if="ope.TronconName">{{index+1}} - {{ope.Type}}<i class="icon--right fas fa-arrow-right icon--left"></i>{{ope.TronconName}}</div>
+								<div v-else>{{index+1}} - {{ope.Type}}</div>
+							</el-col>
+							<el-col :span="10">
+								<span>{{ope.NbFiber}} fibre(s)</span>
+							</el-col>
+						</el-row>
+						<i slot="reference" class="fas fa-info-circle icon--right"></i>
+					</el-popover>
+				</span>
 			</div>
         </template>
     </el-table-column>
     <el-table-column
             label="Tronçon"
-            width="120px" :resizable="true" :show-overflow-tooltip=true
+            width="140px" :resizable="true" :show-overflow-tooltip=true
     >
         <template slot-scope="scope">
             <div>{{GetTronconDesc(scope.row)}}</div>
