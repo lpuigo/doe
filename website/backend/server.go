@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/route"
 	"net/http"
+	_ "net/http/pprof"
 	"os/exec"
 )
 
@@ -106,6 +107,8 @@ func main() {
 	}
 
 	router := mux.NewRouter()
+	// attach pprof route from defaultServeMux
+	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	// session management
 	router.HandleFunc("/api/login", withManager(route.GetUser)).Methods("GET")
 	router.HandleFunc("/api/login", withUserManager("Logout", route.Logout)).Methods("DELETE")

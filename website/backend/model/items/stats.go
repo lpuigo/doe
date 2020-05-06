@@ -58,8 +58,28 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 	}
 
 	curStringDate := sc.DateFor(date.DateFrom(start).String())
-	curDate := date.DateFrom(curStringDate)
 	endStringDate := sc.DateFor(end.String())
+
+	// estimate nb of increment between 2 stat dates (only usefull for monthly stats)
+	// less precise but more robust to corrupted data
+	nbIncr := 1
+	nextDate := date.DateFrom(endStringDate).AddDays(sc.DayIncr)
+	for sc.DateFor(nextDate.String()) == endStringDate {
+		nbIncr++
+		nextDate = nextDate.AddDays(sc.DayIncr)
+	}
+	if nbIncr > 1 {
+		nbIncr++ // raise nbIncr to make sure it is ok even if it is a 4 weeks month
+	}
+
+	// compare "values" driven timelap and previously calculated timelap
+	dateDiff := date.NbDaysBetween(curStringDate, endStringDate)
+	if dateDiff > sc.MaxVal*sc.DayIncr*nbIncr {
+		// dateDiff is too big, use estimated start time instead of values driven start time
+		curStringDate = sc.DateFor(date.DateFrom(endStringDate).AddDays(-sc.MaxVal * sc.DayIncr * nbIncr).String())
+	}
+
+	curDate := date.DateFrom(curStringDate)
 	endReached := false
 	for !endReached {
 		dateset[curStringDate] = 1
