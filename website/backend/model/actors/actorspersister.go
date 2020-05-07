@@ -169,7 +169,7 @@ func (ap *ActorsPersister) GetActorsByClient(activeOnly bool, clients ...string)
 func (ap *ActorsPersister) UpdateActors(updatedActors []*Actor) error {
 	for _, actor := range updatedActors {
 		ar := NewActorRecordFromActor(actor)
-		if actor.Id == -1 {
+		if actor.Id < 0 { // New Actor, add it instead of update
 			ap.Add(ar)
 			continue
 		}
