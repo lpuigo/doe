@@ -11,6 +11,7 @@ import (
 type StatContext struct {
 	DayIncr       int
 	MaxVal        int
+	StartDate     string
 	DateFor       date.DateAggreg
 	IsTeamVisible clients.IsTeamVisible
 	ClientByName  clients.ClientByName
@@ -29,12 +30,16 @@ type ItemizableSite interface {
 	GetRef() string
 	GetClient() string
 	GetType() string
+	GetUpdateDate() string
 	Itemize(*bpu.Bpu) ([]*Item, error)
 }
 
 func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
 	calcValues := NewStats()
 	for _, site := range sites.GetItemizableSites(isSiteVisible) {
+		if site.GetUpdateDate() < sc.StartDate {
+			continue
+		}
 		client := sc.ClientByName(site.GetClient())
 		if client == nil {
 			continue
@@ -74,13 +79,17 @@ func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.
 		if !item.Done {
 			continue
 		}
+		dateItem := sc.DateFor(item.Date)
+		if dateItem < sc.StartDate {
+			continue
+		}
 		actorsName := make([]string, len(item.Actors))
 		for i, actId := range item.Actors {
 			actorsName[i] = sc.ActorById(actId)
 		}
-		addValue(sc.DateFor(item.Date), StatSerieWork, actorsName, item.Work())
+		addValue(dateItem, StatSerieWork, actorsName, item.Work())
 		if showprice {
-			addValue(sc.DateFor(item.Date), StatSeriePrice, actorsName, item.Price())
+			addValue(dateItem, StatSeriePrice, actorsName, item.Price())
 		}
 	}
 	return nil

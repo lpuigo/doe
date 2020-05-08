@@ -39,6 +39,10 @@ func (s *Site) GetType() string {
 	return "ripsite"
 }
 
+func (s *Site) GetUpdateDate() string {
+	return s.UpdateDate
+}
+
 func (s *Site) GetInfo(clientByName clients.ClientByName) *fm.RipsiteInfo {
 	rsi := fm.NewBERipsiteInfo()
 

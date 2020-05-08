@@ -139,7 +139,7 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-03-06 Remplacement\Polesite Sogetrel Poteau-Metz.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-04-21 Plaque 25 (option a confirmer)\Polesite.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)

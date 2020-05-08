@@ -23,6 +23,7 @@ func (m Manager) GetPolesitesInfo(writer io.Writer) error {
 func (m Manager) GetPolesitesStats(writer io.Writer, freq string) error {
 	maxVal := 12
 	dayIncr := 7
+	startDate := date.Today().String()
 
 	var dateFor date.DateAggreg
 	switch freq {
@@ -32,14 +33,17 @@ func (m Manager) GetPolesitesStats(writer io.Writer, freq string) error {
 		dateFor = func(d string) string {
 			return d
 		}
+		startDate = date.Today().AddDays(1 - maxVal).String()
 	case "week":
 		dateFor = func(d string) string {
 			return date.GetMonday(d)
 		}
+		startDate = date.GetDateAfter(date.GetMonday(startDate), (1-maxVal)*7)
 	case "month":
 		dateFor = func(d string) string {
 			return date.GetMonth(d)
 		}
+		startDate = date.GetMonth(date.GetDateAfter(startDate, -maxVal*30))
 	default:
 		return fmt.Errorf("unsupported stat period '%s'", freq)
 	}
@@ -52,6 +56,7 @@ func (m Manager) GetPolesitesStats(writer io.Writer, freq string) error {
 	statContext := items.StatContext{
 		DayIncr:       dayIncr,
 		MaxVal:        maxVal,
+		StartDate:     startDate,
 		DateFor:       dateFor,
 		IsTeamVisible: isActorVisible,
 		ClientByName:  m.genGetClient(),

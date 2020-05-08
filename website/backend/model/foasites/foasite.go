@@ -101,6 +101,10 @@ func (fs *FoaSite) GetType() string {
 	return "foa"
 }
 
+func (fs *FoaSite) GetUpdateDate() string {
+	return fs.UpdateDate
+}
+
 // Itemize returns slice of item pertaining to polesite poles list
 func (fs *FoaSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	res := []*items.Item{}

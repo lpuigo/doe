@@ -40,6 +40,10 @@ func (ps *PoleSite) GetType() string {
 	return "polesite"
 }
 
+func (ps *PoleSite) GetUpdateDate() string {
+	return ps.UpdateDate
+}
+
 func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 	psi := fm.NewBEPolesiteInfo()
 
