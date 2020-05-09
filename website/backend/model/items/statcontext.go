@@ -17,6 +17,13 @@ type StatContext struct {
 	ClientByName  clients.ClientByName
 	ActorById     clients.ActorById
 	ShowTeam      bool
+
+	Data1   func(s StatKey) string
+	Data2   func(s StatKey) string
+	Data3   func(s StatKey) string
+	Filter1 func(string) bool
+	Filter2 func(string) bool
+	Filter3 func(string) bool
 }
 
 type IsItemizableSiteVisible func(site ItemizableSite) bool
@@ -32,6 +39,51 @@ type ItemizableSite interface {
 	GetType() string
 	GetUpdateDate() string
 	Itemize(*bpu.Bpu) ([]*Item, error)
+}
+
+func NewStatContext(freq string) (*StatContext, error) {
+	maxVal := 12
+	dayIncr := 7
+	startDate := date.Today().String()
+
+	var dateFor date.DateAggreg
+	switch freq {
+	case "day":
+		dayIncr = 1
+		maxVal = 15
+		dateFor = func(d string) string {
+			return d
+		}
+		startDate = date.Today().AddDays(1 - maxVal).String()
+	case "week":
+		dateFor = func(d string) string {
+			return date.GetMonday(d)
+		}
+		startDate = date.GetDateAfter(date.GetMonday(startDate), (1-maxVal)*7)
+	case "month":
+		dateFor = func(d string) string {
+			return date.GetMonth(d)
+		}
+		startDate = date.GetMonth(date.GetDateAfter(startDate, (1-maxVal)*30))
+	default:
+		return nil, fmt.Errorf("unsupported stat period '%s'", freq)
+	}
+
+	return &StatContext{
+		DayIncr:   dayIncr,
+		MaxVal:    maxVal,
+		StartDate: startDate,
+		DateFor:   dateFor,
+	}, nil
+}
+
+func (sc *StatContext) SetSerieTeamSiteConf() {
+	sc.Data1 = func(s StatKey) string { return s.Serie } // Bars Family
+	sc.Data2 = func(s StatKey) string { return s.Team }  // Graphs
+	sc.Data3 = func(s StatKey) string { return s.Site }  // side block
+	sc.Filter1 = KeepAll
+	sc.Filter2 = KeepAll
+	sc.Filter3 = KeepAll
 }
 
 func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
@@ -50,14 +102,7 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 		}
 	}
 
-	d1 := func(s StatKey) string { return s.Serie } // Bars Family
-	d2 := func(s StatKey) string { return s.Team }  // Graphs
-	d3 := func(s StatKey) string { return s.Site }  // side block
-	f1 := KeepAll
-	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-	f2 := KeepAll
-	f3 := KeepAll
-	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
+	return calcValues.Aggregate(sc), nil
 }
 
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {

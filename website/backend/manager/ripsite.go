@@ -37,31 +37,9 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
-	maxVal := 12
-	dayIncr := 7
-	startDate := date.Today().String()
-
-	var dateFor date.DateAggreg
-	switch freq {
-	case "day":
-		maxVal = 15
-		dayIncr = 1
-		dateFor = func(d string) string {
-			return d
-		}
-		startDate = date.Today().AddDays(1 - maxVal).String()
-	case "week":
-		dateFor = func(d string) string {
-			return date.GetMonday(d)
-		}
-		startDate = date.GetDateAfter(date.GetMonday(startDate), (1-maxVal)*7)
-	case "month":
-		dateFor = func(d string) string {
-			return date.GetMonth(d)
-		}
-		startDate = date.GetMonth(date.GetDateAfter(startDate, -maxVal*30))
-	default:
-		return fmt.Errorf("unsupported stat period '%s'", freq)
+	statContext, err := items.NewStatContext(freq)
+	if err != nil {
+		return err
 	}
 
 	isActorVisible, err := m.genIsActorVisible()
@@ -69,27 +47,23 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		return err
 	}
 
-	statContext := items.StatContext{
-		DayIncr:       dayIncr,
-		MaxVal:        maxVal,
-		StartDate:     startDate,
-		DateFor:       dateFor,
-		IsTeamVisible: isActorVisible,
-		ClientByName:  m.genGetClient(),
-		ActorById:     m.genActorById(),
-		ShowTeam:      !m.CurrentUser.Permissions["Review"],
-	}
+	statContext.IsTeamVisible = isActorVisible
+	statContext.ClientByName = m.genGetClient()
+	statContext.ActorById = m.genActorById()
+	statContext.ShowTeam = !m.CurrentUser.Permissions["Review"]
+
+	statContext.SetSerieTeamSiteConf()
 
 	switch groupBy {
 	case "activity", "site":
-		ripsiteStats, err := m.Ripsites.GetProdStats(statContext, m.visibleRipsiteFilter(), m.CurrentUser.Permissions["Invoice"], groupBy)
+		ripsiteStats, err := m.Ripsites.GetProdStats(*statContext, m.visibleRipsiteFilter(), m.CurrentUser.Permissions["Invoice"], groupBy)
 		if err != nil {
 			return err
 		}
 		return json.NewEncoder(writer).Encode(ripsiteStats)
 
 	case "mean":
-		ripsiteStats, err := m.Ripsites.GetMeanProdStats(statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorInfoById())
+		ripsiteStats, err := m.Ripsites.GetMeanProdStats(*statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorInfoById())
 		if err != nil {
 			return err
 		}

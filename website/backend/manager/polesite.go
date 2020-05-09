@@ -2,9 +2,7 @@ package manager
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
-	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 
 	"io"
@@ -21,48 +19,26 @@ func (m Manager) GetPolesitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetPolesitesStats(writer io.Writer, freq string) error {
-	maxVal := 12
-	dayIncr := 7
-	startDate := date.Today().String()
-
-	var dateFor date.DateAggreg
-	switch freq {
-	case "day":
-		dayIncr = 1
-		maxVal = 15
-		dateFor = func(d string) string {
-			return d
-		}
-		startDate = date.Today().AddDays(1 - maxVal).String()
-	case "week":
-		dateFor = func(d string) string {
-			return date.GetMonday(d)
-		}
-		startDate = date.GetDateAfter(date.GetMonday(startDate), (1-maxVal)*7)
-	case "month":
-		dateFor = func(d string) string {
-			return date.GetMonth(d)
-		}
-		startDate = date.GetMonth(date.GetDateAfter(startDate, -maxVal*30))
-	default:
-		return fmt.Errorf("unsupported stat period '%s'", freq)
-	}
-
-	isActorVisible, err := m.genIsActorVisible()
+	statContext, err := m.NewStatContext(freq)
 	if err != nil {
 		return err
 	}
 
-	statContext := items.StatContext{
-		DayIncr:       dayIncr,
-		MaxVal:        maxVal,
-		StartDate:     startDate,
-		DateFor:       dateFor,
-		IsTeamVisible: isActorVisible,
-		ClientByName:  m.genGetClient(),
-		ActorById:     m.genActorById(),
-		ShowTeam:      !m.CurrentUser.Permissions["Review"],
+	polesiteStats, err := statContext.CalcStats(m.Polesites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
 	}
+	return json.NewEncoder(writer).Encode(polesiteStats)
+}
+
+func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
+	statContext, err := m.NewStatContext("day")
+	if err != nil {
+		return err
+	}
+	statContext.StartDate = month
+	statContext.MaxVal = date.NbDaysBetween(month, date.GetMonth(date.GetDateAfter(month, 32)))
+
 	polesiteStats, err := statContext.CalcStats(m.Polesites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err

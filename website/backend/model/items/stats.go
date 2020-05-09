@@ -25,7 +25,7 @@ func (s Stats) AddStatValue(site, team, date, article, serie string, value float
 // Aggregate returns struct with ws.Values : map{D1}[#D2]{D3}[#date]float64
 //
 // Standard usage is ws.Values : map{series}[#team]{sites}[#date]float64
-func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2, f3 func(string) bool) *rs.RipsiteStats {
+func (s Stats) Aggregate(sc StatContext) *rs.RipsiteStats {
 
 	//create client-team, sites, Series & dates Lists
 	serieset := make(ElemSet) // d1
@@ -39,9 +39,9 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 	agrValues := make(Stats) // values
 
 	for key, val := range s {
-		k1 := d1(key)
-		k2 := d2(key)
-		k3 := d3(key)
+		k1 := sc.Data1(key)
+		k2 := sc.Data2(key)
+		k3 := sc.Data3(key)
 		serieset[k1] = 1 // d1
 		teamset[k2] = 1  // d2
 		siteset[k3] = 1  // d3
@@ -57,46 +57,17 @@ func (s Stats) Aggregate(sc StatContext, d1, d2, d3 func(StatKey) string, f1, f2
 		}] += val
 	}
 
-	curStringDate := sc.DateFor(date.DateFrom(start).String())
-	endStringDate := sc.DateFor(end.String())
-
-	// estimate nb of increment between 2 stat dates (only usefull for monthly stats)
-	// less precise but more robust to corrupted data
-	nbIncr := 1
-	nextDate := date.DateFrom(endStringDate).AddDays(sc.DayIncr)
-	for sc.DateFor(nextDate.String()) == endStringDate {
-		nbIncr++
-		nextDate = nextDate.AddDays(sc.DayIncr)
-	}
-	if nbIncr > 1 {
-		nbIncr++ // raise nbIncr to make sure it is ok even if it is a 4 weeks month
-	}
-
-	// compare "values" driven timelap and previously calculated timelap
-	dateDiff := date.NbDaysBetween(curStringDate, endStringDate)
-	if dateDiff > sc.MaxVal*sc.DayIncr*nbIncr {
-		// dateDiff is too big, use estimated start time instead of values driven start time
-		curStringDate = sc.DateFor(date.DateFrom(endStringDate).AddDays(-sc.MaxVal * sc.DayIncr * nbIncr).String())
-	}
-
-	curDate := date.DateFrom(curStringDate)
-	endReached := false
-	for !endReached {
+	curDate := date.DateFrom(sc.StartDate)
+	for len(dateset) < sc.MaxVal {
+		curStringDate := sc.DateFor(curDate.String())
 		dateset[curStringDate] = 1
 		curDate = curDate.AddDays(sc.DayIncr)
-		curStringDate = sc.DateFor(curDate.String())
-		endReached = curStringDate > endStringDate
 	}
 
-	series := serieset.SortedKeys(f1)    // d1
-	teams := teamset.SortedKeys(f2)      // d2
-	sites := siteset.SortedKeys(f3)      // d3
-	dates := dateset.SortedKeys(KeepAll) // d4
-
-	// keep maxVal newest data
-	if len(dates) > sc.MaxVal {
-		dates = dates[len(dates)-sc.MaxVal:]
-	}
+	series := serieset.SortedKeys(sc.Filter1) // d1
+	teams := teamset.SortedKeys(sc.Filter2)   // d2
+	sites := siteset.SortedKeys(sc.Filter3)   // d3
+	dates := dateset.SortedKeys(KeepAll)      // d4
 
 	// ws.Values : map{D1}[#D2]{D3}[#D4]float64
 	ws := rs.NewBERipsiteStats()
@@ -290,22 +261,6 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 				//mainMeanData[actPos] = map[string][]float64{}
 			}
 		}
-
-		//mainTeamData = mapData(mainTeamData, mainTeamNbActorData, 0, divData)
-		//mainMeanData[mainTeamPos][StatSiteGlobal] = mainTeamData
-
-		//for roleTeamName, roleTeamActorsPos := range actorsIndex[mainTeamName] {
-		//	role := roleTeamRole[roleTeamName]
-		//	roleTeamPos := roleTeamIndex[roleTeamName]
-		//
-		//	apply mainTeam mean on roleTeam if there is role activity
-		//	mainMeanData[roleTeamPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[roleTeamPos][role], 0, getData)
-		//
-		//	apply mainTeam mean on actor if there is actor activity
-		//	for _, actPos := range roleTeamActorsPos {
-		//		mainMeanData[actPos][StatSiteGlobal] = mapData(mainTeamData, nbActors[actPos][role], 0, getData)
-		//	}
-		//}
 	}
 
 	aggrStat.Values[StatSerieRoleMeanData] = roleMeanData

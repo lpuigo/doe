@@ -210,6 +210,7 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 		dateFor := sc.DateFor(item.Date)
 		switch groupBy {
 		case "activity":
+			//AddStatValue(site, team, date, article, serie string, value float64)
 			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
 			if showprice {
 				addValue(item.Activity, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
@@ -219,22 +220,14 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 			if showprice {
 				addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
 			}
-		case "mean":
-			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+		//case "mean":
+		//	addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
 		default:
 			return nil, fmt.Errorf("unsupported groupBy value '%s'", groupBy)
 		}
 	}
 
-	// Aggregate Stats
-	d1 := func(s items.StatKey) string { return s.Serie }
-	d2 := func(s items.StatKey) string { return s.Team }
-	d3 := func(s items.StatKey) string { return s.Site }
-	f1 := items.KeepAll
-	f2 := items.KeepAll
-	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-	f3 := items.KeepAll
-	aggrStats := stats.Aggregate(sc, d1, d2, d3, f1, f2, f3)
+	aggrStats := stats.Aggregate(sc)
 
 	return aggrStats, nil
 }
@@ -281,15 +274,7 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 		}
 	}
 
-	// Aggregate Stats
-	d1 := func(s items.StatKey) string { return s.Serie }
-	d2 := func(s items.StatKey) string { return s.Team }
-	d3 := func(s items.StatKey) string { return s.Site }
-	f1 := items.KeepAll
-	f2 := items.KeepAll
-	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-	f3 := items.KeepAll
-	aggrStats := stats.Aggregate(sc, d1, d2, d3, f1, f2, f3)
+	aggrStats := stats.Aggregate(sc)
 
 	return aggrStats, nil
 }

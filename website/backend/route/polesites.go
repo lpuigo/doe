@@ -2,6 +2,7 @@ package route
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 	"strconv"
 
@@ -113,6 +114,28 @@ func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("%s polesite stats produced", freq), http.StatusOK)
+}
+
+func GetPolesitesProgress(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesitesProgress").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+	var err error
+	vars := mux.Vars(r)
+	month := vars["month"]
+	if date.GetMonth(month) != month {
+		AddError(w, logmsg, "misformated date '"+month+"'", http.StatusBadRequest)
+		return
+	}
+
+	err = mgr.GetPolesitesProgress(w, month)
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("polesite progress produced for %s", month), http.StatusOK)
 }
 
 // GetPolesiteExport

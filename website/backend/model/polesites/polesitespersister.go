@@ -3,11 +3,9 @@ package polesites
 import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/archives"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"path/filepath"
 	"sync"
 	"time"
@@ -164,36 +162,6 @@ func (psp *PoleSitesPersister) ArchiveCompletedPoleRefs(psr *PoleSiteRecord) err
 	}
 	psp.Add(archivePoleSite)
 	return nil
-}
-
-// GetStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (psp *PoleSitesPersister) GetStats(sc items.StatContext, isPSVisible IsPolesiteVisible, clientByName clients.ClientByName, actorById clients.ActorById, showprice bool) (*rs.RipsiteStats, error) {
-	psp.RLock()
-	defer psp.RUnlock()
-
-	// calc per Team/date/indicator values
-	calcValues := make(items.Stats)
-	for _, pr := range psp.polesites {
-		if isPSVisible(pr.PoleSite) {
-			client := clientByName(pr.PoleSite.Client)
-			if client == nil {
-				continue
-			}
-			err := pr.AddStat(calcValues, sc, actorById, client.Bpu, showprice)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	d1 := func(s items.StatKey) string { return s.Serie } // Bars Family
-	d2 := func(s items.StatKey) string { return s.Team }  // Graphs
-	d3 := func(s items.StatKey) string { return s.Site }  // side block
-	f1 := items.KeepAll
-	//f2 := func(e string) bool { return !(!sc.ShowTeam && strings.Contains(e, " : ")) }
-	f2 := items.KeepAll
-	f3 := items.KeepAll
-	return calcValues.Aggregate(sc, d1, d2, d3, f1, f2, f3), nil
 }
 
 func (psp *PoleSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {

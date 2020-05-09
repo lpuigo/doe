@@ -137,6 +137,7 @@ func main() {
 	// Polesites methods
 	router.HandleFunc("/api/polesites", withUserManager("GetPolesitesInfo", route.GetPolesitesInfo)).Methods("GET")
 	router.HandleFunc("/api/polesites/stat/{freq}", withUserManager("GetPolesitesStats", route.GetPolesitesStats)).Methods("GET")
+	router.HandleFunc("/api/polesites/progress/{month}", withUserManager("GetPolesitesProgress", route.GetPolesitesProgress)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("GetPolesite", route.GetPolesite)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}", withUserManager("UpdatePolesite", route.UpdatePolesite)).Methods("PUT")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/archivecompleted", withUserManager("ArchiveCompletedPoleRefs", route.ArchiveCompletedPoleRefs)).Methods("GET")
