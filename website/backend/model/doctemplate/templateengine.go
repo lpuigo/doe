@@ -365,7 +365,7 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 	styleHoursOff, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColOffHoursTpl))
 
 	found := xf.GetSheetIndex(amtsSheetName)
-	if found == 0 {
+	if found == -1 {
 		return fmt.Errorf("could not find CRA sheet")
 	}
 	dates := make([]string, 31) // dates of month
