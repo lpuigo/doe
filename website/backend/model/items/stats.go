@@ -270,3 +270,65 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 
 	return aggrStat
 }
+
+func CalcProgress(aggrStat *rs.RipsiteStats) *rs.RipsiteStats {
+	var refDailyTarget float64
+	var serieNameTarget string
+
+	isActiveDate := make([]bool, len(aggrStat.Dates))
+	nbActiveDay := 0
+	for dateId, day := range aggrStat.Dates {
+		if date.DateFrom(day).IsSaturdaySunday() {
+			continue
+		}
+		isActiveDate[dateId] = true
+		nbActiveDay++
+	}
+
+	newValues := make(map[string][]map[string][]float64)
+	for serieName, serieValues := range aggrStat.Values {
+		//_ = serieName: Price | Work
+		switch serieName {
+		case StatSerieWork:
+			serieNameTarget = StatSerieWorkTarget
+			refDailyTarget = 1000
+		case StatSeriePrice:
+			serieNameTarget = StatSeriePriceTarget
+			refDailyTarget = 20000
+		}
+		newSerieValues := make([]map[string][]float64, len(serieValues))
+		for teamIndex, sitesValues := range serieValues {
+			//_ = teamIndex <=> Client & actor per client
+
+			// Calc Cumulative values
+			for _, dateValues := range sitesValues {
+				//_ = siteName
+				for dateId := 1; dateId < len(dateValues); dateId++ {
+					dateValues[dateId] += dateValues[dateId-1]
+				}
+			}
+
+			newSitesValues := make(map[string][]float64)
+			// if team[teamIndex] == main team
+			// 		Calc incremental target
+			nbDays := len(aggrStat.Dates)
+			dailyTarget := refDailyTarget / float64(nbActiveDay)
+			targetVal := 0.0
+			target := make([]float64, nbDays)
+			for dateId := 0; dateId < nbDays; dateId++ {
+				if isActiveDate[dateId] {
+					targetVal += dailyTarget
+				}
+				target[dateId] = targetVal
+			}
+			newSitesValues[StatSiteProgressTarget] = target
+			newSerieValues[teamIndex] = newSitesValues
+		}
+		newValues[serieNameTarget] = newSerieValues
+	}
+	for serieName, serieValues := range newValues {
+		aggrStat.Values[serieName] = serieValues
+	}
+	aggrStat.Sites[StatSiteProgressTarget] = true
+	return aggrStat
+}

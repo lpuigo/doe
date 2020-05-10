@@ -41,7 +41,7 @@ func SetColor(sites map[string]bool, workCM, priceCM ColorMap) SiteColorMap {
 	return res
 }
 
-func newSerie(style, name, stack, tooltipPrefix, tooltipSuffix string, colormap siteColors, yAxis int, pointpadding float64, data map[string][]float64) []js.M {
+func newSerie(style, dash, name, stack, tooltipPrefix, tooltipSuffix string, colormap siteColors, yAxis int, pointpadding float64, data map[string][]float64) []js.M {
 	//s := &serie{Object: tools.O()}
 	//s.Name = name
 	//s.Color = color
@@ -52,6 +52,7 @@ func newSerie(style, name, stack, tooltipPrefix, tooltipSuffix string, colormap 
 			//"name":         name + " " + key,
 			"name":         key,
 			"type":         style,
+			"dashStyle":    dash,
 			"color":        colormap[key],
 			"yAxis":        yAxis,
 			"data":         value,

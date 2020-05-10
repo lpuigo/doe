@@ -10,6 +10,7 @@ import (
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/worksite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"honnef.co/go/js/xhr"
 	"strings"
@@ -60,6 +61,7 @@ type TeamProductivityModalModel struct {
 	PeriodMode string `js:"PeriodMode"`
 	GroupMode  string `js:"GroupMode"`
 	InfoMode   string `js:"InfoMode"`
+	Month      string `js:"Month"`
 }
 
 func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
@@ -82,6 +84,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	tpmm.PeriodMode = "week"
 	tpmm.GroupMode = "activity"
 	tpmm.InfoMode = "prod"
+	tpmm.Month = date.GetFirstOfMonth(date.TodayAfter(0))
 	return tpmm
 }
 
@@ -124,11 +127,16 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	case "Rip":
 		go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.PeriodMode)
 	case "Poles":
-		go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.PeriodMode)
+		if tpmm.PeriodMode == "progress" {
+			go tpmm.callGetRipsitesStats("/api/polesites/progress/" + tpmm.Month)
+		} else {
+			go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.PeriodMode)
+		}
 	case "Foa":
 		go tpmm.callGetRipsitesStats("/api/foasites/stat/" + tpmm.PeriodMode)
 	case "Orange":
-		if tpmm.PeriodMode == "day" {
+		switch tpmm.PeriodMode {
+		case "day", "progress":
 			tpmm.PeriodMode = "week"
 		}
 		go tpmm.callGetWorksitesStats("/api/worksites/stat/" + tpmm.InfoMode + "/" + tpmm.PeriodMode)

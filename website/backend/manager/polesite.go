@@ -3,6 +3,7 @@ package manager
 import (
 	"encoding/json"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 
 	"io"
@@ -36,12 +37,16 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	if err != nil {
 		return err
 	}
+	// start on month first
 	statContext.StartDate = month
+	// Extraxt all month's days
 	statContext.MaxVal = date.NbDaysBetween(month, date.GetMonth(date.GetDateAfter(month, 32)))
+	statContext.Data3 = func(s items.StatKey) string { return items.StatSiteProgress }
+	//statContext.Data3 = func(s items.StatKey) string { return s.Team}
 
 	polesiteStats, err := statContext.CalcStats(m.Polesites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(polesiteStats)
+	return json.NewEncoder(writer).Encode(items.CalcProgress(polesiteStats))
 }

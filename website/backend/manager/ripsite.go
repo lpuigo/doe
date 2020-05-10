@@ -37,22 +37,10 @@ func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 }
 
 func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error {
-	statContext, err := items.NewStatContext(freq)
+	statContext, err := m.NewStatContext(freq)
 	if err != nil {
 		return err
 	}
-
-	isActorVisible, err := m.genIsActorVisible()
-	if err != nil {
-		return err
-	}
-
-	statContext.IsTeamVisible = isActorVisible
-	statContext.ClientByName = m.genGetClient()
-	statContext.ActorById = m.genActorById()
-	statContext.ShowTeam = !m.CurrentUser.Permissions["Review"]
-
-	statContext.SetSerieTeamSiteConf()
 
 	switch groupBy {
 	case "activity", "site":

@@ -53,6 +53,15 @@ func (d Date) GetMonday() Date {
 	return Date(d.ToTime().AddDate(0, 0, -wd))
 }
 
+func (d Date) GetWeekDay() int {
+	return int(d.ToTime().Weekday())
+}
+
+func (d Date) IsSaturdaySunday() bool {
+	wd := d.GetWeekDay()
+	return wd == 0 || wd == 6
+}
+
 func (d Date) GetMonth() Date {
 	t := d.ToTime()
 	return Date(time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC))
