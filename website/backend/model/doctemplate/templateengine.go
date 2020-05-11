@@ -78,7 +78,7 @@ func (te *DocTemplateEngine) GetWorksiteXLSAttachment(w io.Writer, ws *model.Wor
 	}
 
 	found := xf.GetSheetIndex(sheetName)
-	if found == 0 {
+	if found == -1 {
 		return fmt.Errorf("could not find EWIN sheet")
 	}
 
@@ -287,7 +287,7 @@ func (te *DocTemplateEngine) GetActorsWorkingHoursRecordXLS(w io.Writer, monthDa
 	}
 
 	found := xf.GetSheetIndex(awhrSheetName)
-	if found == 0 {
+	if found == -1 {
 		return fmt.Errorf("could not find CRA sheet")
 	}
 
