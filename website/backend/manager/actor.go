@@ -32,6 +32,12 @@ func (m Manager) UpdateActors(updatedActors []*actorinfos.ActorHr) error {
 		// If User has no HR permission, ignore returned ActorInfo data
 		return nil
 	}
+	// Update actInfos actorId according to updated actors Id
+	for i, actInfo := range actInfos {
+		if actInfo.ActorId < 0 {
+			actInfo.ActorId = acts[i].Id
+		}
+	}
 	return m.ActorInfos.UpdateActorInfos(actInfos)
 }
 
