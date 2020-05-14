@@ -176,15 +176,20 @@ func (aitm *ActorsInfoTableModel) FormatSalary(act *actor.Actor) string {
 	if len(act.Info.Salary) == 0 {
 		return "-"
 	}
-	thisMonthDate := date.GetFirstOfMonth(date.TodayAfter(0))
 	var currentDac actor.DateAmountComment
 	// search for current applicable salary date
-	for _, dac := range act.Info.Salary {
-		if dac.Date > thisMonthDate {
-			continue
+	switch len(act.Info.Salary) {
+	case 1:
+		currentDac = act.Info.Salary[0]
+	default:
+		today := date.TodayAfter(0)
+		for _, dac := range act.Info.Salary {
+			if dac.Date > today {
+				continue
+			}
+			currentDac = dac
+			break
 		}
-		currentDac = dac
-		break
 	}
 	suffix := currentDac.Comment
 	switch act.Contract {
