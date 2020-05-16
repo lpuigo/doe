@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/lpuig/ewin/doe/website/frontend/comp/poleinfoupdate"
 	"strconv"
 	"strings"
 
@@ -27,6 +28,7 @@ func main() {
 	mpm := NewMainPageModel()
 
 	hvue.NewVM(
+		poleinfoupdate.RegisterComponent(),
 		polemap.RegisterComponent(),
 		poleedit.RegisterComponent(),
 		poletable.RegisterComponent(),
@@ -206,6 +208,10 @@ func (mpm *MainPageModel) DictZipArchiveURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/dictzip"
 }
 
+func (mpm *MainPageModel) ProgressXlsURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/progress"
+}
+
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
 func (mpm *MainPageModel) ApplyFilterOnMap() {
 	poleMap := mpm.GetPoleMap()
@@ -361,13 +367,19 @@ func (mpm *MainPageModel) CenterOnPole(p *polesite.Pole) {
 // SwitchActiveMode handles ActiveMode change
 func (mpm *MainPageModel) SwitchActiveMode(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
-	if mpm.ActiveMode == "Map" {
+	switch mpm.ActiveMode {
+	case "Map":
 		mpm.ApplyFilterOnMap()
+	case "Info":
+		mpm.CloseEditPole()
 	}
 }
 
 //
 func (mpm *MainPageModel) CloseEditPole() {
+	if !mpm.IsPoleSelected {
+		return
+	}
 	mpm.IsPoleSelected = false
 	mpm.SelectedPoleMarker.EndEditMode(true)
 	mpm.SelectedPoleMarker = nil

@@ -164,7 +164,18 @@ func (ps *PoleSite) ExportName() string {
 
 // XLSExport returns the PoleSite XLS export
 func (ps *PoleSite) XLSExport(w io.Writer) error {
-	return ToXLS(w, ps)
+	return ToExportXLS(w, ps)
+}
+
+// ExportName returns the PoleSite XLS export file name
+func (ps *PoleSite) ProgressName() string {
+	year, weeknum := date.Today().ToTime().ISOWeek()
+	return fmt.Sprintf("Avancement %s-%s (sem%02d-%04d).xlsx", ps.Client, ps.Ref, weeknum, year)
+}
+
+// XLSExport returns the PoleSite XLS export
+func (ps *PoleSite) XLSProgress(w io.Writer) error {
+	return ToProgressXLS(w, ps)
 }
 
 // ExportName returns the PoleSite XLS export file name

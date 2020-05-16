@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
@@ -128,4 +129,14 @@ func PolesiteRowClassName(status string) string {
 		res = "worksite-row-error"
 	}
 	return res
+}
+
+func GetPoleSiteStatesValueLabel() []*elements.ValueLabel {
+	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.PsStatusNew, PolesiteStatusLabel(poleconst.PsStatusNew)),
+		elements.NewValueLabel(poleconst.PsStatusInProgress, PolesiteStatusLabel(poleconst.PsStatusInProgress)),
+		elements.NewValueLabel(poleconst.PsStatusBlocked, PolesiteStatusLabel(poleconst.PsStatusBlocked)),
+		elements.NewValueLabel(poleconst.PsStatusCancelled, PolesiteStatusLabel(poleconst.PsStatusCancelled)),
+		elements.NewValueLabel(poleconst.PsStatusDone, PolesiteStatusLabel(poleconst.PsStatusDone)),
+	}
 }

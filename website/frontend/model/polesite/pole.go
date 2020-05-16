@@ -266,7 +266,7 @@ func (p *Pole) CheckState() {
 			p.SetState(poleconst.StateDictToDo)
 			return
 		}
-		if p.DictDate < today {
+		if p.DictDate > today {
 			p.SetState(poleconst.StatePermissionPending)
 			return
 		}
@@ -395,6 +395,7 @@ func GetMaterialsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.MaterialMetal, poleconst.MaterialMetal),
 		elements.NewValueLabel(poleconst.MaterialEnforcedMetal, poleconst.MaterialEnforcedMetal),
 		elements.NewValueLabel(poleconst.MaterialComp, poleconst.MaterialComp),
+		elements.NewValueLabel(poleconst.MaterialEnforcedComp, poleconst.MaterialEnforcedComp),
 	}
 }
 

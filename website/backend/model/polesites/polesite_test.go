@@ -132,7 +132,7 @@ func Test_ToXLS(t *testing.T) {
 		t.Fatalf("could not create result xlsx file '%s':%s", resultPsFile, err.Error())
 	}
 
-	err = ToXLS(oxf, ps)
+	err = ToExportXLS(oxf, ps)
 	if err != nil {
 		t.Fatalf("could not save xlsx file '%s':%s", resultPsFile, err.Error())
 	}
@@ -161,9 +161,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("could not create file: %s", err.Error())
 	}
 	defer xfr.Close()
-	err = ToXLS(xfr, ps)
+	err = ToExportXLS(xfr, ps)
 	if err != nil {
-		t.Fatalf("ToXLS return unexpected: %s", err.Error())
+		t.Fatalf("ToExportXLS return unexpected: %s", err.Error())
 	}
 
 	jsonOutFile := filepath.Join(path, fmt.Sprintf("%06d.json", ps.Id))

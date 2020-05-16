@@ -5,6 +5,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/tools/nominatim"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -45,7 +46,7 @@ const (
 	colPoleProduct
 )
 
-func ToXLS(w io.Writer, ps *PoleSite) error {
+func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	xf := excelize.NewFile()
 	sheetName := ps.Ref
 	xf.SetSheetName(xf.GetSheetName(0), sheetName)
@@ -127,6 +128,107 @@ func ToXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductCouple])
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+3), products[poleconst.ProductReplace])
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+4), products[poleconst.ProductRemove])
+	}
+
+	err := xf.Write(w)
+	if err != nil {
+		return fmt.Errorf("could not write XLS file:%s", err.Error())
+	}
+	return nil
+}
+
+const (
+	colProgressPoleRef int = iota + 1
+	colProgressPoleSticker
+	colProgressPoleCity
+	colProgressPoleAddress
+	colProgressPoleDate
+	colProgressPoleHeight
+	colProgressPoleMaterial
+	colProgressPoleProduct
+)
+
+const (
+	colProgressPoleRefWidth      float64 = 18
+	colProgressPoleStickerWidth  float64 = 12
+	colProgressPoleCityWidth     float64 = 25
+	colProgressPoleAddressWidth  float64 = 40
+	colProgressPoleDateWidth     float64 = 12
+	colProgressPoleHeightWidth   float64 = 8
+	colProgressPoleMaterialWidth float64 = 18
+	colProgressPoleProductWidth  float64 = 60
+)
+
+func ToProgressXLS(w io.Writer, ps *PoleSite) error {
+	progressPoles := []*Pole{}
+	for _, pole := range ps.Poles {
+		if !pole.IsDone() {
+			continue
+		}
+		progressPoles = append(progressPoles, pole)
+	}
+
+	sort.Slice(progressPoles, func(i, j int) bool {
+		if progressPoles[i].Date != progressPoles[j].Date {
+			return progressPoles[i].Date < progressPoles[j].Date
+		}
+		if progressPoles[i].Ref != progressPoles[j].Ref {
+			return progressPoles[i].Ref < progressPoles[j].Ref
+		}
+		return progressPoles[i].Sticker < progressPoles[j].Sticker
+	})
+
+	xf := excelize.NewFile()
+	sheetName := ps.Ref
+	xf.SetSheetName(xf.GetSheetName(0), sheetName)
+
+	getColName := func(col int) string {
+		colName, _ := excelize.ColumnNumberToName(col)
+		return colName
+	}
+
+	// Set Cols width & Format
+	colName := getColName(colProgressPoleRef)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleRefWidth)
+	colName = getColName(colProgressPoleSticker)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleStickerWidth)
+	colName = getColName(colProgressPoleCity)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleCityWidth)
+	colName = getColName(colProgressPoleAddress)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleAddressWidth)
+	colName = getColName(colProgressPoleDate)
+	exp := "dd/mm/yyyy;@"
+	style, _ := xf.NewStyle(&excelize.Style{CustomNumFmt: &exp})
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleDateWidth)
+	xf.SetColStyle(sheetName, colName, style)
+	colName = getColName(colProgressPoleHeight)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleHeightWidth)
+	colName = getColName(colProgressPoleMaterial)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleMaterialWidth)
+	colName = getColName(colProgressPoleProduct)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleProductWidth)
+
+	row := 1
+	// Set Poles infos
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), "POI")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleSticker), "Appui")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleCity), "Ville")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleAddress), "Adresse")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleDate), "Date")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), "Hauteur")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), "Materiau")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), "Prestations")
+	row++
+	for _, pole := range progressPoles {
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), pole.Ref)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleSticker), pole.Sticker)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleCity), pole.City)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleAddress), pole.Address)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleDate), date.DateFrom(pole.Date).ToTime()) // Date
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), pole.Height)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), pole.Material)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), strings.Join(pole.Product, ", "))
+		row++
 	}
 
 	err := xf.Write(w)

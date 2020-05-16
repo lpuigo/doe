@@ -29,7 +29,8 @@
                         <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
                     </el-tooltip>
                     <el-tooltip content="Raffraichir / Annuler les modifications" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)" size="mini"></el-button>
+                        <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)"
+                                   size="mini"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
@@ -39,6 +40,9 @@
                 <el-button class="icon" icon="fas fa-th-list icon--big" @click="ShowPoleTable" size="mini"></el-button>
                 -->
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">
+                    <el-tooltip content="Info. chantier" placement="bottom" effect="light" open-delay="500">
+                        <el-radio-button label="Info"><i class="fas fa-info"></i></el-radio-button>
+                    </el-tooltip>
                     <el-tooltip content="Carte" placement="bottom" effect="light" open-delay="500">
                         <el-radio-button label="Map"><i class="fas fa-map"></i></el-radio-button>
                     </el-tooltip>
@@ -50,30 +54,33 @@
                 <span></span>
                 <span></span>
 
+                <el-tooltip content="Création d'un nouveau poteau" placement="bottom" effect="light" open-delay="500">
+                    <el-button class="icon" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini"
+                               :disabled="ActiveMode=='Info'"></el-button>
+                </el-tooltip>
+
                 <el-popover placement="bottom" width="260" title="Recherche d'une adresse :"
                             v-model="VisibleSearchLoc">
                     <div style="width: 100%">
-                        <el-input  placeholder="Adresse" v-model="SearchAddress" @input="UpdateSearchLocation" clearable size="mini"></el-input>
+                        <el-input placeholder="Adresse" v-model="SearchAddress" @input="UpdateSearchLocation" clearable
+                                  size="mini"></el-input>
                         <p v-if="IsSearchAddressMsg" class="warning-block">{{SearchAddressMsg}}</p>
                     </div>
                     <div style="text-align: right; margin: 0; margin-top: 10px">
                         <el-button size="mini" type="text" @click="VisibleSearchLoc = false">Annuler</el-button>
                         <el-button type="primary" size="mini" @click="SearchLocation">Chercher</el-button>
                     </div>
-                    <el-tooltip slot="reference" content="Recherche adresse" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-search-location icon--big" size="mini"></el-button>
+                    <el-tooltip slot="reference" content="Recherche adresse" placement="bottom" effect="light"
+                                open-delay="500">
+                        <el-button class="icon" icon="fas fa-search-location icon--big" size="mini"
+                                   :disabled="ActiveMode!='Map'"></el-button>
                     </el-tooltip>
                 </el-popover>
 
-                <el-tooltip content="Création d'un nouveau poteau" placement="bottom" effect="light" open-delay="500">
-                    <el-button class="icon" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini"></el-button>
+                <el-tooltip content="Recentrer la carte" placement="bottom" effect="light" open-delay="500">
+                    <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini"
+                               :disabled="ActiveMode!='Map'"></el-button>
                 </el-tooltip>
-
-                <el-button-group>
-                    <el-tooltip content="Recentrer la carte" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-map-marked icon--big" @click="CenterMapOnPoles" size="mini" :disabled="ActiveMode!='Map'"></el-button>
-                    </el-tooltip>
-                </el-button-group>
 
                 <span></span>
                 <span></span>
@@ -92,7 +99,7 @@
                                     :value="item.value"
                             ></el-option>
                         </el-select>
-                        <el-button slot="append"  icon="far fa-times-circle" @click="ClearFilter"></el-button>
+                        <el-button slot="append" icon="far fa-times-circle" @click="ClearFilter"></el-button>
                     </el-input>
                 </div>
 
@@ -101,7 +108,11 @@
                 <el-popover placement="bottom" width="260" title="Outils :"
                             v-model="VisibleTools">
                     <div>
-                        <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive DICT</el-link>
+                        <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive des DICT
+                        </el-link>
+                    </div>
+                    <div>
+                        <el-link icon="fas fa-file-excel icon--left" :href="ProgressXlsURL()">Avancement XLSx</el-link>
                     </div>
                     <div style="text-align: right; margin: 0; margin-top: 10px">
                         <el-button type="primary" plain size="mini" @click="VisibleTools = false">Fermer</el-button>
@@ -144,15 +155,17 @@
                         @marker-click="MarkerClick"
                 ></pole-map>
                 <pole-table v-if="ActiveMode == 'Table'"
-                        :user="User"
-                        :polesite="Polesite"
-                        :filter="Filter"
-                        :filtertype="FilterType"
-                        :context.sync="TableContext"
-                        @update:context="TablePoleSelected"
-                        @polesite-updated="HandleTablePolesiteUpdate"
-                        @polesite-archive-refsgroup="HandleArchiveRefsGroup"
+                            :user="User"
+                            :polesite="Polesite"
+                            :filter="Filter"
+                            :filtertype="FilterType"
+                            :context.sync="TableContext"
+                            @update:context="TablePoleSelected"
+                            @polesite-updated="HandleTablePolesiteUpdate"
+                            @polesite-archive-refsgroup="HandleArchiveRefsGroup"
                 ></pole-table>
+                <polesite-info-update v-if="ActiveMode == 'Info'" v-model="Polesite"
+                                      :user="User"></polesite-info-update>
             </el-main>
         </el-container>
     </el-container>
