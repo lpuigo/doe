@@ -262,15 +262,14 @@ func (p *Pole) CheckState() {
 			p.SetState(poleconst.StateDictToDo)
 			return
 		}
-		if tools.Empty(p.DictDate) {
+		if !(!tools.Empty(p.DictDate) && today <= date.After(p.DictDate, poleconst.DictValidityDuration)) {
 			p.SetState(poleconst.StateDictToDo)
 			return
 		}
-		if !(p.DictDate <= today && today <= date.After(p.DictDate, poleconst.DictValidityDuration)) {
+		if p.DictDate < today {
 			p.SetState(poleconst.StatePermissionPending)
 			return
 		}
-		p.SetState(poleconst.StateToDo)
 		if !tools.Empty(p.DaStartDate) && today < p.DaStartDate {
 			p.SetState(poleconst.StatePermissionPending)
 			return
@@ -279,6 +278,7 @@ func (p *Pole) CheckState() {
 			p.SetState(poleconst.StatePermissionPending)
 			return
 		}
+		p.SetState(poleconst.StateToDo)
 	}
 
 	if p.IsInStateToBeChecked() {
