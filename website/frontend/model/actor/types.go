@@ -3,6 +3,7 @@ package actor
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 )
 
 // Type DateComment reflects ewin/doe/website/backend/model/actorinfos.DateComment
@@ -66,10 +67,32 @@ func (e Events) Copy() Events {
 	return ne
 }
 
+// Type Earnings reflects ewin/doe/website/backend/model/actorinfos.Earnings
+// Earnings type is dedicated to date-defined earning (like monthly bonuses)
+type Earnings []DateAmountComment
+
 // Type EarningHistory reflects ewin/doe/website/backend/model/actorinfos.EarningHistory
 // EarningHistory type is dedicated to date-changing earning (like salary) : only most recent entry is applicable. Other are stored for history purpose
 type EarningHistory []DateAmountComment
 
-// Type Earnings reflects ewin/doe/website/backend/model/actorinfos.Earnings
-// Earnings type is dedicated to date-defined earning (like monthly bonuses)
-type Earnings []DateAmountComment
+func (eh EarningHistory) CurrentDateAmountComment() *DateAmountComment {
+	if len(eh) == 0 {
+		return nil
+	}
+	var currentDac DateAmountComment
+	// search for current applicable entry
+	switch len(eh) {
+	case 1:
+		currentDac = eh[0]
+	default:
+		today := date.TodayAfter(0)
+		for _, dac := range eh {
+			if dac.Date > today {
+				continue
+			}
+			currentDac = dac
+			break
+		}
+	}
+	return &currentDac
+}

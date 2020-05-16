@@ -15,7 +15,7 @@ type ActorInfo struct {
 	Salary        EarningHistory `js:"Salary"`
 	EarnedBonuses Earnings       `js:"EarnedBonuses"`
 	PaidBonuses   Earnings       `js:"PaidBonuses"`
-	TravelSubsidy Earnings       `js:"TravelSubsidy"`
+	TravelSubsidy EarningHistory `js:"TravelSubsidy"`
 }
 
 func NewActorInfo() *ActorInfo {
@@ -26,7 +26,7 @@ func NewActorInfo() *ActorInfo {
 	nai.Salary = EarningHistory{}
 	nai.EarnedBonuses = Earnings{}
 	nai.PaidBonuses = Earnings{}
-	nai.TravelSubsidy = Earnings{}
+	nai.TravelSubsidy = EarningHistory{}
 	return nai
 }
 
@@ -38,7 +38,7 @@ func NewActorInfoForActor(actor *Actor) *ActorInfo {
 	nai.Salary = EarningHistory{}
 	nai.EarnedBonuses = Earnings{}
 	nai.PaidBonuses = Earnings{}
-	nai.TravelSubsidy = Earnings{}
+	nai.TravelSubsidy = EarningHistory{}
 	return nai
 }
 

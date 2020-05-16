@@ -62,7 +62,7 @@ const (
 	<!--	Last & First Name -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
-            prop="Ref" label="Nom Prénom" width="200px"
+            prop="Ref" label="Nom Prénom" width="170px"
 			sortable :sort-by="['Ref']"
     >
         <template slot-scope="scope">
@@ -88,6 +88,16 @@ const (
     >
         <template slot-scope="scope">
 			<span>{{FormatSalary(scope.row)}}</span>
+        </template>
+	</el-table-column>
+
+	<!--	Travel Subsidy -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            label="Frais Dépl." width="100px" align="center"
+    >
+        <template slot-scope="scope">
+			<span>{{FormatTravelSubsidy(scope.row)}}</span>
         </template>
 	</el-table-column>
 
@@ -173,23 +183,9 @@ func ActorsInfoTableModelFromJS(o *js.Object) *ActorsInfoTableModel {
 // Column related Methods
 
 func (aitm *ActorsInfoTableModel) FormatSalary(act *actor.Actor) string {
-	if len(act.Info.Salary) == 0 {
+	currentDac := act.Info.Salary.CurrentDateAmountComment()
+	if currentDac == nil {
 		return "-"
-	}
-	var currentDac actor.DateAmountComment
-	// search for current applicable salary date
-	switch len(act.Info.Salary) {
-	case 1:
-		currentDac = act.Info.Salary[0]
-	default:
-		today := date.TodayAfter(0)
-		for _, dac := range act.Info.Salary {
-			if dac.Date > today {
-				continue
-			}
-			currentDac = dac
-			break
-		}
 	}
 	suffix := currentDac.Comment
 	switch act.Contract {
@@ -198,6 +194,16 @@ func (aitm *ActorsInfoTableModel) FormatSalary(act *actor.Actor) string {
 	case actorconst.ContractCDD, actorconst.ContractCDI:
 		suffix = "€"
 	}
+	res := strconv.FormatFloat(currentDac.Amount, 'f', 2, 64) + " " + suffix
+	return res
+}
+
+func (aitm *ActorsInfoTableModel) FormatTravelSubsidy(act *actor.Actor) string {
+	currentDac := act.Info.TravelSubsidy.CurrentDateAmountComment()
+	if currentDac == nil {
+		return "-"
+	}
+	suffix := currentDac.Comment
 	res := strconv.FormatFloat(currentDac.Amount, 'f', 2, 64) + " " + suffix
 	return res
 }

@@ -188,6 +188,56 @@ const template string = `<el-dialog
 				</el-col>
 			</el-row>
 
+			<!-- TravelSubsidy -->
+			<el-row :gutter="10" align="top" class="doublespaced" type="flex">
+				<el-col :span="4" class="align-right">Déplacements :</el-col>
+				<el-col :span="20">
+					<el-table 
+							:data="current_actor.Info.TravelSubsidy"
+							max-height="200" size="mini" border
+					>
+						<el-table-column label="" width="80">
+							<template slot="header" slot-scope="scope">
+								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddTravelSubsidy()"></el-button>
+							</template>
+							<template slot-scope="scope">
+								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveTravelSubsidy(scope.$index)"></el-button>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Date" width="180">
+							<template slot-scope="scope">
+								<el-date-picker v-model="scope.row.Date"
+												type="month" :clearable="false"
+												:picker-options="{firstDayOfWeek:1}" value-format="yyyy-MM-dd" format="dd/MM/yyyy" 
+												placeholder="Date" size="mini" style="width: 100%"
+												@change="CheckTravelSubsidy()"
+								></el-date-picker>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Montant" width="180">
+							<template slot-scope="scope">
+								<el-input-number 
+										v-model="scope.row.Amount" 
+										:min="0" :step="50" :precision="2" size="mini" 
+										controls-position="right" style="width: 100%"
+								></el-input-number>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Commentaire">
+							<template slot-scope="scope">
+								<el-input 
+										v-model="scope.row.Comment" placeholder="Commentaire"
+										clearable size="mini" style="width: 100%"
+								></el-input>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-col>
+			</el-row>
+
 			<!-- Comment -->
 			<el-row :gutter="10" align="top" class="doublespaced" type="flex">
 				<el-col :span="4" class="align-right">Commentaire :</el-col>
@@ -291,58 +341,6 @@ const template string = `<el-dialog
 								<el-input-number 
 										v-model="scope.row.Amount" 
 										:min="0" :step="100" :precision="2" size="mini" 
-										controls-position="right" style="width: 100%"
-								></el-input-number>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Commentaire">
-							<template slot-scope="scope">
-								<el-input 
-										v-model="scope.row.Comment" placeholder="Commentaire"
-										clearable size="mini" style="width: 100%"
-								></el-input>
-							</template>
-						</el-table-column>
-					</el-table>
-				</el-col>
-			</el-row>
-		</el-tab-pane>
-
-		<el-tab-pane label="Déplacements" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
-			<!-- TravelSubsidy -->
-			<el-row :gutter="10" align="top" class="spaced" type="flex">
-				<el-col :span="3" class="align-right">Déplacements :</el-col>
-				<el-col :span="21">
-					<el-table 
-							:data="current_actor.Info.TravelSubsidy"
-							max-height="200" size="mini" border
-					>
-						<el-table-column label="" width="80">
-							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddTravelSubsidy()"></el-button>
-							</template>
-							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveTravelSubsidy(scope.$index)"></el-button>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Date" width="180">
-							<template slot-scope="scope">
-								<el-date-picker v-model="scope.row.Date"
-												type="month" :clearable="false"
-												:picker-options="{firstDayOfWeek:1}" value-format="yyyy-MM-dd" format="dd/MM/yyyy" 
-												placeholder="Date" size="mini" style="width: 100%"
-												@change="CheckTravelSubsidy()"
-								></el-date-picker>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Montant" width="180">
-							<template slot-scope="scope">
-								<el-input-number 
-										v-model="scope.row.Amount" 
-										:min="0" :step="50" :precision="2" size="mini" 
 										controls-position="right" style="width: 100%"
 								></el-input-number>
 							</template>
@@ -643,7 +641,7 @@ func (aumm *ActorUpdateModalModel) AddTravelSubsidy(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	nd := actor.NewDateAmountComment()
 	nd.Date = date.GetFirstOfMonth(date.TodayAfter(0))
-	aumm.CurrentActor.Info.TravelSubsidy = append(actor.Earnings{*nd}, aumm.CurrentActor.Info.TravelSubsidy...)
+	aumm.CurrentActor.Info.TravelSubsidy = append(actor.EarningHistory{*nd}, aumm.CurrentActor.Info.TravelSubsidy...)
 }
 
 func (aumm *ActorUpdateModalModel) RemoveTravelSubsidy(vm *hvue.VM, pos int) {
