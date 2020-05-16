@@ -118,14 +118,16 @@
                         <el-button type="primary" plain size="mini" @click="VisibleTools = false">Fermer</el-button>
                     </div>
                     <el-tooltip slot="reference" content="Outils" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-toolbox icon--big" size="mini"></el-button>
+                        <el-button class="icon" icon="fas fa-toolbox icon--big" size="mini"
+                                   :disabled="IsDirty"></el-button>
                     </el-tooltip>
                 </el-popover>
 
                 <span></span>
 
                 <el-row :gutter="20" type="flex" align="middle">
-                    <span v-if="!User.Connected"><i class="far fa-user-circle icon--left icon--medium"></i>Not logged</span>
+                    <span v-if="!User.Connected"><i
+                                class="far fa-user-circle icon--left icon--medium"></i>Not logged</span>
                     <span v-else><i class="fas fa-user-circle icon--left icon--medium"></i>{{User.Name}}</span>
                 </el-row>
             </div>
