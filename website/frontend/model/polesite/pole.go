@@ -325,6 +325,12 @@ func (p *Pole) AddProduct(prd string) {
 	p.Get("Product").Call("sort")
 }
 
+func (p *Pole) CheckProductConsistency() {
+	if p.HasProduct(poleconst.ProductTrickyReplace) {
+		p.AddProduct(poleconst.ProductReplace)
+	}
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.FilterValueAll, poleconst.FilterLabelAll),

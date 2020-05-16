@@ -530,6 +530,7 @@ func (pem *PoleEditModel) GetStates(vm *hvue.VM) []*elements.ValueLabelDisabled 
 func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker.Pole
+	ep.CheckProductConsistency()
 	ep.Get("Product").Call("sort")
 	if ep.State == poleconst.StateToDo || ep.State == poleconst.StateDenseNetwork || ep.State == poleconst.StateNoAccess {
 		ep.SetState(poleconst.StateToDo)
