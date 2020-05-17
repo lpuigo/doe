@@ -137,7 +137,8 @@ const template string = `<div>
                 <el-col :span="6" class="align-right">Ville:</el-col>
                 <el-col :span="18">
                     <el-input placeholder="Ville"
-                              v-model="editedpolemarker.Pole.City" clearable size="mini"
+							v-model="editedpolemarker.Pole.City" clearable size="mini"
+							@change="UpdatePoleCity"							
                     ></el-input>
                 </el-col>
             </el-row>
@@ -206,7 +207,7 @@ const template string = `<div>
                 <el-col :span="6" class="align-right">DT:</el-col>
                 <el-col :span="18">
                     <el-input placeholder="Référence DT"
-                              v-model="editedpolemarker.Pole.DtRef" clearable size="mini"
+                              v-model.trim="editedpolemarker.Pole.DtRef" clearable size="mini"
                     ></el-input>
                 </el-col>
             </el-row>
@@ -215,7 +216,7 @@ const template string = `<div>
                 <el-col :span="6" class="align-right">DICT:</el-col>
                 <el-col :span="10">
                     <el-input placeholder="Référence DICT"
-                              v-model="editedpolemarker.Pole.DictRef" clearable size="mini"
+                              v-model.trim="editedpolemarker.Pole.DictRef" clearable size="mini"
 							  @change="CheckPermissions()"
                     ></el-input>
                 </el-col>
@@ -593,6 +594,11 @@ func (pem *PoleEditModel) UpdatePoleDegLat(vm *hvue.VM, value string) {
 	pem.EditedPoleMarker.UpdateMarkerLatLng()
 	pem.EditedPoleMarker.CenterOnMap(20)
 
+}
+
+func (pem *PoleEditModel) UpdatePoleCity(vm *hvue.VM, value string) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.EditedPoleMarker.Pole.CheckInfoConsistency()
 }
 
 func (pem *PoleEditModel) UpdatePoleDegLong(vm *hvue.VM, value string) {

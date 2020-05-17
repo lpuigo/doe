@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"strconv"
+	"strings"
 )
 
 // type Pole reflects backend/model/polesites.pole struct
@@ -329,6 +330,14 @@ func (p *Pole) CheckProductConsistency() {
 	if p.HasProduct(poleconst.ProductTrickyReplace) {
 		p.AddProduct(poleconst.ProductReplace)
 	}
+}
+
+func (p *Pole) CheckInfoConsistency() {
+	// City
+	p.City = strings.Trim(strings.Title(strings.ToLower(p.City)), " ")
+	// DICT & DT
+	p.DictRef = strings.Trim(strings.ToUpper(p.DictRef), " ")
+	p.DtRef = strings.Trim(strings.ToUpper(p.DtRef), " ")
 }
 
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
