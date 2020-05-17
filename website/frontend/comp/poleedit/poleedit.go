@@ -8,11 +8,13 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/autocomplete"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/latlong"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -136,10 +138,11 @@ const template string = `<div>
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6" class="align-right">Ville:</el-col>
                 <el-col :span="18">
-                    <el-input placeholder="Ville"
+					<el-autocomplete placeholder="Ville"
 							v-model="editedpolemarker.Pole.City" clearable size="mini"
-							@change="UpdatePoleCity"							
-                    ></el-input>
+							:fetch-suggestions="GetCities" :trigger-on-focus="false" 
+							@change="UpdatePoleCity"	
+					></el-autocomplete>
                 </el-col>
             </el-row>
         
@@ -594,6 +597,25 @@ func (pem *PoleEditModel) UpdatePoleDegLat(vm *hvue.VM, value string) {
 	pem.EditedPoleMarker.UpdateMarkerLatLng()
 	pem.EditedPoleMarker.CenterOnMap(20)
 
+}
+
+func (pem *PoleEditModel) GetCities(vm *hvue.VM, value string, callback *js.Object) {
+	pem = PoleEditModelFromJS(vm.Object)
+	cities := make(map[string]bool)
+	for _, pole := range pem.Polesite.Poles {
+		cities[pole.City] = true
+	}
+	matchingCities := []*autocomplete.Result{}
+	matchvalue := strings.ToLower(value)
+	for cityName, _ := range cities {
+		if strings.Contains(strings.ToLower(cityName), matchvalue) {
+			matchingCities = append(matchingCities, autocomplete.NewResult(cityName))
+		}
+	}
+	sort.Slice(matchingCities, func(i, j int) bool {
+		return matchingCities[i].Value < matchingCities[j].Value
+	})
+	callback.Invoke(matchingCities)
 }
 
 func (pem *PoleEditModel) UpdatePoleCity(vm *hvue.VM, value string) {
