@@ -85,6 +85,11 @@ func (u *User) IsDayOff(day string) bool {
 func (u *User) HasPermissionInvoice() bool {
 	return u.Permissions["Invoice"]
 }
+
 func (u *User) HasPermissionHR() bool {
 	return u.Permissions["HR"]
+}
+
+func (u *User) HasPermissionUpdate() bool {
+	return u.Permissions["Update"]
 }

@@ -145,7 +145,7 @@ func (mpm *MainPageModel) GetPoleMap() *polemap.PoleMap {
 }
 
 func (mpm *MainPageModel) PreventLeave() bool {
-	return mpm.Dirty
+	return mpm.User.HasPermissionUpdate() && mpm.Dirty
 }
 
 // GetPoleMarkerById returns the PoleMarker associated with given Id (or nil if not found)

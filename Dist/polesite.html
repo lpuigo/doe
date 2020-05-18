@@ -22,13 +22,17 @@
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
                 <el-row :gutter="20" type="flex" align="middle">
-                    <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span></h2>
+                    <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>EWIN Services Poteaux : <span style="color: #ccebff">{{Title}}</span>
+                    </h2>
                 </el-row>
                 <el-button-group>
-                    <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite" :disabled="!IsDirty" size="mini"></el-button>
+                    <el-tooltip v-if="User.Permissions['Update']" content="Enregistrer les modifications"
+                                placement="bottom" effect="light" open-delay="500">
+                        <el-button class="icon" icon="fas fa-cloud-upload-alt icon--big" @click="SavePolesite"
+                                   :disabled="!IsDirty" size="mini"></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Raffraichir / Annuler les modifications" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Raffraichir / Annuler les modifications" placement="bottom" effect="light"
+                                open-delay="500">
                         <el-button class="icon" icon="fas fa-undo-alt icon--big" @click="LoadPolesite(true)"
                                    size="mini"></el-button>
                     </el-tooltip>
