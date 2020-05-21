@@ -178,3 +178,39 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("could not encode polesite: %s", err.Error())
 	}
 }
+
+func TestPoleSite_AppendXlsToJson(t *testing.T) {
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2019-10-15 Pont a Mousson\2020-05-07 maj nouveaux Poteaux`
+	psXlsfile := `Polesite.xlsx`
+	psJsonFile := `000011.json`
+
+	// Get original PoleSiteRecord
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	// Get new XLS file and create new PoleSite
+	xf, err := os.Open(filepath.Join(psDir, psXlsfile))
+	if err != nil {
+		t.Fatalf("could not open file: %s", err.Error())
+	}
+
+	newPs, err := FromXLS(xf)
+	if err != nil {
+		t.Fatalf("FromXLS returned unexpected: %s", err.Error())
+	}
+
+	// append new Poles to original PoleSiteRecord
+	origPsr.AppendPolesFrom(newPs)
+
+	err = os.Rename(origPsrFile, origPsrFile+".bak")
+	if err != nil {
+		t.Fatalf("Rename origPsrFile returned unexpected: %s", err.Error())
+	}
+	// Persist updated PoleSite
+	err = origPsr.Persist(psDir)
+	if err != nil {
+		t.Fatalf("Persist returned unexpected: %s", err.Error())
+	}
+}

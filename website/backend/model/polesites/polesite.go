@@ -273,3 +273,20 @@ func (ps *PoleSite) MoveCompletedGroupTo(aps *PoleSite) int {
 
 	return apid
 }
+
+// AppendPolesFrom appends Poles from nps PoleSite to receiver Polesite
+func (ps *PoleSite) AppendPolesFrom(nps *PoleSite) {
+	poleId := -100
+	for _, pole := range ps.Poles {
+		if pole.Id > poleId {
+			poleId = pole.Id
+		}
+	}
+
+	for _, pole := range nps.Poles {
+		poleId++
+		npole := *pole
+		npole.Id = poleId
+		ps.Poles = append(ps.Poles, &npole)
+	}
+}
