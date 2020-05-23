@@ -12,6 +12,10 @@ type PoleMarker struct {
 	Pole      *polesite.Pole `js:"Pole"`
 	Map       *PoleMap       `js:"Map"`
 	Draggable bool           `js:"Draggable"`
+	Selected  bool           `js:"Selected"`
+	Edited    bool           `js:"Edited"`
+	Class     string         `js:"Class"`
+	Html      string         `js:"Html"`
 }
 
 func PoleMarkerFromJS(obj *js.Object) *PoleMarker {
@@ -23,6 +27,10 @@ func NewPoleMarker(option *leaflet.MarkerOptions, pole *polesite.Pole) *PoleMark
 	np.Pole = pole
 	np.Map = nil
 	np.Draggable = false
+	np.Selected = false
+	np.Edited = false
+	np.Class = ""
+	np.Html = pmHtmlPin
 	return np
 }
 
@@ -34,26 +42,55 @@ func DefaultPoleMarker() *PoleMarker {
 }
 
 func (pm *PoleMarker) StartEditMode(drag bool) {
-	pm.SetOpacity(poleconst.OpacitySelected)
 	if drag {
 		pm.SetDraggable(true)
 	}
+	pm.Edited = true
+	pm.UpdateDivIconHtml()
 	pm.Map.PoleLine.SetTarget(pm)
 	pm.Refresh()
 }
 
 func (pm *PoleMarker) EndEditMode(refresh bool) {
-	pm.SetOpacity(poleconst.OpacityNormal)
+	pm.Edited = false
 	pm.SetDraggable(false)
+	pm.UpdateDivIconHtml()
 	pm.Map.PoleLine.Reinit()
 	if refresh {
 		pm.Refresh()
 	}
 }
 
+// SwitchSelection switched receiver selected status, and updates its html and map Selection list
+func (pm *PoleMarker) SwitchSelection() {
+	pm.Selected = !pm.Selected
+	if pm.Selected {
+		pm.Map.AddSelected(pm)
+	} else {
+		pm.Map.RemoveSelected(pm)
+	}
+	pm.UpdateDivIconHtml()
+	pm.Refresh()
+}
+
+// Deselect set the receiver unselected, and updates its html (Map selection list is not updated)
+func (pm *PoleMarker) Deselect() {
+	pm.Selected = false
+	pm.UpdateDivIconHtml()
+	pm.Refresh()
+}
+
+// Select set the receiver selected, and updates its html (Map selection list is not updated)
+func (pm *PoleMarker) Select() {
+	pm.Selected = true
+	pm.UpdateDivIconHtml()
+	pm.Refresh()
+}
+
 func (pm *PoleMarker) SetDraggable(drag bool) {
 	pm.Draggable = drag
 	pm.Marker.SetDraggable(pm.Draggable)
+	pm.UpdateDivIconHtml()
 	pm.Refresh()
 }
 
@@ -68,12 +105,20 @@ func (pm *PoleMarker) RefreshState() *PoleMarker {
 }
 
 const (
-	pmHtmlPin     string = `<i class="fas fa-map-pin fa-3x"></i>`
-	pmHtmlPlain   string = `<i class="fas fa-map-marker fa-3x"></i>`
-	pmHtmlBolt    string = `<i class="fas fa-bolt fa-3x"></i>`
-	pmHtmlExclam  string = `<i class="fas fa-exclamation fa-3x"></i>`
-	pmHtmlHole    string = `<i class="fas fa-map-marker-alt fa-3x"></i>`
-	pmHtmlOutline string = `<i class="el-icon-location-outline" style="font-size: 3.3em"></i>`
+	pmHtmlPin           string = `<i class="fas fa-map-pin fa-fw fa-3x pole-marker"></i>`
+	pmHtmlReplace       string = `<i class="fas fa-arrows-alt-v fa-fw fa-3x pole-marker"></i>`
+	pmHtmlTrickyReplace string = `<i class="fas fa-level-down-alt fa-fw fa-3x pole-marker"></i>`
+	pmHtmlCreation      string = `<i class="fas fa-long-arrow-alt-down fa-fw fa-3x pole-marker"></i>`
+	pmHtmlReplenish     string = `<i class="fas fa-angle-double-down fa-fw fa-3x pole-marker"></i>`
+	pmHtmlPlain         string = `<i class="fas fa-map-marker fa-fw fa-3x pole-marker"></i>`
+	pmHtmlBolt          string = `<i class="fas fa-bolt fa-fw fa-3x pole-marker"></i>`
+	pmHtmlExclam        string = `<i class="fas fa-exclamation fa-fw fa-3x pole-marker"></i>`
+	pmHtmlHole          string = `<i class="fas fa-map-marker-alt fa-fw fa-3x pole-marker"></i>`
+	pmHtmlOutline       string = `<i class="el-icon-location-outline" style="font-size: 3.3em"></i>`
+
+	pmHtmlShadow       string = `<div class="pole_marker_shadow"></div>`
+	pmHtmlShadowEdited string = `<div class="pole_marker_shadow edited"></div>`
+	pmHtmlDragEdited   string = `<i class="fas fa-expand-arrows-alt fa-fw fa-2x pole-marker drag"></i>`
 )
 
 func (pm *PoleMarker) UpdateFromState() {
@@ -87,39 +132,73 @@ func (pm *PoleMarker) UpdateFromState() {
 		html = pmHtmlOutline
 		class = "red"
 	case poleconst.StatePermissionPending:
-		html = pmHtmlOutline
+		class = "teal"
+	case poleconst.StateDictToDo:
+		class = "darkred"
+	case poleconst.StateDaToDo:
+		class = "red"
+	case poleconst.StateDaExpected:
 		class = "orange"
 	case poleconst.StateToDo:
-		html = pmHtmlPlain
 		class = "blue"
 	case poleconst.StateNoAccess:
-		html = pmHtmlExclam
-		class = "blue"
+		class = "purple"
 	case poleconst.StateDenseNetwork:
-		html = pmHtmlBolt
-		class = "blue"
+		class = "purple"
 	case poleconst.StateHoleDone:
 		html = pmHtmlHole
 		class = "orange"
 	case poleconst.StateIncident:
-		html = pmHtmlHole
+		html = pmHtmlExclam
 		class = "red"
 	case poleconst.StateDone:
-		html = pmHtmlPlain
 		class = "green"
 	case poleconst.StateAttachment:
-		html = pmHtmlPlain
 		class = "darkgreen"
 	case poleconst.StateCancelled:
-		html = pmHtmlPlain
 		class = ""
 	default:
-		html = pmHtmlPin
-		class = "red"
+		class = "darkred"
 	}
 
+	if html == "" {
+		html = pmHtmlBolt
+		switch {
+		case pm.Pole.HasProduct(poleconst.ProductTrickyReplace):
+			html = pmHtmlTrickyReplace
+		case pm.Pole.HasProduct(poleconst.ProductReplace):
+			html = pmHtmlReplace
+		case pm.Pole.HasProduct(poleconst.ProductCreation):
+			html = pmHtmlCreation
+		case pm.Pole.HasProduct(poleconst.ProductCoated):
+			html = pmHtmlCreation
+		case pm.Pole.HasProduct(poleconst.ProductReplenishment):
+			html = pmHtmlReplenish
+		case pm.Pole.HasProduct(poleconst.ProductFarReplenishment):
+			html = pmHtmlReplenish
+		}
+	}
+
+	pm.Html = html
+	pm.Class = class
+
 	pm.UpdateDivIconClassname(class)
-	pm.UpdateDivIconHtml(html)
+	pm.UpdateDivIconHtml()
+}
+
+func (pm *PoleMarker) UpdateDivIconHtml() {
+	switch {
+	case pm.Draggable:
+		pm.Marker.UpdateDivIconHtml(pm.Html + pmHtmlDragEdited)
+	case pm.Edited:
+		pm.Marker.UpdateDivIconHtml(pm.Html + pmHtmlShadowEdited)
+		pm.SetOpacity(poleconst.OpacitySelected)
+	case pm.Selected:
+		pm.Marker.UpdateDivIconHtml(pm.Html + pmHtmlShadow)
+	default:
+		pm.Marker.UpdateDivIconHtml(pm.Html)
+		pm.SetOpacity(poleconst.OpacityNormal)
+	}
 }
 
 func (pm *PoleMarker) UpdateTitle() {

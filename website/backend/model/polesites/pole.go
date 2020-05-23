@@ -24,6 +24,7 @@ type Pole struct {
 	DictRef        string
 	DictDate       string
 	DictInfo       string
+	DaQueryDate    string
 	DaStartDate    string
 	DaEndDate      string
 	Height         int
@@ -62,6 +63,10 @@ func (p *Pole) IsTodo() bool {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
 	case poleconst.StateDictToDo:
+		return true
+	case poleconst.StateDaToDo:
+		return true
+	case poleconst.StateDaExpected:
 		return true
 	case poleconst.StateToDo:
 		return true

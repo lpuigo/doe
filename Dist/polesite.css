@@ -11,28 +11,70 @@ html, body {
    === Map Marker Style
  */
 
+.teal {
+    color: #00d2e6;
+}
+
 .blue {
     color: #0060ff;
 }
 
+.purple {
+    color: #aa33ff;
+}
+
 .orange {
-    color: #ff9700;
+    color: #ff8c1a;
 }
 
 .red {
-    color: #ff1600;
+    color: #ff0000;
+}
+
+.darkred {
+    color: #a62121;
 }
 
 .green {
-    color: #2ee62e;
+    color: #44cc29;
 }
 
 .darkgreen {
-    color: #229922;
+    color: #1f991f;
 }
 
 .purple {
     color: #d85ce6;
+}
+
+i.pole-marker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -36px 0px 0px -22px;
+}
+
+i.pole-marker.drag {
+    color: rgba(0, 94, 255, 0.7);
+    margin: -12px 0px 0px -15px;
+    transform: rotateX(55deg);
+}
+
+.pole_marker_shadow {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    height: 16px;
+    width: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -7px 0px 0px -7px;
+    transform: rotateX(55deg);
+    z-index: -2;
+}
+
+.pole_marker_shadow.edited {
+    background: rgba(0, 94, 255, 0.7);
 }
 
 /* =====================================================================================================================
@@ -45,6 +87,11 @@ html, body {
 
 .el-collapse-item__content {
     padding-bottom: 15px;
+}
+
+h1 {
+    color: blue;
+    margin: 8px 0px;
 }
 
 .title {
@@ -164,8 +211,8 @@ html, body {
     padding: 6px 8px;
     font: 12px/14px Arial, Helvetica, sans-serif;
     background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
 }
 
@@ -188,7 +235,19 @@ html, body {
     text-align: center;
 }
 
+.control-info span.header {
+    color: blue;
+}
+
 .control-info span.title {
     color: #777;
 }
 
+.map-button {
+    /*display: flex;*/
+    /*align-items: center;*/
+    position: absolute;
+    top: 40px;
+    right: 50vw;
+    z-index: 500;
+}

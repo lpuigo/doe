@@ -138,6 +138,13 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Data Management Methods
+
+func (mpm *MainPageModel) DetectDuplicate() {
+	mpm.Polesite.DetectDoubles()
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tools Methods
 
 func (mpm *MainPageModel) GetPoleMap() *polemap.PoleMap {
@@ -185,7 +192,7 @@ func (mpm *MainPageModel) GetMapCenter() *leaflet.LatLng {
 
 // CenterMapOnLatLong centers PoleMap component on lat long position
 func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
-	mpm.GetPoleMap().CenterOn(lat, long, 20)
+	mpm.GetPoleMap().CenterOn(lat, long, poleconst.ZoomLevelOnPole)
 }
 
 func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker, drag bool) {
@@ -194,7 +201,7 @@ func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker, drag bool) {
 	pm.StartEditMode(drag)
 	mpm.IsPoleSelected = true
 
-	pm.CenterOnMap(20)
+	pm.CenterOnMap(poleconst.ZoomLevelOnPole)
 }
 
 func (mpm *MainPageModel) UnSelectPole(refresh bool) {
@@ -429,6 +436,7 @@ func (mpm *MainPageModel) CreatePole(vm *hvue.VM) {
 	newPole := polesite.NewPole()
 	newPole.Lat, newPole.Long = mpm.GetMapCenter().ToFloats()
 	newPole.State = poleconst.StateNotSubmitted
+	newPole.AddProduct(poleconst.ProductCreation)
 	mpm.AddPole(newPole)
 }
 

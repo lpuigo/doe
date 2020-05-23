@@ -119,9 +119,9 @@ type DivIconOptions struct {
 
 func DefaultDivIconOptions() *DivIconOptions {
 	dio := &DivIconOptions{Object: tools.O()}
-	dio.Html = `<i class="fas fa-map-marker-alt fa-3x"></i>`
-	dio.IconSize = js.S{27, 37}
-	dio.IconAnchor = js.S{13, 37}
+	dio.Html = `<i class="fas fa-map-marker-alt fa-3x pole_marker_shadow"></i>`
+	//dio.IconSize = js.S{45, 36}
+	//dio.IconAnchor = js.S{22.5, 36}
 	dio.PopupAnchor = js.S{0, -37}
 	dio.ClassName = ""
 	return dio

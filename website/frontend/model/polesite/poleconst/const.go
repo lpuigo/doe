@@ -22,6 +22,8 @@ const (
 	StateNotSubmitted      string = "00 Not Submitted"
 	StateNoGo              string = "05 NoGo"
 	StateDictToDo          string = "08 DICT To Do"
+	StateDaToDo            string = "081 DA To Do"
+	StateDaExpected        string = "083 DA Expected"
 	StatePermissionPending string = "09 Permission Pending"
 	StateToDo              string = "10 To Do"
 	StateNoAccess          string = "12 No Access"
@@ -35,6 +37,8 @@ const (
 	LabelNotSubmitted      string = "Non soumis"
 	LabelNoGo              string = "NoGo Client"
 	LabelDictToDo          string = "DICT à faire"
+	LabelDaToDo            string = "Demande AC à faire"
+	LabelDaExpected        string = "Attente retour AC"
 	LabelPermissionPending string = "Attente Permission"
 	LabelToDo              string = "A faire"
 	LabelNoAccess          string = "Inaccessible"
@@ -75,10 +79,12 @@ const (
 	MaterialComp          string = "Composite"
 	MaterialEnforcedComp  string = "Composite Renforcé"
 
+	ProductCreation         string = "Création"
 	ProductCoated           string = "Enrobé"
 	ProductHandDigging      string = "Implantation manuelle"
 	ProductMoise            string = "Moisé"
 	ProductCouple           string = "Couplé"
+	ProductHauban           string = "Haubané"
 	ProductReplace          string = "Remplacement"
 	ProductTrickyReplace    string = "Remplacement complexe"
 	ProductRemove           string = "Retrait"
@@ -86,9 +92,13 @@ const (
 	ProductDenseNetwork     string = "Réseaux denses"
 	ProductReplenishment    string = "Réappro."
 	ProductFarReplenishment string = "Réappro. (>50km)"
+)
 
-	OpacityBlur     float64 = 0.2
-	OpacityNormal   float64 = 0.5
-	OpacityFiltered float64 = 0.8
-	OpacitySelected float64 = 0.9
+const (
+	OpacityBlur     float64 = 0.25
+	OpacityNormal   float64 = 0.6
+	OpacityFiltered float64 = 1.0
+	OpacitySelected float64 = 0.8
+
+	ZoomLevelOnPole int = 20
 )

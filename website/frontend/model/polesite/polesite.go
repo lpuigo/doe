@@ -141,3 +141,58 @@ func GetPoleSiteStatesValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.PsStatusDone, PolesiteStatusLabel(poleconst.PsStatusDone)),
 	}
 }
+
+type pos struct {
+	lat, long int
+}
+
+func (ps *Polesite) DetectDoubles() {
+	const prec float64 = 100000.0
+	duplicatePolesByPos := map[pos][]*Pole{}
+	duplicatePolesByTitle := map[string][]*Pole{}
+	foundDuplicateByPos := false
+	foundDuplicateByTitle := false
+	for _, pole := range ps.Poles {
+		polePos := pos{lat: int(pole.Lat*prec) / 2, long: int(pole.Long*prec) / 2}
+		polesWithPos, found := duplicatePolesByPos[polePos]
+		if !found {
+			duplicatePolesByPos[polePos] = []*Pole{pole}
+		} else {
+			duplicatePolesByPos[polePos] = append(polesWithPos, pole)
+			foundDuplicateByPos = true
+		}
+
+		title := pole.GetTitle()
+		polesWithTitle, found := duplicatePolesByTitle[title]
+		if !found {
+			duplicatePolesByTitle[title] = []*Pole{pole}
+		} else {
+			duplicatePolesByTitle[title] = append(polesWithTitle, pole)
+			foundDuplicateByTitle = true
+		}
+	}
+
+	if foundDuplicateByPos {
+		print("====================== Duplicate by Position ====================")
+		for _, poles := range duplicatePolesByPos {
+			if len(poles) > 1 {
+				print("Duplicate from", poles[0].GetTitle())
+				for _, pole := range poles[1:] {
+					print("==> ", pole.GetTitle())
+				}
+			}
+		}
+	}
+
+	if foundDuplicateByTitle {
+		print("====================== Duplicate by Title =======================")
+		for _, poles := range duplicatePolesByTitle {
+			if len(poles) > 1 {
+				print("Duplicate from", poles[0].GetTitle())
+				for _, pole := range poles[1:] {
+					print("==> ", pole.GetTitle())
+				}
+			}
+		}
+	}
+}

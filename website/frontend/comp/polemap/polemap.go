@@ -6,7 +6,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/leafletmap"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
-	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
 	"sort"
@@ -16,6 +15,16 @@ import (
 
 const template string = `
 <div id="LeafLetMap" style="height: 100%"></div>
+<!--<div style="height: 100%">-->
+<!--	<div class="map-button">-->
+<!--		<el-button type="warning" plain  @click='ClearSelected' size="mini">Déselectionner appui(s)</el-button>-->
+<!--&lt;!&ndash;		<pre>{{SelectedPoleMarkers}}</pre>&ndash;&gt;-->
+<!--	</div>-->
+<!--	<div id="LeafLetMap" style="height: 100%"></div>-->
+<!--&lt;!&ndash;	<div v-if="SelectedPoleMarkers.length > 0" class="map-button">&ndash;&gt;-->
+<!--&lt;!&ndash;		<el-button type="primary" plain  @click="ClearSelected" size="mini">Déselectionner {{SelectedPoleMarkers.length}} appui(s)</el-button>&ndash;&gt;-->
+<!--&lt;!&ndash;	</div>&ndash;&gt;-->
+<!--</div>-->
 `
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,11 +39,11 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Template(template),
 		hvue.MethodsOf(&PoleMap{}),
 		hvue.Mounted(func(vm *hvue.VM) {
-			pm := newPoleMap(vm)
-			pm.VM = vm
-			if len(pm.Poles) > 0 {
-				pm.AddPoles(pm.Poles)
-			}
+			newPoleMap(vm)
+		}),
+		hvue.Computed("NbSelected", func(vm *hvue.VM) interface{} {
+			pm := PoleMapFromJS(vm.Object)
+			return len(pm.SelectedPoleMarkers)
 		}),
 		//hvue.BeforeUpdate(func(vm *hvue.VM) {
 		//	pm := PoleMapFromJS(vm.Object)
@@ -53,10 +62,11 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleMap struct {
 	leafletmap.LeafletMap
-	PoleLine         *PoleLine                      `js:"PoleLine"`
-	Poles            []*polesite.Pole               `js:"poles"`
-	PoleMarkers      map[string][]*PoleMarker       `js:"PoleMarkers"`
-	PoleMarkersGroup map[string]*leaflet.LayerGroup `js:"PoleMarkersGroup"`
+	PoleLine            *PoleLine                      `js:"PoleLine"`
+	Poles               []*polesite.Pole               `js:"poles"`
+	PoleMarkers         map[string][]*PoleMarker       `js:"PoleMarkers"`
+	PoleMarkersGroup    map[string]*leaflet.LayerGroup `js:"PoleMarkersGroup"`
+	SelectedPoleMarkers []*PoleMarker                  `js:"SelectedPoleMarkers"`
 	//PoleOverlays map[string]*leaflet.Layer `js:"PoleOverlays"`
 }
 
@@ -78,6 +88,7 @@ func newPoleMap(vm *hvue.VM) *PoleMap {
 func (pm *PoleMap) initPoleMarkersGroups() {
 	pm.PoleMarkers = make(map[string][]*PoleMarker)
 	pm.PoleMarkersGroup = make(map[string]*leaflet.LayerGroup)
+	pm.SelectedPoleMarkers = []*PoleMarker{}
 }
 
 // NewPoleMarker creates and returns a new configured PoleMarker for given pole
@@ -93,21 +104,25 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 	poleMarker.Map = pm
 	//poleMarker.BindPopup(pole.Ref)
 	poleMarker.UpdateFromState()
-	poleMarker.On("click", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("sourceTarget"))
-		pm.VM.Emit("marker-click", poleMarker, o)
+	poleMarker.On("click", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("sourceTarget"))
+		if event.Get("originalEvent").Get("shiftKey").Bool() {
+			poleMarker.SwitchSelection()
+			return
+		}
+		pm.VM.Emit("marker-click", poleMarker, event)
 	})
-	poleMarker.On("contextmenu", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("sourceTarget"))
+	poleMarker.On("contextmenu", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("sourceTarget"))
 		poleMarker.Map.PoleLine.SetPivot(poleMarker)
 		poleMarker.Map.PoleLine.Draw()
 	})
-	poleMarker.On("move", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("target"))
-		poleMarker.Map.RefreshPivotLine(o)
+	poleMarker.On("move", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("target"))
+		poleMarker.Map.RefreshPivotLine(event)
 	})
-	poleMarker.On("dragend", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("target"))
+	poleMarker.On("dragend", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("target"))
 		if poleMarker.Map.PoleLine.IsDrawn {
 			poleMarker.SetLatLng(poleMarker.Map.PoleLine.RoundedPos)
 			poleMarker.Refresh()
@@ -115,12 +130,12 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 		}
 		poleMarker.Pole.Lat, poleMarker.Pole.Long = poleMarker.GetLatLong().ToFloats()
 	})
-	poleMarker.On("mouseover", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("target"))
+	poleMarker.On("mouseover", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("target"))
 		poleMarker.Map.ShowPoleInfo(poleMarker)
 	})
-	poleMarker.On("mouseout", func(o *js.Object) {
-		poleMarker := PoleMarkerFromJS(o.Get("target"))
+	poleMarker.On("mouseout", func(event *js.Object) {
+		poleMarker := PoleMarkerFromJS(event.Get("target"))
 		poleMarker.Map.HidePoleInfo()
 	})
 
@@ -230,7 +245,7 @@ func (pm *PoleMap) FitBounds(min, max *leaflet.LatLng) {
 
 func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
 	pole := poleMarker.Pole
-	html := "<h4>" + polesite.PoleStateLabel(pole.State) + ": " + pole.GetTitle() + "</h4>"
+	html := `<h4><span class="header">` + polesite.PoleStateLabel(pole.State) + ": </span>" + pole.GetTitle() + "</h4>"
 	html += `<p class="right">` + pole.Material + " " + strconv.Itoa(pole.Height) + "m" + "</p>"
 	html += strings.Join(pole.Product, ", ") + "<br />"
 
@@ -240,22 +255,90 @@ func (pm *PoleMap) ShowPoleInfo(poleMarker *PoleMarker) {
 	if pole.DictInfo != "" {
 		html += `<p><span class="title">Info DICT: </span>` + pole.DictInfo + "</p>"
 	}
-	if pole.IsDoable() {
-		html += `<br /><p><span class="title">DICT: </span> du ` + date.DateString(pole.DictDate) + " au " + date.DateString(date.After(pole.DictDate, poleconst.DictValidityDuration)) + "</p>"
-		daInfo := ""
-		if !(tools.Empty(pole.DaStartDate) && tools.Empty(pole.DaEndDate)) {
-			daInfo = "du " + date.DateString(pole.DaStartDate) + " au " + date.DateString(pole.DaEndDate)
+	if pole.IsToDo() {
+		if pole.State > poleconst.StateDictToDo {
+			html += `<br /><p><span class="title">DICT: </span> du ` + date.DateString(pole.DictDate) + " au " + date.DateString(date.After(pole.DictDate, poleconst.DictValidityDuration)) + "</p>"
+		}
+		if pole.State > poleconst.StateDaToDo {
+			daInfo := ""
+			if pole.State == poleconst.StateDaExpected {
+				daInfo = "demandé le " + date.DateString(pole.DaQueryDate)
+			} else {
+				daInfo = "du " + date.DateString(pole.DaStartDate) + " au " + date.DateString(pole.DaEndDate)
+			}
 			html += `<p><span class="title">DA: </span>` + daInfo + "</p>"
 		}
-	}
-	if !(!pole.IsDone() && !pole.IsAttachment()) {
-		html += `<br /><p><span class="title">Réalisé:</span> le ` + date.DateString(pole.Date) + "</p>"
+		if !(!pole.IsDone() && !pole.IsAttachment()) {
+			html += `<br /><p><span class="title">Réalisé:</span> le ` + date.DateString(pole.Date) + "</p>"
+			if pole.IsAttachment() {
+				html += `<p><span class="title">Facturé:</span> le ` + date.DateString(pole.AttachmentDate) + "</p>"
+			}
+		}
 	}
 	pm.ControlInfo.Update(html)
 }
 
 func (pm *PoleMap) HidePoleInfo() {
 	pm.ControlInfo.Update("")
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Selected Poles related methods
+
+func (pm *PoleMap) NbSelected() int {
+	return len(pm.SelectedPoleMarkers)
+}
+
+func (pm *PoleMap) SelectedIndex(p *PoleMarker) int {
+	for i, poleMarker := range pm.SelectedPoleMarkers {
+		if poleMarker.Pole.Id == p.Pole.Id {
+			return i
+		}
+	}
+	return -1
+}
+
+func (pm *PoleMap) AddSelected(p *PoleMarker) {
+	if pm.SelectedIndex(p) >= 0 {
+		return
+	}
+	//pm.SelectedPoleMarkers = append(pm.SelectedPoleMarkers, p)
+	pm.Get("SelectedPoleMarkers").Call("push", p)
+}
+
+func (pm *PoleMap) RemoveSelected(p *PoleMarker) {
+	index := pm.SelectedIndex(p)
+	if index < 0 {
+		return
+	}
+	pm.Get("SelectedPoleMarkers").Call("splice", index, 1)
+}
+
+func (pm *PoleMap) ClearSelected() {
+	for _, poleMarker := range pm.SelectedPoleMarkers {
+		poleMarker.Deselect()
+	}
+	pm.SelectedPoleMarkers = []*PoleMarker{}
+}
+
+// SelectByFilter resets current SelectionList, and select all Pole mathcing given filter
+func (pm *PoleMap) SelectByFilter(filter func(*PoleMarker) bool) {
+	pm.ClearSelected()
+	spms := []*PoleMarker{}
+	for _, poleMarker := range pm.GetPoleMarkers() {
+		if filter(poleMarker) {
+			poleMarker.Select()
+			spms = append(spms, poleMarker)
+		}
+	}
+	pm.SelectedPoleMarkers = spms
+}
+
+// ApplyOnSelected applys action on all selected PoleMarkers
+func (pm *PoleMap) ApplyOnSelected(action func(*PoleMarker)) {
+	for _, poleMarker := range pm.SelectedPoleMarkers {
+		action(poleMarker)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
