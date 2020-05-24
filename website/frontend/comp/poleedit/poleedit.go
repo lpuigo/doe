@@ -394,7 +394,6 @@ const template string = `<div>
                                     v-model="editedpolemarker.Pole.AttachmentDate"
                                     value-format="yyyy-MM-dd"
                                     :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
-                                    @change="UpdateState()"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -581,32 +580,25 @@ func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
 	}
 }
 
+// CheckPermissions updates EditedPoleMarker according to DICT and DA Dates
 func (pem *PoleEditModel) CheckPermissions(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker
 	currentState := ep.Pole.State
-	ep.Pole.CheckState()
+	ep.Pole.UpdateState()
 	if ep.Pole.State != currentState {
 		pem.UpdateState(vm)
 	}
 }
 
+// UpdateState
 func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	ep := pem.EditedPoleMarker
-	ep.Pole.SetState(ep.Pole.State)
-	ep.Pole.CheckState()
-	if ep.Pole.State == poleconst.StateDone {
-		if tools.Empty(ep.Pole.Date) {
-			ep.Pole.Date = date.TodayAfter(0)
-		}
-		if !tools.Empty(ep.Pole.AttachmentDate) {
-			ep.Pole.State = poleconst.StateAttachment
-		}
-	}
-	//ep.UpdateFromState()
-	pem.EditedPoleMarker = ep.RefreshState()
-	pem.VM.Emit("update:editedpolemarker", pem.EditedPoleMarker)
+	//ep.Pole.SetState(ep.Pole.State)
+	ep.Pole.UpdateState()
+	ep.UpdateFromState()
+	ep.Map.RefreshPoleMarkersGroups()
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {
@@ -807,10 +799,10 @@ func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
 		p.Pole.DictRef = editedPoleMarker.Pole.DictRef
 		p.Pole.DictDate = editedPoleMarker.Pole.DictDate
 		p.Pole.DictInfo = editedPoleMarker.Pole.DictInfo
-		p.Pole.CheckState()
+		p.Pole.UpdateState()
 		p.UpdateFromState()
-		p.RefreshState()
 	})
+	editedPoleMarker.Map.RefreshPoleMarkersGroups()
 }
 
 func (pem *PoleEditModel) ApplyDa(vm *hvue.VM) {
@@ -820,5 +812,8 @@ func (pem *PoleEditModel) ApplyDa(vm *hvue.VM) {
 		p.Pole.DaQueryDate = editedPoleMarker.Pole.DaQueryDate
 		p.Pole.DaStartDate = editedPoleMarker.Pole.DaStartDate
 		p.Pole.DaEndDate = editedPoleMarker.Pole.DaEndDate
+		p.Pole.UpdateState()
+		p.UpdateFromState()
 	})
+	editedPoleMarker.Map.RefreshPoleMarkersGroups()
 }

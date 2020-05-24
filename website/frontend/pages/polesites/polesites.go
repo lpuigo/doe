@@ -138,17 +138,6 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Data Management Methods
-
-func (mpm *MainPageModel) DetectDuplicate() {
-	mpm.Polesite.DetectDuplicate()
-}
-
-func (mpm *MainPageModel) DetectProductInconsistency() {
-	mpm.Polesite.DetectProductInconsistency()
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tools Methods
 
 func (mpm *MainPageModel) GetPoleMap() *polemap.PoleMap {
@@ -166,13 +155,13 @@ func (mpm *MainPageModel) GetPoleMarkerById(id int) *polemap.PoleMarker {
 
 // initMap init Poles Array in PoleMap component
 func (mpm *MainPageModel) initMap() {
-	mpm.GetPoleMap().AddPoles(mpm.Polesite.Poles)
+	mpm.GetPoleMap().SetPoles(mpm.Polesite.Poles)
 }
 
 // UpdateMap updates current Poles Array in PoleMap component
 func (mpm *MainPageModel) UpdateMap() {
 	mpm.initMap()
-	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
+	if mpm.IsFilterClear() {
 		mpm.CenterMapOnPoles()
 		return
 	}
@@ -310,7 +299,7 @@ func (mpm *MainPageModel) GetPoleMarker(pole *polesite.Pole) *polemap.PoleMarker
 	return mpm.GetPoleMap().GetPoleMarkerById(pole.Id)
 }
 
-func (mpm *MainPageModel) LoadPolesite(update bool) {
+func (mpm *MainPageModel) LoadPolesite(refresh bool) {
 	opsid := tools.GetURLSearchParam("psid")
 	if opsid == nil {
 		print("psid undefined")
@@ -322,7 +311,7 @@ func (mpm *MainPageModel) LoadPolesite(update bool) {
 	}
 
 	callback := mpm.UpdateMap
-	if update {
+	if refresh {
 		mpm.UnSelectPole(false)
 		callback = mpm.RefreshMap
 	}
@@ -477,6 +466,11 @@ func (mpm *MainPageModel) ClearFilter(vm *hvue.VM) {
 	mpm.ApplyFilter(vm)
 }
 
+// IsFilterClear returns true if filter is clear (no filter criteria)
+func (mpm *MainPageModel) IsFilterClear() bool {
+	return mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == ""
+}
+
 // ApplyFilter refreshes the map with current filter/filter-type values. ApplyFilter is also called by the computed value ShowMap when Map is activated
 func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
@@ -577,4 +571,16 @@ func (mpm *MainPageModel) callArchiveRefsGroup(ups *polesite.Polesite, callback 
 		message.SuccesStr(mpm.VM, "Groupes finalisés archivés")
 		callback()
 	})
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Data Management Methods
+
+func (mpm *MainPageModel) DetectDuplicate() {
+	mpm.Polesite.DetectDuplicate()
+}
+
+func (mpm *MainPageModel) DetectProductInconsistency() {
+	mpm.Polesite.DetectProductInconsistency()
+	mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles)
 }

@@ -92,7 +92,7 @@ func (ps *Polesite) Clone() *Polesite {
 func (ps *Polesite) CheckPolesStatus() {
 	for _, pole := range ps.Poles {
 		pole.CheckInfoConsistency()
-		pole.CheckState()
+		pole.UpdateState()
 	}
 }
 

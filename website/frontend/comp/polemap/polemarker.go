@@ -97,15 +97,24 @@ func (pm *PoleMarker) SetDraggable(drag bool) {
 	pm.Refresh()
 }
 
-// Refresh refreshes the look of the reciever on its map
+// Refresh refreshes the look of the PoleMarker receiver on its map (State and groups are not updated)
 func (pm *PoleMarker) Refresh() {
 	pm.Remove()
 	pm.AddTo(pm.Map.Map)
 }
 
-func (pm *PoleMarker) RefreshState() *PoleMarker {
+// FullRefreshState refreshes the look of the PoleMarker receiver on its map and reinit state groups.
+//
+// As PoleMarkers are discarded and created back during the process, pointer on newly created PoleMarker bound to the same receiver pole is returned.
+func (pm *PoleMarker) FullRefreshState() *PoleMarker {
 	pm.Map.RefreshPoles(pm.Map.Poles)
 	return pm.Map.GetPoleMarkerById(pm.Pole.Id)
+}
+
+// UpdateRefreshGroup updates the polemarker receiver look, update the layer groups and refreshes all PoleMarkers on map
+func (pm *PoleMarker) UpdateRefreshGroup() {
+	pm.UpdateFromState()
+	pm.Map.RefreshPoleMarkersGroups()
 }
 
 const (
@@ -125,7 +134,7 @@ const (
 	pmHtmlDragEdited   string = `<i class="fas fa-expand-arrows-alt fa-fw fa-2x pole-marker drag"></i>`
 )
 
-// UpdateFromState updates the look of receiver depending on its pole's state and product, and its marker state (no refresh undertaken)
+// UpdateFromState updates the look of receiver depending on its pole's state and product, and its marker state (no refresh undertaken nor layer group updated)
 func (pm *PoleMarker) UpdateFromState() {
 	var html, class string
 

@@ -58,7 +58,8 @@ type PoleMap struct {
 	*leafletmap.LeafletMap
 	PoleLine            *PoleLine                      `js:"PoleLine"`
 	Poles               []*polesite.Pole               `js:"poles"`
-	PoleMarkers         map[string][]*PoleMarker       `js:"PoleMarkers"`
+	PoleMarkers         []*PoleMarker                  `js:"PoleMarkers"`
+	PoleMarkersByState  map[string][]*PoleMarker       `js:"PoleMarkersByState"`
 	PoleMarkersGroup    map[string]*leaflet.LayerGroup `js:"PoleMarkersGroup"`
 	SelectedPoleMarkers []*PoleMarker                  `js:"SelectedPoleMarkers"`
 }
@@ -73,7 +74,7 @@ func NewPoleMap(vm *hvue.VM) *PoleMap {
 	//pm.LeafletMap.Init()
 	pm.PoleLine = nil
 	pm.Poles = nil
-	pm.initPoleMarkersGroups()
+	pm.clearPoleMarkersGroups()
 	return pm
 }
 
@@ -82,8 +83,10 @@ func (pm *PoleMap) Init() {
 	pm.PoleLine = NewPoleLine(pm)
 }
 
-func (pm *PoleMap) initPoleMarkersGroups() {
-	pm.PoleMarkers = make(map[string][]*PoleMarker)
+// clearPoleMarkersGroups clears all PoleMarker containers
+func (pm *PoleMap) clearPoleMarkersGroups() {
+	pm.PoleMarkers = []*PoleMarker{}
+	pm.PoleMarkersByState = make(map[string][]*PoleMarker)
 	pm.PoleMarkersGroup = make(map[string]*leaflet.LayerGroup)
 	pm.SelectedPoleMarkers = []*PoleMarker{}
 }
@@ -144,17 +147,28 @@ type namedLayers struct {
 	Layers []*leaflet.Layer
 }
 
-func (pm *PoleMap) updatePoleMarkersGroups() {
+// createPoleMarkers resets PoleMarkersGroups and creates new PoleMarkers for attached Poles
+func (pm *PoleMap) createPoleMarkers() {
+	pm.clearPoleMarkersGroups()
+	pms := []*PoleMarker{}
+
+	for _, pole := range pm.Poles {
+		pms = append(pms, pm.NewPoleMarker(pole))
+	}
+	pm.PoleMarkers = pms
+}
+
+// setPoleMarkersGroups resets PoleMarkersByState and PoleMarkersGroup according to attached PoleMarkers
+func (pm *PoleMap) setPoleMarkersGroups() {
 	pms := make(map[string][]*PoleMarker)
 	polesLayer := make(map[string][]*leaflet.Layer)
 
 	// create group
-	for _, pole := range pm.Poles {
-		poleMarker := pm.NewPoleMarker(pole)
-		pms[pole.State] = append(pms[pole.State], poleMarker)
-		polesLayer[pole.State] = append(polesLayer[pole.State], &poleMarker.Layer)
+	for _, poleMarker := range pm.PoleMarkers {
+		pms[poleMarker.Pole.State] = append(pms[poleMarker.Pole.State], poleMarker)
+		polesLayer[poleMarker.Pole.State] = append(polesLayer[poleMarker.Pole.State], &poleMarker.Layer)
 	}
-	pm.PoleMarkers = pms
+	pm.PoleMarkersByState = pms
 
 	// set controlGroup and add LayerGroup to map
 	pmg := make(map[string]*leaflet.LayerGroup)
@@ -175,30 +189,38 @@ func (pm *PoleMap) updatePoleMarkersGroups() {
 	pm.PoleMarkersGroup = pmg
 }
 
-// AddPoles creates PoleMarkers and adds them to Map
-func (pm *PoleMap) AddPoles(poles []*polesite.Pole) {
+// SetPoles creates PoleMarkers and adds them to Map (pre-existing markers and groups are deleted)
+func (pm *PoleMap) SetPoles(poles []*polesite.Pole) {
 	pm.Poles = poles
-	pm.initPoleMarkersGroups()
-	pm.updatePoleMarkersGroups()
+	pm.createPoleMarkers()
+	pm.setPoleMarkersGroups()
 }
 
-// RefreshPoles removes previously existing PoleMarkers from Map, and adds given Poles to map
+// RefreshPoles removes existing PoleMarkers from Map, and attach given Poles to map (PoleMarkers and Groups are rebuilt)
 func (pm *PoleMap) RefreshPoles(poles []*polesite.Pole) {
 	// remove Poles groups from map and controlLayer
 	for _, group := range pm.PoleMarkersGroup {
 		pm.LeafletMap.ControlLayers.RemoveLayer(&group.Layer)
 		group.Remove()
 	}
-	pm.AddPoles(poles)
+	pm.SetPoles(poles)
+}
+
+// RefreshPoleMarkersGroups updates PoleMarkersGroups according to existing PoleMarkers
+func (pm *PoleMap) RefreshPoleMarkersGroups() {
+	// remove Poles groups from map and controlLayer
+	for _, group := range pm.PoleMarkersGroup {
+		pm.LeafletMap.ControlLayers.RemoveLayer(&group.Layer)
+		group.Remove()
+	}
+	pm.setPoleMarkersGroups()
 }
 
 // GetPoleMarkerById returns the polemarker bounded to given pole's Id (nil if not found)
 func (pm *PoleMap) GetPoleMarkerById(id int) *PoleMarker {
-	for _, group := range pm.PoleMarkers {
-		for _, poleMarker := range group {
-			if poleMarker.Pole.Id == id {
-				return poleMarker
-			}
+	for _, poleMarker := range pm.PoleMarkers {
+		if poleMarker.Pole.Id == id {
+			return poleMarker
 		}
 	}
 	return nil
@@ -206,11 +228,7 @@ func (pm *PoleMap) GetPoleMarkerById(id int) *PoleMarker {
 
 // RefreshGroup refreshs all group of polemarkers
 func (pm *PoleMap) GetPoleMarkers() []*PoleMarker {
-	res := []*PoleMarker{}
-	for _, pms := range pm.PoleMarkers {
-		res = append(res, pms...)
-	}
-	return res
+	return pm.PoleMarkers[:]
 }
 
 // RefreshGroup refreshs all group of polemarkers
@@ -221,11 +239,11 @@ func (pm *PoleMap) RefreshGroup() {
 }
 
 func (pm *PoleMap) CenterOnPoleMarkers(pms []*PoleMarker) {
-	if len(pm.SelectedPoleMarkers) == 0 {
+	if len(pms) == 0 {
 		return
 	}
-	poles := make([]*polesite.Pole, len(pm.SelectedPoleMarkers))
-	for i, poleMarker := range pm.SelectedPoleMarkers {
+	poles := make([]*polesite.Pole, len(pms))
+	for i, poleMarker := range pms {
 		poles[i] = poleMarker.Pole
 	}
 	_, _, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(poles)
@@ -349,7 +367,7 @@ func (pm *PoleMap) SelectByFilter(filter func(*PoleMarker) bool) {
 	pm.SelectedPoleMarkers = spms
 }
 
-// ApplyOnSelected applys action on all selected PoleMarkers
+// ApplyOnSelected applies action on all selected PoleMarkers
 func (pm *PoleMap) ApplyOnSelected(action func(*PoleMarker)) {
 	for _, poleMarker := range pm.SelectedPoleMarkers {
 		action(poleMarker)

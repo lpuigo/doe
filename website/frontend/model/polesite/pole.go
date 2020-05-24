@@ -294,8 +294,8 @@ func (p *Pole) SetAttachmentDate(d string) {
 	p.State = poleconst.StateAttachment
 }
 
-// CheckState updates pole state according to DICT and DA value (depending on current date) if pole is Actually To Do
-func (p *Pole) CheckState() {
+// UpdateState updates pole receiver state according to DICT and DA info (depending on current date) if pole is actually To be processed
+func (p *Pole) UpdateState() {
 	today := date.TodayAfter(0)
 
 	testDICTandDAdates := func() {
@@ -329,6 +329,14 @@ func (p *Pole) CheckState() {
 		}
 		// All checked => StateToDo
 		p.SetState(poleconst.StateToDo)
+		if p.State == poleconst.StateDone {
+			if tools.Empty(p.Date) {
+				p.Date = date.TodayAfter(0)
+			}
+			if !tools.Empty(p.AttachmentDate) {
+				p.State = poleconst.StateAttachment
+			}
+		}
 	}
 
 	if p.IsInStateToBeChecked() {
@@ -336,6 +344,7 @@ func (p *Pole) CheckState() {
 	}
 }
 
+// SetState sets pole receiver state according to declared specific product ( ProductDenseNetwork or ProductNoAccess)
 func (p *Pole) SetState(state string) {
 	switch state {
 	case poleconst.StateToDo:
@@ -375,6 +384,7 @@ func (p *Pole) AddProduct(prd string) {
 	p.Get("Product").Call("sort")
 }
 
+// CheckProductConsistency checks for reciever pole's products consistency. Product can be added or discarded on pole receiver
 func (p *Pole) CheckProductConsistency() {
 	if p.HasProduct(poleconst.ProductTrickyReplace) {
 		p.AddProduct(poleconst.ProductReplace)
