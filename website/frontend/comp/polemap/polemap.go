@@ -14,17 +14,16 @@ import (
 )
 
 const template string = `
-<div id="LeafLetMap" style="height: 100%"></div>
-<!--<div style="height: 100%">-->
-<!--	<div class="map-button">-->
-<!--		<el-button type="warning" plain  @click='ClearSelected' size="mini">Déselectionner appui(s)</el-button>-->
-<!--&lt;!&ndash;		<pre>{{SelectedPoleMarkers}}</pre>&ndash;&gt;-->
+<!--<div id="LeafLetMap" style="height: 100%"></div>-->
+<div style="height: 100%">
+	<div v-if="NbSelected > 0"  class="map-button">
+		<el-button type="warning" plain  @click="HandleClearSelected()" size="mini">Déselectionner {{NbSelected}} appui(s)</el-button>
+	</div>
+	<div id="LeafLetMap" style="height: 100%"></div>
+<!--	<div v-if="SelectedPoleMarkers.length > 0" class="map-button">-->
+<!--		<el-button type="primary" plain  @click="ClearSelected" size="mini">Déselectionner {{SelectedPoleMarkers.length}} appui(s)</el-button>-->
 <!--	</div>-->
-<!--	<div id="LeafLetMap" style="height: 100%"></div>-->
-<!--&lt;!&ndash;	<div v-if="SelectedPoleMarkers.length > 0" class="map-button">&ndash;&gt;-->
-<!--&lt;!&ndash;		<el-button type="primary" plain  @click="ClearSelected" size="mini">Déselectionner {{SelectedPoleMarkers.length}} appui(s)</el-button>&ndash;&gt;-->
-<!--&lt;!&ndash;	</div>&ndash;&gt;-->
-<!--</div>-->
+</div>
 `
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,22 +37,18 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
 		hvue.MethodsOf(&PoleMap{}),
+		hvue.DataFunc(func(vm *hvue.VM) interface{} {
+			return NewPoleMap(vm)
+		}),
 		hvue.Mounted(func(vm *hvue.VM) {
-			newPoleMap(vm)
+			pm := PoleMapFromJS(vm.Object)
+			pm.Init()
+			print("Mounted", vm.Object)
 		}),
 		hvue.Computed("NbSelected", func(vm *hvue.VM) interface{} {
 			pm := PoleMapFromJS(vm.Object)
 			return len(pm.SelectedPoleMarkers)
 		}),
-		//hvue.BeforeUpdate(func(vm *hvue.VM) {
-		//	pm := PoleMapFromJS(vm.Object)
-		//	print("polemap beforeUpdate", pm.Poles)
-		//	//pm.AddPoles(pm.Poles, "attrib Poteaux")
-		//}),
-		//hvue.Updated(func(vm *hvue.VM) {
-		//	pm := PoleMapFromJS(vm.Object)
-		//	print("polemap Updated", pm.Poles)
-		//}),
 	}
 }
 
@@ -61,28 +56,31 @@ func componentOptions() []hvue.ComponentOption {
 // Comp Model
 
 type PoleMap struct {
-	leafletmap.LeafletMap
+	*leafletmap.LeafletMap
 	PoleLine            *PoleLine                      `js:"PoleLine"`
 	Poles               []*polesite.Pole               `js:"poles"`
 	PoleMarkers         map[string][]*PoleMarker       `js:"PoleMarkers"`
 	PoleMarkersGroup    map[string]*leaflet.LayerGroup `js:"PoleMarkersGroup"`
 	SelectedPoleMarkers []*PoleMarker                  `js:"SelectedPoleMarkers"`
-	//PoleOverlays map[string]*leaflet.Layer `js:"PoleOverlays"`
 }
 
 func PoleMapFromJS(obj *js.Object) *PoleMap {
-	return &PoleMap{LeafletMap: leafletmap.LeafletMap{Object: obj}}
+	return &PoleMap{LeafletMap: leafletmap.LeafletMapFromJS(obj)}
 }
 
-func newPoleMap(vm *hvue.VM) *PoleMap {
-	pm := PoleMapFromJS(vm.Object)
-	pm.LeafletMap.VM = vm
-	pm.LeafletMap.Init()
-	pm.PoleLine = NewPoleLine(pm)
+func NewPoleMap(vm *hvue.VM) *PoleMap {
+	pm := &PoleMap{LeafletMap: leafletmap.NewLeafletMap(vm)}
+	//pm.LeafletMap.VM = vm
+	//pm.LeafletMap.Init()
+	pm.PoleLine = nil
 	pm.Poles = nil
 	pm.initPoleMarkersGroups()
-	//pm.PoleOverlays = make(map[string]*leaflet.Layer)
 	return pm
+}
+
+func (pm *PoleMap) Init() {
+	pm.LeafletMap.Init()
+	pm.PoleLine = NewPoleLine(pm)
 }
 
 func (pm *PoleMap) initPoleMarkersGroups() {
@@ -110,7 +108,7 @@ func (pm *PoleMap) NewPoleMarker(pole *polesite.Pole) *PoleMarker {
 			poleMarker.SwitchSelection()
 			return
 		}
-		pm.VM.Emit("marker-click", poleMarker, event)
+		poleMarker.Map.VM.Emit("marker-click", poleMarker, event)
 	})
 	poleMarker.On("contextmenu", func(event *js.Object) {
 		poleMarker := PoleMarkerFromJS(event.Get("sourceTarget"))
@@ -312,6 +310,11 @@ func (pm *PoleMap) RemoveSelected(p *PoleMarker) {
 		return
 	}
 	pm.Get("SelectedPoleMarkers").Call("splice", index, 1)
+}
+
+func (pm *PoleMap) HandleClearSelected(vm *hvue.VM) {
+	pm = PoleMapFromJS(vm.Object)
+	pm.ClearSelected()
 }
 
 func (pm *PoleMap) ClearSelected() {

@@ -54,6 +54,10 @@ func NewLeafletMap(vm *hvue.VM) *LeafletMap {
 	return llm
 }
 
+func LeafletMapFromJS(o *js.Object) *LeafletMap {
+	return &LeafletMap{Object: o}
+}
+
 func (llm *LeafletMap) Init() {
 	mapOption := leaflet.DefaultMapOptions()
 

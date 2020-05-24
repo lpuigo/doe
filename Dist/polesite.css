@@ -247,7 +247,7 @@ h1 {
     /*display: flex;*/
     /*align-items: center;*/
     position: absolute;
-    top: 40px;
+    top: 50px;
     right: 50vw;
     z-index: 500;
 }
