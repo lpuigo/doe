@@ -68,6 +68,8 @@ func (p *Pole) IsTodo() bool {
 		return true
 	case poleconst.StateDaExpected:
 		return true
+	case poleconst.StatePermissionPending:
+		return true
 	case poleconst.StateToDo:
 		return true
 	case poleconst.StateHoleDone:
@@ -89,6 +91,9 @@ func (p *Pole) IsDone() bool {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
 	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
@@ -124,6 +129,9 @@ func (p *Pole) IsBilled() bool {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
 	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
@@ -141,6 +149,9 @@ func (p *Pole) IsArchivable() bool {
 	//case poleconst.StateNotSubmitted:
 	//case poleconst.StateNoGo:
 	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
@@ -174,42 +185,49 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 
 	todo, done, blocked, billed := p.IsTodo(), p.IsDone(), p.IsBlocked(), p.IsBilled()
 
-	article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
-	if err != nil {
-		return nil, fmt.Errorf("can not define pole creation Item: %s", err.Error())
-	}
-
-	info := fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
-
+	//article, err := poleArticles.GetArticleFor(catPoleCreation, p.Height)
+	//if err != nil {
+	//	return nil, fmt.Errorf("can not define pole creation Item: %s", err.Error())
+	//}
+	//
+	//info := fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
+	//
+	//it := items.NewItem(
+	//	client,
+	//	site,
+	//	activityPole,
+	//	ref,
+	//	info,
+	//	p.Date,
+	//	"",
+	//	article,
+	//	1,
+	//	1,
+	//	todo,
+	//	done,
+	//	blocked,
+	//	billed,
+	//)
+	//it.Comment = p.Comment
+	//it.Actors = p.Actors
+	//if billed {
+	//	it.AttachDate = p.AttachmentDate
+	//}
+	//res = append(res, it)
 	ref := p.ExtendedRef()
-
-	it := items.NewItem(
-		client,
-		site,
-		activityPole,
-		ref,
-		info,
-		p.Date,
-		"",
-		article,
-		1,
-		1,
-		todo,
-		done,
-		blocked,
-		billed,
-	)
-	it.Comment = p.Comment
-	it.Actors = p.Actors
-	if billed {
-		it.AttachDate = p.AttachmentDate
-	}
-	res = append(res, it)
 
 	for _, product := range p.Product {
 		article, err := poleArticles.GetArticleFor(product, p.Height)
 		if err != nil {
 			return nil, fmt.Errorf("can not define pole product item: %s", err.Error())
+		}
+		info := ""
+		comment := ""
+		if product == poleconst.ProductCreation {
+			info = fmt.Sprintf("Création poteau %s %dm", p.Material, p.Height)
+			comment = p.Comment
+		} else {
+			info = fmt.Sprintf("prestation complémentaire %s", product)
 		}
 
 		it := items.NewItem(
@@ -217,7 +235,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 			site,
 			activityPole,
 			ref,
-			fmt.Sprintf("prestation complémentaire %s", product),
+			info,
 			p.Date,
 			"",
 			article,
@@ -228,6 +246,7 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 			blocked,
 			billed,
 		)
+		it.Comment = comment
 		it.Actors = p.Actors
 		if billed {
 			it.AttachDate = p.AttachmentDate
