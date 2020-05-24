@@ -43,7 +43,6 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Mounted(func(vm *hvue.VM) {
 			pm := PoleMapFromJS(vm.Object)
 			pm.Init()
-			print("Mounted", vm.Object)
 		}),
 		hvue.Computed("NbSelected", func(vm *hvue.VM) interface{} {
 			pm := PoleMapFromJS(vm.Object)

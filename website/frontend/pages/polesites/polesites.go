@@ -141,7 +141,11 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 // Data Management Methods
 
 func (mpm *MainPageModel) DetectDuplicate() {
-	mpm.Polesite.DetectDoubles()
+	mpm.Polesite.DetectDuplicate()
+}
+
+func (mpm *MainPageModel) DetectProductInconsistency() {
+	mpm.Polesite.DetectProductInconsistency()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -41,6 +41,7 @@ func DefaultPoleMarker() *PoleMarker {
 	return np
 }
 
+// StartEditMode set the receiver as edited, updates its look and refreshes it
 func (pm *PoleMarker) StartEditMode(drag bool) {
 	if drag {
 		pm.SetDraggable(true)
@@ -51,6 +52,7 @@ func (pm *PoleMarker) StartEditMode(drag bool) {
 	pm.Refresh()
 }
 
+// EndEditMode set the receiver as not edited, updates its look and refreshes it
 func (pm *PoleMarker) EndEditMode(refresh bool) {
 	pm.Edited = false
 	pm.SetDraggable(false)
@@ -73,20 +75,21 @@ func (pm *PoleMarker) SwitchSelection() {
 	pm.Refresh()
 }
 
-// Deselect set the receiver unselected, and updates its html (Map selection list is not updated)
+// Deselect set the receiver unselected, and updates its look and refreshes it (Map selection list is not updated)
 func (pm *PoleMarker) Deselect() {
 	pm.Selected = false
 	pm.UpdateDivIconHtml()
 	pm.Refresh()
 }
 
-// Select set the receiver selected, and updates its html (Map selection list is not updated)
+// Select set the receiver as selected, updates its look and refreshes it (Map selection list is not updated)
 func (pm *PoleMarker) Select() {
 	pm.Selected = true
 	pm.UpdateDivIconHtml()
 	pm.Refresh()
 }
 
+// SetDraggable sets the marker as draggable and refreshes it
 func (pm *PoleMarker) SetDraggable(drag bool) {
 	pm.Draggable = drag
 	pm.Marker.SetDraggable(pm.Draggable)
@@ -94,6 +97,7 @@ func (pm *PoleMarker) SetDraggable(drag bool) {
 	pm.Refresh()
 }
 
+// Refresh refreshes the look of the reciever on its map
 func (pm *PoleMarker) Refresh() {
 	pm.Remove()
 	pm.AddTo(pm.Map.Map)
@@ -121,6 +125,7 @@ const (
 	pmHtmlDragEdited   string = `<i class="fas fa-expand-arrows-alt fa-fw fa-2x pole-marker drag"></i>`
 )
 
+// UpdateFromState updates the look of receiver depending on its pole's state and product, and its marker state (no refresh undertaken)
 func (pm *PoleMarker) UpdateFromState() {
 	var html, class string
 
@@ -170,8 +175,8 @@ func (pm *PoleMarker) UpdateFromState() {
 			html = pmHtmlReplace
 		case pm.Pole.HasProduct(poleconst.ProductCreation):
 			html = pmHtmlCreation
-		case pm.Pole.HasProduct(poleconst.ProductCoated):
-			html = pmHtmlCreation
+		//case pm.Pole.HasProduct(poleconst.ProductCoated):
+		//	html = pmHtmlCreation
 		case pm.Pole.HasProduct(poleconst.ProductReplenishment):
 			html = pmHtmlReplenish
 		case pm.Pole.HasProduct(poleconst.ProductFarReplenishment):
@@ -186,6 +191,7 @@ func (pm *PoleMarker) UpdateFromState() {
 	pm.UpdateDivIconHtml()
 }
 
+// UpdateDivIconHtml updates the look and the shadow of receiver (no refresh undertaken)
 func (pm *PoleMarker) UpdateDivIconHtml() {
 	switch {
 	case pm.Draggable:

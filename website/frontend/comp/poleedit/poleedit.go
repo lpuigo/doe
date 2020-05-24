@@ -807,6 +807,9 @@ func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
 		p.Pole.DictRef = editedPoleMarker.Pole.DictRef
 		p.Pole.DictDate = editedPoleMarker.Pole.DictDate
 		p.Pole.DictInfo = editedPoleMarker.Pole.DictInfo
+		p.Pole.CheckState()
+		p.UpdateFromState()
+		p.RefreshState()
 	})
 }
 

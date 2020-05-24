@@ -146,7 +146,7 @@ type pos struct {
 	lat, long int
 }
 
-func (ps *Polesite) DetectDoubles() {
+func (ps *Polesite) DetectDuplicate() {
 	const prec float64 = 100000.0
 	duplicatePolesByPos := map[pos][]*Pole{}
 	duplicatePolesByTitle := map[string][]*Pole{}
@@ -194,5 +194,14 @@ func (ps *Polesite) DetectDoubles() {
 				}
 			}
 		}
+	}
+}
+
+func (ps *Polesite) DetectProductInconsistency() {
+	for _, pole := range ps.Poles {
+		if !(pole.State != poleconst.StateCancelled && pole.State != poleconst.StateNotSubmitted) {
+			continue
+		}
+		pole.AddProduct(poleconst.ProductCreation)
 	}
 }
