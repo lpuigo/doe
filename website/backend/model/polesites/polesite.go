@@ -81,6 +81,12 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 		case poleconst.StateDictToDo:
 			total++
 			blocked++
+		case poleconst.StateDaToDo:
+			total++
+			blocked++
+		case poleconst.StateDaExpected:
+			total++
+			blocked++
 		case poleconst.StatePermissionPending:
 			total++
 			blocked++
