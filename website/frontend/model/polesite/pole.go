@@ -508,9 +508,9 @@ func PoleRowClassName(status string) string {
 	case poleconst.StateDaToDo:
 		return "pole-row-nogo"
 	case poleconst.StateDaExpected:
-		return "pole-row-nogo"
+		return "pole-row-expectda"
 	case poleconst.StatePermissionPending:
-		return "pole-row-nogo"
+		return "pole-row-permission"
 	case poleconst.StateToDo:
 		return "pole-row-todo"
 	case poleconst.StateNoAccess:

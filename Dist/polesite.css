@@ -202,6 +202,24 @@ h1 {
     transition: background-color .15s ease;
 }
 
+.el-table .pole-row-expectda {
+    background: #f2cf9d;
+}
+
+.el-table .pole-row-expectda:hover {
+    background: #d9b88d;
+    transition: background-color .15s ease;
+}
+
+.el-table .pole-row-permission {
+    background: #f2dec2;
+}
+
+.el-table .pole-row-permission:hover {
+    background: #d9c6ad;
+    transition: background-color .15s ease;
+}
+
 
 /* =====================================================================================================================
    === Control Info Style
