@@ -42,40 +42,46 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
 
         <el-table-column
                 label="Déb DICT" prop="DictDate" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
+                width="92px" :resizable=true
+                align="center"	:formatter="FormatDate"
+        ></el-table-column>
+
+<!--        <el-table-column-->
+<!--                label="Fin DICT" sortable :sort-by="SortDate('DictDate')"-->
+<!--                width="100px" :resizable=true-->
+<!--                align="center"-->
+<!--        >-->
+<!--            <template slot-scope="scope">-->
+<!--                <span>{{DictEndDate(scope.row.DictDate)}}</span>-->
+<!--            </template>-->
+<!--        </el-table-column>-->
+
+<!--        <el-table-column-->
+<!--                label="Info DICT" prop="DictInfo"-->
+<!--                width="100px" :resizable=true :show-overflow-tooltip=true-->
+<!--        ></el-table-column>-->
+
+        <el-table-column
+                label="Dem. DA" prop="DaQueryDate" sortable :sort-by="SortDate('DaQueryDate')"
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
-                label="Fin DICT" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
-                align="center"
-        >
-            <template slot-scope="scope">
-                <span>{{DictEndDate(scope.row.DictDate)}}</span>
-            </template>
-        </el-table-column>
-
-        <el-table-column
-                label="Info DICT" prop="DictInfo"
-                width="100px" :resizable=true :show-overflow-tooltip=true
-        ></el-table-column>
-
-        <el-table-column
                 label="Déb DA" prop="DaStartDate" sortable :sort-by="SortDate('DaStartDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Fin DA" prop="DaEndDate" sortable :sort-by="SortDate('DaEndDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Type" prop="Material"
-                width="80px" :resizable=true :show-overflow-tooltip=true
+                width="100px" :resizable=true :show-overflow-tooltip=true
         >
             <template slot-scope="scope">
                 <span>{{FormatType(scope.row)}}</span>
@@ -132,8 +138,12 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
 		-->
         <el-table-column 
                 label="Commentaire" prop="Comment"
-                min-width="120px" :resizable=true
-        ></el-table-column>
+                min-width="120px"
+        >
+            <template slot-scope="scope">
+                <span style="white-space: pre">{{FormatComment(scope.row)}}</span>
+            </template>
+        </el-table-column>
     </el-table>
 </el-container>
 `
@@ -182,13 +192,13 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
 
         <el-table-column
                 label="Déb DICT" prop="DictDate" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
+                width="92px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Fin DICT" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         >
             <template slot-scope="scope">
@@ -196,20 +206,26 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
             </template>
         </el-table-column>
 
+<!--        <el-table-column-->
+<!--                label="Info DICT" prop="DictInfo"-->
+<!--                width="100px" :resizable=true :show-overflow-tooltip=true-->
+<!--        ></el-table-column>-->
+
         <el-table-column
-                label="Info DICT" prop="DictInfo"
-                width="100px" :resizable=true :show-overflow-tooltip=true
+                label="Dem. DA" prop="DaQueryDate" sortable :sort-by="SortDate('DaQueryDate')"
+                width="90px" :resizable=true
+                align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Déb DA" prop="DaStartDate" sortable :sort-by="SortDate('DaStartDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Fin DA" prop="DaEndDate" sortable :sort-by="SortDate('DaEndDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
@@ -273,8 +289,12 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
 
         <el-table-column 
                 label="Commentaire" prop="Comment"
-                min-width="120px" :resizable=true
-        ></el-table-column>
+                min-width="120px"
+        >
+            <template slot-scope="scope">
+                <span style="white-space: pre">{{FormatComment(scope.row)}}</span>
+            </template>
+        </el-table-column>
     </el-table>
 </el-container>
 `
@@ -322,13 +342,13 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
 
         <el-table-column
                 label="Déb DICT" prop="DictDate" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
+                width="92px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Fin DICT" sortable :sort-by="SortDate('DictDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         >
             <template slot-scope="scope">
@@ -343,13 +363,13 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
 
         <el-table-column
                 label="Déb DA" prop="DaStartDate" sortable :sort-by="SortDate('DaStartDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
         <el-table-column
                 label="Fin DA" prop="DaEndDate" sortable :sort-by="SortDate('DaEndDate')"
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 		-->
@@ -385,7 +405,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
 
         <el-table-column
                 label="Date" prop="Date" sortable
-                width="100px" :resizable=true
+                width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
         ></el-table-column>
 
@@ -411,8 +431,12 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
 
         <el-table-column 
                 label="Commentaire" prop="Comment"
-                min-width="120px" :resizable=true
-        ></el-table-column>
+                min-width="120px"
+        >
+            <template slot-scope="scope">
+                <span style="white-space: pre">{{FormatComment(scope.row)}}</span>
+            </template>
+        </el-table-column>
     </el-table>
 </el-container>
 `

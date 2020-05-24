@@ -221,6 +221,19 @@ func (pm *PoleMap) RefreshGroup() {
 	}
 }
 
+func (pm *PoleMap) CenterOnPoleMarkers(pms []*PoleMarker) {
+	if len(pm.SelectedPoleMarkers) == 0 {
+		return
+	}
+	poles := make([]*polesite.Pole, len(pm.SelectedPoleMarkers))
+	for i, poleMarker := range pm.SelectedPoleMarkers {
+		poles[i] = poleMarker.Pole
+	}
+	_, _, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(poles)
+	pm.LeafletMap.Map.Stop()
+	pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minlat, minlong), leaflet.NewLatLng(maxlat, maxlong))
+}
+
 func (pm *PoleMap) CenterOnPoles() {
 	clat, clong, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(pm.Poles)
 	pm.LeafletMap.Map.Stop()

@@ -220,20 +220,20 @@ const template string = `<div>
             </template>
             <!-- DT -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
-                <el-col :span="6" class="align-right">DT:</el-col>
-                <el-col :span="12">
+				<el-col :span="3">
+					<el-tooltip content="Appliquer les infos DT / DICT à la selection" placement="bottom" effect="light" open-delay="500">
+						<el-button type="warning" plain style="width: 100%" class="icon" icon="fas fa-clone" size="mini" @click="ApplyDict"></el-button>
+					</el-tooltip>	
+				</el-col>
+                <el-col :span="3" class="align-right">DT:</el-col>
+                <el-col :span="10">
                     <el-input placeholder="Référence DT"
                               v-model.trim="editedpolemarker.Pole.DtRef" clearable size="mini"
                     ></el-input>
                 </el-col>
-				<el-col :span="3">
+				<el-col :offset="5" :span="3">
 					<el-tooltip content="Selectionner les autres appuis ayant la même DT / DICT" placement="bottom" effect="light" open-delay="500">
 						<el-button type="info" plain style="width: 100%" class="icon" icon="fas fa-eye-dropper" size="mini" @click="SelectByDict"></el-button>
-					</el-tooltip>	
-				</el-col>
-				<el-col :span="3">
-					<el-tooltip content="Appliquer les infos DT / DICT à la selection" placement="bottom" effect="light" open-delay="500">
-						<el-button type="warning" plain style="width: 100%" class="icon" icon="far fa-clone" size="mini" @click="ApplyDict"></el-button>
 					</el-tooltip>	
 				</el-col>
             </el-row>
@@ -266,7 +266,12 @@ const template string = `<div>
             </el-row>
             <!-- DA -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
-                <el-col :span="6" class="align-right">DA:</el-col>
+				<el-col :span="3">
+					<el-tooltip content="Appliquer les infos DA à la selection" placement="bottom" effect="light" open-delay="500">
+						<el-button type="warning" plain style="width: 100%" class="icon" icon="fas fa-clone" size="mini" @click="ApplyDa"></el-button>
+					</el-tooltip>	
+				</el-col>
+                <el-col :span="3" class="align-right">DA:</el-col>
                 <el-col :span="9">
                     <el-date-picker format="dd/MM/yyyy" placeholder="Demande" size="mini"
                                     style="width: 100%" type="date"
@@ -770,6 +775,7 @@ func (pem *PoleEditModel) SelectByRef(vm *hvue.VM) {
 		}
 		return false
 	})
+	editedPoleMarker.Map.CenterOnPoleMarkers(editedPoleMarker.Map.SelectedPoleMarkers)
 }
 
 func (pem *PoleEditModel) SelectByDict(vm *hvue.VM) {
@@ -791,6 +797,7 @@ func (pem *PoleEditModel) SelectByDict(vm *hvue.VM) {
 		}
 		return false
 	})
+	editedPoleMarker.Map.CenterOnPoleMarkers(editedPoleMarker.Map.SelectedPoleMarkers)
 }
 
 func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
@@ -800,5 +807,15 @@ func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
 		p.Pole.DictRef = editedPoleMarker.Pole.DictRef
 		p.Pole.DictDate = editedPoleMarker.Pole.DictDate
 		p.Pole.DictInfo = editedPoleMarker.Pole.DictInfo
+	})
+}
+
+func (pem *PoleEditModel) ApplyDa(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	editedPoleMarker := pem.EditedPoleMarker
+	editedPoleMarker.Map.ApplyOnSelected(func(p *polemap.PoleMarker) {
+		p.Pole.DaQueryDate = editedPoleMarker.Pole.DaQueryDate
+		p.Pole.DaStartDate = editedPoleMarker.Pole.DaStartDate
+		p.Pole.DaEndDate = editedPoleMarker.Pole.DaEndDate
 	})
 }

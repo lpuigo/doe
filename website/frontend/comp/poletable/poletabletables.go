@@ -134,6 +134,14 @@ func (ptm *PoleTableModel) DictEndDate(d string) string {
 	return date.DateString(date.After(d, poleconst.DictValidityDuration))
 }
 
+func (ptm *PoleTableModel) FormatComment(p *ps.Pole) string {
+	res := p.Comment
+	if !tools.Empty(p.DictInfo) {
+		res = "Info DICT: " + p.DictInfo + "\n" + res
+	}
+	return res
+}
+
 func (ptm *PoleTableModel) FormatDate(r, c *js.Object, d string) string {
 	return date.DateString(d)
 }
@@ -169,8 +177,8 @@ func (ptm *PoleTableModel) FormatActors(vm *hvue.VM, p *ps.Pole) string {
 func (ptm *PoleTableModel) SortDate(attrib string) func(obj *js.Object) string {
 	return func(obj *js.Object) string {
 		val := obj.Get(attrib).String()
-		if val == "" {
-			return "9999-12-31"
+		if tools.Empty(val) {
+			return "0001-01-01"
 		}
 		return val
 	}
