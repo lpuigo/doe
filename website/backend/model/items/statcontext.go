@@ -64,7 +64,7 @@ func NewStatContext(freq string) (*StatContext, error) {
 		dateFor = func(d string) string {
 			return date.GetMonth(d)
 		}
-		startDate = date.GetMonth(date.GetDateAfter(startDate, (1-maxVal)*30))
+		startDate = dateFor(date.GetDateAfter(dateFor(startDate), (1-maxVal)*30))
 	default:
 		return nil, fmt.Errorf("unsupported stat period '%s'", freq)
 	}
