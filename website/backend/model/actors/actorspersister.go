@@ -29,7 +29,7 @@ func NewActorsPersister(dir string) (*ActorsPersister, error) {
 	return ap, nil
 }
 
-func (ap ActorsPersister) NbActors() int {
+func (ap *ActorsPersister) NbActors() int {
 	return len(ap.actors)
 }
 

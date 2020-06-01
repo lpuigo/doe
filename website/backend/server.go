@@ -42,6 +42,7 @@ const (
 	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
 	CalendarFile  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
 	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
+	GroupsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Groups`
 	TemplatesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
 	LaunchWebBrowser = true
@@ -63,6 +64,7 @@ func main() {
 			TimeSheetsDir: TimeSheetsDir,
 			CalendarFile:  CalendarFile,
 			ClientsDir:    ClientsDir,
+			GroupsDir:     GroupsDir,
 			TemplatesDir:  TemplatesDir,
 			SessionKey:    SessionKey,
 		},

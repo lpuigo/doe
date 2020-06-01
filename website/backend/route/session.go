@@ -70,16 +70,18 @@ func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authent
 }
 
 type authentUser struct {
-	Name        string
-	Clients     []authentClient
+	Name    string
+	Clients []authentClient
+	//Groups      []*groups.Group
 	Permissions map[string]bool
 	DaysOff     map[string]string
 }
 
 func newAuthentUser() authentUser {
 	return authentUser{
-		Name:        "",
-		Clients:     []authentClient{},
+		Name:    "",
+		Clients: []authentClient{},
+		//Groups:      []*groups.Group{},
 		Permissions: make(map[string]bool),
 		DaysOff:     make(map[string]string),
 	}
@@ -88,6 +90,7 @@ func newAuthentUser() authentUser {
 func (au *authentUser) SetFrom(mgr *mgr.Manager, clients []*clients.Client) {
 	au.Name = mgr.CurrentUser.Name
 	au.Clients = getAuthentClientFrom(mgr, clients)
+	//au.Groups = getGroupsFrom(mgr)
 	au.Permissions = mgr.CurrentUser.Permissions
 	au.DaysOff = mgr.DaysOff.GetDays()
 }
@@ -102,7 +105,6 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	user := newAuthentUser()
 	// check for session cookie
 	if !mgr.CheckSessionUser(r) {
 		// user cookie not found or improper, remove it first
@@ -123,6 +125,7 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	user := newAuthentUser()
 	user.SetFrom(mgr, clts)
 
 	// refresh session cookie

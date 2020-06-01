@@ -11,6 +11,7 @@ type ManagerConfig struct {
 	TimeSheetsDir string
 	CalendarFile  string
 	ClientsDir    string
+	GroupsDir     string
 	TemplatesDir  string
 	SessionKey    string
 }

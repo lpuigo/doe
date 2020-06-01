@@ -18,6 +18,7 @@ type Actor struct {
 	Role      string
 	Vacation  []date.DateStringRangeComment
 	Client    []string
+	Groups    GroupHistory
 	Comment   string
 }
 
@@ -33,6 +34,7 @@ func NewActor(firstName, lastName, company string) *Actor {
 		Role:      "",
 		Vacation:  []date.DateStringRangeComment{},
 		Client:    []string{},
+		Groups:    NewGroupHistory(),
 		Comment:   "",
 	}
 }
