@@ -29,6 +29,7 @@ func NewActorRecordFrom(r io.Reader) (ar *ActorRecord, err error) {
 		ar = nil
 		return
 	}
+	ar.CheckConsistency()
 	ar.SetId(ar.Id)
 	return
 }

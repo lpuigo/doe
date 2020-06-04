@@ -24,6 +24,7 @@ type Actor struct {
 	Role      string                   `js:"Role"`
 	Vacation  []*date.DateRangeComment `js:"Vacation"`
 	Client    []string                 `js:"Client"`
+	Groups    GroupHistory             `js:"Groups"`
 	Comment   string                   `js:"Comment"`
 	Info      *ActorInfo               `js:"Info"`
 }
@@ -70,6 +71,7 @@ func (a *Actor) Clone(oa *Actor) {
 		a.Vacation = append(a.Vacation, date.NewDateRangeCommentFrom(vac.Begin, vac.End, vac.Comment))
 	}
 	a.Client = oa.Client[:]
+	a.Groups = oa.Groups.Copy()
 	a.Comment = oa.Comment
 	a.Info.Clone(oa.Info)
 }

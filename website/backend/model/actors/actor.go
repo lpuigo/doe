@@ -39,6 +39,13 @@ func NewActor(firstName, lastName, company string) *Actor {
 	}
 }
 
+func (a *Actor) CheckConsistency() {
+	if a.Groups == nil {
+		a.Groups = NewGroupHistory()
+		a.Groups[a.Period.Begin] = 0
+	}
+}
+
 func (a *Actor) IsActiveOn(date string) bool {
 	if !(a.Period.Begin != "" && a.Period.Begin <= date) {
 		return false

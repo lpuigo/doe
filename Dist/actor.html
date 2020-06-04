@@ -16,6 +16,7 @@
     <!-- -->
     <actor-update-modal
             ref="ActorEditModal"
+            :groups.sync="GroupStore"
             @edited-actor="HandleEditedActor"
     ></actor-update-modal>
 

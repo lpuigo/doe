@@ -13,6 +13,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/model/group"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -41,6 +42,7 @@ func main() {
 			mpm := &MainPageModel{Object: vm.Object}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
 			mpm.GetUserSession(func() {
+				mpm.GroupStore.CallGetGroups(vm, func() {})
 				mpm.LoadActors(true)
 			})
 		}),
@@ -60,13 +62,14 @@ type MainPageModel struct {
 	VM   *hvue.VM `js:"VM"`
 	User *fm.User `js:"User"`
 
-	ActiveMode  string         `js:"ActiveMode"`
-	Filter      string         `js:"Filter"`
-	FilterType  string         `js:"FilterType"`
-	Actors      []*actor.Actor `js:"Actors"`
-	Reference   string         `js:"Reference"`
-	Dirty       bool           `js:"Dirty"`
-	NextActorId int            `js:"NextActorId"`
+	ActiveMode  string            `js:"ActiveMode"`
+	Filter      string            `js:"Filter"`
+	FilterType  string            `js:"FilterType"`
+	Actors      []*actor.Actor    `js:"Actors"`
+	GroupStore  *group.GroupStore `js:"GroupStore"`
+	Reference   string            `js:"Reference"`
+	Dirty       bool              `js:"Dirty"`
+	NextActorId int               `js:"NextActorId"`
 
 	CraVisible bool   `js:"craVisible"`
 	CraMonth   string `js:"craMonth"`
@@ -83,8 +86,9 @@ func NewMainPageModel() *MainPageModel {
 	mpm.Actors = []*actor.Actor{}
 	mpm.Reference = ""
 	mpm.Dirty = false
-
 	mpm.NextActorId = -2
+
+	mpm.GroupStore = group.NewGroupStore()
 
 	mpm.CraVisible = false
 	mpm.CraMonth = date.GetFirstOfMonth(date.TodayAfter(-7))

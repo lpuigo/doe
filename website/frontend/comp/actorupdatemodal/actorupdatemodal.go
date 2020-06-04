@@ -3,10 +3,13 @@ package actorupdatemodal
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/model/group"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"strconv"
 	"strings"
 )
 
@@ -121,7 +124,7 @@ const template string = `<el-dialog
 						</el-option>
 					</el-select>
 				</el-col>
-	
+
 				<el-col :span="4" class="align-right">Rôle :</el-col>
 				<el-col :span="8">
 					<el-select filterable allow-create clearable placeholder="Rôle" size="mini"
@@ -136,6 +139,56 @@ const template string = `<el-dialog
 						</el-option>
 					</el-select>
 				</el-col>
+			</el-row>
+	
+			<!-- Group -->
+			<el-row :gutter="10" align="middle" class="doublespaced" type="flex">
+				<el-col :span="4" class="align-right">Affectation :</el-col>
+				<el-col :span="20">
+					<el-table 
+							:data="GroupsControl.Assignments"
+							max-height="160" size="mini" border
+					>
+						<el-table-column label="" width="80">
+							<template slot="header" slot-scope="scope">
+								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddAssignment()"></el-button>
+							</template>
+							<template slot-scope="scope">
+								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveAssignment(scope.$index)"></el-button>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Depuis le" width="180">
+							<template slot-scope="scope">
+								<el-date-picker :picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
+											placeholder="Date" size="mini"
+											style="width: 100%"
+											type="date"
+											v-model="scope.row.Date"
+											value-format="yyyy-MM-dd"
+											@change="UpdateAssignments"
+								></el-date-picker>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Groupe">
+							<template slot-scope="scope">
+								<el-select placeholder="Groupe" size="mini"
+										   v-model="scope.row.GroupId"
+										   @change="UpdateAssignments" style="width: 100%"
+								>
+									<el-option v-for="item in GetAssignmentGroups()"
+											   :key="item.value"
+											   :label="item.label"
+											   :value="item.value"
+									>
+									</el-option>
+								</el-select>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-col>
+	
 			</el-row>
 	
 	        <!-- Salary -->
@@ -420,12 +473,16 @@ const template string = `<el-dialog
 type ActorUpdateModalModel struct {
 	*ActorModalModel
 
-	ThisMonth string `js:"ThisMonth"`
+	ThisMonth     string            `js:"ThisMonth"`
+	GroupStore    *group.GroupStore `js:"groups"`
+	GroupsControl *GroupsControl    `js:"GroupsControl"`
 }
 
 func NewActorUpdateModalModel(vm *hvue.VM) *ActorUpdateModalModel {
 	aumm := &ActorUpdateModalModel{ActorModalModel: NewActorModalModel(vm)}
 	aumm.ThisMonth = date.GetFirstOfMonth(date.TodayAfter(0))
+	aumm.GroupStore = nil
+	aumm.GroupsControl = NewGroupsControl(nil)
 	return aumm
 }
 
@@ -447,6 +504,7 @@ func componentOptions() []hvue.ComponentOption {
 			return NewActorUpdateModalModel(vm)
 		}),
 		hvue.MethodsOf(&ActorUpdateModalModel{}),
+		hvue.Props("groups"),
 		hvue.Computed("isNewActor", func(vm *hvue.VM) interface{} {
 			aumm := ActorUpdateModalModelFromJS(vm.Object)
 			return aumm.CurrentActor.Id == -1
@@ -461,6 +519,19 @@ func componentOptions() []hvue.ComponentOption {
 		//	return aumm.CurrentActor.Ref
 		//}),
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Modal Methods
+
+func (aumm *ActorUpdateModalModel) Show(act *actor.Actor, user *fm.User) {
+	aumm.GroupsControl = NewGroupsControl(aumm.GroupStore)
+	aumm.EditedActor = act
+	aumm.CurrentActor = act.Copy()
+	aumm.GroupsControl.SetAssignments(aumm.CurrentActor)
+	aumm.User = user
+	aumm.ShowConfirmDelete = false
+	aumm.Visible = true
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -509,6 +580,47 @@ func (aumm *ActorUpdateModalModel) ConfirmChange(vm *hvue.VM) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+// Actor Group Tools Methods
+
+func (aumm *ActorUpdateModalModel) GetCurrentGroupInfo(vm *hvue.VM) string {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	id, assignDate := aumm.CurrentActor.Groups.GetCurrentInfo()
+	if id < 0 {
+		return "Pas de groupe affecté"
+	}
+	group := aumm.GroupStore.GetGroupById(id)
+	if group == nil {
+		return "Pas de groupe connu affecté"
+	}
+	return group.Name + " depuis le " + date.DateString(assignDate)
+}
+
+func (aumm *ActorUpdateModalModel) AddAssignment(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.GroupsControl.Add()
+}
+
+func (aumm *ActorUpdateModalModel) RemoveAssignment(vm *hvue.VM, index int) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.GroupsControl.Remove(index)
+}
+
+func (aumm *ActorUpdateModalModel) UpdateAssignments(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.GroupsControl.SortAssignments()
+	aumm.GroupsControl.UpdateActor()
+}
+
+func (aumm *ActorUpdateModalModel) GetAssignmentGroups(vm *hvue.VM) []*elements.ValueLabel {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	res := make([]*elements.ValueLabel, len(aumm.GroupStore.Groups))
+	for i, grp := range aumm.GroupStore.Groups {
+		res[i] = elements.NewValueLabel(strconv.Itoa(grp.Id), grp.Name)
+	}
+	return res
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 // ActorInfos Tools Button Methods
 
 // Salary
@@ -535,6 +647,25 @@ func (aumm *ActorUpdateModalModel) RemoveSalary(vm *hvue.VM, pos int) {
 func (aumm *ActorUpdateModalModel) CheckSalary(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	aumm.CurrentActor.Info.Get("Salary").Call("sort", actor.CompareDateAmountComment)
+}
+
+// TravelSubsidy
+
+func (aumm *ActorUpdateModalModel) AddTravelSubsidy(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	nd := actor.NewDateAmountComment()
+	nd.Date = date.GetFirstOfMonth(date.TodayAfter(0))
+	aumm.CurrentActor.Info.TravelSubsidy = append(actor.EarningHistory{*nd}, aumm.CurrentActor.Info.TravelSubsidy...)
+}
+
+func (aumm *ActorUpdateModalModel) RemoveTravelSubsidy(vm *hvue.VM, pos int) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.CurrentActor.Info.Get("TravelSubsidy").Call("splice", pos, 1)
+}
+
+func (aumm *ActorUpdateModalModel) CheckTravelSubsidy(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.CurrentActor.Info.Get("TravelSubsidy").Call("sort", actor.CompareDateAmountComment)
 }
 
 // EarnedBonuses
@@ -633,25 +764,6 @@ func (aumm *ActorUpdateModalModel) CheckPaidBonus(vm *hvue.VM, value *js.Object)
 		value.Set("Date", date.GetFirstOfMonth(currentDate))
 	}
 	aumm.CurrentActor.Info.Get("PaidBonuses").Call("sort", actor.CompareDateAmountComment)
-}
-
-// TravelSubsidy
-
-func (aumm *ActorUpdateModalModel) AddTravelSubsidy(vm *hvue.VM) {
-	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	nd := actor.NewDateAmountComment()
-	nd.Date = date.GetFirstOfMonth(date.TodayAfter(0))
-	aumm.CurrentActor.Info.TravelSubsidy = append(actor.EarningHistory{*nd}, aumm.CurrentActor.Info.TravelSubsidy...)
-}
-
-func (aumm *ActorUpdateModalModel) RemoveTravelSubsidy(vm *hvue.VM, pos int) {
-	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	aumm.CurrentActor.Info.Get("TravelSubsidy").Call("splice", pos, 1)
-}
-
-func (aumm *ActorUpdateModalModel) CheckTravelSubsidy(vm *hvue.VM) {
-	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	aumm.CurrentActor.Info.Get("TravelSubsidy").Call("sort", actor.CompareDateAmountComment)
 }
 
 // Trainings

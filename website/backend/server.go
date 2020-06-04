@@ -159,6 +159,10 @@ func main() {
 	// Attachements methods
 	router.HandleFunc("/api/{sitetype}/{id:[0-9]+}/attach", withUserManager("GetSiteAttachement", route.GetItemizableSiteAttachement)).Methods("GET")
 
+	// Groups methods
+	router.HandleFunc("/api/groups", withUserManager("GetGroups", route.GetGroups)).Methods("GET")
+	router.HandleFunc("/api/groups", withUserManager("UpdateGroups", route.UpdateGroups)).Methods("PUT")
+
 	// Actors methods
 	router.HandleFunc("/api/actors", withUserManager("GetActors", route.GetActors)).Methods("GET")
 	router.HandleFunc("/api/actors", withUserManager("UpdateActors", route.UpdateActors)).Methods("PUT")

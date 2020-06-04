@@ -32,7 +32,7 @@ func (gp *GroupsPersister) NbGroups() int {
 	return len(gp.groups)
 }
 
-// LoadDirectory loads all persisted Actors Records
+// LoadDirectory loads all persisted Groups Records
 func (gp *GroupsPersister) LoadDirectory() error {
 	gp.Lock()
 	defer gp.Unlock()
@@ -78,7 +78,7 @@ func (gp *GroupsPersister) Update(ugr *GroupRecord) error {
 
 	ogr := gp.GetById(ugr.Id)
 	if ogr == nil {
-		return fmt.Errorf("actor id not found")
+		return fmt.Errorf("group id not found")
 	}
 	ogr.Group = ugr.Group
 	gp.persister.MarkDirty(ogr)
@@ -94,7 +94,7 @@ func (gp *GroupsPersister) findIndex(gr *GroupRecord) int {
 	return -1
 }
 
-// Remove removes the given ActorRecord from the GroupsPersister (pertaining file is moved to deleted dir)
+// Remove removes the given GroupRecord from the GroupsPersister (pertaining file is moved to deleted dir)
 func (gp *GroupsPersister) Remove(ra *GroupRecord) error {
 	gp.Lock()
 	defer gp.Unlock()
@@ -119,6 +119,32 @@ func (gp *GroupsPersister) GetById(id int) *GroupRecord {
 	for _, gr := range gp.groups {
 		if gr.Id == id {
 			return gr
+		}
+	}
+	return nil
+}
+
+func (gp *GroupsPersister) GetGroups() []*Group {
+	gp.RLock()
+	defer gp.RUnlock()
+
+	res := make([]*Group, len(gp.groups))
+	for i, gr := range gp.groups {
+		res[i] = gr.Group
+	}
+	return res
+}
+
+func (gp *GroupsPersister) UpdateGroups(updatedGroups []*Group) error {
+	for _, updGrp := range updatedGroups {
+		ugr := NewGroupRecordFromGroup(updGrp)
+		if updGrp.Id < 0 { // New Group, add it instead of update
+			gp.Add(ugr)
+			continue
+		}
+		err := gp.Update(ugr)
+		if err != nil {
+			fmt.Errorf("could not update group '%s' (id: %d)", ugr.Name, ugr.Id)
 		}
 	}
 	return nil
