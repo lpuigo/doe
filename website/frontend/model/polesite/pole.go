@@ -253,10 +253,10 @@ func (p *Pole) IsInStateToBeChecked() bool {
 		return true
 	case poleconst.StateDenseNetwork:
 		return true
-	case poleconst.StateHoleDone:
-		return true
-	case poleconst.StateIncident:
-		return true
+	//case poleconst.StateHoleDone:
+	//	return true
+	//case poleconst.StateIncident:
+	//	return true
 	default:
 		return false
 	}
@@ -294,7 +294,11 @@ func (p *Pole) SetAttachmentDate(d string) {
 	p.State = poleconst.StateAttachment
 }
 
-// UpdateState updates pole receiver state according to DICT and DA info (depending on current date) if pole is actually To be processed
+// UpdateState updates pole receiver state.
+//
+// According to DICT and DA info (depending on current date) if pole is actually To be processed
+//
+// If State is StateDone, Date is checked and filled with current date if empty
 func (p *Pole) UpdateState() {
 	today := date.TodayAfter(0)
 
@@ -329,22 +333,25 @@ func (p *Pole) UpdateState() {
 		}
 		// All checked => StateToDo
 		p.SetState(poleconst.StateToDo)
-		if p.State == poleconst.StateDone {
-			if tools.Empty(p.Date) {
-				p.Date = date.TodayAfter(0)
-			}
-			if !tools.Empty(p.AttachmentDate) {
-				p.State = poleconst.StateAttachment
-			}
-		}
 	}
 
 	if p.IsInStateToBeChecked() {
 		testDICTandDAdates()
+		return
+	}
+	if p.State == poleconst.StateDone {
+		if tools.Empty(p.Date) {
+			p.Date = date.TodayAfter(0)
+		}
+		if !tools.Empty(p.AttachmentDate) {
+			p.State = poleconst.StateAttachment
+		}
 	}
 }
 
-// SetState sets pole receiver state according to declared specific product ( ProductDenseNetwork or ProductNoAccess)
+// SetState sets pole receiver state.
+//
+// StateToDo can be modified according to already declared specific product (ProductDenseNetwork or ProductNoAccess)
 func (p *Pole) SetState(state string) {
 	switch state {
 	case poleconst.StateToDo:

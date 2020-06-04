@@ -206,7 +206,7 @@ func (pm *PoleMap) RefreshPoles(poles []*polesite.Pole) {
 	pm.SetPoles(poles)
 }
 
-// RefreshPoleMarkersGroups updates PoleMarkersGroups according to existing PoleMarkers
+// RefreshPoleMarkersGroups updates PoleMarkersGroups according to existing PoleMarkers (PoleMarkers Groups are reseted)
 func (pm *PoleMap) RefreshPoleMarkersGroups() {
 	// remove Poles groups from map and controlLayer
 	for _, group := range pm.PoleMarkersGroup {
