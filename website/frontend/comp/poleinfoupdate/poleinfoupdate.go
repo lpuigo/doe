@@ -19,6 +19,7 @@ const template string = `
         <el-col :span="8">
             <el-input placeholder="Client"
                       v-model="value.Client" clearable size="mini"
+					  @change="UpdateTitle"
             ></el-input>
         </el-col>
 
@@ -26,7 +27,8 @@ const template string = `
         <el-col :span="8">
             <el-input placeholder="Référence"
                       v-model="value.Ref" clearable size="mini"
-            ></el-input>
+					  @change="UpdateTitle"
+			></el-input>
         </el-col>
     </el-row>
 
@@ -182,6 +184,12 @@ func PoleInfoUpdateModelFromJS(o *js.Object) *PoleInfoUpdateModel {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Data Items Related Methods
+
+func (pium *PoleInfoUpdateModel) UpdateTitle(vm *hvue.VM) {
+	pium = PoleInfoUpdateModelFromJS(vm.Object)
+	newTitle := pium.Polesite.Ref + " - " + pium.Polesite.Client
+	js.Global.Get("document").Set("title", newTitle)
+}
 
 func (pium *PoleInfoUpdateModel) GetStates(vm *hvue.VM) []*elements.ValueLabel {
 	//pium := PoleInfoUpdateModelFromJS(vm.Object)
