@@ -3,7 +3,6 @@ package poletable
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/ripprogressbar"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	ps "github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
@@ -36,7 +35,7 @@ func registerComponentTable(tableType string) hvue.ComponentOption {
 
 func componentOptionsTable(tableTemplate hvue.ComponentOption) []hvue.ComponentOption {
 	return []hvue.ComponentOption{
-		ripprogressbar.RegisterComponent(),
+		//ripprogressbar.RegisterComponent(),
 		tableTemplate,
 		hvue.Props("user", "polesite", "filter", "filtertype", "context"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
@@ -235,7 +234,7 @@ func (ptm *PoleTableModel) GetFilteredPole() []*ps.Pole {
 	}
 
 	res := []*ps.Pole{}
-	expected := strings.ToUpper(strings.Trim(ptm.Filter, " "))
+	expected := strings.ToUpper(strings.Trim(ptm.Filter, " \t"))
 	filter := func(p *ps.Pole) bool {
 		sis := p.SearchString(ptm.FilterType)
 		if sis == "" {
@@ -264,6 +263,15 @@ func (ptm *PoleTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValT
 	count := map[string]int{}
 	attribs := []string{}
 
+	for _, psi := range ptm.GetFilteredPole() {
+		attrib := psi.Object.Get(prop).String()
+		if _, exist := count[attrib]; !exist {
+			attribs = append(attribs, attrib)
+		}
+		count[attrib]++
+	}
+	sort.Strings(attribs)
+
 	var translate func(string) string
 	switch prop {
 	case "State":
@@ -274,14 +282,6 @@ func (ptm *PoleTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValT
 		translate = func(val string) string { return val }
 	}
 
-	for _, psi := range ptm.Polesite.Poles {
-		attrib := psi.Object.Get(prop).String()
-		if _, exist := count[attrib]; !exist {
-			attribs = append(attribs, attrib)
-		}
-		count[attrib]++
-	}
-	sort.Strings(attribs)
 	res := []*elements.ValText{}
 	for _, a := range attribs {
 		fa := a
@@ -293,13 +293,60 @@ func (ptm *PoleTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValT
 	return res
 }
 
-func (ptm *PoleTableModel) FilteredStatusValue() []string {
-	res := []string{
-		//poleconst.PsStatusNew,
-		//poleconst.PsStatusInProgress,
-		//poleconst.PsStatusBlocked,
-		//poleconst.PsStatusCancelled,
-		//poleconst.PsStatusDone,
+func (ptm *PoleTableModel) FilteredStatusValue(tableType string) []string {
+	res := []string{}
+	switch tableType {
+	case "creation":
+		res = []string{
+			poleconst.StateNotSubmitted,
+			poleconst.StateNoGo,
+			poleconst.StateDictToDo,
+			poleconst.StateDaToDo,
+			poleconst.StateDaExpected,
+			poleconst.StatePermissionPending,
+			poleconst.StateToDo,
+			poleconst.StateNoAccess,
+			poleconst.StateDenseNetwork,
+			//poleconst.StateHoleDone,
+			//poleconst.StateIncident,
+			//poleconst.StateDone,
+			//poleconst.StateAttachment,
+			poleconst.StateCancelled,
+		}
+	case "followup":
+		res = []string{
+			//poleconst.StateNotSubmitted,
+			//poleconst.StateNoGo,
+			poleconst.StateDictToDo,
+			poleconst.StateDaToDo,
+			poleconst.StateDaExpected,
+			poleconst.StatePermissionPending,
+			poleconst.StateToDo,
+			poleconst.StateNoAccess,
+			poleconst.StateDenseNetwork,
+			poleconst.StateHoleDone,
+			poleconst.StateIncident,
+			//poleconst.StateDone,
+			//poleconst.StateAttachment,
+			//poleconst.StateCancelled,
+		}
+	case "billing":
+		res = []string{
+			//poleconst.StateNotSubmitted,
+			//poleconst.StateNoGo,
+			//poleconst.StateDictToDo,
+			//poleconst.StateDaToDo,
+			//poleconst.StateDaExpected,
+			//poleconst.StatePermissionPending,
+			//poleconst.StateToDo,
+			//poleconst.StateNoAccess,
+			//poleconst.StateDenseNetwork,
+			//poleconst.StateHoleDone,
+			//poleconst.StateIncident,
+			poleconst.StateDone,
+			poleconst.StateAttachment,
+			//poleconst.StateCancelled,
+		}
 	}
 	return res
 }

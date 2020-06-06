@@ -9,8 +9,8 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
             :border=true size="mini"
             @current-change="SetSelectedPole"
     >
-        <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
-        <el-table-column
+		<el-table-column type="index"></el-table-column>
+		<el-table-column
                 label="Ref" prop="Ref" sortable :sort-by="PoleRefName"
                 width="150px" :resizable=true :show-overflow-tooltip=true
         >
@@ -97,17 +97,17 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
             </template>
         </el-table-column>
 
+        <el-table-column
+                label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
+                width="100px" :resizable=true :show-overflow-tooltip=true
+                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue('creation')"
+        ></el-table-column>
+
 		<!--
         <el-table-column
                 label="Aspi." prop="AspiDate" sortable
                 width="90px" :resizable=true
                 align="center"	:formatter="FormatDate"
-        ></el-table-column>
-
-        <el-table-column
-                label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
-                width="100px" :resizable=true :show-overflow-tooltip=true
-                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
         ></el-table-column>
 
         <el-table-column
@@ -157,7 +157,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
             :border=true size="mini"
             @current-change="SetSelectedPole"
     >
-        <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
+		<el-table-column type="index"></el-table-column>
         <el-table-column
                 label="Ref" prop="Ref" sortable :sort-by="PoleRefName"
                 width="150px" :resizable=true :show-overflow-tooltip=true
@@ -256,7 +256,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
         <el-table-column
                 label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
                 width="100px" :resizable=true :show-overflow-tooltip=true
-                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue('followup')"
         ></el-table-column>
 
         <el-table-column
@@ -308,7 +308,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
             :border=true size="mini"
             @current-change="SetSelectedPole"
     >
-        <!--  :sort-method="SortStatus" :sort-by="['Status', 'Client', 'City', 'Ref']"  -->
+		<el-table-column type="index"></el-table-column>
         <el-table-column
                 label="Ref" prop="Ref" sortable :sort-by="PoleRefName"
                 width="150px" :resizable=true :show-overflow-tooltip=true
@@ -400,7 +400,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
         <el-table-column
                 label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
                 width="100px" :resizable=true :show-overflow-tooltip=true
-                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
+                :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue('billing')"
         ></el-table-column>
 
         <el-table-column
