@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"strconv"
 )
 
 const template string = `
@@ -97,7 +98,7 @@ const template string = `
         <el-col :span="19" >
 			<el-table
 					:data="summaryInfos"
-					stripe size="mini"
+					stripe size="mini" show-summary :summary-method="SummaryTotal"
 					:default-sort = "{prop: 'City', order: 'ascending'}"
 			>
 				<el-table-column
@@ -260,4 +261,24 @@ func (pium *PoleInfoUpdateModel) SortBy(attrib string) func(obj *js.Object) int 
 	return func(obj *js.Object) int {
 		return obj.Get("NbPoles").Get(attrib).Int()
 	}
+}
+
+func (pium *PoleInfoUpdateModel) SummaryTotal(vm *hvue.VM, param *js.Object) []string {
+	pium = PoleInfoUpdateModelFromJS(vm.Object)
+	statuses := pium.GetSummaryStatuses()
+	nbRes := make([]int, len(statuses))
+	param.Get("data").Call("forEach", func(sd *SummaryData) {
+		for i, status := range statuses {
+			nbRes[i] += sd.NbPoles[status]
+		}
+	})
+	res := make([]string, len(statuses)+1)
+	res[0] = "Total :"
+	for i, nb := range nbRes {
+		if nb == 0 {
+			continue
+		}
+		res[i+1] = strconv.Itoa(nb)
+	}
+	return res
 }

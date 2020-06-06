@@ -127,7 +127,7 @@ const (
 	pmHtmlBolt          string = `<i class="fas fa-bolt fa-fw fa-3x pole-marker"></i>`
 	pmHtmlExclam        string = `<i class="fas fa-exclamation fa-fw fa-3x pole-marker"></i>`
 	pmHtmlHole          string = `<i class="fas fa-map-marker-alt fa-fw fa-3x pole-marker"></i>`
-	pmHtmlOutline       string = `<i class="el-icon-location-outline" style="font-size: 3.3em"></i>`
+	pmHtmlOutline       string = `<i class="el-icon-location-outline pole-marker" style="font-size: 3.3em"></i>`
 
 	pmHtmlShadow       string = `<div class="pole_marker_shadow"></div>`
 	pmHtmlShadowEdited string = `<div class="pole_marker_shadow edited"></div>`
@@ -140,7 +140,7 @@ func (pm *PoleMarker) UpdateFromState() {
 
 	switch pm.Pole.State {
 	case poleconst.StateNotSubmitted:
-		html = pmHtmlPin
+		//html = pmHtmlPin
 		class = ""
 	case poleconst.StateNoGo:
 		html = pmHtmlOutline
@@ -170,26 +170,30 @@ func (pm *PoleMarker) UpdateFromState() {
 	case poleconst.StateAttachment:
 		class = "darkgreen"
 	case poleconst.StateCancelled:
-		class = ""
+		class = "grey"
 	default:
 		class = "darkred"
 	}
 
+	//if pm.Pole.HasProduct(poleconst.ProductReplenishment) || pm.Pole.HasProduct(poleconst.ProductFarReplenishment) {
+	//	html = pmHtmlReplenish
+	//}
+
 	if html == "" {
-		html = pmHtmlBolt
+		html = pmHtmlPin
 		switch {
+		case pm.Pole.HasProduct(poleconst.ProductReplenishment):
+			html = pmHtmlReplenish
+		case pm.Pole.HasProduct(poleconst.ProductFarReplenishment):
+			html = pmHtmlReplenish
 		case pm.Pole.HasProduct(poleconst.ProductTrickyReplace):
 			html = pmHtmlTrickyReplace
 		case pm.Pole.HasProduct(poleconst.ProductReplace):
 			html = pmHtmlReplace
 		case pm.Pole.HasProduct(poleconst.ProductCreation):
 			html = pmHtmlCreation
-		//case pm.Pole.HasProduct(poleconst.ProductCoated):
-		//	html = pmHtmlCreation
-		case pm.Pole.HasProduct(poleconst.ProductReplenishment):
-			html = pmHtmlReplenish
-		case pm.Pole.HasProduct(poleconst.ProductFarReplenishment):
-			html = pmHtmlReplenish
+			//case pm.Pole.HasProduct(poleconst.ProductCoated):
+			//	html = pmHtmlCreation
 		}
 	}
 

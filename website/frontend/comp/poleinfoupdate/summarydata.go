@@ -21,6 +21,10 @@ func NewSummaryData(city string) *SummaryData {
 	return sd
 }
 
+func SummaryDataFromJS(obj *js.Object) *SummaryData {
+	return &SummaryData{Object: obj}
+}
+
 func CalcSummaryDatas(poles []*polesite.Pole, interestingStatuses []string) []*SummaryData {
 	statuses := map[string]bool{}
 	for _, status := range interestingStatuses {

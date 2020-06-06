@@ -11,6 +11,10 @@ html, body {
    === Map Marker Style
  */
 
+.grey {
+    color: #664242;
+}
+
 .teal {
     color: #00d2e6;
 }

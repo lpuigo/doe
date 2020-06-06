@@ -580,8 +580,8 @@ func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
 	ep.Get("Product").Call("sort")
 	if ep.IsInStateToBeChecked() {
 		ep.SetState(poleconst.StateToDo)
-		pem.UpdateState(vm)
 	}
+	pem.UpdateState(vm)
 }
 
 // CheckPermissions updates EditedPoleMarker according to DICT and DA Dates
