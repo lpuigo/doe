@@ -12,9 +12,9 @@ import (
 )
 
 const template string = `
-<div style="padding: 5px 25px">
+<div style="padding: 20px 25px; height: calc(100% - 40px);">
 	<!-- Client & Ref -->
-    <el-row :gutter="10" type="flex" align="middle" class="doublespaced">
+    <el-row :gutter="10" type="flex" align="middle">
         <el-col :span="3" class="align-right">Client :</el-col>
         <el-col :span="8">
             <el-input placeholder="Client"
@@ -90,29 +90,33 @@ const template string = `
         </el-col>
     </el-row>
 
-	<!-- Junction Progress provided for exemple-->
-<!--    <el-row :gutter="10" type="flex" align="middle" class="doublespaced">-->
-<!--        <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Total Raccordement :</h4></el-col>-->
-<!--        <el-col :span="19">-->
-<!--            <ripsiteinfo-progress-bar height="10px" :total="JunctionTotal" :done="JunctionDone" :blocked="JunctionBlocked"-->
-<!--            ></ripsiteinfo-progress-bar>-->
-<!--        </el-col>-->
-<!--    </el-row>-->
 
-<!--    <el-row :gutter="10" type="flex" align="middle" class="spaced">-->
-<!--        <el-col :span="3" class="align-right">Boitiers :</el-col>-->
-<!--        <el-col :span="19">-->
-<!--            <ripsiteinfo-progress-bar height="7px" :total="JunctionNodeTotal" :done="JunctionNodeDone" :blocked="JunctionNodeBlocked"-->
-<!--            ></ripsiteinfo-progress-bar>-->
-<!--        </el-col>-->
-<!--    </el-row>-->
-<!--    <el-row :gutter="10" type="flex" align="middle" class="spaced">-->
-<!--        <el-col :span="3" class="align-right">Epissures :</el-col>-->
-<!--        <el-col :span="19">-->
-<!--            <ripsiteinfo-progress-bar height="7px" :total="JunctionSpliceTotal" :done="JunctionSpliceDone" :blocked="JunctionSpliceBlocked"-->
-<!--            ></ripsiteinfo-progress-bar>-->
-<!--        </el-col>-->
-<!--    </el-row>-->
+	<!-- Summary -->
+    <el-row :gutter="10" type="flex" class="doublespaced">
+        <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Synthèse :</h4></el-col>
+        <el-col :span="19" >
+			<el-table
+					:data="summaryInfos"
+					stripe size="mini"
+					:default-sort = "{prop: 'City', order: 'ascending'}"
+			>
+				<el-table-column
+						label="Ville" prop="City" sortable :sort-by="['City']"
+						width="200px" :resizable=true :show-overflow-tooltip=true
+				></el-table-column>
+
+				<el-table-column v-for="status in GetSummaryStatuses()"
+						:resizable="true" align="center"
+						:label="StateName(status)" width="150px"
+						sortable :sort-by="SortBy(status)"
+				>
+					<template slot-scope="scope">
+						<span>{{scope.row.NbPoles[status]}}</span>
+					</template>
+				</el-table-column>
+			</el-table>
+        </el-col>
+    </el-row>
 </div>
 `
 
@@ -132,6 +136,10 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.Computed("statNbPole", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
 			return pium.CalcStat()
+		}),
+		hvue.Computed("summaryInfos", func(vm *hvue.VM) interface{} {
+			pium := PoleInfoUpdateModelFromJS(vm.Object)
+			return CalcSummaryDatas(pium.Polesite.Poles, pium.GetSummaryStatuses())
 		}),
 		//hvue.Computed("PullingTotal", func(vm *hvue.VM) interface{} {
 		//	pium := PoleInfoUpdateModelFromJS(vm.Object)
@@ -225,4 +233,31 @@ func (pium *PoleInfoUpdateModel) CalcStat() int {
 	pium.StatNbPoleDICTToDo = dict
 	pium.StatNbPolePending = pending
 	return tot
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Summary Data Table Related Methods
+
+func (pium *PoleInfoUpdateModel) GetSummaryStatuses() []string {
+	//pium := PoleInfoUpdateModelFromJS(vm.Object)
+	return []string{
+		poleconst.StateNotSubmitted,
+		poleconst.StateDictToDo,
+		poleconst.StateDaToDo,
+		poleconst.StateDaExpected,
+		poleconst.StatePermissionPending,
+		poleconst.StateToDo,
+		poleconst.StateDone,
+		poleconst.StateAttachment,
+	}
+}
+
+func (pium *PoleInfoUpdateModel) StateName(status string) string {
+	return polesite.PoleStateLabel(status)
+}
+
+func (pium *PoleInfoUpdateModel) SortBy(attrib string) func(obj *js.Object) int {
+	return func(obj *js.Object) int {
+		return obj.Get("NbPoles").Get(attrib).Int()
+	}
 }
