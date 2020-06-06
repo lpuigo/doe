@@ -634,6 +634,9 @@ func (pem *PoleEditModel) UpdatePoleDegLat(vm *hvue.VM, value string) {
 
 func (pem *PoleEditModel) GetCities(vm *hvue.VM, value string, callback *js.Object) {
 	pem = PoleEditModelFromJS(vm.Object)
+	if len(value) < 3 {
+		return
+	}
 	cities := make(map[string]bool)
 	for _, pole := range pem.Polesite.Poles {
 		cities[pole.City] = true
@@ -641,7 +644,7 @@ func (pem *PoleEditModel) GetCities(vm *hvue.VM, value string, callback *js.Obje
 	matchingCities := []*autocomplete.Result{}
 	matchvalue := strings.ToLower(value)
 	for cityName, _ := range cities {
-		if strings.Contains(strings.ToLower(cityName), matchvalue) {
+		if cityName != value && strings.Contains(strings.ToLower(cityName), matchvalue) {
 			matchingCities = append(matchingCities, autocomplete.NewResult(cityName))
 		}
 	}
