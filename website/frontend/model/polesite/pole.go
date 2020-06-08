@@ -396,9 +396,14 @@ func (p *Pole) CheckProductConsistency() {
 	if p.HasProduct(poleconst.ProductTrickyReplace) {
 		p.AddProduct(poleconst.ProductReplace)
 	}
+	if p.HasProduct(poleconst.ProductReplace) {
+		p.AddProduct(poleconst.ProductCreation)
+	}
 }
 
 func (p *Pole) CheckInfoConsistency() {
+	// Products
+	p.CheckProductConsistency()
 	// City
 	p.City = strings.Trim(strings.Title(strings.ToLower(p.City)), " ")
 	// DICT & DT
