@@ -76,7 +76,7 @@ const (
 	<!--	State -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
-            prop="State" label="Statut" width="100px"
+            prop="State" label="Statut" width="80px"
 			:formatter="FormatState"
 			:filters="FilterList('State')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     ></el-table-column>
@@ -124,7 +124,7 @@ const (
 	<!--	Trainings -->
     <el-table-column v-for="trainingName in GetTrainingNames()"
             :resizable="true" align="center"
-            :label="trainingName" width="100px"
+            :label="trainingName" width="90px"
     >
         <template slot-scope="scope">
 			<span>{{FormatTrainingDate(scope.row, trainingName)}}</span>

@@ -40,6 +40,7 @@ const (
 )
 
 const (
+	InfoTrainingBirth         string = "Date Naissance"
 	InfoTrainingMedic         string = "Visite Med."
 	InfoTrainingProBTP        string = "ProBTP"
 	InfoTrainingAIPR          string = "AIPR"
