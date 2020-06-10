@@ -359,7 +359,7 @@ func (pm *PoleMap) SelectByFilter(filter func(*PoleMarker) bool) {
 	pm.ClearSelected()
 	spms := []*PoleMarker{}
 	for _, poleMarker := range pm.GetPoleMarkers() {
-		if filter(poleMarker) {
+		if !poleMarker.Edited && filter(poleMarker) {
 			poleMarker.Select()
 			spms = append(spms, poleMarker)
 		}

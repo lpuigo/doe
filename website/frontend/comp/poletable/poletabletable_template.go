@@ -303,7 +303,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
     <el-table
             :data="filteredPoles"
             :row-class-name="TableRowClassName"
-            :default-sort = "{prop: 'Ref', order: 'ascending'}"
+            :default-sort = "{prop: 'Date', order: 'descending'}"
             height="100%"
             :border=true size="mini"
             @current-change="SetSelectedPole"

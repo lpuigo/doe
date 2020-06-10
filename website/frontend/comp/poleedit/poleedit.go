@@ -105,7 +105,7 @@ const template string = `<div>
 
     <el-collapse v-model="chapters" @change="ChapterChange">
 		<!-- ======================== Chapter Address ===================================-->
-        <el-collapse-item name="1">
+        <el-collapse-item name="address">
             <template slot="title">
                 <h2 class="title">Adresse: <a v-if="editedlatlong != ''" :href="GetGMAPUrl(editedlatlong)" rel="noopener noreferrer" target="_blank">(GMap)</a><span class="blue"> {{editedpolemarker.Pole.Address}}</span></h1>
             </template>
@@ -172,7 +172,7 @@ const template string = `<div>
         </el-collapse-item>
 
 		<!-- ======================== Chapter Work to do ===================================-->
-        <el-collapse-item name="2">
+        <el-collapse-item name="work">
             <template slot="title">
                 <h2 class="title">Travaux: <span class="blue">{{editedpolemarker.Pole.Material}} {{editedpolemarker.Pole.Height}}m</span></h1>
             </template>
@@ -217,7 +217,7 @@ const template string = `<div>
         </el-collapse-item>
 
 		<!-- ======================== Chapter DICT DT DA ===================================-->
-        <el-collapse-item name="3">
+        <el-collapse-item name="dict">
             <template slot="title">
                 <h2 class="title">DT, DICT et DA&nbsp;<a v-if="editedpolemarker.Pole.DictRef != ''" :href="GetDICTUrl()" rel="noopener noreferrer" target="_blank">(Carte DICT.fr)</a></h1>
             </template>
@@ -308,7 +308,7 @@ const template string = `<div>
         </el-collapse-item>
 
 		<!-- ======================== Chapter State ===================================-->
-        <el-collapse-item name="4">
+        <el-collapse-item name="state">
             <template slot="title">
                 <h2 class="title">Etat: <span class="blue">{{FormatState(editedpolemarker.Pole)}}</span></h1>
             </template>
@@ -774,7 +774,8 @@ func (pem *PoleEditModel) SelectByRef(vm *hvue.VM) {
 		}
 		return false
 	})
-	editedPoleMarker.Map.CenterOnPoleMarkers(editedPoleMarker.Map.SelectedPoleMarkers)
+	centerOn := append(editedPoleMarker.Map.SelectedPoleMarkers, editedPoleMarker)
+	editedPoleMarker.Map.CenterOnPoleMarkers(centerOn)
 }
 
 func (pem *PoleEditModel) SelectByDict(vm *hvue.VM) {
@@ -796,7 +797,8 @@ func (pem *PoleEditModel) SelectByDict(vm *hvue.VM) {
 		}
 		return false
 	})
-	editedPoleMarker.Map.CenterOnPoleMarkers(editedPoleMarker.Map.SelectedPoleMarkers)
+	centerOn := append(editedPoleMarker.Map.SelectedPoleMarkers, editedPoleMarker)
+	editedPoleMarker.Map.CenterOnPoleMarkers(centerOn)
 }
 
 func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
