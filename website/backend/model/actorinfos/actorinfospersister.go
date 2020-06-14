@@ -202,8 +202,10 @@ func (aip *ActorInfosPersister) GetAllSites() []archives.ArchivableRecord {
 	defer aip.RUnlock()
 
 	archivableSites := make([]archives.ArchivableRecord, len(aip.actorInfosById))
-	for i, site := range aip.actorInfosById {
+	i := 0
+	for _, site := range aip.actorInfosById {
 		archivableSites[i] = site
+		i++
 	}
 	return archivableSites
 }

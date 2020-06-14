@@ -16,33 +16,35 @@ func GetRecordsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	vars := mux.Vars(r)
 	recordType := vars["recordtype"]
-	var sites archives.ArchivableRecordContainer
+	var container archives.ArchivableRecordContainer
 	switch recordType {
 	case "worksites":
-		sites = mgr.Worksites
+		container = mgr.Worksites
 	case "ripsites":
-		sites = mgr.Ripsites
+		container = mgr.Ripsites
 	case "polesites":
-		sites = mgr.Polesites
+		container = mgr.Polesites
 	case "foasites":
-		sites = mgr.Foasites
+		container = mgr.Foasites
 	case "clients":
-		sites = mgr.Clients
+		container = mgr.Clients
 	case "actors":
-		sites = mgr.Actors
+		container = mgr.Actors
 	case "actorinfos":
-		sites = mgr.ActorInfos
+		container = mgr.ActorInfos
 	case "timesheet":
-		sites = mgr.TimeSheets
+		container = mgr.TimeSheets
+	case "groups":
+		container = mgr.Groups
 	default:
 		AddError(w, logmsg, "unsupported archive type '"+recordType+"'", http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", archives.ArchiveName(sites)))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", archives.ArchiveName(container)))
 	w.Header().Set("Content-Type", "application/zip")
 
-	err := archives.CreateRecordsArchive(w, sites)
+	err := archives.CreateRecordsArchive(w, container)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
