@@ -157,7 +157,7 @@ func (sp SitesPersister) findIndex(sr *SiteRecord) int {
 //
 
 // getSitesItems returns items for all visible ripsites
-func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
+func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName clients.ClientByName, doneOnly bool) ([]*items.Item, error) {
 	items := []*items.Item{}
 	for _, sr := range sp.sites {
 		if isRSVisible(sr.Site) {
@@ -165,7 +165,7 @@ func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName 
 			if client == nil {
 				continue
 			}
-			siteItems, err := sr.Itemize(client.Bpu)
+			siteItems, err := sr.Itemize(client.Bpu, doneOnly)
 			if err != nil {
 				return nil, fmt.Errorf("error on ripsite stat itemize for '%s':%s", sr.Ref, err.Error())
 			}
@@ -181,7 +181,7 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	defer sp.RUnlock()
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, sc.ClientByName)
+	sitesItems, err := sp.getSitesItems(isRSVisible, sc.ClientByName, true)
 	if err != nil {
 		return nil, err
 	}
@@ -200,9 +200,6 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	}
 
 	for _, item := range sitesItems {
-		if !item.Done {
-			continue
-		}
 		actorsName := make([]string, len(item.Actors))
 		for i, actId := range item.Actors {
 			actorsName[i] = sc.ActorById(actId)
@@ -238,7 +235,7 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 	defer sp.RUnlock()
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, true)
 	if err != nil {
 		return nil, err
 	}
@@ -247,9 +244,6 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 	stats := items.NewStats()
 
 	for _, item := range sitesItems {
-		if !item.Done {
-			continue
-		}
 		dateFor := sc.DateFor(item.Date)
 
 		nbActors := float64(len(item.Actors))
@@ -282,7 +276,7 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg, isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName)
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, false)
 	if err != nil {
 		return nil, err
 	}

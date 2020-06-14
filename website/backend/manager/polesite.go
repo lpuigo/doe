@@ -41,6 +41,19 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	statContext.StartDate = month
 	// Extraxt all month's days
 	statContext.MaxVal = date.NbDaysBetween(month, date.GetMonth(date.GetDateAfter(month, 32)))
+	groupNameByClient := make(map[string]string)
+	for _, group := range m.Groups.GetGroups() {
+		for _, client := range group.Clients {
+			groupNameByClient[client] = group.Name
+		}
+	}
+	statContext.GraphName = func(site items.ItemizableSite) string {
+		groupName, found := groupNameByClient[site.GetClient()]
+		if !found {
+			return "Client non assigné"
+		}
+		return groupName
+	}
 	statContext.Data3 = func(s items.StatKey) string { return items.StatSiteProgress }
 	//statContext.Data3 = func(s items.StatKey) string { return s.Team}
 
@@ -48,5 +61,5 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(items.CalcProgress(polesiteStats))
+	return json.NewEncoder(writer).Encode(items.CalcProgress(polesiteStats, m.GetGroupByName(), m.GroupSizeOnMonth(polesiteStats.Dates)))
 }

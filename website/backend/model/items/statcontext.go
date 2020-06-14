@@ -16,7 +16,9 @@ type StatContext struct {
 	IsTeamVisible clients.IsTeamVisible
 	ClientByName  clients.ClientByName
 	ActorById     clients.ActorById
-	ShowTeam      bool
+	GraphName     func(site ItemizableSite) string
+
+	ShowTeam bool
 
 	Data1   func(s StatKey) string
 	Data2   func(s StatKey) string
@@ -38,7 +40,7 @@ type ItemizableSite interface {
 	GetClient() string
 	GetType() string
 	GetUpdateDate() string
-	Itemize(*bpu.Bpu) ([]*Item, error)
+	Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*Item, error)
 }
 
 func NewStatContext(freq string) (*StatContext, error) {
@@ -74,6 +76,9 @@ func NewStatContext(freq string) (*StatContext, error) {
 		MaxVal:    maxVal,
 		StartDate: startDate,
 		DateFor:   dateFor,
+		GraphName: func(site ItemizableSite) string {
+			return site.GetClient()
+		},
 	}, nil
 }
 
@@ -107,23 +112,22 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {
 	addValue := func(date, serie string, actors []string, value float64) {
-		stats.AddStatValue(site.GetRef(), site.GetClient(), date, "", serie, value)
+		team := sc.GraphName(site)
+		//team := site.GetClient()
+		stats.AddStatValue(site.GetRef(), team, date, "", serie, value)
 		if sc.ShowTeam && len(actors) > 0 {
 			value /= float64(len(actors))
 			for _, actName := range actors {
-				stats.AddStatValue(site.GetRef(), site.GetClient()+" : "+actName, date, "", serie, value)
+				stats.AddStatValue(site.GetRef(), team+" : "+actName, date, "", serie, value)
 			}
 		}
 	}
 
-	calcItems, err := site.Itemize(currentBpu)
+	calcItems, err := site.Itemize(currentBpu, true)
 	if err != nil {
 		return fmt.Errorf("error on %s stat itemize for '%s':%s", site.GetType(), site.GetRef(), err.Error())
 	}
 	for _, item := range calcItems {
-		if !item.Done {
-			continue
-		}
 		dateItem := sc.DateFor(item.Date)
 		if dateItem < sc.StartDate {
 			continue

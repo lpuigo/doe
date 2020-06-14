@@ -6,7 +6,7 @@ import (
 )
 
 type Item struct {
-	Client       string // Site name
+	Client       string // Client name
 	Site         string // Site name
 	Activity     string // Racco, Tirage, ...
 	Name         string // PTxxx, Cablezzz, ...
@@ -57,7 +57,7 @@ func (i *Item) Clone() *Item {
 		Date:         i.Date,
 		AttachDate:   i.AttachDate,
 		Team:         i.Team,
-		Actors:       i.Actors,
+		Actors:       i.Actors[:],
 		Article:      i.Article,
 		Quantity:     i.Quantity,
 		WorkQuantity: i.WorkQuantity,

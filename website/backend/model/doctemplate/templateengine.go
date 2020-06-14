@@ -190,7 +190,7 @@ func (te *DocTemplateEngine) GetItemizableSiteXLSAttachement(w io.Writer, site i
 		return fmt.Errorf("unknown client '%s'", site.GetClient())
 	}
 
-	its, err := site.Itemize(client.Bpu)
+	its, err := site.Itemize(client.Bpu, false)
 	if err != nil {
 		return fmt.Errorf("unable to create items: %s", err.Error())
 	}

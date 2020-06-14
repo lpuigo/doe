@@ -72,7 +72,7 @@ func (s *Site) GetInfo(clientByName clients.ClientByName) *fm.RipsiteInfo {
 	if client == nil {
 
 	}
-	itms, err := s.Itemize(client.Bpu)
+	itms, err := s.Itemize(client.Bpu, false)
 	if err != nil {
 		rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = 0, 0, 0
 		rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = 0, 0, 0
@@ -207,17 +207,17 @@ func (s *Site) GetMeasurementNumbers() (total, blocked, done int) {
 	return
 }
 
-func (s *Site) Itemize(bpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) Itemize(bpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res := []*items.Item{}
-	pullItems, err := s.itemizePullings(bpu)
+	pullItems, err := s.itemizePullings(bpu, doneOnly)
 	if err != nil {
 		return nil, err
 	}
-	junctItems, err := s.itemizeJunctions(bpu)
+	junctItems, err := s.itemizeJunctions(bpu, doneOnly)
 	if err != nil {
 		return nil, err
 	}
-	measItems, err := s.itemizeMeasurements(bpu)
+	measItems, err := s.itemizeMeasurements(bpu, doneOnly)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ const (
 	catMeasurement string = "Mesure"
 )
 
-func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizePullings(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	pullingArticles := currentBpu.GetCategoryArticles(activityPulling)
@@ -256,6 +256,9 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 			return nil, err
 		}
 		todo, done, blocked := pulling.State.GetTodoDoneBlocked()
+		if doneOnly && !done {
+			continue
+		}
 
 		l, u, a, b := pulling.GetTotalDists()
 		// Item for underground cable pulling
@@ -338,7 +341,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	return res, nil
 }
 
-func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res := []*items.Item{}
 	junctionArticles := currentBpu.GetCategoryArticles(activityJunction)
 
@@ -346,6 +349,9 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, junction := range s.Junctions {
 		todo, done, blocked := junction.State.GetTodoDoneBlocked()
+		if doneOnly && !done {
+			continue
+		}
 
 		node, nodeFound := s.Nodes[junction.NodeName]
 		if !nodeFound {
@@ -406,7 +412,7 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 	return res, nil
 }
 
-func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res := []*items.Item{}
 	measurementArticles := currentBpu.GetCategoryArticles(activityMeasurement)
 
@@ -418,6 +424,9 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 
 	for _, measurement := range s.Measurements {
 		todo, done, blocked := measurement.State.GetTodoDoneBlocked()
+		if doneOnly && !done {
+			continue
+		}
 		//actors := []string{}
 		//for _, actorId := range measurement.State.Actors {
 		//	actors = append(actors, actorById(actorId))

@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
@@ -116,10 +115,13 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 type IsPolesiteVisible func(s *PoleSite) bool
 
 // Itemize returns slice of item pertaining to polesite poles list
-func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
+func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res := []*items.Item{}
 
 	for _, pole := range ps.Poles {
+		if doneOnly && !pole.IsDone() {
+			continue
+		}
 		items, err := pole.Itemize(ps.Client, ps.Ref, currentBpu)
 		if err != nil {
 			return nil, err
@@ -130,38 +132,38 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu) ([]*items.Item, error) {
 }
 
 // AddStat adds Stats into values for given Polesite
-func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
-	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
-
-	addValue := func(date, serie string, actors []string, value float64) {
-		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)
-		if sc.ShowTeam && len(actors) > 0 {
-			value /= float64(len(actors))
-			for _, actName := range actors {
-				stats.AddStatValue(ps.Ref, ps.Client+" : "+actName, date, "", serie, value)
-			}
-		}
-	}
-
-	calcItems, err := ps.Itemize(currentBpu)
-	if err != nil {
-		return fmt.Errorf("error on polesite stat itemize for '%s':%s", ps.Ref, err.Error())
-	}
-	for _, item := range calcItems {
-		if !item.Done {
-			continue
-		}
-		actorsName := make([]string, len(item.Actors))
-		for i, actId := range item.Actors {
-			actorsName[i] = actorById(actId)
-		}
-		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
-		if showprice {
-			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
-		}
-	}
-	return nil
-}
+//func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
+//	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
+//
+//	addValue := func(date, serie string, actors []string, value float64) {
+//		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)
+//		if sc.ShowTeam && len(actors) > 0 {
+//			value /= float64(len(actors))
+//			for _, actName := range actors {
+//				stats.AddStatValue(ps.Ref, ps.Client+" : "+actName, date, "", serie, value)
+//			}
+//		}
+//	}
+//
+//	calcItems, err := ps.Itemize(currentBpu)
+//	if err != nil {
+//		return fmt.Errorf("error on polesite stat itemize for '%s':%s", ps.Ref, err.Error())
+//	}
+//	for _, item := range calcItems {
+//		if !item.Done {
+//			continue
+//		}
+//		actorsName := make([]string, len(item.Actors))
+//		for i, actId := range item.Actors {
+//			actorsName[i] = actorById(actId)
+//		}
+//		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
+//		if showprice {
+//			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
+//		}
+//	}
+//	return nil
+//}
 
 // ExportName returns the PoleSite XLS export file name
 func (ps *PoleSite) ExportName() string {

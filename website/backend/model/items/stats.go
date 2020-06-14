@@ -2,6 +2,7 @@ package items
 
 import (
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/groups"
 	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"strings"
 )
@@ -271,12 +272,12 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	return aggrStat
 }
 
-func CalcProgress(aggrStat *rs.RipsiteStats) *rs.RipsiteStats {
-	var refDailyTarget float64
+func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, groupSize map[string][]int) *rs.RipsiteStats {
 	var serieNameTarget string
 
 	isActiveDate := make([]bool, len(aggrStat.Dates))
 	nbActiveDay := 0
+	// TODO manage dayoff calendar
 	for dateId, day := range aggrStat.Dates {
 		if date.DateFrom(day).IsSaturdaySunday() {
 			continue
@@ -291,14 +292,12 @@ func CalcProgress(aggrStat *rs.RipsiteStats) *rs.RipsiteStats {
 		switch serieName {
 		case StatSerieWork:
 			serieNameTarget = StatSerieWorkTarget
-			refDailyTarget = 1000
 		case StatSeriePrice:
 			serieNameTarget = StatSeriePriceTarget
-			refDailyTarget = 20000
 		}
 		newSerieValues := make([]map[string][]float64, len(serieValues))
 		for teamIndex, sitesValues := range serieValues {
-			//_ = teamIndex <=> Client & actor per client
+			//_ = teamIndex <=> group & actor per graph
 
 			// Calc Cumulative values
 			for _, dateValues := range sitesValues {
@@ -308,16 +307,25 @@ func CalcProgress(aggrStat *rs.RipsiteStats) *rs.RipsiteStats {
 				}
 			}
 
+			// check if teamIndex is group or individual actor
+			groupName := strings.Split(aggrStat.Teams[teamIndex], " : ")[0] // retrieve group Name
+			incrVal := 0.0
+			switch serieName {
+			case StatSerieWork:
+				incrVal = groupByName(groupName).ActorDailyWork
+			case StatSeriePrice:
+				incrVal = groupByName(groupName).ActorDailyIncome
+			}
+
 			newSitesValues := make(map[string][]float64)
 			// if team[teamIndex] == main team
 			// 		Calc incremental target
 			nbDays := len(aggrStat.Dates)
-			dailyTarget := refDailyTarget / float64(nbActiveDay)
 			targetVal := 0.0
 			target := make([]float64, nbDays)
 			for dateId := 0; dateId < nbDays; dateId++ {
 				if isActiveDate[dateId] {
-					targetVal += dailyTarget
+					targetVal += incrVal * float64(groupSize[groupName][dateId])
 				}
 				target[dateId] = targetVal
 			}

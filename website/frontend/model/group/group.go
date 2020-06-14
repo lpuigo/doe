@@ -9,16 +9,18 @@ import (
 type Group struct {
 	*js.Object
 
-	Id               int     `js:"Id"`
-	Name             string  `js:"Name"`
-	ActorDailyWork   float64 `js:"ActorDailyWork"`
-	ActorDailyIncome float64 `js:"ActorDailyIncome"`
+	Id               int      `js:"Id"`
+	Name             string   `js:"Name"`
+	Clients          []string `js:"Clients"`
+	ActorDailyWork   float64  `js:"ActorDailyWork"`
+	ActorDailyIncome float64  `js:"ActorDailyIncome"`
 }
 
 func NewGroup() *Group {
 	g := &Group{Object: tools.O()}
 	g.Id = -1
 	g.Name = ""
+	g.Clients = []string{}
 	g.ActorDailyIncome = 0
 	g.ActorDailyWork = 0
 	return g
