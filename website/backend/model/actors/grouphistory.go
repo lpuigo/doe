@@ -1,5 +1,7 @@
 package actors
 
+import "sort"
+
 type GroupHistory map[string]int
 
 func NewGroupHistory() GroupHistory {
@@ -16,13 +18,21 @@ func (gh GroupHistory) ActiveGroupOnDate(day string) int {
 			return i
 		}
 	}
-	id := -1
-	curDay := day
-	for assignDate, grId := range gh {
-		if assignDate <= day && assignDate <= curDay {
-			id = grId
-			curDay = assignDate
+	dates := make([]string, len(gh))
+	i := 0
+	for assignDate, _ := range gh {
+		dates[i] = assignDate
+		i++
+	}
+	sort.Strings(dates)
+	effDate := ""
+	for _, assignDate := range dates {
+		if day >= assignDate {
+			effDate = assignDate
 		}
 	}
-	return id
+	if effDate == "" {
+		effDate = dates[0]
+	}
+	return gh[effDate]
 }

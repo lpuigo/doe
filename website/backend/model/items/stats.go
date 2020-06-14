@@ -308,7 +308,8 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 			}
 
 			// check if teamIndex is group or individual actor
-			groupName := strings.Split(aggrStat.Teams[teamIndex], " : ")[0] // retrieve group Name
+			groupActor := strings.Split(aggrStat.Teams[teamIndex], " : ")
+			groupName := groupActor[0] // retrieve group Name
 			incrVal := 0.0
 			switch serieName {
 			case StatSerieWork:
@@ -325,7 +326,11 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 			target := make([]float64, nbDays)
 			for dateId := 0; dateId < nbDays; dateId++ {
 				if isActiveDate[dateId] {
-					targetVal += incrVal * float64(groupSize[groupName][dateId])
+					if len(groupActor) > 1 {
+						targetVal += incrVal // Current team is an actor
+					} else {
+						targetVal += incrVal * float64(groupSize[groupName][dateId]) // Current Team is a group
+					}
 				}
 				target[dateId] = targetVal
 			}
