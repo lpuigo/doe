@@ -6,6 +6,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
+	"github.com/lpuig/ewin/doe/website/frontend/model/group"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -23,12 +24,14 @@ const (
         :row-class-name="TableRowClassName" height="100%" size="mini"
 		@row-dblclick="HandleDoubleClickedRow"
 >
+	<!--	Index   -->
 	<el-table-column
 			label="N°" width="40px" align="right"
 			type="index"
 			index=1 
 	></el-table-column>
 
+	<!--	Compagny   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
@@ -36,11 +39,25 @@ const (
 			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
+	<!--	Contract   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true
             prop="Contract" label="Contrat" width="110px"
     ></el-table-column>
     
+	<!--	group   -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            prop="Groups" label="Groupe" width="150px"
+			sortable :sort-method="SortGroup"
+			:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+    >
+        <template slot-scope="scope">
+			<span>{{GetGroup(scope.row)}}</span>
+        </template>
+	</el-table-column>
+    
+	<!--	clients   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Client" label="Clients" width="200px"
@@ -52,6 +69,7 @@ const (
         </template>
 	</el-table-column>
 
+	<!--	Role   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Role" label="Rôle" width="110px"
@@ -59,6 +77,7 @@ const (
 			:filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
+	<!--	Last & First Name   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Ref" label="Nom Prénom" width="200px"
@@ -72,6 +91,7 @@ const (
         </template>
 	</el-table-column>
     
+	<!--	Start Day   -->
     <el-table-column
             label="Arrivée" sortable :sort-by="SortDate('Period', 'Begin')"
             width="110px" :resizable="true" 
@@ -82,6 +102,7 @@ const (
 		</template>
     </el-table-column>
     
+	<!--	State   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="State" label="Statut" width="100px"
@@ -89,6 +110,7 @@ const (
 			:filters="FilterList('State')" :filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue()"
     ></el-table-column>
     
+	<!--	Hollidays   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             label="Congés" width="200px"
@@ -101,6 +123,7 @@ const (
         </template>
     </el-table-column>
     
+	<!--	Comment   -->
     <el-table-column
             :resizable="true" prop="Comment" label="Commentaire"
     ></el-table-column>
@@ -115,7 +138,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.Props("value", "groups", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorsTableModel(vm)
 		}),
@@ -138,10 +161,11 @@ func componentOptions() []hvue.ComponentOption {
 type ActorsTableModel struct {
 	*js.Object
 
-	Actors     []*actor.Actor `js:"value"`
-	User       *fm.User       `js:"user"`
-	Filter     string         `js:"filter"`
-	FilterType string         `js:"filtertype"`
+	Actors     []*actor.Actor    `js:"value"`
+	GroupStore *group.GroupStore `js:"groups"`
+	User       *fm.User          `js:"user"`
+	Filter     string            `js:"filter"`
+	FilterType string            `js:"filtertype"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -150,6 +174,7 @@ func NewActorsTableModel(vm *hvue.VM) *ActorsTableModel {
 	atm := &ActorsTableModel{Object: tools.O()}
 	atm.VM = vm
 	atm.Actors = []*actor.Actor{}
+	atm.GroupStore = group.NewGroupStore()
 	atm.User = fm.NewUser()
 	atm.Filter = ""
 	atm.FilterType = ""
@@ -227,6 +252,34 @@ func (atm *ActorsTableModel) SortClient(a, b *actor.Actor) int {
 	}
 }
 
+func (atm *ActorsTableModel) GetGroup(vm *hvue.VM, act *actor.Actor) string {
+	atm = ActorsTableModelFromJS(vm.Object)
+	groupId, _ := act.Groups.GetCurrentInfo()
+	if groupId == -1 {
+		return "Non Assigné"
+	}
+	return atm.GroupStore.GetGroupNameById(groupId)
+}
+
+func (atm *ActorsTableModel) SortGroup(vm *hvue.VM, a, b *actor.Actor) int {
+	ca, cb := atm.GetGroup(vm, a), atm.GetGroup(vm, b)
+	switch {
+	case ca == cb:
+		switch {
+		case a.State == b.State:
+			return atm.SortRoleRef(a, b)
+		case a.State < b.State:
+			return -1
+		default:
+			return 1
+		}
+	case ca < cb:
+		return -1
+	default:
+		return 1
+	}
+}
+
 func (atm *ActorsTableModel) SortRoleRef(a, b *actor.Actor) int {
 	switch {
 	case a.Role == b.Role:
@@ -266,9 +319,10 @@ func (atm *ActorsTableModel) SortDate(attrib1, attrib2 string) func(obj *js.Obje
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Column Filtering Related Methods
 
-func (atm *ActorsTableModel) FilterHandler(value string, p *js.Object, col *js.Object) bool {
+func (atm *ActorsTableModel) FilterHandler(vm *hvue.VM, value string, p *js.Object, col *js.Object) bool {
 	prop := col.Get("property").String()
-	if prop == "Client" {
+	switch prop {
+	case "Client":
 		clients := strings.Split(p.Get(prop).String(), ",")
 		for _, c := range clients {
 			if c == value {
@@ -276,6 +330,10 @@ func (atm *ActorsTableModel) FilterHandler(value string, p *js.Object, col *js.O
 			}
 		}
 		return false
+	case "Groups":
+		atm = ActorsTableModelFromJS(vm.Object)
+		act := actor.ActorFromJS(p)
+		return atm.GetGroup(vm, act) == value
 	}
 	return p.Get(prop).String() == value
 }
@@ -295,8 +353,13 @@ func (atm *ActorsTableModel) FilterList(vm *hvue.VM, prop string) []*elements.Va
 		translate = func(val string) string { return val }
 	}
 
+	attrib := ""
 	for _, act := range atm.Actors {
-		attrib := act.Object.Get(prop).String()
+		if prop == "Groups" {
+			attrib = atm.GetGroup(vm, act)
+		} else {
+			attrib = act.Object.Get(prop).String()
+		}
 		var attrs []string
 		switch prop {
 		case "Client":
@@ -310,7 +373,6 @@ func (atm *ActorsTableModel) FilterList(vm *hvue.VM, prop string) []*elements.Va
 			}
 			count[a]++
 		}
-
 	}
 	sort.Strings(attribs)
 	res := []*elements.ValText{}

@@ -37,8 +37,9 @@ const template string = `<el-dialog
         
     -->
     <el-tabs type="border-card" tab-position="left" style="height: 75vh">
-        <!-- Last & First Name -->
+		<!-- ===================================== Bonus Tab ======================================================= -->
 		<el-tab-pane label="Acteur" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+	        <!-- Last & First Name -->
 			<el-row :gutter="10" align="middle" class="spaced" type="flex">
 				<el-col :span="4" class="align-right">Nom :</el-col>
 				<el-col :span="8">
@@ -151,10 +152,10 @@ const template string = `<el-dialog
 					>
 						<el-table-column label="" width="80">
 							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddAssignment()"></el-button>
+								<el-button type="success" plain icon="fas fa-user-friends fa-fw" size="mini" @click="AddAssignment()"></el-button>
 							</template>
 							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveAssignment(scope.$index)"></el-button>
+								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveAssignment(scope.$index)"></el-button>
 							</template>
 						</el-table-column>
 	
@@ -188,7 +189,6 @@ const template string = `<el-dialog
 						</el-table-column>
 					</el-table>
 				</el-col>
-	
 			</el-row>
 	
 	        <!-- Salary -->
@@ -201,10 +201,10 @@ const template string = `<el-dialog
 					>
 						<el-table-column label="" width="80">
 							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddSalary()"></el-button>
+								<el-button type="success" plain icon="fas fa-euro-sign fa-fw" size="mini" @click="AddSalary()"></el-button>
 							</template>
 							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveSalary(scope.$index)"></el-button>
+								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveSalary(scope.$index)"></el-button>
 							</template>
 						</el-table-column>
 	
@@ -251,10 +251,10 @@ const template string = `<el-dialog
 					>
 						<el-table-column label="" width="80">
 							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddTravelSubsidy()"></el-button>
+								<el-button type="success" plain icon="fas fa-euro-sign fa-fw" size="mini" @click="AddTravelSubsidy()"></el-button>
 							</template>
 							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveTravelSubsidy(scope.$index)"></el-button>
+								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveTravelSubsidy(scope.$index)"></el-button>
 							</template>
 						</el-table-column>
 	
@@ -303,6 +303,7 @@ const template string = `<el-dialog
 
 		</el-tab-pane>
 
+		<!-- ===================================== Bonus Tab ======================================================= -->
 		<el-tab-pane label="Bonus" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 			<!-- Bonuses -->
 			<el-row :gutter="10" align="top" class="spaced" type="flex">
@@ -412,6 +413,7 @@ const template string = `<el-dialog
 			</el-row>
 		</el-tab-pane>
 
+		<!-- ===================================== Training Tab ======================================================= -->
 		<el-tab-pane label="Formations" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 			<el-row :gutter="10" align="top" class="spaced" type="flex">
 				<el-col :span="3" class="align-right">Visites et Formations :</el-col>

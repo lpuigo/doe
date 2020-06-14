@@ -123,11 +123,13 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 		for _, product := range pole.Product {
 			products[product] = "1"
 		}
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+0), products[poleconst.ProductCoated])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+1), products[poleconst.ProductMoise])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductCouple])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+3), products[poleconst.ProductReplace])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+4), products[poleconst.ProductRemove])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+0), products[poleconst.ProductCreation])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+1), products[poleconst.ProductCoated])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductMoise])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+3), products[poleconst.ProductCouple])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+4), products[poleconst.ProductReplace])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+5), products[poleconst.ProductRemove])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+6), products[poleconst.ProductHauban])
 	}
 
 	err := xf.Write(w)
@@ -276,7 +278,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return nil, err
 	}
 	productKeys := map[int]string{}
-	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4} {
+	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6} {
 		productKeys[col], _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
 	}
 	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
@@ -377,7 +379,8 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 			}
 		}
 		products := []string{}
-		for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4} {
+		//for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4}
+		for col := colPoleProduct; col < colPoleProduct+len(productKeys); col++ {
 			if getCol(col) == "1" {
 				products = append(products, productKeys[col])
 			}

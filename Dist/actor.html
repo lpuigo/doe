@@ -147,23 +147,24 @@
                              @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-calendar>
             <actors-time-sheet v-if="ActiveMode=='TimeSheet'"
-                             v-model="Actors"
-                             :user="User"
-                             :filter="Filter" :filtertype="FilterType"
-                             @edit-actor-vacancy="ShowEditActorVacancy"
+                               v-model="Actors"
+                               :user="User"
+                               :filter="Filter" :filtertype="FilterType"
+                               @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-time-sheet>
             <actors-table v-if="ActiveMode=='Table'"
                           v-model="Actors"
+                          :groups="GroupStore"
                           :user="User"
                           :filter="Filter" :filtertype="FilterType"
                           @edit-actor="ShowEditActor"
                           @edit-actor-vacancy="ShowEditActorVacancy"
             ></actors-table>
             <actorinfos-table v-if="ActiveMode=='HRTable'"
-                          v-model="Actors"
-                          :user="User"
-                          :filter="Filter" :filtertype="FilterType"
-                          @edit-actor="ShowEditActor"
+                              v-model="Actors"
+                              :user="User"
+                              :filter="Filter" :filtertype="FilterType"
+                              @edit-actor="ShowEditActor"
             ></actorinfos-table>
         </el-main>
     </el-container>

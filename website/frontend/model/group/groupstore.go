@@ -116,7 +116,7 @@ func (gs *GroupStore) getUpdatedGroups() []*Group {
 	return updGrps
 }
 
-// GetGroupById returns returns Group with given Id (nil if Id does not exist)
+// GetGroupById returns Group with given Id (nil if Id does not exist)
 func (gs *GroupStore) GetGroupById(id int) *Group {
 	for _, group := range gs.Groups {
 		if group.Id == id {
@@ -124,4 +124,13 @@ func (gs *GroupStore) GetGroupById(id int) *Group {
 		}
 	}
 	return nil
+}
+
+// GetGroupNameById returns Group"Name with given Id ("" if Id does not exist)
+func (gs *GroupStore) GetGroupNameById(id int) string {
+	gr := gs.GetGroupById(id)
+	if gr != nil {
+		return gr.Name
+	}
+	return ""
 }
