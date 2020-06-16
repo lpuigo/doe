@@ -11,13 +11,14 @@ import (
 )
 
 type PoleRecord struct {
-	Date   string
-	Hour   string
-	SRO    string
-	Ref    string
-	Images map[string]string
-	long   float64
-	lat    float64
+	Date    string
+	Hour    string
+	SRO     string
+	Ref     string
+	Comment string
+	Images  map[string]string
+	long    float64
+	lat     float64
 }
 
 func (pr *PoleRecord) String() string {
@@ -41,7 +42,7 @@ func (pr *PoleRecord) GetImageLabels() []string {
 	return res
 }
 
-func (pr PoleRecord) GetImage(dir, label string) error {
+func (pr *PoleRecord) GetImage(dir, label string) error {
 	url, found := pr.Images[label]
 	if !found {
 		return fmt.Errorf("could not find image with label '%s'\n", label)
@@ -88,6 +89,25 @@ func (pr *PoleRecord) GetAllImages(dir string, parallel int) error {
 	// wait for goroutine completion
 	for i := 0; i < parallel; i++ {
 		workers <- struct{}{}
+	}
+	return nil
+}
+
+func (pr *PoleRecord) WriteComment(dir string) error {
+	if pr.Comment == "" {
+		return nil
+	}
+
+	commentName := fmt.Sprintf("%s %s.txt", pr.Ref, "Commentaire")
+	commentFullName := filepath.Join(dir, commentName)
+	commentFile, err := os.Create(commentFullName)
+	if err != nil {
+		return fmt.Errorf("could not create comment file '%s': %s\n", commentFullName, err.Error())
+	}
+	defer commentFile.Close()
+	_, err = fmt.Fprint(commentFile, pr.Comment)
+	if err != nil {
+		return fmt.Errorf("could not write to comment file '%s': %s\n", commentFullName, err.Error())
 	}
 	return nil
 }

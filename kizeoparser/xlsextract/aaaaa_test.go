@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\2020-06-03 Reprises\`
-	jobs                string = `Création_Poteau_Fiitelcom_20200607`
-	report              string = `2020-06-05 Report`
-	kizeoXlsExtractFile string = kizeoXlsExtractDir + jobs + ".xlsx"
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025-336\Reportages\2020-06-12 Reprises\`
+	kizeoXlsExtractName string = `Création_Poteau_Fiitelcom_20200616`
+	report              string = `2020-06-12 Rapport Reprise`
+	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
 )
 
@@ -41,6 +41,10 @@ func Test_ExtractReport(t *testing.T) {
 		err := rec.GetAllImages(dir, 3)
 		if err != nil {
 			t.Fatalf("GetAllImages returned unexpected: %s\n", err.Error())
+		}
+		err = rec.WriteComment(dir)
+		if err != nil {
+			t.Fatalf("WriteComment returned unexpected: %s\n", err.Error())
 		}
 	}
 }

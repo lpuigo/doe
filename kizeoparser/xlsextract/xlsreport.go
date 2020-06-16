@@ -91,10 +91,11 @@ func (rp *reportParser) writeHeader() error {
 	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), "Heure")
 	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), "SRO")
 	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), "Appui")
-	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), "Latitude")
-	rp.file.SetCellStr(rp.sheet, "F"+strconv.Itoa(rp.curRow), "Longitude")
-	rp.file.SetCellStr(rp.sheet, "G"+strconv.Itoa(rp.curRow), "Google Maps")
-	rp.file.SetCellStr(rp.sheet, "H"+strconv.Itoa(rp.curRow), "Image (link)")
+	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), "Commentaire")
+	rp.file.SetCellStr(rp.sheet, "F"+strconv.Itoa(rp.curRow), "Latitude")
+	rp.file.SetCellStr(rp.sheet, "G"+strconv.Itoa(rp.curRow), "Longitude")
+	rp.file.SetCellStr(rp.sheet, "H"+strconv.Itoa(rp.curRow), "Google Maps")
+	rp.file.SetCellStr(rp.sheet, "I"+strconv.Itoa(rp.curRow), "Image (link)")
 
 	return nil
 }
@@ -104,18 +105,19 @@ func (rp *reportParser) writeRecord(rec *PoleRecord) error {
 	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), rec.Hour)
 	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), rec.SRO)
 	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), rec.Ref)
-	rp.file.SetCellFloat(rp.sheet, "E"+strconv.Itoa(rp.curRow), rec.lat, 7, 64)
-	rp.file.SetCellFloat(rp.sheet, "F"+strconv.Itoa(rp.curRow), rec.long, 7, 64)
-	rp.file.SetCellStr(rp.sheet, "G"+strconv.Itoa(rp.curRow), "maps")
+	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), rec.Comment)
+	rp.file.SetCellFloat(rp.sheet, "F"+strconv.Itoa(rp.curRow), rec.lat, 7, 64)
+	rp.file.SetCellFloat(rp.sheet, "G"+strconv.Itoa(rp.curRow), rec.long, 7, 64)
 
+	gmcoord := "H" + strconv.Itoa(rp.curRow)
+	rp.file.SetCellStr(rp.sheet, gmcoord, "maps")
 	style, _ := rp.file.NewStyle(`{"font":{"color":"#1265BE","underline":"single"}}`)
-	gmcoord := "G" + strconv.Itoa(rp.curRow)
 	rp.file.SetCellStr(rp.sheet, gmcoord, "maps")
 	rp.file.SetCellHyperLink(rp.sheet, gmcoord, getGMAPUrl(rec), "External")
 	rp.file.SetCellStyle(rp.sheet, gmcoord, gmcoord, style)
 
 	for i, label := range rec.GetImageLabels() {
-		coord := fmt.Sprintf("%c%d", 'H'+i, rp.curRow)
+		coord := fmt.Sprintf("%c%d", 'I'+i, rp.curRow)
 		rp.file.SetCellStr(rp.sheet, coord, label)
 		rp.file.SetCellHyperLink(rp.sheet, coord, rec.Images[label], "External")
 		rp.file.SetCellStyle(rp.sheet, coord, coord, style)
@@ -131,24 +133,25 @@ func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 	rec := &PoleRecord{
 		Images: make(map[string]string),
 	}
-	rec.Date = cols[0] // column A Date
-	rec.Hour = cols[1] // column B Heure
-	rec.SRO = cols[2]  // column C SRO
-	rec.Ref = cols[3]  // column D Appui
-	// column E Latitude
-	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[4], ",", "."), 64)
+	rec.Date = cols[0]    // column A Date
+	rec.Hour = cols[1]    // column B Heure
+	rec.SRO = cols[2]     // column C SRO
+	rec.Ref = cols[3]     // column D Appui
+	rec.Comment = cols[4] // column E Comment
+	// column F Latitude
+	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[5], ",", "."), 64)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse latitude '%s' at %s", cols[4], "E"+strconv.Itoa(rp.curRow))
+		return nil, fmt.Errorf("could not parse latitude '%s' at %s", cols[5], "F"+strconv.Itoa(rp.curRow))
 	}
-	// column F Longitude
-	rec.long, err = strconv.ParseFloat(strings.ReplaceAll(cols[5], ",", "."), 64)
+	// column G Longitude
+	rec.long, err = strconv.ParseFloat(strings.ReplaceAll(cols[6], ",", "."), 64)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse longitude '%s' at %s", cols[5], "F"+strconv.Itoa(rp.curRow))
+		return nil, fmt.Errorf("could not parse longitude '%s' at %s", cols[6], "G"+strconv.Itoa(rp.curRow))
 	}
-	// column H> Image Link
-	for colnum := 7; colnum < len(cols); colnum++ {
+	// column I> Image Link
+	for colnum := 8; colnum < len(cols); colnum++ {
 		label := cols[colnum]
-		coord := fmt.Sprintf("%c%d", 'H'+colnum-7, rp.curRow)
+		coord := fmt.Sprintf("%c%d", 'I'+colnum-8, rp.curRow)
 		isLink, link, err := rp.file.GetCellHyperLink(rp.sheet, coord)
 		if !isLink || err != nil {
 			return nil, fmt.Errorf("could not get link for image '%s' at %s", label, coord)

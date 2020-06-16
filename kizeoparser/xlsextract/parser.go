@@ -6,7 +6,6 @@ import (
 )
 
 func NewParserFile(xlsfile string) (*xlsPoleParser, error) {
-
 	xlsf, err := excelize.OpenFile(xlsfile)
 	if err != nil {
 		return nil, err

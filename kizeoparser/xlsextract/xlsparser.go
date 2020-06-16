@@ -75,7 +75,7 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve columns for row %d: %s\n", xpp.rowNum, err.Error())
 	}
-	var date, hour, sro, ref string
+	var date, hour, sro, ref, comment string
 	var long, lat float64
 	img := map[string]string{}
 
@@ -114,7 +114,7 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 			sro = value
 		case "Référence Poteau":
 			ref = value
-		case "Pied Poteau", "Etiquette", "Vue d'ensemble":
+		case "Pied Poteau", "Etiquette", "Vue d'ensemble", "Piquet":
 			link, target, err := xpp.getPicture(coord)
 			if err != nil {
 				fmt.Printf("could not retrieve picture at %s: %s\n", coord, err.Error())
@@ -141,16 +141,19 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 			if err != nil {
 				return nil, fmt.Errorf("could not parle GPS Longitude at %s '%s': %s\n", coord, slong, err.Error())
 			}
+		case "Commentaire":
+			comment = value
 		}
 	}
 
 	return &PoleRecord{
-		Date:   date,
-		Hour:   hour,
-		SRO:    sro,
-		Ref:    ref,
-		Images: img,
-		long:   long,
-		lat:    lat,
+		Date:    date,
+		Hour:    hour,
+		SRO:     sro,
+		Ref:     ref,
+		Comment: comment,
+		Images:  img,
+		long:    long,
+		lat:     lat,
 	}, nil
 }
