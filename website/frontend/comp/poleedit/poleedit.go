@@ -805,6 +805,7 @@ func (pem *PoleEditModel) ApplyDict(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	editedPoleMarker := pem.EditedPoleMarker
 	editedPoleMarker.Map.ApplyOnSelected(func(p *polemap.PoleMarker) {
+		p.Pole.DtRef = editedPoleMarker.Pole.DtRef
 		p.Pole.DictRef = editedPoleMarker.Pole.DictRef
 		p.Pole.DictDate = editedPoleMarker.Pole.DictDate
 		p.Pole.DictInfo = editedPoleMarker.Pole.DictInfo
