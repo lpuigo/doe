@@ -50,7 +50,7 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	statContext.GraphName = func(site items.ItemizableSite) string {
 		groupName, found := groupNameByClient[site.GetClient()]
 		if !found {
-			return "Client non assigné"
+			return m.Groups.GetById(0).Name
 		}
 		return groupName
 	}

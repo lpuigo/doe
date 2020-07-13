@@ -155,7 +155,7 @@ func (aip *ActorInfosPersister) GetActorInfosByActors(actors []*actors.Actor) []
 }
 
 // GetActorInfosByActors returns a slice containing all persisted ActorInfos pertinaining to given actors
-func (aip *ActorInfosPersister) GetActorHRsByActors(actors []*actors.Actor, addActualInfo bool) []*ActorHr {
+func (aip *ActorInfosPersister) GetActorHRsByActors(actors []*actors.Actor, addHRInfo bool) []*ActorHr {
 	aip.RLock()
 	defer aip.RUnlock()
 
@@ -164,7 +164,7 @@ func (aip *ActorInfosPersister) GetActorHRsByActors(actors []*actors.Actor, addA
 	actorHrs := make([]*ActorHr, len(actors))
 	for i, actor := range actors {
 		ahr := &ActorHr{Actor: actor}
-		if addActualInfo {
+		if addHRInfo {
 			air, found := aip.actorInfoByActorId[actor.Id]
 			if !found {
 				air = NewActorInfoRecordForActor(actor)
