@@ -161,8 +161,8 @@ func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
 
 	if mpm.Dirty {
 		onUpdatedActors := func() {
-			//mpm.LoadActors(false)
-			mpm.SetReference()
+			mpm.LoadActors(false)
+			//mpm.SetReference()
 		}
 		go mpm.callUpdateActors(onUpdatedActors)
 	}
@@ -246,12 +246,6 @@ func (mpm *MainPageModel) callGetActors(callback func()) {
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
 
-	actors := mpm.Actors[:]
-	defer func() {
-		mpm.Actors = actors
-		callback()
-	}()
-
 	err := req.Send(nil)
 	if err != nil {
 		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
@@ -266,12 +260,12 @@ func (mpm *MainPageModel) callGetActors(callback func()) {
 		act := actor.ActorFromJS(item)
 		loadedActors = append(loadedActors, act)
 	})
-	actors = loadedActors
+	mpm.Actors = loadedActors
+	callback()
 }
 
 func (mpm *MainPageModel) callUpdateActors(callback func()) {
 	updatedActors := mpm.getUpdatedActors()
-	defer callback()
 	if len(updatedActors) == 0 {
 		message.ErrorStr(mpm.VM, "Could not find any updated actors", false)
 		return
@@ -290,6 +284,7 @@ func (mpm *MainPageModel) callUpdateActors(callback func()) {
 		return
 	}
 	message.NotifySuccess(mpm.VM, "Equipes", "Modifications sauvegardées")
+	callback()
 }
 
 func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {
