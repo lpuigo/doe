@@ -27,7 +27,7 @@ func (m Manager) GetGroupByName() groups.GroupByName {
 }
 
 func (m Manager) GroupSizeOnMonth(days []string) map[string][]int {
-	month := date.DateStringRange{
+	monthRange := date.DateStringRange{
 		Begin: days[0],
 		End:   days[len(days)-1],
 	}
@@ -37,24 +37,23 @@ func (m Manager) GroupSizeOnMonth(days []string) map[string][]int {
 	}
 
 	for _, actor := range m.Actors.GetAllActors() {
-		if !actor.IsActiveOnDateRange(month) {
+		if !actor.IsActiveOnDateRange(monthRange) {
 			continue
 		}
+		actorActivity := make([]int, len(days))
+		actorGroups := actor.Groups.ActiveGroupPerDay(days)
 		for dayNum, day := range days {
-			if !actor.IsActiveOn(day) { // TODO manage actors holidays
+			if !actor.IsWorkingOn(day) {
 				continue
 			}
-
-			groupId := actor.Groups.ActiveGroupOnDate(day)
-			if groupId == -1 {
-				continue
-			}
-			gr := m.Groups.GetById(groupId)
+			actorActivity[dayNum] = 1
+			gr := m.Groups.GetById(actorGroups[dayNum])
 			if gr == nil {
 				continue
 			}
 			res[gr.Name][dayNum]++
 		}
+		res[actor.GetLabel()] = actorActivity
 	}
 	return res
 }

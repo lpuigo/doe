@@ -113,7 +113,6 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {
 	addValue := func(date, serie string, actors []string, value float64) {
 		team := sc.GraphName(site)
-		//team := site.GetClient()
 		stats.AddStatValue(site.GetRef(), team, date, "", serie, value)
 		if sc.ShowTeam && len(actors) > 0 {
 			value /= float64(len(actors))

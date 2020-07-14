@@ -272,6 +272,9 @@ func CalcTeamMean(aggrStat *rs.RipsiteStats, threshold float64) *rs.RipsiteStats
 	return aggrStat
 }
 
+// CalcProgress processes given RipsiteStats, computing cumulative figures and adding forecast result
+//
+// groupSize contains , per group name, active group's actor number (slice len is month days number)
 func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, groupSize map[string][]int) *rs.RipsiteStats {
 	var serieNameTarget string
 
@@ -310,6 +313,10 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 			// check if teamIndex is group or individual actor
 			groupActor := strings.Split(aggrStat.Teams[teamIndex], " : ")
 			groupName := groupActor[0] // retrieve group Name
+			actorLabel := ""
+			if len(groupActor) > 1 {
+				actorLabel = groupActor[1]
+			}
 			incrVal := 0.0
 			switch serieName {
 			case StatSerieWork:
@@ -326,8 +333,11 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 			target := make([]float64, nbDays)
 			for dateId := 0; dateId < nbDays; dateId++ {
 				if isActiveDate[dateId] {
-					if len(groupActor) > 1 {
-						targetVal += incrVal // Current team is an actor
+					if actorLabel != "" {
+						actorActivity, found := groupSize[actorLabel]
+						if found {
+							targetVal += incrVal * float64(actorActivity[dateId]) // Current team is an actor
+						}
 					} else {
 						targetVal += incrVal * float64(groupSize[groupName][dateId]) // Current Team is a group
 					}

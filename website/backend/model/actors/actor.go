@@ -53,7 +53,7 @@ func (a *Actor) IsActiveOn(date string) bool {
 	if a.Period.End == "" {
 		return true
 	}
-	return date < a.Period.End
+	return date <= a.Period.End
 }
 
 func (a *Actor) IsActiveOnWeek(weekDate string) bool {
@@ -75,6 +75,19 @@ func (a *Actor) IsActiveOnDateRange(dr date.DateStringRange) bool {
 	}
 	if a.Period.End != "" && a.Period.End < dr.Begin {
 		return false
+	}
+	return true
+}
+
+// IsWorkingOn returns true if actor is active and is not on holiday for given date
+func (a *Actor) IsWorkingOn(date string) bool {
+	if !a.IsActiveOn(date) {
+		return false
+	}
+	for _, vacation := range a.Vacation {
+		if vacation.OverlapDate(date) {
+			return false
+		}
 	}
 	return true
 }
@@ -136,4 +149,8 @@ func (a *Actor) GetActivityInfoFor(dr date.DateStringRange) (int, string) {
 		dur = 0
 	}
 	return dur, strings.Join(comments, "\n")
+}
+
+func (a *Actor) GetLabel() string {
+	return "(" + a.Role + ") " + a.Ref
 }

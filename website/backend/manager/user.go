@@ -30,7 +30,7 @@ func (m *Manager) genActorById() clients.ActorById {
 		if ar == nil {
 			return ""
 		}
-		return "(" + ar.Role + ") " + ar.Actor.Ref
+		return ar.Actor.GetLabel()
 	}
 }
 
@@ -46,7 +46,7 @@ func (m *Manager) genActorInfoById() clients.ActorInfoById {
 		if ar == nil {
 			return nil
 		}
-		return []string{ar.Role, ar.Actor.Ref}
+		return []string{ar.Actor.Role, ar.Actor.Ref}
 	}
 }
 
