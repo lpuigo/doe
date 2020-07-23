@@ -146,6 +146,7 @@ func main() {
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/dictzip", withUserManager("DictZip", route.DictZip)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/export", withUserManager("GetPolesiteExport", route.GetPolesiteExport)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/progress", withUserManager("GetPolesiteProgress", route.GetPolesiteProgress)).Methods("GET")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}/refexport", withUserManager("GetPolesiteRefExport", route.GetPolesiteRefExport)).Methods("GET")
 
 	// Foasites methods
 	router.HandleFunc("/api/foasites", withUserManager("GetFoaSitesInfo", route.GetFoaSitesInfo)).Methods("GET")

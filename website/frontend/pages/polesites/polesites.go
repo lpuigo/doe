@@ -212,6 +212,10 @@ func (mpm *MainPageModel) ProgressXlsURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/progress"
 }
 
+func (mpm *MainPageModel) RefExportXlsURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/refexport"
+}
+
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
 func (mpm *MainPageModel) ApplyFilterOnMap() {
 	poleMap := mpm.GetPoleMap()

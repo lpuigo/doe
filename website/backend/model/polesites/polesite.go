@@ -170,9 +170,19 @@ func (ps *PoleSite) ExportName() string {
 	return fmt.Sprintf("Polesite %s-%s (%d).xlsx", ps.Client, ps.Ref, ps.Id)
 }
 
+// RefExportName returns the PoleSite XLS reference export file name
+func (ps *PoleSite) RefExportName() string {
+	return fmt.Sprintf("Polesite %s-%s References.xlsx", ps.Client, ps.Ref)
+}
+
 // XLSExport returns the PoleSite XLS export
 func (ps *PoleSite) XLSExport(w io.Writer) error {
 	return ToExportXLS(w, ps)
+}
+
+// XLSRefExport returns the PoleSite XLS references export
+func (ps *PoleSite) XLSRefExport(w io.Writer) error {
+	return ToRefExportXLS(w, ps)
 }
 
 // ExportName returns the PoleSite XLS export file name

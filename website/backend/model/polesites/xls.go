@@ -139,6 +139,44 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	return nil
 }
 
+func ToRefExportXLS(w io.Writer, ps *PoleSite) error {
+	refSet := make(map[string]int)
+	for _, pole := range ps.Poles {
+		refSet[pole.Ref]++
+	}
+
+	refs := make([]string, len(refSet))
+	i := 0
+	for ref, _ := range refSet {
+		refs[i] = ref
+		i++
+	}
+	sort.Strings(refs)
+
+	xf := excelize.NewFile()
+	sheetName := ps.Ref
+	xf.SetSheetName(xf.GetSheetName(0), sheetName)
+
+	// Set PoleSite infos
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 1), "Client")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 2), "polesite")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 3), "Ref")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteHeader, 4), "Nb Poles")
+
+	for i, refName := range refs {
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo+i, 1), ps.Client)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo+i, 2), ps.Ref)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo+i, 3), refName)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo+i, 4), refSet[refName])
+	}
+
+	err := xf.Write(w)
+	if err != nil {
+		return fmt.Errorf("could not write XLS file:%s", err.Error())
+	}
+	return nil
+}
+
 const (
 	colProgressPoleRef int = iota + 1
 	colProgressPoleSticker
