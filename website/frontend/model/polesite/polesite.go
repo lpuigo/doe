@@ -24,14 +24,15 @@ type Polesite struct {
 }
 
 func (ps *Polesite) getNextId() int {
-	// naive algorithm ... something smarter must be possible
-	maxid := -1
-	for _, pole := range ps.Poles {
-		if pole.Id >= maxid {
-			maxid = pole.Id + 1
-		}
+	// ps.Poles must be sorted by ascending Pole Ids
+	// so last Pole has the highest id
+	nbPoles := len(ps.Poles)
+	if nbPoles == 0 {
+		return 0
 	}
-	return maxid
+	// returns highest + 1
+	return ps.Poles[nbPoles-1].Id + 1
+
 }
 
 // AddPole adds the given pole to polesite, and sets pole's new Id to ensure Id unicity

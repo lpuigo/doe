@@ -420,7 +420,7 @@ func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
 
 	newPoleMarker := mpm.GetPoleMarker(newPole)
 	if newPoleMarker == nil {
-		message.ErrorStr(mpm.VM, "Impossible de selectionner le nouveau poteau", false)
+		message.ErrorStr(mpm.VM, "Impossible de sélectionner le nouveau poteau", false)
 		return
 	}
 	mpm.SelectPole(newPoleMarker, true)
