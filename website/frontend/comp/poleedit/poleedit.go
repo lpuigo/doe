@@ -151,13 +151,18 @@ const template string = `<div>
             <!-- Ville -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6" class="align-right">Ville:</el-col>
-                <el-col :span="18">
-					<el-autocomplete placeholder="Ville"
+                <el-col :span="15">
+					<el-autocomplete placeholder="Ville" style="width: 100%"
 							v-model="editedpolemarker.Pole.City" clearable size="mini"
 							:fetch-suggestions="GetCities" :trigger-on-focus="false" 
 							@change="UpdatePoleCity"	
 					></el-autocomplete>
                 </el-col>
+				<el-col :span="3">
+					<el-tooltip content="Selectionner les autres appuis de la ville" placement="bottom" effect="light" open-delay="500">
+						<el-button type="info" plain style="width: 100%" class="icon" icon="fas fa-eye-dropper" size="mini" @click="SelectByCity"></el-button>
+					</el-tooltip>	
+				</el-col>
             </el-row>
         
             <!-- Adresse -->
@@ -763,6 +768,19 @@ func (pem *PoleEditModel) GetDICTUrl(vm *hvue.VM) string {
 func (pem *PoleEditModel) ClearSelection(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
 	pem.EditedPoleMarker.Map.ClearSelected()
+}
+
+func (pem *PoleEditModel) SelectByCity(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	editedPoleMarker := pem.EditedPoleMarker
+	editedPoleMarker.Map.SelectByFilter(func(p *polemap.PoleMarker) bool {
+		if p.Pole.City == editedPoleMarker.Pole.City {
+			return true
+		}
+		return false
+	})
+	centerOn := append(editedPoleMarker.Map.SelectedPoleMarkers, editedPoleMarker)
+	editedPoleMarker.Map.CenterOnPoleMarkers(centerOn)
 }
 
 func (pem *PoleEditModel) SelectByRef(vm *hvue.VM) {
