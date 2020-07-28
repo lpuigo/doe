@@ -384,7 +384,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		}
 		state := getCol(colPoleState)
 		if state == "" {
-			state = poleconst.StateNotSubmitted
+			state = poleconst.StateDictToDo
 		}
 		height := 8
 		if getCol(colPoleHeight) != "" {
