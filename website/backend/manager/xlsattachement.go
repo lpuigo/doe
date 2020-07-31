@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"io"
 )
@@ -21,7 +22,7 @@ func (m Manager) GetItemizableSite(siteType string) (site items.ItemizableContai
 }
 
 func (m Manager) GetItemizableSiteXLSAttachementName(site items.ItemizableSite) string {
-	return fmt.Sprintf("ATTACHEMENT %s.xlsx", site.GetRef())
+	return fmt.Sprintf("%s ATTACHEMENT %s.xlsx", date.Today().String(), site.GetRef())
 }
 
 func (m Manager) GetItemizableSiteXLSAttachement(writer io.Writer, site items.ItemizableSite) error {
