@@ -114,17 +114,6 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 			sro = value
 		case "Référence Poteau":
 			ref = value
-		case "Pied Poteau", "Etiquette", "Vue d'ensemble", "Piquet":
-			link, target, err := xpp.getPicture(coord)
-			if err != nil {
-				fmt.Printf("could not retrieve picture at %s: %s\n", coord, err.Error())
-				continue
-			}
-			if !link {
-				fmt.Printf("could not get picture link at %s\n", coord)
-				continue
-			}
-			img[colName] = target
 		case "Localisation GPS Poteau":
 			gps := strings.Split(value, "\n")
 			if len(gps) != 2 {
@@ -143,6 +132,16 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 			}
 		case "Commentaire":
 			comment = value
+		default:
+			link, target, err := xpp.getPicture(coord)
+			if err != nil {
+				fmt.Printf("could not retrieve picture at %s: %s\n", coord, err.Error())
+				continue
+			}
+			if !link {
+				continue
+			}
+			img[colName] = target
 		}
 	}
 
