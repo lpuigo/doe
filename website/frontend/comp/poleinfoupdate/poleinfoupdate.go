@@ -96,16 +96,16 @@ const template string = `
     <el-row :gutter="10" type="flex" class="doublespaced">
         <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Synthèse :</h4></el-col>
         <el-col :span="19" >
-			<el-tabs tab-position="top" style="height: 35vh">
+			<el-tabs tab-position="top">
 				<!-- ===================================== Bonus Tab ======================================================= -->
-				<el-tab-pane label="Statuts" lazy=true style="height: 35vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+				<el-tab-pane label="Statuts" lazy=true style="height: 44vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 					<el-table
 							:data="summaryInfos"
 							stripe size="mini" show-summary :summary-method="SummaryTotal"
 							:default-sort = "{prop: 'City', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="City" sortable :sort-by="['City']"
+								label="Ville" prop="Line" sortable :sort-by="['Line']"
 								width="200px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
@@ -145,7 +145,11 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			return CalcSummaryDatas(pium.Polesite.Poles, pium.GetSummaryStatuses())
+			summer := NewSummarizer()
+			summer.Colums = pium.GetSummaryStatuses()
+			summer.Calc(pium.Polesite.Poles)
+			return summer.SummaryDatas
+			//return CalcSummaryDatas(pium.Polesite.Poles, pium.GetSummaryStatuses())
 		}),
 		//hvue.Computed("PullingTotal", func(vm *hvue.VM) interface{} {
 		//	pium := PoleInfoUpdateModelFromJS(vm.Object)

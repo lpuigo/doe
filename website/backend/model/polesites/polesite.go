@@ -317,11 +317,19 @@ func (ps *PoleSite) UpdateWith(usr *PoleSite) {
 
 	resPoleSite := *usr //shallow copy of updated PoleSite
 	origPoles := make(map[int]*Pole)
+	maxOrig := -100
 	for i, pole := range ps.Poles {
 		origPoles[i] = pole
+		if pole.Id > maxOrig {
+			maxOrig = pole.Id
+		}
 	}
 	updtPoles := []*Pole{}
+	maxUpdt := -100
 	for _, updtPole := range usr.Poles {
+		if updtPole.Id > maxUpdt {
+			maxUpdt = updtPole.Id
+		}
 		origPole, exists := origPoles[updtPole.Id]
 		if !exists {
 			// its a new pole => let's add it with new timestamp
@@ -342,6 +350,15 @@ func (ps *PoleSite) UpdateWith(usr *PoleSite) {
 		}
 		updtPole.TimeStamp = timeStamp
 		updtPoles = append(updtPoles, updtPole)
+	}
+	// Check for newest poles on server side only
+	if maxOrig > maxUpdt {
+		for i := len(ps.Poles) - 1; i > 0; i-- {
+			if ps.Poles[i].Id <= maxUpdt {
+				break
+			}
+			updtPoles = append(updtPoles, ps.Poles[i])
+		}
 	}
 	resPoleSite.Poles = updtPoles
 	*ps = resPoleSite //shallow copy of updated PoleSite on receiver PoleSite
