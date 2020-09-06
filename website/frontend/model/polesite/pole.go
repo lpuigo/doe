@@ -38,6 +38,7 @@ type Pole struct {
 	Comment        string   `js:"Comment"`
 	Product        []string `js:"Product"`
 	AttachmentDate string   `js:"AttachmentDate"`
+	TimeStamp      string   `js:"TimeStamp"`
 }
 
 func NewPole() *Pole {

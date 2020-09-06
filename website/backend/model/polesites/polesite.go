@@ -254,7 +254,8 @@ func (ps *PoleSite) CloneInfoForArchive() *PoleSite {
 	return nps
 }
 
-// MoveCompletedGroupTo moves poles sharing the same ref and all having a terminal status (Attachement ou Cancelled) to the given PoleSite, and returns archived pole number
+// MoveCompletedGroupTo moves poles sharing the same ref and all having a terminal status (Attachement or Cancelled)
+// from receiver PoleSite to the given PoleSite, and returns archived pole number
 func (ps *PoleSite) MoveCompletedGroupTo(aps *PoleSite) int {
 	doArchive := make(map[string]bool)
 
@@ -307,4 +308,41 @@ func (ps *PoleSite) AppendPolesFrom(nps *PoleSite) {
 		npole.Id = poleId
 		ps.Poles = append(ps.Poles, &npole)
 	}
+}
+
+// UpdateWith updates receiver PoleSite with information from given PoleSite by checking update on each poles.
+// Outdated poles are ignore. Updated pole' timestamp is set to current time
+func (ps *PoleSite) UpdateWith(usr *PoleSite) {
+	timeStamp := date.Now().TimeStamp()
+
+	resPoleSite := *usr //shallow copy of updated PoleSite
+	origPoles := make(map[int]*Pole)
+	for i, pole := range ps.Poles {
+		origPoles[i] = pole
+	}
+	updtPoles := []*Pole{}
+	for _, updtPole := range usr.Poles {
+		origPole, exists := origPoles[updtPole.Id]
+		if !exists {
+			// its a new pole => let's add it with new timestamp
+			updtPole.TimeStamp = timeStamp
+			updtPoles = append(updtPoles, updtPole)
+			continue
+		}
+		if updtPole.IsEqual(origPole) {
+			// unchanged => let's add it unchanged
+			updtPoles = append(updtPoles, origPole)
+			continue
+		}
+		// some change occured
+		if updtPole.TimeStamp != origPole.TimeStamp {
+			// updated pole is outdated compared to current pole info, let's keep origPole
+			updtPoles = append(updtPoles, origPole)
+			continue
+		}
+		updtPole.TimeStamp = timeStamp
+		updtPoles = append(updtPoles, updtPole)
+	}
+	resPoleSite.Poles = updtPoles
+	*ps = resPoleSite //shallow copy of updated PoleSite on receiver PoleSite
 }

@@ -96,26 +96,31 @@ const template string = `
     <el-row :gutter="10" type="flex" class="doublespaced">
         <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Synthèse :</h4></el-col>
         <el-col :span="19" >
-			<el-table
-					:data="summaryInfos"
-					stripe size="mini" show-summary :summary-method="SummaryTotal"
-					:default-sort = "{prop: 'City', order: 'ascending'}"
-			>
-				<el-table-column
-						label="Ville" prop="City" sortable :sort-by="['City']"
-						width="200px" :resizable=true :show-overflow-tooltip=true
-				></el-table-column>
-
-				<el-table-column v-for="status in GetSummaryStatuses()"
-						:resizable="true" align="center"
-						:label="StateName(status)" width="150px"
-						sortable :sort-by="SortBy(status)"
-				>
-					<template slot-scope="scope">
-						<span>{{scope.row.NbPoles[status]}}</span>
-					</template>
-				</el-table-column>
-			</el-table>
+			<el-tabs tab-position="top" style="height: 35vh">
+				<!-- ===================================== Bonus Tab ======================================================= -->
+				<el-tab-pane label="Statuts" lazy=true style="height: 35vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+					<el-table
+							:data="summaryInfos"
+							stripe size="mini" show-summary :summary-method="SummaryTotal"
+							:default-sort = "{prop: 'City', order: 'ascending'}"
+					>
+						<el-table-column
+								label="Ville" prop="City" sortable :sort-by="['City']"
+								width="200px" :resizable=true :show-overflow-tooltip=true
+						></el-table-column>
+		
+						<el-table-column v-for="status in GetSummaryStatuses()"
+								:resizable="true" align="center"
+								:label="StateName(status)" width="150px"
+								sortable :sort-by="SortBy(status)"
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.NbPoles[status]}}</span>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-tab-pane>
+			</el-tabs>
         </el-col>
     </el-row>
 </div>

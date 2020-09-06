@@ -103,7 +103,8 @@ func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 	return psr
 }
 
-// Update updates the given PoleSiteRecord
+// Update updates the given PoleSiteRecord with per pole control : outdated poles are ignored (outdated : one original pole' timestamp is newer than the corresponding pole in the updated polesite)
+
 func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
 	psp.RLock()
 	defer psp.RUnlock()
@@ -112,7 +113,8 @@ func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
 	if osr == nil {
 		return fmt.Errorf("id not found")
 	}
-	osr.PoleSite = usr.PoleSite
+	//osr.PoleSite = usr.PoleSite
+	osr.UpdateWith(usr.PoleSite)
 	osr.PoleSite.UpdateDate = date.Today().String()
 	psp.persister.MarkDirty(osr)
 	return nil

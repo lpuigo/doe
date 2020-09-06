@@ -5,6 +5,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -34,6 +35,7 @@ type Pole struct {
 	Comment        string
 	Product        []string
 	AttachmentDate string
+	TimeStamp      string
 }
 
 func (p *Pole) SearchString() string {
@@ -255,4 +257,117 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 	}
 
 	return res, nil
+}
+
+// IsEqual returns true if both Pole are identical (long and lat must be 1e-10 near, TimeStamp is not checked)
+func (p *Pole) IsEqual(pole *Pole) bool {
+	//Id             int
+	if p.Id != pole.Id {
+		return false
+	}
+	//Ref            string
+	if p.Ref != pole.Ref {
+		return false
+	}
+	//City           string
+	if p.City != pole.City {
+		return false
+	}
+	//Address        string
+	if p.Address != pole.Address {
+		return false
+	}
+	//Sticker        string
+	if p.Sticker != pole.Sticker {
+		return false
+	}
+	//Lat            float64
+	if math.Abs(p.Lat-pole.Lat) > 0.00000000001 {
+		return false
+	}
+	//Long           float64
+	if math.Abs(p.Long-pole.Long) > 0.00000000001 {
+		return false
+	}
+	//State          string
+	if p.State != pole.State {
+		return false
+	}
+	//Date           string
+	if p.Date != pole.Date {
+		return false
+	}
+	//Actors         []string
+	if len(p.Actors) != len(pole.Actors) {
+		return false
+	}
+	for i, act := range pole.Actors {
+		if p.Actors[i] != act {
+			return false
+		}
+	}
+	//DtRef          string
+	if p.DtRef != pole.DtRef {
+		return false
+	}
+	//DictRef        string
+	if p.DictRef != pole.DictRef {
+		return false
+	}
+	//DictDate       string
+	if p.DictDate != pole.DictDate {
+		return false
+	}
+	//DictInfo       string
+	if p.DictInfo != pole.DictInfo {
+		return false
+	}
+	//DaQueryDate    string
+	if p.DaQueryDate != pole.DaQueryDate {
+		return false
+	}
+	//DaStartDate    string
+	if p.DaStartDate != pole.DaStartDate {
+		return false
+	}
+	//DaEndDate      string
+	if p.DaEndDate != pole.DaEndDate {
+		return false
+	}
+	//Height         int
+	if p.Height != pole.Height {
+		return false
+	}
+	//Material       string
+	if p.Material != pole.Material {
+		return false
+	}
+	//AspiDate       string
+	if p.AspiDate != pole.AspiDate {
+		return false
+	}
+	//Kizeo          string
+	if p.Kizeo != pole.Kizeo {
+		return false
+	}
+	//Comment        string
+	if p.Comment != pole.Comment {
+		return false
+	}
+	//Product        []string
+	if len(p.Product) != len(pole.Product) {
+		return false
+	}
+	for i, prd := range pole.Product {
+		if p.Product[i] != prd {
+			return false
+		}
+	}
+	//AttachmentDate string
+	if p.AttachmentDate != pole.AttachmentDate {
+		return false
+	}
+	//TimeStamp      string
+	// not compared
+	return true
 }

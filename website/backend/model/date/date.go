@@ -10,8 +10,9 @@ type Date time.Time
 type DateAggreg func(string) string
 
 const (
-	TimeJSLayout string = "2006-01-02"
-	TimeLayout   string = "02/01/2006"
+	TimeStampLayout string = "2006-01-02 15:04:05.000"
+	TimeJSLayout    string = "2006-01-02"
+	TimeLayout      string = "02/01/2006"
 )
 
 func DateFrom(d string) Date {
@@ -40,6 +41,12 @@ func (d Date) String() string {
 	return time.Time(d).Format(TimeJSLayout)
 }
 
+// String returns format YYYY-MM-DD HH:MM:SS.mmm date string
+func (d Date) TimeStamp() string {
+	return time.Time(d).Format(TimeStampLayout)
+}
+
+// TODDMMYYYY returns format DD/MM/YYYY date string
 func (d Date) ToDDMMYYYY() string {
 	return time.Time(d).Format(TimeLayout)
 }
@@ -85,6 +92,10 @@ func (d Date) Equal(d2 Date) bool {
 
 func Today() Date {
 	return Date(time.Now().Truncate(24 * time.Hour))
+}
+
+func Now() Date {
+	return Date(time.Now())
 }
 
 func GetMonday(d string) string {
