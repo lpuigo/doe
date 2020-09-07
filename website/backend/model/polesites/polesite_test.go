@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -204,6 +205,38 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 	// append new Poles to original PoleSiteRecord
 	origPsr.AppendPolesFrom(newPs)
 
+	err = os.Rename(origPsrFile, origPsrFile+".bak")
+	if err != nil {
+		t.Fatalf("Rename origPsrFile returned unexpected: %s", err.Error())
+	}
+	// Persist updated PoleSite
+	err = origPsr.Persist(psDir)
+	if err != nil {
+		t.Fatalf("Persist returned unexpected: %s", err.Error())
+	}
+}
+
+func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
+	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	psJsonFile := `000035.json`
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	ps := origPsr.PoleSite
+	sort.Slice(ps.Poles, func(i, j int) bool {
+		return ps.Poles[i].Id < ps.Poles[j].Id
+	})
+	if ps.Poles[0].Id >= 0 {
+		return
+	}
+	// negative Ids found, lets setup Poles Id
+	t.Logf("Negative Id found for PoleSite %s\n", psJsonFile)
+	for i := 0; i < len(ps.Poles); i++ {
+		ps.Poles[i].Id = i
+	}
 	err = os.Rename(origPsrFile, origPsrFile+".bak")
 	if err != nil {
 		t.Fatalf("Rename origPsrFile returned unexpected: %s", err.Error())
