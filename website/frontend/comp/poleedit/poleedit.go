@@ -289,6 +289,12 @@ const template string = `<div>
 									@change="CheckPermissions()"
                     ></el-date-picker>
                 </el-col>
+                <el-col :span="9">
+                	<el-checkbox v-model="editedpolemarker.Pole.DaValidation" 
+                				label="AC reçu" size="mini" 
+                				@change="CheckPermissions()"
+                	></el-checkbox>
+                </el-col>
             </el-row>
             <el-row :gutter="5" type="flex" align="middle">
                 <el-col :offset="6" :span="9">
@@ -838,6 +844,7 @@ func (pem *PoleEditModel) ApplyDa(vm *hvue.VM) {
 	editedPoleMarker := pem.EditedPoleMarker
 	editedPoleMarker.Map.ApplyOnSelected(func(p *polemap.PoleMarker) {
 		p.Pole.DaQueryDate = editedPoleMarker.Pole.DaQueryDate
+		p.Pole.DaValidation = editedPoleMarker.Pole.DaValidation
 		p.Pole.DaStartDate = editedPoleMarker.Pole.DaStartDate
 		p.Pole.DaEndDate = editedPoleMarker.Pole.DaEndDate
 		p.Pole.UpdateState()

@@ -206,3 +206,19 @@ func (ps *Polesite) DetectProductInconsistency() {
 		pole.AddProduct(poleconst.ProductCreation)
 	}
 }
+
+func (ps *Polesite) DetectMissingDAValidation() bool {
+	updateMap := false
+	for _, pole := range ps.Poles {
+		if !(!tools.Empty(pole.DaQueryDate) && !tools.Empty(pole.DaStartDate) && !tools.Empty(pole.DaEndDate) && !pole.DaValidation) {
+			continue
+		}
+		pole.DaValidation = true
+		currentState := pole.State
+		pole.UpdateState()
+		if pole.State != currentState {
+			updateMap = true
+		}
+	}
+	return updateMap
+}

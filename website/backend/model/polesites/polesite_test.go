@@ -139,7 +139,7 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-07-23 Alsace 67 et 68 Rosace\Polesite 68.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025-Vittel\Polesite.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -180,9 +180,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 }
 
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-03-06 Remplacement Metz\2020-05-25 Update QGIS\MOSELLE\Pagny sur Moselle - 18 - Absent A FAIRE`
-	psXlsfile := `Polesite Sogetrel Poteau-Metz.xlsx`
-	psJsonFile := `000019.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025-Vittel`
+	psXlsfile := `Polesite.xlsx`
+	psJsonFile := `000026.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)

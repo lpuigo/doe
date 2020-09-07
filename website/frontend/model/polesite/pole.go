@@ -29,6 +29,7 @@ type Pole struct {
 	DictDate       string   `js:"DictDate"`
 	DictInfo       string   `js:"DictInfo"`
 	DaQueryDate    string   `js:"DaQueryDate"`
+	DaValidation   bool     `js:"DaValidation"`
 	DaStartDate    string   `js:"DaStartDate"`
 	DaEndDate      string   `js:"DaEndDate"`
 	Height         int      `js:"Height"`
@@ -61,6 +62,7 @@ func NewPole() *Pole {
 	np.DictDate = ""
 	np.DictInfo = ""
 	np.DaQueryDate = ""
+	np.DaValidation = false
 	np.DaStartDate = ""
 	np.DaEndDate = ""
 	np.Height = 0
@@ -94,6 +96,7 @@ func (p *Pole) Duplicate(newname string, offset float64) *Pole {
 	np.DictDate = p.DictDate
 	np.DictInfo = p.DictInfo
 	np.DaQueryDate = p.DaQueryDate
+	np.DaValidation = p.DaValidation
 	np.DaStartDate = p.DaStartDate
 	np.DaEndDate = p.DaEndDate
 	np.Height = p.Height
@@ -323,7 +326,7 @@ func (p *Pole) UpdateState() {
 			p.SetState(poleconst.StateDaToDo)
 			return
 		}
-		if tools.Empty(p.DaStartDate) {
+		if !(p.DaValidation && !tools.Empty(p.DaStartDate)) {
 			p.SetState(poleconst.StateDaExpected)
 			return
 		}

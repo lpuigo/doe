@@ -26,6 +26,7 @@ type Pole struct {
 	DictDate       string
 	DictInfo       string
 	DaQueryDate    string
+	DaValidation   bool
 	DaStartDate    string
 	DaEndDate      string
 	Height         int

@@ -584,6 +584,12 @@ func (mpm *MainPageModel) DetectDuplicate() {
 	mpm.Polesite.DetectDuplicate()
 }
 
+func (mpm *MainPageModel) DetectMissingDAValidation() {
+	if mpm.Polesite.DetectMissingDAValidation() {
+		mpm.RefreshMap()
+	}
+}
+
 func (mpm *MainPageModel) DetectProductInconsistency() {
 	mpm.Polesite.DetectProductInconsistency()
 	mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles)
