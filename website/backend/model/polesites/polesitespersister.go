@@ -104,7 +104,6 @@ func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 }
 
 // Update updates the given PoleSiteRecord with per pole control : outdated poles are ignored (outdated : one original pole' timestamp is newer than the corresponding pole in the updated polesite)
-
 func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
 	psp.RLock()
 	defer psp.RUnlock()

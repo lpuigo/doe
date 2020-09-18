@@ -312,10 +312,10 @@ func (ps *PoleSite) AppendPolesFrom(nps *PoleSite) {
 
 // UpdateWith updates receiver PoleSite with information from given PoleSite by checking update on each poles.
 // Outdated poles are ignore. Updated pole' timestamp is set to current time
-func (ps *PoleSite) UpdateWith(usr *PoleSite) {
+func (ps *PoleSite) UpdateWith(ups *PoleSite) {
 	timeStamp := date.Now().TimeStamp()
 
-	resPoleSite := *usr //shallow copy of updated PoleSite
+	resPoleSite := *ups //shallow copy of updated PoleSite
 	origPoles := make(map[int]*Pole)
 	maxOrig := -100
 	for i, pole := range ps.Poles {
@@ -326,7 +326,7 @@ func (ps *PoleSite) UpdateWith(usr *PoleSite) {
 	}
 	updtPoles := []*Pole{}
 	maxUpdt := -100
-	for _, updtPole := range usr.Poles {
+	for _, updtPole := range ups.Poles {
 		if updtPole.Id > maxUpdt {
 			maxUpdt = updtPole.Id
 		}
@@ -344,7 +344,7 @@ func (ps *PoleSite) UpdateWith(usr *PoleSite) {
 		}
 		// some change occured
 		if updtPole.TimeStamp != origPole.TimeStamp {
-			// updated pole is outdated compared to current pole info, let's keep origPole
+			// updated pole is outdated compared to current pole info, let's ignore update and keep origPole
 			updtPoles = append(updtPoles, origPole)
 			continue
 		}

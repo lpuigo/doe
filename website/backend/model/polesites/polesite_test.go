@@ -181,9 +181,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 }
 
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025-Vittel`
-	psXlsfile := `Polesite.xlsx`
-	psJsonFile := `000026.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2020-09-18 Gap`
+	psXlsfile := `Polesite GAP.xlsx`
+	psJsonFile := `000041.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)

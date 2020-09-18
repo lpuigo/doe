@@ -327,6 +327,10 @@ func (p *Pole) IsEqual(pole *Pole) bool {
 	if p.DaQueryDate != pole.DaQueryDate {
 		return false
 	}
+	//DaValidation   bool
+	if p.DaValidation != pole.DaValidation {
+		return false
+	}
 	//DaStartDate    string
 	if p.DaStartDate != pole.DaStartDate {
 		return false
