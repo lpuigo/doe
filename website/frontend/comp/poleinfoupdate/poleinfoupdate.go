@@ -98,7 +98,7 @@ const template string = `
         <el-col :span="19" >
 			<el-tabs tab-position="top">
 				<!-- ===================================== Bonus Tab ======================================================= -->
-				<el-tab-pane label="Statuts" lazy=true style="height: 44vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+				<el-tab-pane label="Statuts" lazy=true style="padding: 5px 25px;">
 					<el-table
 							:data="summaryInfos"
 							stripe size="mini" show-summary :summary-method="SummaryTotal"
