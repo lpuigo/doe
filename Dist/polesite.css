@@ -187,6 +187,16 @@ h1 {
     transition: background-color .15s ease;
 }
 
+.el-table .pole-row-deleted {
+    background: #e6e1e1;
+    color: #bfbbbb;
+}
+
+.el-table .pole-row-deleted:hover {
+    background: #ccc8c8;
+    transition: background-color .15s ease;
+}
+
 .el-table .pole-row-not-submitted {
     background: #ede8e8;
     color: #b3b1b1;

@@ -43,17 +43,20 @@ func (ps *Polesite) AddPole(pole *Pole) {
 
 // DeletePole deletes the given pole and returns true if it was found and deleted, false otherwise (no-op)
 func (ps *Polesite) DeletePole(pole *Pole) bool {
-	for i, p := range ps.Poles {
-		if p.Id == pole.Id {
-			// remove the item the JS way, to triggger vueJS observers
-			ps.Object.Get("Poles").Call("splice", i, 1)
-			return true
-		}
-	}
-	return false
+	// Set the state of given Pole to StateDeleted
+	pole.State = poleconst.StateDeleted
+	return true
+	//for _, p := range ps.Poles {
+	//	if p.Id == pole.Id {
+	//		// remove the item the JS way, to trigger vueJS observers
+	//		ps.Object.Get("Poles").Call("splice", i, 1)
+	//		return true
+	//	}
+	//}
+	//return false
 }
 
-// DeletePole deletes the given pole and returns true if it was found and deleted, false otherwise (no-op)
+// DuplicatePole duplicates the given pole and returns true if it was found and deleted, false otherwise (no-op)
 func (ps *Polesite) DuplicatePole(pole *Pole) bool {
 	print("DuplicatePole", pole.Object)
 	return true

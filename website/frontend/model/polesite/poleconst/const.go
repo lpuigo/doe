@@ -33,6 +33,7 @@ const (
 	StateDone              string = "90 Done"
 	StateAttachment        string = "95 Attachment"
 	StateCancelled         string = "99 Cancelled"
+	StateDeleted           string = "999 Deleted"
 
 	LabelNotSubmitted      string = "Non soumis"
 	LabelNoGo              string = "NoGo Client"
@@ -48,6 +49,7 @@ const (
 	LabelDone              string = "Fait"
 	LabelAttachment        string = "Attach. fait"
 	LabelCancelled         string = "Annulé"
+	LabelDeleted           string = "Supprimé"
 
 	FilterValueAll      string = ""
 	FilterValueRef      string = "REF:"

@@ -345,6 +345,8 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return row[col-1]
 	}
 
+	timeStamp := date.Today().TimeStamp()
+
 	for line, row = range rows {
 		if line+1 < rowPoleInfo {
 			continue
@@ -453,6 +455,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 			Kizeo:          getCol(colPoleKizeo),
 			Comment:        comment,
 			Product:        products,
+			TimeStamp:      timeStamp,
 		}
 
 		ps.Poles = append(ps.Poles, pole)

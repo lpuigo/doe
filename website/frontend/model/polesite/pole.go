@@ -184,6 +184,8 @@ func (p *Pole) IsToDo() bool {
 	//case poleconst.StateAttachment:
 	case poleconst.StateCancelled:
 		return false
+	case poleconst.StateDeleted:
+		return false
 	default:
 		return true
 	}
@@ -470,6 +472,8 @@ func PoleStateLabel(state string) string {
 		return poleconst.LabelAttachment
 	case poleconst.StateCancelled:
 		return poleconst.LabelCancelled
+	case poleconst.StateDeleted:
+		return poleconst.LabelDeleted
 	default:
 		return "<" + state + ">"
 	}
@@ -553,6 +557,8 @@ func PoleRowClassName(status string) string {
 		return "pole-row-attachment"
 	case poleconst.StateCancelled:
 		return "pole-row-cancelled"
+	case poleconst.StateDeleted:
+		return "pole-row-deleted"
 
 	default:
 		res = "worksite-row-error"

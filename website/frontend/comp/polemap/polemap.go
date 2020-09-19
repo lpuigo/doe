@@ -148,11 +148,17 @@ type namedLayers struct {
 }
 
 // createPoleMarkers resets PoleMarkersGroups and creates new PoleMarkers for attached Poles
+//
+// Deleted Poles are ignored
 func (pm *PoleMap) createPoleMarkers() {
 	pm.clearPoleMarkersGroups()
 	pms := []*PoleMarker{}
 
 	for _, pole := range pm.Poles {
+		if pole.State == poleconst.StateDeleted {
+			// skip deleted poles
+			continue
+		}
 		pms = append(pms, pm.NewPoleMarker(pole))
 	}
 	pm.PoleMarkers = pms

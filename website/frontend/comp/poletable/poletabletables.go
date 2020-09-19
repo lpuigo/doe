@@ -93,6 +93,10 @@ func (ptm *PoleTableModel) SetSelectedPole(vm *hvue.VM, p *ps.Pole) {
 	//	// no change ... skip
 	//	return
 	//}
+	if p.State == poleconst.StateDeleted {
+		// deleted pole are not selectable
+		return
+	}
 	ptm.Context.SelectedPole = p.Id
 	vm.Emit("update:context", ptm.Context)
 }
