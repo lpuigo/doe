@@ -35,6 +35,18 @@ func (ps *Polesite) getNextId() int {
 
 }
 
+// GetPoles returns all active (ie not deleted) PoleSite' Poles
+func (ps *Polesite) GetPoles() []*Pole {
+	res := []*Pole{}
+	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
+		res = append(res, pole)
+	}
+	return res
+}
+
 // AddPole adds the given pole to polesite, and sets pole's new Id to ensure Id unicity
 func (ps *Polesite) AddPole(pole *Pole) {
 	pole.Id = ps.getNextId()
@@ -156,7 +168,7 @@ func (ps *Polesite) DetectDuplicate() {
 	duplicatePolesByTitle := map[string][]*Pole{}
 	foundDuplicateByPos := false
 	foundDuplicateByTitle := false
-	for _, pole := range ps.Poles {
+	for _, pole := range ps.GetPoles() {
 		polePos := pos{lat: int(pole.Lat*prec) / 2, long: int(pole.Long*prec) / 2}
 		polesWithPos, found := duplicatePolesByPos[polePos]
 		if !found {
@@ -202,7 +214,7 @@ func (ps *Polesite) DetectDuplicate() {
 }
 
 func (ps *Polesite) DetectProductInconsistency() {
-	for _, pole := range ps.Poles {
+	for _, pole := range ps.GetPoles() {
 		if !(pole.State != poleconst.StateCancelled && pole.State != poleconst.StateNotSubmitted) {
 			continue
 		}
@@ -212,7 +224,7 @@ func (ps *Polesite) DetectProductInconsistency() {
 
 func (ps *Polesite) DetectMissingDAValidation() bool {
 	updateMap := false
-	for _, pole := range ps.Poles {
+	for _, pole := range ps.GetPoles() {
 		if !(!tools.Empty(pole.DaQueryDate) && !tools.Empty(pole.DaStartDate) && !tools.Empty(pole.DaEndDate) && !pole.DaValidation) {
 			continue
 		}
