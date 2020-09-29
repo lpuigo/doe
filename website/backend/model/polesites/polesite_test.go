@@ -140,7 +140,7 @@ func Test_ToXLS(t *testing.T) {
 }
 
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-025-Vittel\Polesite.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2020-09-25 Cadolive\Polesite.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -241,6 +241,77 @@ func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Rename origPsrFile returned unexpected: %s", err.Error())
 	}
+	// Persist updated PoleSite
+	err = origPsr.Persist(psDir)
+	if err != nil {
+		t.Fatalf("Persist returned unexpected: %s", err.Error())
+	}
+}
+
+func TestPoleSite_DetectDuplicatedId(t *testing.T) {
+	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	psJsonFile := `000012.json`
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	ps := origPsr.PoleSite
+
+	// detect duplicated pole id
+	polesById := make(map[int][]int)
+	for i, pole := range ps.Poles {
+		bucket, found := polesById[pole.Id]
+		if !found {
+			bucket = []int{i}
+			polesById[pole.Id] = bucket
+			continue
+		}
+		//t.Logf("found another pole id %d\n", pole.Id)
+		polesById[pole.Id] = append(polesById[pole.Id], i)
+	}
+
+	for id, bucket := range polesById {
+		if len(bucket) > 1 {
+			//t.Logf("Found %d duplicate(s) for pole id %d\n", len(bucket)-1, id)
+
+			refB := &strings.Builder{}
+			poleRef := ps.Poles[bucket[0]]
+			json.NewEncoder(refB).Encode(poleRef)
+			ref := refB.String()
+			for _, i := range bucket[1:] {
+				otherB := &strings.Builder{}
+				poleOther := ps.Poles[i]
+				json.NewEncoder(otherB).Encode(poleOther)
+				other := otherB.String()
+				if other == ref {
+					t.Logf("poleid:%d #%d doublon de #%d => A supprimer\n", id, i, bucket[0])
+					continue
+				}
+				if poleRef.ExtendedRef() == poleOther.ExtendedRef() {
+					t.Logf("poleid:%d #%d en delta de #%d => A décider\nRef  :%sClone:%s\n", id, i, bucket[0], ref, other)
+				} else {
+					t.Logf("poleid:%d #%d différent de #%d => id a modifier\nRef  :%sClone:%s\n", id, i, bucket[0], ref, other)
+				}
+			}
+		}
+	}
+}
+
+func TestPoleSite_FixOrderedPoleId(t *testing.T) {
+	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	psJsonFile := `000012.json`
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	ps := origPsr.PoleSite
+	sort.Slice(ps.Poles, func(i, j int) bool {
+		return ps.Poles[i].Id < ps.Poles[j].Id
+	})
 	// Persist updated PoleSite
 	err = origPsr.Persist(psDir)
 	if err != nil {

@@ -317,19 +317,11 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) {
 
 	resPoleSite := *ups //shallow copy of updated PoleSite
 	origPoles := make(map[int]*Pole)
-	//maxOrig := -100
-	for i, pole := range ps.Poles {
-		origPoles[i] = pole
-		//if pole.Id > maxOrig {
-		//	maxOrig = pole.Id
-		//}
+	for _, pole := range ps.Poles {
+		origPoles[pole.Id] = pole
 	}
 	updtPoles := []*Pole{}
-	//maxUpdt := -100
 	for _, updtPole := range ups.Poles {
-		//if updtPole.Id > maxUpdt {
-		//	maxUpdt = updtPole.Id
-		//}
 		origPole, exists := origPoles[updtPole.Id]
 		if !exists {
 			// its a new pole => let's add it with new timestamp

@@ -49,7 +49,7 @@ func GetPolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, "could not marshall Polesite. "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Polesite Id %d (%s) returned", psr.Id, psr.Ref), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("Polesite id %d (%s) returned", psr.Id, psr.Ref), http.StatusOK)
 }
 
 func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
