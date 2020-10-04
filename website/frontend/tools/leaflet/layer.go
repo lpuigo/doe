@@ -25,6 +25,7 @@ type TileLayerOptions struct {
 	MaxZoom       int      `js:"maxZoom"`
 	MinNativeZoom int      `js:"minNativeZoom"`
 	MaxNativeZoom int      `js:"maxNativeZoom"`
+	TileSize      int      `js:"tileSize"`
 	Subdomains    []string `js:"subdomains"`
 	ErrorTileURL  string   `js:"errorTileUrl"`
 	ZoomOffset    int      `js:"zoomOffset"`
