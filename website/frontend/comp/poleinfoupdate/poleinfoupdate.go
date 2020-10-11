@@ -106,7 +106,7 @@ const template string = `
 					>
 						<el-table-column
 								label="Ville" prop="Line" sortable :sort-by="['Line']"
-								width="200px" :resizable=true :show-overflow-tooltip=true
+								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
 						<el-table-column v-for="status in GetSummaryStatuses()"
@@ -129,7 +129,7 @@ const template string = `
 					>
 						<el-table-column
 								label="Ville" prop="Line" sortable :sort-by="['Line']"
-								width="200px" :resizable=true :show-overflow-tooltip=true
+								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
 						<el-table-column v-for="poleAction in GetPoleActionColumns()"
@@ -152,16 +152,39 @@ const template string = `
 					>
 						<el-table-column
 								label="Ville" prop="Line" sortable :sort-by="['Line']"
-								width="200px" :resizable=true :show-overflow-tooltip=true
+								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
 						<el-table-column v-for="poleType in GetPoleTypeColumns()"
 								:resizable="true" align="center"
-								:label="poleType" width="100px"
+								:label="poleType" width="97px"
 								sortable :sort-by="SortBy(poleType)"
 						>
 							<template slot-scope="scope">
 								<span>{{scope.row.NbPoles[poleType]}}</span>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-tab-pane>
+				<!-- ================================== Per Pole Item Tab ========================================== -->
+				<el-tab-pane label="Besoin Matériel" lazy=true style="padding: 5px 25px;">
+					<el-table
+							:data="summaryPoleItemInfos"
+							stripe size="mini" show-summary :summary-method="SummaryPoleItemTotal"
+							:default-sort = "{prop: 'Line', order: 'ascending'}"
+					>
+						<el-table-column
+								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								width="160px" :resizable=true :show-overflow-tooltip=true
+						></el-table-column>
+		
+						<el-table-column v-for="poleItem in GetPoleItemColumns()"
+								:resizable="true" align="center"
+								:label="poleItem" width="120px"
+								sortable :sort-by="SortBy(poleItem)"
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.NbPoles[poleItem]}}</span>
 							</template>
 						</el-table-column>
 					</el-table>
@@ -212,6 +235,14 @@ func componentOptions() []hvue.ComponentOption {
 			pium.PoleTypeCols = summer.GetCalcColumns()
 			return summer.SummaryDatas
 		}),
+		hvue.Computed("summaryPoleItemInfos", func(vm *hvue.VM) interface{} {
+			pium := PoleInfoUpdateModelFromJS(vm.Object)
+			summer := NewSummarizer()
+			summer.GetColumn = GetPoleItem
+			summer.Calc(pium.Polesite.Poles)
+			pium.PoleItemCols = summer.GetCalcColumns()
+			return summer.SummaryDatas
+		}),
 	}
 }
 
@@ -233,6 +264,7 @@ type PoleInfoUpdateModel struct {
 	StateCols      []string `js:"StateCols"`
 	PoleTypeCols   []string `js:"PoleTypeCols"`
 	PoleActionCols []string `js:"PoleActionCols"`
+	PoleItemCols   []string `js:"PoleItemCols"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -252,6 +284,7 @@ func NewPoleInfoUpdateModel(vm *hvue.VM) *PoleInfoUpdateModel {
 	pium.StateCols = []string{}
 	pium.PoleTypeCols = []string{}
 	pium.PoleActionCols = []string{}
+	pium.PoleItemCols = []string{}
 
 	return pium
 }
@@ -334,6 +367,11 @@ func (pium *PoleInfoUpdateModel) GetPoleActionColumns(vm *hvue.VM) []string {
 	return pium.PoleActionCols
 }
 
+func (pium *PoleInfoUpdateModel) GetPoleItemColumns(vm *hvue.VM) []string {
+	pium = PoleInfoUpdateModelFromJS(vm.Object)
+	return pium.PoleItemCols
+}
+
 func (pium *PoleInfoUpdateModel) StateName(status string) string {
 	return polesite.PoleStateLabel(status)
 }
@@ -377,4 +415,9 @@ func (pium *PoleInfoUpdateModel) SummaryPoleTypeTotal(vm *hvue.VM, param *js.Obj
 func (pium *PoleInfoUpdateModel) SummaryPoleActionTotal(vm *hvue.VM, param *js.Object) []string {
 	pium = PoleInfoUpdateModelFromJS(vm.Object)
 	return pium.summaryTotal(vm, param, pium.PoleActionCols)
+}
+
+func (pium *PoleInfoUpdateModel) SummaryPoleItemTotal(vm *hvue.VM, param *js.Object) []string {
+	pium = PoleInfoUpdateModelFromJS(vm.Object)
+	return pium.summaryTotal(vm, param, pium.PoleItemCols)
 }

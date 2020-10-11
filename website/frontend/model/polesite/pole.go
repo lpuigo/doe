@@ -392,6 +392,9 @@ func (p *Pole) HasProduct(prd string) bool {
 }
 
 func (p *Pole) IsDoublePole() bool {
+	if !p.HasProduct(poleconst.ProductCreation) {
+		return false
+	}
 	for _, product := range p.Product {
 		if !(product != poleconst.ProductCouple && product != poleconst.ProductMoise) {
 			return true

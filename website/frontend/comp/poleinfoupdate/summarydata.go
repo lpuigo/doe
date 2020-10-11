@@ -35,7 +35,7 @@ type Summarizer struct {
 	SummaryDatas []*SummaryData `js:"SummaryDatas"`
 
 	GetLine   func(*polesite.Pole) string
-	GetColumn func(*polesite.Pole) (string, int)
+	GetColumn func(*polesite.Pole) ([]string, []int)
 }
 
 func NewSummarizer() *Summarizer {
@@ -46,12 +46,12 @@ func NewSummarizer() *Summarizer {
 	s.GetLine = func(pole *polesite.Pole) string {
 		return pole.City
 	}
-	s.GetColumn = func(pole *polesite.Pole) (string, int) {
+	s.GetColumn = func(pole *polesite.Pole) ([]string, []int) {
 		state := pole.State
 		if state == poleconst.StateDenseNetwork || state == poleconst.StateNoAccess {
 			state = poleconst.StateToDo
 		}
-		return state, 1
+		return []string{state}, []int{1}
 	}
 	return s
 }
@@ -60,38 +60,94 @@ const (
 	IgnoreColumn string = "Ignore"
 )
 
-func GetPoleType(pole *polesite.Pole) (string, int) {
+func GetPoleType(pole *polesite.Pole) ([]string, []int) {
 	if !pole.IsToBeDone() {
-		return IgnoreColumn, 0
+		return []string{IgnoreColumn}, []int{0}
 	}
 	height := strconv.Itoa(pole.Height)
-	nb := 1
-	if pole.IsDoublePole() {
+	crea := pole.HasProduct(poleconst.ProductCreation)
+	coupl := pole.HasProduct(poleconst.ProductCouple)
+	moise := pole.HasProduct(poleconst.ProductMoise)
+	nb := 0
+	if crea || coupl || moise {
+		nb = 1
+	}
+	if crea && (coupl || moise) {
 		nb = 2
 	}
+	if nb == 0 {
+		return []string{IgnoreColumn}, []int{0}
+	}
+	poles := []string{}
+	nbs := []int{}
 	switch pole.Material {
 	case "Bois":
-		return "BS " + height, nb
+		poles = append(poles, "BS"+height)
+		nbs = append(nbs, nb)
 	case "Métal":
-		return "MS " + height, nb
+		poles = append(poles, "MS"+height)
+		nbs = append(nbs, nb)
 	case "Métal Renforcé":
-		return "MF " + height, nb
+		poles = append(poles, "MF"+height)
+		nbs = append(nbs, nb)
 	case "Composite":
-		return "FS " + height, nb
+		poles = append(poles, "FS"+height)
+		nbs = append(nbs, nb)
 	case "Composite Renforcé":
-		return "FR " + height, nb
+		poles = append(poles, "FR"+height)
+		nbs = append(nbs, nb)
 	default:
-		mat := pole.Material
-		if mat == "" {
-			mat = "A définir "
+		materl := pole.Material
+		if materl == "" {
+			materl = "A définir "
 		}
-		return mat + height, nb
+		poles = append(poles, materl+height)
+		nbs = append(nbs, nb)
 	}
+	return poles, nbs
 }
 
-func GetPoleAction(pole *polesite.Pole) (string, int) {
+func GetPoleItem(pole *polesite.Pole) ([]string, []int) {
 	if !pole.IsToBeDone() {
-		return IgnoreColumn, 0
+		return []string{IgnoreColumn}, []int{0}
+	}
+	coupl := pole.HasProduct(poleconst.ProductCouple)
+	moise := pole.HasProduct(poleconst.ProductMoise)
+	mat := ""
+	switch pole.Material {
+	case "Bois":
+		mat = "Bois"
+	case "Métal":
+		mat = "Mét."
+	case "Métal Renforcé":
+		mat = "Mét."
+	case "Composite":
+		mat = "Comp."
+	case "Composite Renforcé":
+		mat = "Comp."
+	default:
+		mat = "à définir"
+	}
+	poles := []string{}
+	nbs := []int{}
+	if pole.HasProduct(poleconst.ProductHauban) {
+		poles = append(poles, "Hauban "+mat)
+		nbs = append(nbs, 1)
+	}
+	if moise {
+		poles = append(poles, "Mois. "+mat)
+		nbs = append(nbs, 1)
+	}
+	if coupl {
+		poles = append(poles, "Entr. "+mat)
+		nbs = append(nbs, 1)
+	}
+	return poles, nbs
+}
+
+func GetPoleAction(pole *polesite.Pole) ([]string, []int) {
+	if !pole.IsToBeDone() {
+		return []string{IgnoreColumn}, []int{0}
 	}
 	nb := 1
 	create := pole.HasProduct(poleconst.ProductCreation)
@@ -101,25 +157,27 @@ func GetPoleAction(pole *polesite.Pole) (string, int) {
 	haub := pole.HasProduct(poleconst.ProductHauban)
 	switch {
 	case repl && create && couple && haub:
-		return "Rpl. Couplé Haubané", nb
+		return []string{"Rempl. Couplé Haub."}, []int{nb}
 	case repl && create && couple:
-		return "Rempl. Couplé", nb
+		return []string{"Rempl. Couplé"}, []int{nb}
 	case repl && create && moise:
-		return "Rempl. Moisé", nb
+		return []string{"Rempl. Moisé"}, []int{nb}
 	case repl && create:
-		return "Remplacement", nb
+		return []string{"Remplacement"}, []int{nb}
 	case create && couple && haub:
-		return "Impl. Couplé Haubané", nb
+		return []string{"Impl. Couplé Haub."}, []int{nb}
 	case create && couple:
-		return "Impl. Couplé", nb
+		return []string{"Impl. Couplé"}, []int{nb}
 	case create && moise:
-		return "Impl. Moisé", nb
+		return []string{"Impl. Moisé"}, []int{nb}
 	case create:
-		return "Implantation", nb
+		return []string{"Implantation"}, []int{nb}
+	case couple:
+		return []string{"Renf. Couplé"}, []int{nb}
 	case haub:
-		return "Renf. Hauban", nb
+		return []string{"Renf. Hauban"}, []int{nb}
 	default:
-		return "A définir", nb
+		return []string{"A définir"}, []int{nb}
 	}
 }
 
@@ -142,19 +200,18 @@ func (s *Summarizer) Calc(poles []*polesite.Pole) {
 
 	for _, pole := range poles {
 		line := s.GetLine(pole)
-		//lineSet[line] = true
-		column, amount := s.GetColumn(pole)
-		columnSet[column] = true
-
 		sd, found := summDatas[line]
 		if !found {
 			sd = NewSummaryData(line)
 			summDatas[line] = sd
 		}
-
-		//sd.NbPoles[pole.State]++
-		nb := sd.Get("NbPoles").Get(column).Int()
-		sd.Get("NbPoles").Set(column, nb+amount)
+		columns, amounts := s.GetColumn(pole)
+		for i, column := range columns {
+			columnSet[column] = true
+			//sd.NbPoles[pole.State]++
+			nb := sd.Get("NbPoles").Get(column).Int()
+			sd.Get("NbPoles").Set(column, nb+amounts[i])
+		}
 	}
 
 	for column, _ := range columnSet {
