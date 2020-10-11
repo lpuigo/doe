@@ -191,34 +191,36 @@ func (p *Pole) IsToDo() bool {
 	}
 }
 
-//func (p *Pole) IsDoable() bool {
-//	switch p.State {
-//	case poleconst.StateNotSubmitted:
-//		return false
-//	case poleconst.StateNoGo:
-//		return false
-//	case poleconst.StateDictToDo:
-//		return false
-//	case poleconst.StateDaToDo:
-//		return false
-//	case poleconst.StateDaExpected:
-//		return false
-//	//case poleconst.StatePermissionPending:
-//	//case poleconst.StateToDo:
-//	//case poleconst.StateNoAccess:
-//	//case poleconst.StateDenseNetwork:
-//	//case poleconst.StateHoleDone:
-//	//case poleconst.StateIncident:
-//	case poleconst.StateDone:
-//		return false
-//	case poleconst.StateAttachment:
-//		return false
-//	case poleconst.StateCancelled:
-//		return false
-//	default:
-//		return true
-//	}
-//}
+// IsToBeDone returns true if pole receiver is yet to be done (ie not canceled, or already done)
+func (p *Pole) IsToBeDone() bool {
+	switch p.State {
+	case poleconst.StateNotSubmitted:
+		return false
+	case poleconst.StateNoGo:
+		return false
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
+	//case poleconst.StateToDo:
+	case poleconst.StateNoAccess:
+		return false
+	//case poleconst.StateDenseNetwork:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	case poleconst.StateDone:
+		return false
+	case poleconst.StateAttachment:
+		return false
+	case poleconst.StateCancelled:
+		return false
+	case poleconst.StateDeleted:
+		return false
+	default:
+		return true
+	}
+}
+
 //
 //func (p *Pole) IsSettingUp() bool {
 //	switch p.State {
@@ -383,6 +385,15 @@ func (p *Pole) SetState(state string) {
 func (p *Pole) HasProduct(prd string) bool {
 	for _, product := range p.Product {
 		if product == prd {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Pole) IsDoublePole() bool {
+	for _, product := range p.Product {
+		if !(product != poleconst.ProductCouple && product != poleconst.ProductMoise) {
 			return true
 		}
 	}
