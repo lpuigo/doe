@@ -12,17 +12,17 @@ func NewParserFile(xlsfile string) (*xlsPoleParser, error) {
 	}
 
 	sheet := xlsf.GetSheetName(0)
-	rows, err := xlsf.Rows(sheet)
+	parser, err := newXlsParser(xlsf, sheet)
 	if err != nil {
 		return nil, err
 	}
-	parser := newXlsParser(xlsf, sheet, rows)
 
 	err = parser.ParseHeader()
 	if err != nil {
 		return nil, err
 	}
 
+	parser.PrintColumnNames()
 	return parser, nil
 }
 

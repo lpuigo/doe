@@ -133,11 +133,11 @@ func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 	rec := &PoleRecord{
 		Images: make(map[string]string),
 	}
-	rec.Date = cols[0]    // column A Date
-	rec.Hour = cols[1]    // column B Heure
-	rec.SRO = cols[2]     // column C SRO
-	rec.Ref = cols[3]     // column D Appui
-	rec.Comment = cols[4] // column E Comment
+	rec.Date = cols[0]                              // column A Date
+	rec.Hour = cols[1]                              // column B Heure
+	rec.SRO = cols[2]                               // column C SRO
+	rec.Ref = strings.ReplaceAll(cols[3], "/", "_") // column D Appui
+	rec.Comment = cols[4]                           // column E Comment
 	// column F Latitude
 	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[5], ",", "."), 64)
 	if err != nil {
@@ -151,6 +151,9 @@ func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 	// column I> Image Link
 	for colnum := 8; colnum < len(cols); colnum++ {
 		label := cols[colnum]
+		if label == "" {
+			continue
+		}
 		coord := fmt.Sprintf("%c%d", 'I'+colnum-8, rp.curRow)
 		isLink, link, err := rp.file.GetCellHyperLink(rp.sheet, coord)
 		if !isLink || err != nil {

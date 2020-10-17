@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogeca\Chantier Poteaux\2020-06-15 SRO 67-014\CR\`
-	kizeoXlsExtractName string = `Remplacement_Poteau_Sogeca_20200728`
-	report              string = `2020-07-28 Rapport Remplacement SRO 67-014`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Sogetrel\Alsace 68\2020-10-16\`
+	kizeoXlsExtractName string = `Remplacement_Poteau_Sogetrel_20201016`
+	report              string = `Alsace 68-041`
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
 )
