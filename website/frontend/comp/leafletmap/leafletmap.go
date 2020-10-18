@@ -81,6 +81,8 @@ func (llm *LeafletMap) Init() {
 	llm.ControlInfo = leaflet.NewControlInfo()
 	llm.ControlInfo.AddTo(llm.Map)
 
+	leaflet.NewControlCurrentPos().AddTo(llm.Map)
+
 	llm.SetView(leaflet.NewLatLng(48, 5), 6)
 
 }

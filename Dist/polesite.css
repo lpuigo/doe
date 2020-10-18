@@ -283,3 +283,18 @@ h1 {
     right: 50vw;
     z-index: 500;
 }
+
+/* =====================================================================================================================
+   === Control Current Pos Style
+ */
+
+.control-currentpos {
+    padding: 6px 8px;
+    font: 12px/14px Arial, Helvetica, sans-serif;
+    background: white;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    background-clip: padding-box;
+    cursor: pointer;
+}

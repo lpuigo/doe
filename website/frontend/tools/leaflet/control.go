@@ -1,6 +1,8 @@
 package leaflet
 
-import "github.com/gopherjs/gopherjs/js"
+import (
+	"github.com/gopherjs/gopherjs/js"
+)
 
 // Control is a leaflet Control object: https://leafletjs.com/reference-1.5.0.html#control.
 type Control struct {
@@ -81,4 +83,37 @@ func (ci *ControlInfo) Update(html string) {
 	}
 	L.Get("DomUtil").Call("removeClass", ci.Div, "hidden")
 	ci.Div.Set("innerHTML", html)
+}
+
+// ControlCurrentPos is a Leaflet Control dedicated to get current user position
+type ControlCurrentPos struct {
+	Control
+	Div *js.Object `js:"_div"`
+}
+
+func NewControlCurrentPos() *ControlCurrentPos {
+	opt := js.M{
+		"position": "topleft",
+	}
+	ccp := &ControlCurrentPos{Control: Control{L.Call("control", opt)}}
+	ccp.Div = nil
+	ccp.Set("onAdd", ccp.onAdd)
+	return ccp
+}
+
+func (ccp *ControlCurrentPos) onAdd(m *Map) *js.Object {
+	ccp.Div = L.Get("DomUtil").Call("create", "div", "control-currentpos")
+	ccp.Div.Set("innerHTML", `<div><i class="fas fa-map-marker-alt icon--big"></i></div>`)
+	ccp.Div.Call("addEventListener", "click", func(event *js.Object) {
+		//print("ControlCurrentPos Click")
+		event.Call("stopPropagation")
+		GetCurrentPosition(func(pos *LatLng) {
+			m.SetView(pos, 18)
+		})
+	})
+	return ccp.Get("_div")
+}
+
+func (ccp *ControlCurrentPos) Update(html string) {
+	ccp.Div.Set("innerHTML", "<div><span>Pos</span></div>")
 }
