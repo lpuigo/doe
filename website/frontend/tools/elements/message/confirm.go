@@ -18,6 +18,10 @@ func ConfirmWarning(vm *hvue.VM, msg string, confirm func()) {
 	confirmString(vm, msg, "warning", confirm)
 }
 
+func ConfirmSuccess(vm *hvue.VM, msg string, confirm func()) {
+	confirmString(vm, msg, "success", confirm)
+}
+
 func confirmCallBack(confirm func()) func(string) {
 	return func(action string) {
 		if action == "confirm" {

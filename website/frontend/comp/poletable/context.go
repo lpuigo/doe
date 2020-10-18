@@ -16,6 +16,8 @@ type Context struct {
 	AttachmentRange    []string `js:"attachmentRange"`
 	AttachmentDate     string   `js:"attachmentDate"`
 	AttachmentOverride bool     `js:"attachmentOverride"`
+
+	RefGroupVisible bool `js:"refGroupVisible"`
 }
 
 const None int = -100
@@ -29,6 +31,8 @@ func NewContext(mode string) *Context {
 	c.AttachmentDate = date.TodayAfter(0)
 	c.AttachmentRange = []string{"", ""}
 	c.AttachmentOverride = false
+
+	c.RefGroupVisible = false
 
 	return c
 }

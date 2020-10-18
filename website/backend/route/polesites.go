@@ -1,10 +1,12 @@
 package route
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
@@ -278,4 +280,54 @@ func DictZip(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("Dict Zip Archive produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
+}
+
+// SetPolesiteRefKizeo
+func SetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("SetPolesiteRefKizeo").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+
+	// Parse our multipart form, 30 << 20 specifies a maximum
+	// upload of 30 MB files.
+	if r.ParseMultipartForm(30<<20) != nil {
+		AddError(w, logmsg, "file info missing", http.StatusBadRequest)
+		return
+	}
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		AddError(w, logmsg, "error retrieving the file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(strings.ToUpper(handler.Filename), ".XLSX") {
+		AddError(w, logmsg, "uploaded file is not a XLSx file", http.StatusBadRequest)
+		return
+	}
+
+	kr, err := mgr.Polesites.UpdateKizeoFromXlsxReport(psr, file)
+	if err != nil {
+		AddError(w, logmsg, fmt.Sprintf("error processing Kizeo Xlsx file : %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(kr)
+
+	logmsg.AddInfoResponse(fmt.Sprintf("Kizeo Status updated for Polesite id %d (%s): %d Ok and %d Ko", rpsid, psr.PoleSite.Ref, kr.NbUpdate, len(kr.UnknownRef)), http.StatusOK)
 }

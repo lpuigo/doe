@@ -65,12 +65,20 @@ const template string = `<el-container  style="height: 100%; padding: 0px">
 						</el-tooltip>
 					</el-popover>
 
-					<el-tooltip content="Archivage des groupes finalisés" placement="bottom" effect="light" open-delay="500">
-						<el-button
-							type="warning" plain class="icon" icon="fas fa-folder-minus icon--medium" size="mini"
-							@click="ArchiveRefGroup()"
-						></el-button>
-					</el-tooltip>
+					<el-popover
+							placement="bottom" title="Archivage des groupes finalisés"
+							trigger="click"
+							width="250"
+							v-model="context.refgroupVisible"
+					>
+						<div style="text-align: right; margin: 15px 0px 0px 0px">
+							<el-button size="mini" type="text" @click="context.refgroupVisible = false">Annuler</el-button>
+							<el-button size="mini" type="primary"  @click="ArchiveRefGroup()">Archiver</el-button>
+						</div>
+						<el-tooltip slot="reference" content="Archivage des groupes finalisés" placement="bottom" effect="light" open-delay="500">
+							<el-button type="warning" plain class="icon" icon="fas fa-folder-minus icon--medium" size="mini" :disabled="context.refgroupVisible"></el-button>
+						</el-tooltip>
+					</el-popover>
 				</div>
             </el-col>
 			<el-col :offset="6" :span="8">
@@ -263,4 +271,5 @@ func (ptm *PoleTablesModel) SetAttachments(vm *hvue.VM) {
 func (ptm *PoleTablesModel) ArchiveRefGroup(vm *hvue.VM) {
 	ptm = &PoleTablesModel{Object: vm.Object}
 	vm.Emit("polesite-archive-refsgroup")
+	ptm.Context.RefGroupVisible = false
 }

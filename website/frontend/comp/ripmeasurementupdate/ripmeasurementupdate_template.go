@@ -34,7 +34,7 @@ const template string = `<el-container style="height: 100%">
                                :on-error="UploadError"
                     >
                         <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">Drop Zip file here or <em>click to upload</em></div>
+                        <div class="el-upload__text">Déposez une archive ZIP ici ou <em>cliquez</em></div>
                     </el-upload>
                     <el-button slot="reference" type="primary" size="mini" style="margin-left: 5px">Mesures...</el-button>
                 </el-popover>

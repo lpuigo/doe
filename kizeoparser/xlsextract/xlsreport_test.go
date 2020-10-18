@@ -18,7 +18,7 @@ func TestWriteXlsReport(t *testing.T) {
 }
 
 func TestReadXlsReport(t *testing.T) {
-	recs, err := ReadXlsReport(testXlsReport)
+	recs, err := ReadXlsReportFromFile(testXlsReport)
 	if err != nil {
 		t.Fatalf("ReadXlsReport returned unexpected: %s\n", err.Error())
 	}

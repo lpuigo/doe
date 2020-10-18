@@ -111,24 +111,50 @@
 
                 <span></span>
 
-                <el-popover placement="bottom" width="260" title="Outils :"
+                <el-popover placement="bottom" width="360" title="Outils :"
                             v-model="VisibleTools">
                     <div>
                         <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive des DICT
                         </el-link>
                     </div>
                     <div>
-                        <el-link icon="fas fa-file-excel icon--left" :href="RefExportXlsURL()">Export XLSx Références</el-link>
+                        <el-link icon="fas fa-file-excel icon--left" :href="RefExportXlsURL()">Export XLSx Références
+                        </el-link>
                     </div>
                     <div>
                         <el-link icon="fas fa-file-excel icon--left" :href="ProgressXlsURL()">Avancement XLSx</el-link>
+                    </div>
+                    <div style="margin-top: 8px">Mise à jour des Kizeo:</div>
+                    <el-upload v-if="!KizeoComplete"
+                               :action="KizeoReportURL()"
+                               drag
+                               style="width: 200px"
+                               :before-upload="BeforeUpload"
+                               :on-success="UploadSuccess"
+                               :on-error="UploadError"
+                    >
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">Déposez un rapport Xlsx Kizeo ici ou <em>cliquez</em></div>
+                    </el-upload>
+                    <div v-else style="margin-left: 10px">
+                        <div>
+                            <span style="color: #1f991f;margin-right: 10px">{{KizeoReport.NbUpdate}} mises à jour effectuées</span>
+                            <el-button class="icon" icon="fas fa-images icon--medium" size="mini"
+                                       @click="KizeoComplete = false"></el-button>
+                        </div>
+                        <div v-if="KizeoReport.UnknownRef.length > 0">
+                            <div style="color: #dd781a">{{KizeoReport.UnknownRef.length}} références non reconnues:
+                            </div>
+                            <div v-for="item in GetUnmatchingKizeoRefs(10)" style="margin-left: 8px">{{item}}</div>
+                        </div>
                     </div>
                     <div style="text-align: right; margin: 0; margin-top: 10px">
                         <el-button type="primary" plain size="mini" @click="VisibleTools = false">Fermer</el-button>
                     </div>
                     <el-tooltip slot="reference" content="Outils" placement="bottom" effect="light" open-delay="500">
                         <el-button class="icon" icon="fas fa-toolbox icon--big" size="mini"
-                                   :disabled="IsDirty"></el-button>
+                                   :disabled="!VisibleTools&&IsDirty">
+                        </el-button>
                     </el-tooltip>
                 </el-popover>
 
@@ -198,6 +224,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.5"></script>
+<script type="text/javascript" src="polesites.js?v=1.6"></script>
 
 </html>

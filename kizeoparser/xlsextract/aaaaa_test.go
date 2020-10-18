@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Sogetrel\Alsace 68\2020-10-16\`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Sogetrel\Alsace 68\test\`
 	kizeoXlsExtractName string = `Remplacement_Poteau_Sogetrel_20201016`
 	report              string = `Alsace 68-041`
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
@@ -29,7 +29,7 @@ func Test_CreateReport(t *testing.T) {
 }
 
 func Test_ExtractReport(t *testing.T) {
-	recs, err := ReadXlsReport(kizeoXlsReportFile)
+	recs, err := ReadXlsReportFromFile(kizeoXlsReportFile)
 	if err != nil {
 		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
 	}

@@ -57,7 +57,8 @@ func (pr *PoleRecord) GetImage(dir, label string) error {
 	imgtype := resp.Header.Get("Content-Type")
 	_ = imgtype // TODO Check img type for "image/jpeg"
 
-	imgName := fmt.Sprintf("%s %s.jpg", pr.Ref, label)
+	ref := safeName(pr.Ref)
+	imgName := fmt.Sprintf("%s %s.jpg", ref, label)
 
 	imgFullName := filepath.Join(dir, imgName)
 	imgFile, err := os.Create(imgFullName)
@@ -98,7 +99,7 @@ func (pr *PoleRecord) WriteComment(dir string) error {
 		return nil
 	}
 
-	commentName := fmt.Sprintf("%s %s.txt", pr.Ref, "Commentaire")
+	commentName := fmt.Sprintf("%s %s.txt", safeName(pr.Ref), "Commentaire")
 	commentFullName := filepath.Join(dir, commentName)
 	commentFile, err := os.Create(commentFullName)
 	if err != nil {
@@ -110,4 +111,12 @@ func (pr *PoleRecord) WriteComment(dir string) error {
 		return fmt.Errorf("could not write to comment file '%s': %s\n", commentFullName, err.Error())
 	}
 	return nil
+}
+
+func safeName(name string) string {
+	name = strings.ReplaceAll(name, "/", "_")
+	name = strings.ReplaceAll(name, ":", "")
+	name = strings.ReplaceAll(name, "  ", " ")
+	name = strings.Trim(name, " \t")
+	return name
 }

@@ -20,5 +20,9 @@ func NotifySuccess(vm *hvue.VM, title, msg string) {
 }
 
 func NotifyWarning(vm *hvue.VM, title, msg string) {
-	notify(vm, "warning", title, msg, 5500)
+	notify(vm, "warning", title, msg, 0)
+}
+
+func NotifyError(vm *hvue.VM, title, msg string) {
+	notify(vm, "error", title, msg, 5500)
 }

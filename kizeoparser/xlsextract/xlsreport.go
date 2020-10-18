@@ -3,6 +3,7 @@ package xlsextract
 import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"io"
 	"strconv"
 	"strings"
 )
@@ -36,11 +37,23 @@ func WriteXlsReport(file string, recs []*PoleRecord) error {
 	return nil
 }
 
-func ReadXlsReport(file string) ([]*PoleRecord, error) {
+func ReadXlsReportFromFile(file string) ([]*PoleRecord, error) {
 	xlsFile, err := excelize.OpenFile(file)
 	if err != nil {
 		return nil, err
 	}
+	return readXlsReport(xlsFile)
+}
+
+func ReadXlsReport(file io.Reader) ([]*PoleRecord, error) {
+	xlsFile, err := excelize.OpenReader(file)
+	if err != nil {
+		return nil, err
+	}
+	return readXlsReport(xlsFile)
+}
+
+func readXlsReport(xlsFile *excelize.File) ([]*PoleRecord, error) {
 	rp := reportParser{
 		file:   xlsFile,
 		sheet:  xlsFile.GetSheetName(0),
@@ -133,11 +146,11 @@ func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 	rec := &PoleRecord{
 		Images: make(map[string]string),
 	}
-	rec.Date = cols[0]                              // column A Date
-	rec.Hour = cols[1]                              // column B Heure
-	rec.SRO = cols[2]                               // column C SRO
-	rec.Ref = strings.ReplaceAll(cols[3], "/", "_") // column D Appui
-	rec.Comment = cols[4]                           // column E Comment
+	rec.Date = cols[0]    // column A Date
+	rec.Hour = cols[1]    // column B Heure
+	rec.SRO = cols[2]     // column C SRO
+	rec.Ref = cols[3]     // column D Appui
+	rec.Comment = cols[4] // column E Comment
 	// column F Latitude
 	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[5], ",", "."), 64)
 	if err != nil {

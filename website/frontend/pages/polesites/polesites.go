@@ -100,6 +100,8 @@ type MainPageModel struct {
 	SearchAddressMsg   string              `js:"SearchAddressMsg"`
 	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
 	VisibleTools       bool                `js:"VisibleTools"`
+	KizeoComplete      bool                `js:"KizeoComplete"`
+	kizeoReport        *kizeoReport        `js:"KizeoReport"`
 	Reference          string              `js:"Reference"`
 	Dirty              bool                `js:"Dirty"`
 
@@ -124,6 +126,8 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false
 	mpm.VisibleTools = false
+	mpm.KizeoComplete = false
+	mpm.kizeoReport = NewKizeoReport()
 	mpm.Reference = ""
 	mpm.Dirty = false
 	//mpm.ColumnSelector = poletable.DefaultColumnSelector()
@@ -214,6 +218,10 @@ func (mpm *MainPageModel) ProgressXlsURL() string {
 
 func (mpm *MainPageModel) RefExportXlsURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/refexport"
+}
+
+func (mpm *MainPageModel) KizeoReportURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/kizeo"
 }
 
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
@@ -484,6 +492,63 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 		return
 	}
 	mpm.ApplyFilterOnMap()
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Kizeo Upload Methods
+
+type kizeoReport struct {
+	*js.Object
+	NbUpdate   int      `js:"NbUpdate"`
+	UnknownRef []string `js:"UnknownRef"`
+}
+
+func NewKizeoReport() *kizeoReport {
+	return &kizeoReport{Object: tools.O()}
+}
+
+func (mpm *MainPageModel) UploadError(vm *hvue.VM, err, file *js.Object) {
+	mpm = &MainPageModel{Object: vm.Object}
+	mpm.VisibleTools = false
+	mpm.KizeoComplete = false
+	message.ErrorStr(vm, err.String(), true)
+}
+
+func (mpm *MainPageModel) UploadSuccess(vm *hvue.VM, response, file *js.Object) {
+	mpm = &MainPageModel{Object: vm.Object}
+	mpm.kizeoReport = &kizeoReport{Object: response}
+	if mpm.kizeoReport.NbUpdate == 0 {
+		message.WarningStr(vm, "Kizeo : aucune correspondance trouvée")
+		return
+	}
+	mpm.KizeoComplete = true
+	mpm.LoadPolesite(false)
+}
+
+func (mpm *MainPageModel) GetUnmatchingKizeoRefs(max int) []string {
+	nbKo := len(mpm.kizeoReport.UnknownRef)
+	nbKoExemples := nbKo
+	offset := 0
+	if nbKo > max {
+		nbKoExemples = max
+		offset = 1
+	}
+	res := make([]string, nbKoExemples)
+	for i := 0; i < nbKoExemples-offset; i++ {
+		res[i] = mpm.kizeoReport.UnknownRef[i]
+	}
+	if nbKoExemples < nbKo {
+		res[nbKoExemples-1] = "..."
+	}
+	return res
+}
+
+func (mpm *MainPageModel) BeforeUpload(vm *hvue.VM, file *js.Object) bool {
+	if file.Get("type").String() != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" {
+		message.ErrorStr(vm, "Le fichier '"+file.Get("name").String()+"' n'est pas un document Xlsx", false)
+		return false
+	}
+	return true
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
