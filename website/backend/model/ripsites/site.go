@@ -282,6 +282,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Ite
 				blocked,
 				false,
 			)
+			item.StartDate = pulling.State.DateStart
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
 		}
@@ -307,6 +308,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Ite
 				blocked,
 				false,
 			)
+			item.StartDate = pulling.State.DateStart
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
 		}
@@ -332,6 +334,7 @@ func (s *Site) itemizePullings(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Ite
 				blocked,
 				false,
 			)
+			item.StartDate = pulling.State.DateStart
 			item.Actors = pulling.State.Actors
 			res = append(res, item)
 		}
@@ -399,11 +402,13 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.It
 		}
 
 		item := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", mainArticle, qty1, qty1, todo, done, blocked, false)
+		item.StartDate = junction.State.DateStart
 		item.Actors = junction.State.Actors
 		res = append(res, item)
 
 		if optArticle != nil {
 			item2 := items.NewItem(s.Client, s.Ref, activityJunction, junction.NodeName, info, junction.State.DateEnd, "", optArticle, qty2, qty2, todo, done, blocked, false)
+			item2.StartDate = junction.State.DateStart
 			item2.Actors = junction.State.Actors
 			res = append(res, item2)
 		}
@@ -436,6 +441,7 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, doneOnly bool) ([]*items
 		qty2 := measurement.NbFiber
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
 		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done, blocked, false)
+		item.StartDate = measurement.State.DateStart
 		item.Actors = measurement.State.Actors
 		res = append(res, item)
 	}

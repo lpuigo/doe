@@ -141,7 +141,7 @@ func GetRipsitesActorsActivity(mgr *mgr.Manager, w http.ResponseWriter, r *http.
 	freq := vars["freq"]
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fmt.Sprintf("RipsiteActors_%s.xlsx", freq)))
-	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Type", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 	err := mgr.GetRipsitesActorsActivity(w, freq)
 	if err != nil {

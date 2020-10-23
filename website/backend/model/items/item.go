@@ -12,6 +12,7 @@ type Item struct {
 	Name         string // PTxxx, Cablezzz, ...
 	Info         string // BoxType + nbFO ...
 	Date         string
+	StartDate    string
 	AttachDate   string
 	Team         string
 	Comment      string
@@ -34,6 +35,7 @@ func NewItem(client, site, activity, name, info, date, team string, chapter *bpu
 		Name:         name,
 		Info:         info,
 		Date:         date,
+		StartDate:    date,
 		Team:         team,
 		Actors:       []string{},
 		Article:      chapter,
@@ -55,6 +57,7 @@ func (i *Item) Clone() *Item {
 		Name:         i.Name,
 		Info:         i.Info,
 		Date:         i.Date,
+		StartDate:    i.StartDate,
 		AttachDate:   i.AttachDate,
 		Team:         i.Team,
 		Actors:       i.Actors[:],

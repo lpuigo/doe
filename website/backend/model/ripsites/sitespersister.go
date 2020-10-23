@@ -276,21 +276,17 @@ func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsS
 func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg, isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
 
 	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, false)
+	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, true)
 	if err != nil {
 		return nil, err
 	}
 
 	res := []*items.Item{}
 	for _, itm := range sitesItems {
-		if !(itm.Todo && itm.Done) {
+		if dateFor(itm.StartDate) < firstDate {
 			continue
 		}
-		if dateFor(itm.Date) < firstDate {
-			continue
-		}
-		itm.Date = dateFor(itm.Date)
-		res = append(res, itm.SplitByActors()...)
+		res = append(res, itm)
 	}
 	return res, nil
 }

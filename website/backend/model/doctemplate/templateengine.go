@@ -269,6 +269,8 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, 15), item.Comment)
 
 	}
+	// Add Item Calendar
+	AddItemsCalendar(xf, its, actorById)
 	xf.UpdateLinkedValue()
 	return xf.Write(w)
 }
