@@ -390,7 +390,7 @@ func (s *Site) itemizeJunctions(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.It
 			mainArticle, optArticle, e = getJunctionBoxArticles(currentBpu, activityJunction, node.Type, node.BoxType)
 			qty1, qty2 = 1, nbSplice
 			if e != nil {
-				return nil, fmt.Errorf("shit hit the fence: %s", e.Error())
+				return nil, fmt.Errorf("could not get box article: %s", e.Error())
 			}
 		default:
 			return nil, fmt.Errorf("unexpected box category '%s'", node.Type)
@@ -486,7 +486,11 @@ func getJunctionBoxArticles(currentBpu *bpu.Bpu, activity, category, boxType str
 			return
 		}
 	case catJuncPBO:
-		boxArticle, err = catArticles.GetArticleFor(category+" "+box.Usage, box.Size)
+		extCategory := category
+		if box.Usage != "" {
+			extCategory += " " + box.Usage
+		}
+		boxArticle, err = catArticles.GetArticleFor(extCategory, box.Size)
 		if err != nil {
 			return
 		}
