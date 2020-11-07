@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2020-09-29 SaintZacharie & Trans-en-Provence\Polesite 2.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-09-15 Meuse\2020-10-27 complément Poteaux\Polesite test.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -37,6 +37,8 @@ func TestPolesiteFromXLS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
+
+	PoleSiteConsistency(t, ps)
 
 	xfr, err := os.Create(filepath.Join(path, outFile))
 	if err != nil {
@@ -64,9 +66,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 // TestPoleSite_AppendXlsToJson : add a XLSx PoleSite description to an already providied PoleSite JSON file.
 // New Poles are appended next to already existing ones
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2020-09-29 SaintZacharie & Trans-en-Provence`
-	psXlsfile := `Polesite.xlsx`
-	psJsonFile := `000044.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-09-15 Meuse\2020-10-27 complément Poteaux`
+	psXlsfile := `Polesite 55.xlsx`
+	psJsonFile := `000042.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)
@@ -87,6 +89,8 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 
 	// append new Poles to original PoleSiteRecord
 	origPsr.AppendPolesFrom(newPs)
+
+	PoleSiteConsistency(t, origPsr.PoleSite)
 
 	err = os.Rename(origPsrFile, origPsrFile+".bak")
 	if err != nil {
@@ -212,6 +216,15 @@ func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
 
 // =====================================================================================================================
 // Utilitary Test functions (PoleSite Fixing) ==========================================================================
+func PoleSiteConsistency(t *testing.T, ps *PoleSite) {
+	consistencyMsgs := ps.CheckPoleSiteConsistency()
+	if len(consistencyMsgs) > 0 {
+		for _, msg := range consistencyMsgs {
+			t.Logf("%s", msg.String())
+		}
+		t.Fatalf("Consistency Check failed")
+	}
+}
 
 func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
@@ -247,7 +260,7 @@ func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
 
 func TestPoleSite_DetectDuplicatedId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	psJsonFile := `000012.json`
+	psJsonFile := `000011.json`
 	origPsrFile := filepath.Join(psDir, psJsonFile)
 
 	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
@@ -298,7 +311,7 @@ func TestPoleSite_DetectDuplicatedId(t *testing.T) {
 
 func TestPoleSite_FixOrderedPoleId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	psJsonFile := `000012.json`
+	psJsonFile := `000011.json`
 	origPsrFile := filepath.Join(psDir, psJsonFile)
 
 	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)

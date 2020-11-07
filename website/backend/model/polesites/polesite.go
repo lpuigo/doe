@@ -3,16 +3,17 @@ package polesites
 import (
 	"archive/zip"
 	"fmt"
+	"io"
+	"path/filepath"
+	"sort"
+	"strings"
+
 	"github.com/lpuig/ewin/doe/kizeoparser/xlsextract"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
-	"io"
-	"path/filepath"
-	"sort"
-	"strings"
 )
 
 type PoleSite struct {
@@ -388,4 +389,122 @@ func (ps *PoleSite) UpdateFromKizeoPoleRecords(prs []*xlsextract.PoleRecord) *Ki
 	}
 
 	return report
+}
+
+// PoleSite Consistency Control
+
+type ConsistencyMsg struct {
+	Category string
+	Msg      string
+	Poles    []*Pole
+}
+
+func (m ConsistencyMsg) String() string {
+	res := m.Category
+	res += ":" + m.Msg + "\n"
+	for _, pole := range m.Poles {
+		res += fmt.Sprintf("\tPole (%3d) %s : %s\n", pole.Id, pole.ExtendedRef(), pole.State)
+	}
+
+	return res
+}
+
+func (ps *PoleSite) CheckPoleSiteConsistency() []*ConsistencyMsg {
+	res := []*ConsistencyMsg{}
+	res = append(res, ps.checkPoleId()...)
+	res = append(res, ps.checkDuplicatedRef()...)
+	res = append(res, ps.checkDuplicatedLocation(100000)...)
+	return res
+}
+
+func (ps *PoleSite) checkPoleId() []*ConsistencyMsg {
+	res := []*ConsistencyMsg{}
+	if len(ps.Poles) <= 1 {
+		return res
+	}
+	sort.Slice(ps.Poles, func(i, j int) bool {
+		return ps.Poles[i].Id < ps.Poles[j].Id
+	})
+
+	curId := ps.Poles[0].Id
+	for numPole, pole := range ps.Poles[1:] {
+		if pole.Id == curId {
+			res = append(res, &ConsistencyMsg{
+				Category: "PoleId",
+				Msg:      "Duplicated Pole Id",
+				Poles:    []*Pole{pole, ps.Poles[numPole]}, // add current and previous pole
+			})
+		}
+		curId = pole.Id
+	}
+	return res
+}
+
+func (ps *PoleSite) checkDuplicatedRef() []*ConsistencyMsg {
+	res := []*ConsistencyMsg{}
+	refDict := make(map[string][]*Pole)
+	duplicateFound := false
+	for _, pole := range ps.Poles {
+		ref := pole.ExtendedRef()
+		if refDict[ref] == nil {
+			refDict[ref] = []*Pole{pole}
+		} else {
+			refDict[ref] = append(refDict[ref], pole)
+			duplicateFound = true
+		}
+	}
+	if !duplicateFound {
+		return res
+	}
+	refs := []string{}
+	for ref, poles := range refDict {
+		if len(poles) < 2 {
+			continue
+		}
+		refs = append(refs, ref)
+	}
+	sort.Strings(refs)
+	for _, ref := range refs {
+		res = append(res, &ConsistencyMsg{
+			Category: "Ref",
+			Msg:      "Duplicated Pole Ref: " + ref,
+			Poles:    refDict[ref],
+		})
+	}
+	return res
+}
+
+func (ps *PoleSite) checkDuplicatedLocation(prec float64) []*ConsistencyMsg {
+	res := []*ConsistencyMsg{}
+	type geoFence struct {
+		lat, long int
+	}
+	posDict := make(map[geoFence][]*Pole)
+	duplicateFound := false
+	for _, pole := range ps.Poles {
+		geofence := geoFence{
+			lat:  int(pole.Lat * prec),
+			long: int(pole.Long * prec),
+		}
+		if posDict[geofence] == nil {
+			posDict[geofence] = []*Pole{pole}
+		} else {
+			posDict[geofence] = append(posDict[geofence], pole)
+			duplicateFound = true
+		}
+	}
+	if !duplicateFound {
+		return res
+	}
+	for _, poles := range posDict {
+		if len(poles) < 2 {
+			continue
+		}
+		res = append(res, &ConsistencyMsg{
+			Category: "Location",
+			Msg:      "Duplicated Pole Location",
+			Poles:    poles,
+		})
+	}
+	return res
 }
