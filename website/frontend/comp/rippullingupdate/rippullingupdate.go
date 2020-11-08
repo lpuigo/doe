@@ -1,6 +1,9 @@
 package rippullingupdate
 
 import (
+	"strings"
+	"time"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingdistinfo"
@@ -9,7 +12,6 @@ import (
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
-	"strings"
 )
 
 func RegisterComponent() hvue.ComponentOption {
@@ -49,6 +51,7 @@ type RipPullingUpdateModel struct {
 	User       *fm.User `js:"user"`
 	Filter     string   `js:"filter"`
 	FilterType string   `js:"filtertype"`
+	SizeLimit  int      `js:"SizeLimit"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -61,6 +64,7 @@ func NewRipPullingUpdateModel(vm *hvue.VM) *RipPullingUpdateModel {
 	rpum.User = nil
 	rpum.Filter = ""
 	rpum.FilterType = ripconst.FilterValueAll
+	rpum.SetSizeLimit()
 	return rpum
 }
 
@@ -70,7 +74,7 @@ func RipPullingUpdateModelFromJS(o *js.Object) *RipPullingUpdateModel {
 
 func (rpum *RipPullingUpdateModel) GetFilteredPullings() []*fmrip.Pulling {
 	if rpum.FilterType == ripconst.FilterValueAll && rpum.Filter == "" {
-		return rpum.Ripsite.Pullings
+		return rpum.GetSizeLimitedResult(rpum.Ripsite.Pullings)
 	}
 	res := []*fmrip.Pulling{}
 	expected := strings.ToUpper(rpum.Filter)
@@ -87,7 +91,7 @@ func (rpum *RipPullingUpdateModel) GetFilteredPullings() []*fmrip.Pulling {
 			res = append(res, pulling)
 		}
 	}
-	return res
+	return rpum.GetSizeLimitedResult(res)
 }
 
 func (rpum *RipPullingUpdateModel) TableRowClassName(rowInfo *js.Object) string {
@@ -97,6 +101,14 @@ func (rpum *RipPullingUpdateModel) TableRowClassName(rowInfo *js.Object) string 
 
 func (rpum *RipPullingUpdateModel) GetFirstPullingChunk(pulling *fmrip.Pulling) *fmrip.PullingChunk {
 	return pulling.Chuncks[0]
+}
+
+func (rpum *RipPullingUpdateModel) GetPullingTypeClass(pulling *fmrip.Pulling) string {
+	_, _, _, aerial, building := pulling.GetDists()
+	if aerial+building > 0 {
+		return "pulling-aerial"
+	}
+	return ""
 }
 
 func (rpum *RipPullingUpdateModel) GetLastPullingChunk(pulling *fmrip.Pulling) *fmrip.PullingChunk {
@@ -116,4 +128,34 @@ func (rpum *RipPullingUpdateModel) GetNode(vm *hvue.VM, nodeName string) *fmrip.
 		return fmrip.NewNode()
 	}
 	return node
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Size Related Methods
+
+const (
+	sizeLimitDefault int = 15
+	sizeLimitTimer       = 200
+)
+
+func (rpum *RipPullingUpdateModel) GetSizeLimitedResult(res []*fmrip.Pulling) []*fmrip.Pulling {
+	if len(res) == rpum.SizeLimit {
+		return res
+	}
+	if len(res) > sizeLimitDefault {
+		rpum.ResetSizeLimit(len(res))
+		return res[:sizeLimitDefault]
+	}
+	return res
+}
+
+func (rpum *RipPullingUpdateModel) SetSizeLimit() {
+	rpum.SizeLimit = -1
+}
+
+func (rpum *RipPullingUpdateModel) ResetSizeLimit(size int) {
+	go func() {
+		time.Sleep(sizeLimitTimer * time.Millisecond)
+		rpum.SizeLimit = size
+	}()
 }

@@ -200,6 +200,15 @@ func (rjum *RipJunctionUpdateModel) GetNodeType(vm *hvue.VM, junction *fmrip.Jun
 	return node.BoxType
 }
 
+func (rjum *RipJunctionUpdateModel) GetNodeTypeClass(vm *hvue.VM, junction *fmrip.Junction) string {
+	rjum = RipJunctionUpdateModelFromJS(vm.Object)
+	node := rjum.Ripsite.Nodes[junction.NodeName]
+	if node.Type == "PBO" {
+		return "pbo-node"
+	}
+	return ""
+}
+
 func (rjum *RipJunctionUpdateModel) GetTronconDesc(vm *hvue.VM, junction *fmrip.Junction) string {
 	rjum = RipJunctionUpdateModelFromJS(vm.Object)
 	node := rjum.Ripsite.Nodes[junction.NodeName]

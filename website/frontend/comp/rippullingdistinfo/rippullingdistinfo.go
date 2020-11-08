@@ -8,7 +8,15 @@ import (
 )
 
 const (
-	template1 string = `<div>Total: {{total}}, Love: {{Love}}, Souterrain: {{Underground}}, Aérien: {{Aerial}}, Façade: {{Building}}</div>`
+	template1 string = `
+<div>
+	<b v-if="total > 0">Total: {{total}}m </b>
+	<span v-if="Love > 0">Lov.: {{Love}}m </span>
+	<span v-if="Underground > 0">Sout.: {{Underground}}m </span>
+	<span v-if="Aerial > 0" class="pulling-aerial">Aér.: {{Aerial}}m </span>
+	<span v-if="Building > 0" class="pulling-aerial">Faç.: {{Building}}m</span>
+</div>
+`
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +38,22 @@ func componentOptions() []hvue.ComponentOption {
 			rim := &RipPullingDistanceInfoModel{Object: vm.Object}
 			var total int
 			total, rim.Love, rim.Underground, rim.Aerial, rim.Building = rim.Pulling.GetDists()
+			nbval := 0
+			if rim.Love > 0 {
+				nbval++
+			}
+			if rim.Underground > 0 {
+				nbval++
+			}
+			if rim.Aerial > 0 {
+				nbval++
+			}
+			if rim.Building > 0 {
+				nbval++
+			}
+			if nbval == 1 {
+				total = 0
+			}
 			return total
 		}),
 	}

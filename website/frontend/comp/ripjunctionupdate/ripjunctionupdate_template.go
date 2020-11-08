@@ -116,7 +116,7 @@ const template string = `
         <template slot-scope="scope">
 			<div class="header-menu-container">
 				<span>{{GetNodeDesc(scope.row)}}</span>
-				<span>{{GetNodeType(scope.row)}}
+				<span :class="GetNodeTypeClass(scope.row)">{{GetNodeType(scope.row)}}
 					<el-popover placement="bottom" width="400"
 								title="Opérations à réaliser:"
 								trigger="hover"
@@ -137,6 +137,7 @@ const template string = `
 			</div>
         </template>
     </el-table-column>
+
     <el-table-column
             label="Tronçon"
             width="140px" :resizable="true" :show-overflow-tooltip=true
@@ -145,6 +146,7 @@ const template string = `
             <div>{{GetTronconDesc(scope.row)}}</div>
         </template>
     </el-table-column>
+
     <el-table-column
             label="Etat"
     >
