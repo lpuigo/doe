@@ -113,7 +113,42 @@ const template string = `<el-table
             :show-overflow-tooltip=true label="Distance" width="250px"
     >
         <template slot-scope="scope">
-            <pulling-distances-info v-model="scope.row"></pulling-distances-info>
+			<div class="header-menu-container on-hover">
+	            <pulling-distances-info v-model="scope.row"></pulling-distances-info>
+					<el-popover placement="bottom" width="900"
+								title="Modification des distances"
+					>
+						<el-row>
+							<el-col :span="6">Tronçon</el-col>
+							<el-col :span="2"><b>Total</b></el-col>
+							<el-col :span="4" class="col-header">Love</el-col>
+							<el-col :span="4" class="col-header">Sout.</el-col>
+							<el-col :span="4" class="col-header pulling-aerial">Aérien</el-col>
+							<el-col :span="4" class="col-header pulling-aerial">Façade</el-col>
+						</el-row>
+						<el-row v-for="(chunk, index) in scope.row.Chuncks" :key="index" :gutter="5" style="padding: 3px 0px">
+							<el-col :span="6">
+								<span>{{chunk.TronconName}}</span>                        
+							</el-col>
+							<el-col :span="2">
+								<b>{{chunk.LoveDist + chunk.UndergroundDist + chunk.AerialDist + chunk.BuildingDist}}m</b>                      
+							</el-col>
+							<el-col :span="4">
+								<el-input-number v-model="chunk.LoveDist" controls-position="right" :min="0" :step="1" size="mini"></el-input-number>                     
+							</el-col>
+							<el-col :span="4">
+								<el-input-number v-model="chunk.UndergroundDist" controls-position="right" :min="0" :step="1" size="mini"></el-input-number>                     
+							</el-col>
+							<el-col :span="4">
+								<el-input-number v-model="chunk.AerialDist" controls-position="right" :min="0" :step="1" size="mini"></el-input-number>                     
+							</el-col>
+							<el-col :span="4">
+								<el-input-number v-model="chunk.BuildingDist" controls-position="right" :min="0" :step="1" size="mini"></el-input-number>                     
+							</el-col>
+						</el-row>
+						<i slot="reference" class="fas fa-edit show"></i>
+					</el-popover>
+			</div>
         </template>
     </el-table-column>
 
