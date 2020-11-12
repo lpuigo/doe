@@ -66,9 +66,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 // TestPoleSite_AppendXlsToJson : add a XLSx PoleSite description to an already providied PoleSite JSON file.
 // New Poles are appended next to already existing ones
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-09-15 Meuse\2020-10-27 complément Poteaux`
-	psXlsfile := `Polesite 55.xlsx`
-	psJsonFile := `000042.json`
+	psDir := `C:\Users\Laurent\Desktop\TEMPORAIRE\Fiitelcom\88-041-285 Vittel\2020-11-11 Ajout Norroy`
+	psXlsfile := `Polesite Norroy.xlsx`
+	psJsonFile := `000026.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)
@@ -90,6 +90,7 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 	// append new Poles to original PoleSiteRecord
 	origPsr.AppendPolesFrom(newPs)
 
+	// Controle result polesite consistency (detects poles with same name, position, ids)
 	PoleSiteConsistency(t, origPsr.PoleSite)
 
 	err = os.Rename(origPsrFile, origPsrFile+".bak")
@@ -224,6 +225,7 @@ func PoleSiteConsistency(t *testing.T, ps *PoleSite) {
 		}
 		t.Fatalf("Consistency Check failed")
 	}
+	t.Logf("Consistency Check OK")
 }
 
 func TestPoleSite_FixInconsistentPoleId(t *testing.T) {

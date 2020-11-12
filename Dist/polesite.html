@@ -3,8 +3,11 @@
 
 <head>
     <title>EWIN Poteaux</title>
+<!--
     <meta charset="UTF-8" name="viewport"
           content="width=device-width, initial-scale=0.75, maximum-scale=1.0, user-scalable=no"/>
+-->
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="icon" href="favicon.png">
     <!-- LeafLet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
@@ -14,7 +17,7 @@
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
     <link rel="stylesheet" href="index.css?v=1.0">
-    <link rel="stylesheet" href="polesite.css?v=1.2">
+    <link rel="stylesheet" href="polesite.css?v=1.3">
 </head>
 
 <body>
@@ -22,8 +25,8 @@
     <el-container style="height: 100%; border: 1px solid #eee">
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
-                <el-row :gutter="20" type="flex" align="middle">
-                    <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i>Poteaux : <span
+                <el-row :gutter="20" type="flex" align="middle" class="rd-large-screen">
+                    <h2 class="content"><i class="fas fa-map-marked-alt icon--left"></i><span
                                 style="color: #ccebff">{{Title}}</span>
                     </h2>
                 </el-row>
@@ -57,11 +60,11 @@
                     </el-tooltip>
                 </el-radio-group>
 
-                <span></span>
-                <span></span>
+                <span class="rd-large-screen"></span>
+                <span class="rd-large-screen"></span>
 
                 <el-tooltip content="Création d'un nouveau poteau" placement="bottom" effect="light" open-delay="500">
-                    <el-button class="icon" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini"
+                    <el-button class="icon rd-large-screen" icon="fas fa-map-pin icon--big" @click="CreatePole" size="mini"
                                :disabled="ActiveMode=='Info'"></el-button>
                 </el-tooltip>
 
@@ -78,7 +81,7 @@
                     </div>
                     <el-tooltip slot="reference" content="Recherche adresse" placement="bottom" effect="light"
                                 open-delay="500">
-                        <el-button class="icon" icon="fas fa-search-location icon--big" size="mini"
+                        <el-button class="icon rd-large-screen" icon="fas fa-search-location icon--big" size="mini"
                                    :disabled="ActiveMode!='Map'"></el-button>
                     </el-tooltip>
                 </el-popover>
@@ -88,11 +91,11 @@
                                :disabled="ActiveMode!='Map'"></el-button>
                 </el-tooltip>
 
-                <span></span>
-                <span></span>
+                <span class="rd-large-screen"></span>
+                <span class="rd-large-screen"></span>
 
                 <div style="width: 20vw">
-                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location"
+                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location" style="min-width: 300px"
                               @input="ApplyFilter">
                         <el-select v-model="FilterType"
                                    @change="ApplyFilter"
@@ -109,7 +112,7 @@
                     </el-input>
                 </div>
 
-                <span></span>
+                <span class="rd-large-screen"></span>
 
                 <el-popover placement="bottom" width="360" title="Outils :"
                             v-model="VisibleTools">
@@ -152,19 +155,19 @@
                         <el-button type="primary" plain size="mini" @click="VisibleTools = false">Fermer</el-button>
                     </div>
                     <el-tooltip slot="reference" content="Outils" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon" icon="fas fa-toolbox icon--big" size="mini"
+                        <el-button class="icon rd-large-screen" icon="fas fa-toolbox icon--big" size="mini"
                                    :disabled="!VisibleTools&&IsDirty">
                         </el-button>
                     </el-tooltip>
                 </el-popover>
 
-                <span></span>
+                <span class="rd-large-screen"></span>
 
-                <el-row :gutter="20" type="flex" align="middle">
+                <div :gutter="20" type="flex" align="middle" class="rd-large-screen">
                     <span v-if="!User.Connected"><i
                                 class="far fa-user-circle icon--left icon--medium"></i>Not logged</span>
                     <span v-else><i class="fas fa-user-circle icon--left icon--medium"></i>{{User.Name}}</span>
-                </el-row>
+                </div>
             </div>
         </el-header>
         <el-container style="height: calc(100% - 40px)">
