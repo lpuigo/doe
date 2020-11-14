@@ -28,3 +28,8 @@ func GetURLSearchParam(param string) *js.Object {
 	usp := js.Global.Get("URLSearchParams").New(GetLocationQueryString())
 	return usp.Call("get", param)
 }
+
+func WindowHasHover() bool {
+	res := js.Global.Get("window").Call("matchMedia", "(any-hover: hover)")
+	return res.Get("matches").Bool()
+}

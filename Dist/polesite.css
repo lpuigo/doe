@@ -11,8 +11,14 @@ html, body {
    === Responsive Design class
  */
 
-@media (max-width: 1600px) {
+@media (max-width: 1200px) {
     .rd-large-screen {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .rd-middle-screen {
         display: none;
     }
 }
@@ -253,7 +259,6 @@ h1 {
 /* =====================================================================================================================
    === Control Info Style
  */
-
 .control-info {
     padding: 6px 8px;
     font: 12px/14px Arial, Helvetica, sans-serif;

@@ -72,6 +72,9 @@ func NewControlInfo() *ControlInfo {
 func (ci *ControlInfo) onAdd(m *Map) *js.Object {
 	ci.Div = L.Get("DomUtil").Call("create", "div", "control-info")
 	//ci.Set("_div", L.Get("DomUtil").Call("create", "div", "control-info"))
+	ci.Div.Call("addEventListener", "click", func(event *js.Object) {
+		ci.Update("")
+	})
 	ci.Update("")
 	return ci.Get("_div")
 }

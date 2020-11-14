@@ -7,7 +7,7 @@
     <meta charset="UTF-8" name="viewport"
           content="width=device-width, initial-scale=0.75, maximum-scale=1.0, user-scalable=no"/>
 -->
-    <meta charset="UTF-8" name="viewport" content="width=device-width, width=610, initial-scale=1"/>
+    <meta charset="UTF-8" name="viewport" content="width=400, initial-scale=1, maximum-scale=1"/>
     <link rel="icon" href="favicon.png">
     <!-- LeafLet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
@@ -17,7 +17,7 @@
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
     <link rel="stylesheet" href="index.css?v=1.1">
-    <link rel="stylesheet" href="polesite.css?v=1.3">
+    <link rel="stylesheet" href="polesite.css?v=1.5">
 </head>
 
 <body>
@@ -49,7 +49,7 @@
                 <el-button class="icon" icon="fas fa-th-list icon--big" @click="ShowPoleTable" size="mini"></el-button>
                 -->
                 <el-radio-group v-model="ActiveMode" @change="SwitchActiveMode" size="mini">
-                    <el-tooltip content="Info. chantier" placement="bottom" effect="light" open-delay="500">
+                    <el-tooltip content="Info. chantier" placement="bottom" effect="light" open-delay="500" class="rd-middle-screen">
                         <el-radio-button label="Info"><i class="fas fa-info"></i></el-radio-button>
                     </el-tooltip>
                     <el-tooltip content="Carte" placement="bottom" effect="light" open-delay="500">
@@ -95,12 +95,12 @@
                 <span class="rd-large-screen"></span>
 
                 <div>
-                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location rd-large-screen" style="min-width: 7vw"
+                    <el-input v-model="Filter" size="mini" style="width: 25vw; min-width: 130px"
                               @input="ApplyFilter">
                         <el-select v-model="FilterType"
                                    @change="ApplyFilter"
                                    slot="prepend" placeholder="Tous"
-                                   style="width: 110px; margin-right: -10px">
+                                   style="width: 10vw; min-width: 60px; max-width: 120px; margin-right: -10px">
                             <el-option
                                     v-for="item in GetFilterType()"
                                     :key="item.value"
@@ -227,6 +227,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.8"></script>
+<script type="text/javascript" src="polesites.js?v=1.9"></script>
 
 </html>

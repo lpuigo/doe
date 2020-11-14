@@ -1,6 +1,10 @@
 package polemap
 
 import (
+	"sort"
+	"strconv"
+	"strings"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/leafletmap"
@@ -8,9 +12,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/leaflet"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 const template string = `
