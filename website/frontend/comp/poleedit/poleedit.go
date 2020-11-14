@@ -21,7 +21,7 @@ import (
 
 const template string = `<div>
 	<div class="header-menu-container spaced">
-		<h1>Appui: <span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span></h1>
+		<h1><i class="far fa-clipboard icon--left button" @click="CopyClipBoardPoleRef()"></i><span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span></h1>
         
         <el-tooltip content="Zoomer sur la carte" placement="bottom" effect="light" open-delay="500">
             <el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
@@ -510,6 +510,20 @@ func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem.VM = vm
 	pem.EditedPoleMarker = polemap.DefaultPoleMarker()
 	return pem
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ClipBoard Methods
+
+func (pem *PoleEditModel) CopyClipBoardPoleRef(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+
+	//clipboardText := tools.GetElementById("copy-clipboard")
+	//clipboardText.SetInnerHTML(pem.EditedPoleMarker.Pole.Ref + " " + pem.EditedPoleMarker.Pole.Sticker)
+	//clipboardText.CopyToClipBoard()
+	text := pem.EditedPoleMarker.Pole.Ref + "|" + pem.EditedPoleMarker.Pole.Sticker
+	tools.CopyToClipBoard(text)
+	message.SuccesStr(vm, "presse papier : "+text)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

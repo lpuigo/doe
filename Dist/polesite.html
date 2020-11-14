@@ -7,7 +7,7 @@
     <meta charset="UTF-8" name="viewport"
           content="width=device-width, initial-scale=0.75, maximum-scale=1.0, user-scalable=no"/>
 -->
-    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, width=610, initial-scale=1"/>
     <link rel="icon" href="favicon.png">
     <!-- LeafLet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.2/lib/theme-chalk/index.css">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
-    <link rel="stylesheet" href="index.css?v=1.0">
+    <link rel="stylesheet" href="index.css?v=1.1">
     <link rel="stylesheet" href="polesite.css?v=1.3">
 </head>
 
@@ -69,7 +69,7 @@
                 </el-tooltip>
 
                 <el-popover placement="bottom" width="260" title="Recherche d'une adresse :"
-                            v-model="VisibleSearchLoc">
+                            v-model="VisibleSearchLoc" class="rd-large-screen">
                     <div style="width: 100%">
                         <el-input placeholder="Adresse" v-model="SearchAddress" @input="UpdateSearchLocation" clearable
                                   size="mini"></el-input>
@@ -81,7 +81,7 @@
                     </div>
                     <el-tooltip slot="reference" content="Recherche adresse" placement="bottom" effect="light"
                                 open-delay="500">
-                        <el-button class="icon rd-large-screen" icon="fas fa-search-location icon--big" size="mini"
+                        <el-button class="icon" icon="fas fa-search-location icon--big" size="mini"
                                    :disabled="ActiveMode!='Map'"></el-button>
                     </el-tooltip>
                 </el-popover>
@@ -94,13 +94,13 @@
                 <span class="rd-large-screen"></span>
                 <span class="rd-large-screen"></span>
 
-                <div style="width: 20vw">
-                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location" style="min-width: 300px"
+                <div>
+                    <el-input v-model="Filter" size="mini" prefix-icon="fas fa-search-location rd-large-screen" style="min-width: 7vw"
                               @input="ApplyFilter">
                         <el-select v-model="FilterType"
                                    @change="ApplyFilter"
                                    slot="prepend" placeholder="Tous"
-                                   style="width: 130px; margin-right: -10px">
+                                   style="width: 110px; margin-right: -10px">
                             <el-option
                                     v-for="item in GetFilterType()"
                                     :key="item.value"
@@ -115,7 +115,7 @@
                 <span class="rd-large-screen"></span>
 
                 <el-popover placement="bottom" width="360" title="Outils :"
-                            v-model="VisibleTools">
+                            v-model="VisibleTools"  class="rd-large-screen">
                     <div>
                         <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive des DICT
                         </el-link>
@@ -155,7 +155,7 @@
                         <el-button type="primary" plain size="mini" @click="VisibleTools = false">Fermer</el-button>
                     </div>
                     <el-tooltip slot="reference" content="Outils" placement="bottom" effect="light" open-delay="500">
-                        <el-button class="icon rd-large-screen" icon="fas fa-toolbox icon--big" size="mini"
+                        <el-button class="icon" icon="fas fa-toolbox icon--big" size="mini"
                                    :disabled="!VisibleTools&&IsDirty">
                         </el-button>
                     </el-tooltip>
@@ -227,6 +227,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.7"></script>
+<script type="text/javascript" src="polesites.js?v=1.8"></script>
 
 </html>
