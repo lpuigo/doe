@@ -16,6 +16,11 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 )
 
+type UpdatedPoleSite struct {
+	Polesite     *PoleSite
+	IgnoredPoles []string
+}
+
 type PoleSite struct {
 	Id         int
 	Client     string
@@ -249,7 +254,7 @@ func (ps *PoleSite) CloneInfoForArchive() *PoleSite {
 		Manager:    ps.Manager,
 		OrderDate:  ps.OrderDate,
 		UpdateDate: date.Today().String(),
-		Status:     ps.Status,
+		Status:     poleconst.PsStatusDone,
 		Comment:    fmt.Sprintf("Archive de %s au %s", ps.Ref, date.Today().ToDDMMYYYY()),
 		Poles:      []*Pole{},
 	}
@@ -313,9 +318,11 @@ func (ps *PoleSite) AppendPolesFrom(nps *PoleSite) {
 }
 
 // UpdateWith updates receiver PoleSite with information from given PoleSite by checking update on each poles.
-// Outdated poles are ignore. Updated pole' timestamp is set to current time
-func (ps *PoleSite) UpdateWith(ups *PoleSite) {
+// Outdated poles are ignored. Updated pole' timestamp is set to current time.
+// Ignored Poles References List is return.
+func (ps *PoleSite) UpdateWith(ups *PoleSite) []string {
 	timeStamp := date.Now().TimeStamp()
+	ignoreList := []string{}
 
 	resPoleSite := *ups //shallow copy of updated PoleSite
 	origPoles := make(map[int]*Pole)
@@ -340,22 +347,16 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) {
 		if updtPole.TimeStamp != origPole.TimeStamp {
 			// updated pole is outdated compared to current pole info, let's ignore update and keep origPole
 			updtPoles = append(updtPoles, origPole)
+			ignoreList = append(ignoreList, updtPole.ExtendedRef())
 			continue
 		}
 		updtPole.TimeStamp = timeStamp
 		updtPoles = append(updtPoles, updtPole)
 	}
-	//// Check for newest poles on server side only
-	//if maxOrig > maxUpdt {
-	//	for i := len(ps.Poles) - 1; i > 0; i-- {
-	//		if ps.Poles[i].Id <= maxUpdt {
-	//			break
-	//		}
-	//		updtPoles = append(updtPoles, ps.Poles[i])
-	//	}
-	//}
 	resPoleSite.Poles = updtPoles
 	*ps = resPoleSite //shallow copy of updated PoleSite on receiver PoleSite
+
+	return ignoreList
 }
 
 type KizeoReport struct {

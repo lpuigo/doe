@@ -8,6 +8,17 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
+type UpdatedPoleSite struct {
+	*js.Object
+
+	Polesite     *Polesite `js:"Polesite"`
+	IgnoredPoles []string  `js:"IgnoredPoles"`
+}
+
+func UpdatedFromJS(o *js.Object) *UpdatedPoleSite {
+	return &UpdatedPoleSite{Object: o}
+}
+
 // Polesite reflects backend/model/polesites.polesite struct
 type Polesite struct {
 	*js.Object

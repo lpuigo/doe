@@ -163,6 +163,8 @@ func (p *Pole) IsArchivable() bool {
 		return true
 	case poleconst.StateCancelled:
 		return true
+	case poleconst.StateDeleted:
+		return true
 	default:
 		return false
 	}

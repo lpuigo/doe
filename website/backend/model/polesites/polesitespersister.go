@@ -106,19 +106,20 @@ func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 }
 
 // Update updates the given PoleSiteRecord with per pole control : outdated poles are ignored (outdated : one original pole' timestamp is newer than the corresponding pole in the updated polesite)
-func (psp *PoleSitesPersister) Update(usr *PoleSiteRecord) error {
+func (psp *PoleSitesPersister) Update(psr *PoleSiteRecord) ([]string, error) {
 	psp.RLock()
 	defer psp.RUnlock()
-
-	osr := psp.GetById(usr.Id)
+	ignoredPolesRefs := []string{}
+	osr := psp.GetById(psr.Id)
 	if osr == nil {
-		return fmt.Errorf("id not found")
+		return ignoredPolesRefs, fmt.Errorf("id not found")
 	}
 	//osr.PoleSite = usr.PoleSite
-	osr.UpdateWith(usr.PoleSite)
+	ignoredPolesRefs = osr.UpdateWith(psr.PoleSite)
 	osr.PoleSite.UpdateDate = date.Today().String()
 	psp.persister.MarkDirty(osr)
-	return nil
+	psr.PoleSite = osr.PoleSite // psr now points to server updated polesite
+	return ignoredPolesRefs, nil
 }
 
 // Remove removes the given PoleSiteRecord from the PoleSitesPersister (pertaining file is moved to deleted dir)
@@ -159,7 +160,7 @@ func (psp *PoleSitesPersister) ArchiveCompletedPoleRefs(psr *PoleSiteRecord) err
 	if nbap == 0 {
 		return nil
 	}
-	err := psp.Update(psr)
+	_, err := psp.Update(psr)
 	if err != nil {
 		return err
 	}

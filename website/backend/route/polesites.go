@@ -63,6 +63,9 @@ func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+
 	reqPolesiteId := mux.Vars(r)["psid"]
 	rpsid, err := strconv.Atoi(reqPolesiteId)
 	if err != nil {
@@ -83,13 +86,29 @@ func UpdatePolesite(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		AddError(w, logmsg, fmt.Sprintf("inconsitent Polesite id between request (%d) and body (%d)", rpsid, psr.Id), http.StatusBadRequest)
 		return
 	}
-	err = mgr.Polesites.Update(psr)
+
+	ignoredList, err := mgr.Polesites.Update(psr)
 	if err != nil {
 		AddError(w, logmsg, fmt.Sprintf("could not update Polesite with id %d: %v", rpsid, err), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("Polesite with id %d (%s) updated", rpsid, psr.Ref), http.StatusOK)
 
+	// create response struct
+	ups := polesites.UpdatedPoleSite{
+		Polesite:     psr.PoleSite,
+		IgnoredPoles: ignoredList,
+	}
+	err = json.NewEncoder(w).Encode(ups)
+	if err != nil {
+		AddError(w, logmsg, "could not encode updated polesite. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	msg := fmt.Sprintf("Polesite with id %d (%s) updated", rpsid, psr.Ref)
+	if len(ignoredList) > 0 {
+		msg += fmt.Sprintf(" (%d poles ignored)", len(ignoredList))
+	}
+	logmsg.AddInfoResponse(msg, http.StatusOK)
 }
 
 func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

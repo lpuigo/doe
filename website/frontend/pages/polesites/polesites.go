@@ -332,7 +332,8 @@ func (mpm *MainPageModel) LoadPolesite(refresh bool) {
 
 func (mpm *MainPageModel) SavePolesite(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
-	go mpm.callUpdatePolesite(mpm.Polesite)
+	mpm.UnSelectPole(false)
+	go mpm.callUpdatePolesite(mpm.Polesite, mpm.RefreshMap)
 }
 
 // MarkerClick handles marker-click PoleMap events
@@ -580,9 +581,6 @@ func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 	req := xhr.NewRequest("GET", "/api/polesites/"+strconv.Itoa(psid))
 	req.Timeout = tools.LongTimeOut
 	req.ResponseType = xhr.JSON
-	defer func() {
-		callback()
-	}()
 	err := req.Send(nil)
 	if err != nil {
 		message.ErrorStr(mpm.VM, "Oups! "+err.Error(), true)
@@ -592,14 +590,19 @@ func (mpm *MainPageModel) callGetPolesite(psid int, callback func()) {
 		message.ErrorRequestMessage(mpm.VM, req)
 		return
 	}
-	mpm.Polesite = polesite.PolesiteFromJS(req.Response)
-	mpm.Reference = json.Stringify(req.Response)
+	mpm.subLoadPolesite(polesite.PolesiteFromJS(req.Response), callback)
+}
+
+func (mpm *MainPageModel) subLoadPolesite(ps *polesite.Polesite, callback func()) {
+	mpm.Polesite = ps
+	mpm.Reference = json.Stringify(ps)
 	mpm.Polesite.CheckPolesStatus()
 	newTitle := mpm.Polesite.Ref + " - " + mpm.Polesite.Client
 	js.Global.Get("document").Set("title", newTitle)
+	callback()
 }
 
-func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite) {
+func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite, callback func()) {
 	//defer func() {}()
 	req := xhr.NewRequest("PUT", "/api/polesites/"+strconv.Itoa(ups.Id))
 	req.Timeout = tools.TimeOut
@@ -613,9 +616,21 @@ func (mpm *MainPageModel) callUpdatePolesite(ups *polesite.Polesite) {
 		message.ErrorRequestMessage(mpm.VM, req)
 		return
 	}
+	UpdtPoleSite := polesite.UpdatedFromJS(req.Response)
+	mpm.subLoadPolesite(UpdtPoleSite.Polesite, callback)
 
-	mpm.Reference = json.Stringify(ups)
-	message.SuccesStr(mpm.VM, "Chantier sauvegardé")
+	msg := "Chantier sauvegardé"
+	nbIgnored := len(UpdtPoleSite.IgnoredPoles)
+	switch nbIgnored {
+	case 0:
+		message.SuccesStr(mpm.VM, msg)
+	case 1:
+		msg += ". Appui '" + UpdtPoleSite.IgnoredPoles[0] + "' ignoré"
+		message.WarningStr(mpm.VM, msg)
+	default:
+		msg += ". " + strconv.Itoa(nbIgnored) + " appuis ignorés: " + strings.Join(UpdtPoleSite.IgnoredPoles, ", ")
+		message.WarningStr(mpm.VM, msg)
+	}
 }
 
 func (mpm *MainPageModel) callArchiveRefsGroup(ups *polesite.Polesite, callback func()) {
