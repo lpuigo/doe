@@ -17,3 +17,4 @@ func NewGroup(name string) *Group {
 }
 
 type GroupByName func(groupName string) *Group
+type GroupById func(groupId int) *Group

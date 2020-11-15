@@ -26,6 +26,16 @@ func (m Manager) GetGroupByName() groups.GroupByName {
 	}
 }
 
+func (m Manager) GetGroupById() groups.GroupById {
+	groupById := make(map[int]*groups.Group)
+	for _, group := range m.Groups.GetGroups() {
+		groupById[group.Id] = group
+	}
+	return func(groupId int) *groups.Group {
+		return groupById[groupId]
+	}
+}
+
 func (m Manager) GroupSizeOnMonth(days []string) map[string][]int {
 	monthRange := date.DateStringRange{
 		Begin: days[0],

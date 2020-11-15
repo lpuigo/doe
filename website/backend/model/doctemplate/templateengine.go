@@ -3,15 +3,18 @@ package doctemplate
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/lpuig/ewin/doe/website/backend/model/actors"
-	"github.com/lpuig/ewin/doe/website/backend/model/items"
-	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
-	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/lpuig/ewin/doe/website/backend/model/actorinfos"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/groups"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
+	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/lpuig/ewin/doe/model"
@@ -331,6 +334,14 @@ const (
 	amtsColDate   int    = 5
 	amtsRowStart  int    = 9
 
+	amtsTemplateSheetName            string = "Template"
+	amtsTemplateRow                  int    = 1
+	amtsTemplateColWEHeaderTpl       int    = 1
+	amtsTemplateColWEHoursTpl        int    = 2
+	amtsTemplateColHolidaysHeaderTpl int    = 3
+	amtsTemplateColHolidaysHoursTpl  int    = 4
+	amtsTemplateColOffHoursTpl       int    = 5
+
 	amtsColStart      int = 2
 	amtsColMonthStart int = 5
 	amtsColHours      int = 36
@@ -338,8 +349,13 @@ const (
 	amtsColActingDays int = 38
 	amtsColComment    int = 39
 	amtsColCompany    int = 41
-	amtsColClient     int = 42
-	amtsColId         int = 43
+	amtsColGroup      int = 42
+	amtsColClient     int = 43
+	amtsColSalary     int = 44
+	amtsColTrvlSub    int = 45
+	amtsColBonus      int = 46
+	amtsColBonusCmt   int = 47
+	amtsColId         int = 48
 
 	amtsColWEHeaderTpl       int = 44
 	amtsColWEHoursTpl        int = 45
@@ -353,23 +369,27 @@ const (
 	amtsNextMonth int = 3
 )
 
-func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, actors []*actors.Actor, monthTimeSheet *timesheets.TimeSheet, publicHolidays map[string]string) error {
+func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, actors []*actorinfos.ActorHr, groupById groups.GroupById, monthTimeSheet *timesheets.TimeSheet, publicHolidays map[string]string) error {
 	file := filepath.Join(te.tmplDir, amtsXLSFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {
 		return err
 	}
-
-	styleHeaderWeekEnd, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColWEHeaderTpl))
-	styleHoursWeekEnd, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColWEHoursTpl))
-	styleHeaderHolidays, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColHolidaysHeaderTpl))
-	styleHoursHolidays, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColHolidaysHoursTpl))
-	styleHoursOff, _ := xf.GetCellStyle(amtsSheetName, xlsx.RcToAxis(amtsRowStart-1, amtsColOffHoursTpl))
-
-	found := xf.GetSheetIndex(amtsSheetName)
-	if found == -1 {
+	if xf.GetSheetIndex(amtsSheetName) == -1 {
 		return fmt.Errorf("could not find CRA sheet")
 	}
+	if xf.GetSheetIndex(amtsTemplateSheetName) == -1 {
+		return fmt.Errorf("could not find Template sheet")
+	}
+
+	styleHeaderWeekEnd, _ := xf.GetCellStyle(amtsTemplateSheetName, xlsx.RcToAxis(amtsTemplateRow, amtsTemplateColWEHeaderTpl))
+	styleHoursWeekEnd, _ := xf.GetCellStyle(amtsTemplateSheetName, xlsx.RcToAxis(amtsTemplateRow, amtsTemplateColWEHoursTpl))
+	styleHeaderHolidays, _ := xf.GetCellStyle(amtsTemplateSheetName, xlsx.RcToAxis(amtsTemplateRow, amtsTemplateColHolidaysHeaderTpl))
+	styleHoursHolidays, _ := xf.GetCellStyle(amtsTemplateSheetName, xlsx.RcToAxis(amtsTemplateRow, amtsTemplateColHolidaysHoursTpl))
+	styleHoursOff, _ := xf.GetCellStyle(amtsTemplateSheetName, xlsx.RcToAxis(amtsTemplateRow, amtsTemplateColOffHoursTpl))
+
+	xf.DeleteSheet(amtsTemplateSheetName)
+
 	dates := make([]string, 31) // dates of month
 	dayAttr := make([]int, 31)  // attr for days of month : 0 open, 1 WE, 2 NextMonth
 	var endOfMonth bool
@@ -403,12 +423,30 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 		if !exists {
 			continue
 		}
+
+		activeGroupId := actor.Groups.ActiveGroupOnDate(dates[26])
+		groupName := "Non Affecté"
+		if group := groupById(activeGroupId); group != nil {
+			groupName = group.Name
+		}
+
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+0), actor.LastName)
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+1), actor.FirstName)
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColStart+2), actor.Role)
 
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColCompany), actor.Company)
+		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColGroup), groupName)
 		_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColClient), strings.Join(actor.Client, ", "))
+		if currentSalary, found := actor.Info.Salary.GetApplicableByDate(dates[26]); found {
+			_ = xf.SetCellFloat(amtsSheetName, xlsx.RcToAxis(row, amtsColSalary), currentSalary.Amount, 3, 64)
+		}
+		if currentTravelSub, found := actor.Info.TravelSubsidy.GetApplicableByDate(dates[26]); found {
+			_ = xf.SetCellFloat(amtsSheetName, xlsx.RcToAxis(row, amtsColTrvlSub), currentTravelSub.Amount, 3, 64)
+		}
+		if currentBonus, found := actor.Info.EarnedBonuses.GetByDate(date.GetDateAfter(dates[26], 30)); found {
+			_ = xf.SetCellFloat(amtsSheetName, xlsx.RcToAxis(row, amtsColBonus), currentBonus.Amount, 3, 64)
+			_ = xf.SetCellStr(amtsSheetName, xlsx.RcToAxis(row, amtsColBonusCmt), currentBonus.Comment)
+		}
 		_ = xf.SetCellInt(amtsSheetName, xlsx.RcToAxis(row, amtsColId), actor.Id)
 
 		countHour = 0

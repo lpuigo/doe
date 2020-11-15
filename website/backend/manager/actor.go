@@ -56,8 +56,12 @@ func (m Manager) GetActorsWorkingHoursRecordXLS(writer io.Writer, date string) e
 func (m Manager) GetActorsMonthlyTimeSheetsXLS(writer io.Writer, date string) error {
 	actors := m.Actors.GetAllActors()
 	sort.Slice(actors, func(i, j int) bool {
-		return actors[i].Ref < actors[j].Ref
+		if actors[i].Company == actors[j].Company {
+			return actors[i].Ref < actors[j].Ref
+		}
+		return actors[i].Company < actors[j].Company
 	})
+	actorRhs := m.ActorInfos.GetActorHRsByActors(actors, true)
 	monthlytimesheet := m.TimeSheets.GetMonthlyTimeSheetFor(date, actors)
-	return m.TemplateEngine.GetActorsMonthlyTimeSheetTemplate(writer, actors, monthlytimesheet, m.DaysOff.days)
+	return m.TemplateEngine.GetActorsMonthlyTimeSheetTemplate(writer, actorRhs, m.GetGroupById(), monthlytimesheet, m.DaysOff.days)
 }
