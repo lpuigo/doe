@@ -31,11 +31,20 @@ func ParseFile(xlsfile string) ([]*PoleRecord, error) {
 	if err != nil {
 		return nil, err
 	}
+	dictRefs := make(map[string]int)
 	res := []*PoleRecord{}
 	for parser.Next() {
 		rec, err := parser.ParseRecord()
 		if err != nil {
 			return nil, fmt.Errorf("could not parse row %4d: %s\n", parser.rowNum, err)
+		}
+
+		// check for duplicate
+		sroref := rec.GetSRORef()
+		dictRefs[sroref]++
+		nb := dictRefs[sroref]
+		if nb > 1 {
+			rec.Ref += fmt.Sprintf(" doublon %d", nb-1)
 		}
 		res = append(res, rec)
 	}

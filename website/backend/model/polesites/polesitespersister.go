@@ -2,15 +2,14 @@ package polesites
 
 import (
 	"fmt"
-	"github.com/lpuig/ewin/doe/kizeoparser/xlsextract"
+	"path/filepath"
+	"sync"
+	"time"
+
 	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	"io"
-	"path/filepath"
-	"sync"
-	"time"
 )
 
 type PoleSitesPersister struct {
@@ -166,26 +165,6 @@ func (psp *PoleSitesPersister) ArchiveCompletedPoleRefs(psr *PoleSiteRecord) err
 	}
 	psp.Add(archivePoleSite)
 	return nil
-}
-
-// UpdateKizeoFromXlsxReport updates given PoleSiteRecord according to goven KizeoReport Data,
-// and returns a KizeoReport with Nb of Updated Poles and list of non mathcing Pole Ref
-func (psp *PoleSitesPersister) UpdateKizeoFromXlsxReport(psr *PoleSiteRecord, file io.Reader) (*KizeoReport, error) {
-	psp.RLock()
-	defer psp.RUnlock()
-
-	prs, err := xlsextract.ReadXlsReport(file)
-	if err != nil {
-		return nil, err
-	}
-
-	report := psr.PoleSite.UpdateFromKizeoPoleRecords(prs)
-	if report.NbUpdate > 0 {
-		psr.PoleSite.UpdateDate = date.Today().String()
-		psp.persister.MarkDirty(psr)
-	}
-
-	return report, nil
 }
 
 func (psp *PoleSitesPersister) GetItemizableSites(isSiteVisible items.IsItemizableSiteVisible) []items.ItemizableSite {

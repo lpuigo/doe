@@ -98,31 +98,35 @@ type reportParser struct {
 }
 
 func (rp *reportParser) writeHeader() error {
-	rp.file.SetColWidth(rp.sheet, "A", "I", 15)
+	rp.file.SetColWidth(rp.sheet, "A", "Z", 15)
 
-	rp.file.SetCellStr(rp.sheet, "A"+strconv.Itoa(rp.curRow), "Date")
-	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), "Heure")
-	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), "SRO")
-	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), "Appui")
-	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), "Commentaire")
-	rp.file.SetCellStr(rp.sheet, "F"+strconv.Itoa(rp.curRow), "Latitude")
-	rp.file.SetCellStr(rp.sheet, "G"+strconv.Itoa(rp.curRow), "Longitude")
-	rp.file.SetCellStr(rp.sheet, "H"+strconv.Itoa(rp.curRow), "Google Maps")
-	rp.file.SetCellStr(rp.sheet, "I"+strconv.Itoa(rp.curRow), "Image (link)")
+	rp.file.SetCellStr(rp.sheet, "A"+strconv.Itoa(rp.curRow), "Récup Image")
+	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), "Date")
+	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), "Heure")
+	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), "SRO")
+	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), "Appui")
+	rp.file.SetCellStr(rp.sheet, "F"+strconv.Itoa(rp.curRow), "Commentaire")
+	rp.file.SetCellStr(rp.sheet, "G"+strconv.Itoa(rp.curRow), "Latitude")
+	rp.file.SetCellStr(rp.sheet, "H"+strconv.Itoa(rp.curRow), "Longitude")
+	rp.file.SetCellStr(rp.sheet, "I"+strconv.Itoa(rp.curRow), "Google Maps")
+	rp.file.SetCellStr(rp.sheet, "J"+strconv.Itoa(rp.curRow), "Image (link)")
 
 	return nil
 }
 
 func (rp *reportParser) writeRecord(rec *PoleRecord) error {
-	rp.file.SetCellStr(rp.sheet, "A"+strconv.Itoa(rp.curRow), rec.Date)
-	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), rec.Hour)
-	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), rec.SRO)
-	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), rec.Ref)
-	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), rec.Comment)
-	rp.file.SetCellFloat(rp.sheet, "F"+strconv.Itoa(rp.curRow), rec.lat, 7, 64)
-	rp.file.SetCellFloat(rp.sheet, "G"+strconv.Itoa(rp.curRow), rec.long, 7, 64)
+	if rec.ExtractPicture {
+		rp.file.SetCellStr(rp.sheet, "A"+strconv.Itoa(rp.curRow), "Oui")
+	}
+	rp.file.SetCellStr(rp.sheet, "B"+strconv.Itoa(rp.curRow), rec.Date)
+	rp.file.SetCellStr(rp.sheet, "C"+strconv.Itoa(rp.curRow), rec.Hour)
+	rp.file.SetCellStr(rp.sheet, "D"+strconv.Itoa(rp.curRow), rec.SRO)
+	rp.file.SetCellStr(rp.sheet, "E"+strconv.Itoa(rp.curRow), rec.Ref)
+	rp.file.SetCellStr(rp.sheet, "F"+strconv.Itoa(rp.curRow), rec.Comment)
+	rp.file.SetCellFloat(rp.sheet, "G"+strconv.Itoa(rp.curRow), rec.lat, 7, 64)
+	rp.file.SetCellFloat(rp.sheet, "H"+strconv.Itoa(rp.curRow), rec.long, 7, 64)
 
-	gmcoord := "H" + strconv.Itoa(rp.curRow)
+	gmcoord := "I" + strconv.Itoa(rp.curRow)
 	rp.file.SetCellStr(rp.sheet, gmcoord, "maps")
 	style, _ := rp.file.NewStyle(`{"font":{"color":"#1265BE","underline":"single"}}`)
 	rp.file.SetCellStr(rp.sheet, gmcoord, "maps")
@@ -130,7 +134,7 @@ func (rp *reportParser) writeRecord(rec *PoleRecord) error {
 	rp.file.SetCellStyle(rp.sheet, gmcoord, gmcoord, style)
 
 	for i, label := range rec.GetImageLabels() {
-		coord := fmt.Sprintf("%c%d", 'I'+i, rp.curRow)
+		coord := fmt.Sprintf("%c%d", 'J'+i, rp.curRow)
 		rp.file.SetCellStr(rp.sheet, coord, label)
 		rp.file.SetCellHyperLink(rp.sheet, coord, rec.Images[label], "External")
 		rp.file.SetCellStyle(rp.sheet, coord, coord, style)
@@ -140,34 +144,35 @@ func (rp *reportParser) writeRecord(rec *PoleRecord) error {
 
 func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 	var err error
-	if len(cols) < 7 {
+	if len(cols) < 8 {
 		return nil, fmt.Errorf("not enough columns")
 	}
 	rec := &PoleRecord{
 		Images: make(map[string]string),
 	}
-	rec.Date = cols[0]    // column A Date
-	rec.Hour = cols[1]    // column B Heure
-	rec.SRO = cols[2]     // column C SRO
-	rec.Ref = cols[3]     // column D Appui
-	rec.Comment = cols[4] // column E Comment
-	// column F Latitude
-	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[5], ",", "."), 64)
+	rec.ExtractPicture = strings.ToLower(cols[0]) == "oui" // Column A ExtractPicture
+	rec.Date = cols[1]                                     // column B Date
+	rec.Hour = cols[2]                                     // column C Heure
+	rec.SRO = cols[3]                                      // column D SRO
+	rec.Ref = cols[4]                                      // column E Appui
+	rec.Comment = cols[5]                                  // column F Comment
+	// column G Latitude
+	rec.lat, err = strconv.ParseFloat(strings.ReplaceAll(cols[6], ",", "."), 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse latitude '%s' at %s", cols[5], "F"+strconv.Itoa(rp.curRow))
 	}
-	// column G Longitude
-	rec.long, err = strconv.ParseFloat(strings.ReplaceAll(cols[6], ",", "."), 64)
+	// column H Longitude
+	rec.long, err = strconv.ParseFloat(strings.ReplaceAll(cols[7], ",", "."), 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse longitude '%s' at %s", cols[6], "G"+strconv.Itoa(rp.curRow))
 	}
-	// column I> Image Link
-	for colnum := 8; colnum < len(cols); colnum++ {
+	// column J> Image Link
+	for colnum := 9; colnum < len(cols); colnum++ {
 		label := cols[colnum]
 		if label == "" {
 			continue
 		}
-		coord := fmt.Sprintf("%c%d", 'I'+colnum-8, rp.curRow)
+		coord := fmt.Sprintf("%c%d", 'J'+colnum-9, rp.curRow)
 		isLink, link, err := rp.file.GetCellHyperLink(rp.sheet, coord)
 		if !isLink || err != nil {
 			return nil, fmt.Errorf("could not get link for image '%s' at %s", label, coord)

@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Eiffage Signes\Kizeo TeP\`
-	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201105`
-	report              string = `2020-11-05 TeP`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Fiitelcom\Kizeo Vittel\`
+	kizeoXlsExtractName string = `Poteau_Fiitelcom_20201121`
+	report              string = `Synthese Kizeo Vittel`
+	kizeoCreatePoleDir  bool   = true
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
 )
@@ -35,9 +36,15 @@ func Test_ExtractReport(t *testing.T) {
 	}
 
 	for _, rec := range recs {
-		dir := filepath.Join(kizeoXlsExtractDir, report, rec.SRO)
+		if !rec.ExtractPicture {
+			continue
+		}
+		dir := filepath.Join(kizeoXlsExtractDir, report, rec.GetSafeSRO())
+		if kizeoCreatePoleDir {
+			dir = filepath.Join(dir, rec.GetSafeRef())
+		}
 		ensure(dir, t)
-		fmt.Printf("%s: %s %s\n", time.Now().Format("2006-01-02 15:04:05.0"), rec.SRO, rec.Ref)
+		fmt.Printf("%s: Get %s %s\n", time.Now().Format("2006-01-02 15:04:05.0"), rec.SRO, rec.Ref)
 		err := rec.GetAllImages(dir, 3)
 		if err != nil {
 			t.Fatalf("GetAllImages returned unexpected: %s\n", err.Error())

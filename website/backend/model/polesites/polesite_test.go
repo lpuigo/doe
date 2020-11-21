@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-09-15 Meuse\2020-10-27 complément Poteaux\Polesite test.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2020-11-17 Pertuis & La Roque d'Anthéron\Polesite La Roque D'Anthéron.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)

@@ -228,14 +228,27 @@ func (xpp *xlsPoleParser) ParseRecord() (*PoleRecord, error) {
 		}
 	}
 
+	// extract sro from ref
+	if sro == "" {
+		// using | separator
+		if refParts := strings.Split(ref, "|"); len(refParts) > 1 {
+			sro = refParts[0]
+			ref = refParts[1]
+		} else if refParts = strings.Split(ref, " "); len(refParts) > 1 {
+			sro = strings.Join(refParts[:len(refParts)-1], " ")
+			ref = refParts[len(refParts)-1]
+		}
+	}
+
 	return &PoleRecord{
-		Date:    date,
-		Hour:    hour,
-		SRO:     sro,
-		Ref:     ref,
-		Comment: comment,
-		Images:  img,
-		long:    long,
-		lat:     lat,
+		Date:           date,
+		Hour:           hour,
+		SRO:            sro,
+		Ref:            ref,
+		Comment:        comment,
+		Images:         img,
+		long:           long,
+		lat:            lat,
+		ExtractPicture: true,
 	}, nil
 }

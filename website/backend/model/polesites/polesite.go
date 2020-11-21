@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/lpuig/ewin/doe/kizeoparser/xlsextract"
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
@@ -357,39 +356,6 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) []string {
 	*ps = resPoleSite //shallow copy of updated PoleSite on receiver PoleSite
 
 	return ignoreList
-}
-
-type KizeoReport struct {
-	NbUpdate   int
-	UnknownRef []string
-}
-
-// UpdateFromKizeoPoleRecords updates kizeo data pertaining to poles described in given PoleRecord slice.
-// Its retuns a KizeoReport describing number of updated pole and list of non matching Pole Ref (eg. ref not found in reciever PoleSite)
-func (ps *PoleSite) UpdateFromKizeoPoleRecords(prs []*xlsextract.PoleRecord) *KizeoReport {
-	timeStamp := date.Now().TimeStamp()
-
-	report := &KizeoReport{
-		NbUpdate:   0,
-		UnknownRef: []string{},
-	}
-	poleDict := make(map[string]*Pole)
-	for _, pole := range ps.Poles {
-		poleDict[pole.ExtendedRef()] = pole
-	}
-	for _, pr := range prs {
-		ref := pr.SRO + " " + pr.Ref
-		pole, found := poleDict[ref]
-		if !found {
-			report.UnknownRef = append(report.UnknownRef, ref)
-			continue
-		}
-		pole.Kizeo = "OK " + pr.Date + " " + pr.Hour
-		pole.TimeStamp = timeStamp
-		report.NbUpdate++
-	}
-
-	return report
 }
 
 // PoleSite Consistency Control

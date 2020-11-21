@@ -505,7 +505,15 @@ type kizeoReport struct {
 }
 
 func NewKizeoReport() *kizeoReport {
-	return &kizeoReport{Object: tools.O()}
+	kr := &kizeoReport{Object: tools.O()}
+	kr.NbUpdate = 0
+	kr.UnknownRef = []string{}
+	return kr
+}
+
+type kizeoRefs struct {
+	*js.Object
+	Refs map[string]string `js:"Refs"`
 }
 
 func (mpm *MainPageModel) UploadError(vm *hvue.VM, err, file *js.Object) {
@@ -517,13 +525,33 @@ func (mpm *MainPageModel) UploadError(vm *hvue.VM, err, file *js.Object) {
 
 func (mpm *MainPageModel) UploadSuccess(vm *hvue.VM, response, file *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
-	mpm.kizeoReport = &kizeoReport{Object: response}
+	refs := &kizeoRefs{Object: response}
+	//mpm.kizeoReport = &kizeoReport{Object: response}
+	mpm.kizeoReport = mpm.MatchKizeoRefs(refs)
 	if mpm.kizeoReport.NbUpdate == 0 {
 		message.WarningStr(vm, "Kizeo : aucune correspondance trouvée")
 		return
 	}
 	mpm.KizeoComplete = true
-	mpm.LoadPolesite(false)
+}
+
+func (mpm *MainPageModel) MatchKizeoRefs(refs *kizeoRefs) *kizeoReport {
+	report := NewKizeoReport()
+	poleDict := make(map[string]*polesite.Pole)
+	for _, pole := range mpm.Polesite.Poles {
+		poleRef := pole.Ref + "|" + pole.Sticker
+		poleDict[poleRef] = pole
+	}
+
+	for poleTitle, info := range refs.Refs {
+		if pole, found := poleDict[poleTitle]; found {
+			pole.Kizeo = "OK " + info
+			report.NbUpdate++
+		} else {
+			report.UnknownRef = append(report.UnknownRef, poleTitle)
+		}
+	}
+	return report
 }
 
 func (mpm *MainPageModel) GetUnmatchingKizeoRefs(max int) []string {

@@ -3,6 +3,7 @@ package route
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/lpuig/ewin/doe/kizeoparser/xlsextract"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"net/http"
 	"strconv"
@@ -301,10 +302,10 @@ func DictZip(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg.AddInfoResponse(fmt.Sprintf("Dict Zip Archive produced for Polesite id %d (%s)", rpsid, psr.PoleSite.Ref), http.StatusOK)
 }
 
-// SetPolesiteRefKizeo
-func SetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+// GetPolesiteRefKizeo
+func GetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	logmsg := logger.TimedEntry("Route").AddRequest("SetPolesiteRefKizeo").AddUser(mgr.CurrentUser.Name)
+	logmsg := logger.TimedEntry("Route").AddRequest("GetPolesiteRefKizeo").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -315,6 +316,7 @@ func SetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
 		return
 	}
+
 	psr := mgr.Polesites.GetById(rpsid)
 	if psr == nil {
 		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
@@ -340,13 +342,21 @@ func SetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	kr, err := mgr.Polesites.UpdateKizeoFromXlsxReport(psr, file)
+	//kr, err := mgr.Polesites.UpdateKizeoFromXlsxReport(psr, file)
+	krs, err := xlsextract.ReadXlsReport(file)
 	if err != nil {
 		AddError(w, logmsg, fmt.Sprintf("error processing Kizeo Xlsx file : %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(kr)
+	krDict := struct{ Refs map[string]string }{Refs: make(map[string]string)}
+	for _, kr := range krs {
+		extRef := strings.Trim(kr.SRO, "  ") + "|" + strings.Trim(kr.Ref, "  ")
+		info := kr.Date + " " + kr.Hour
+		krDict.Refs[extRef] = info
+	}
 
-	logmsg.AddInfoResponse(fmt.Sprintf("Kizeo Status updated for Polesite id %d (%s): %d Ok and %d Ko", rpsid, psr.PoleSite.Ref, kr.NbUpdate, len(kr.UnknownRef)), http.StatusOK)
+	json.NewEncoder(w).Encode(krDict)
+
+	logmsg.AddInfoResponse(fmt.Sprintf("Kizeo Refs for Polesite id %d (%s): %d", rpsid, psr.PoleSite.Ref, len(krDict.Refs)), http.StatusOK)
 }

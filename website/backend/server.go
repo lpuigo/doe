@@ -147,7 +147,7 @@ func main() {
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/export", withUserManager("GetPolesiteExport", route.GetPolesiteExport)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/progress", withUserManager("GetPolesiteProgress", route.GetPolesiteProgress)).Methods("GET")
 	router.HandleFunc("/api/polesites/{psid:[0-9]+}/refexport", withUserManager("GetPolesiteRefExport", route.GetPolesiteRefExport)).Methods("GET")
-	router.HandleFunc("/api/polesites/{psid:[0-9]+}/kizeo", withUserManager("SetPolesiteRefKizeo", route.SetPolesiteRefKizeo)).Methods("POST")
+	router.HandleFunc("/api/polesites/{psid:[0-9]+}/kizeo", withUserManager("GetPolesiteRefKizeo", route.GetPolesiteRefKizeo)).Methods("POST")
 
 	// Foasites methods
 	router.HandleFunc("/api/foasites", withUserManager("GetFoaSitesInfo", route.GetFoaSitesInfo)).Methods("GET")
