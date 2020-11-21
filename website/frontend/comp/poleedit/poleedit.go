@@ -21,7 +21,7 @@ import (
 
 const template string = `<div>
 	<div class="header-menu-container spaced">
-		<h1><i class="far fa-clipboard icon--left button" @click="CopyClipBoardPoleRef()"></i><span style="font-size: 1.5em">{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span></h1>
+		<h1  @click="CopyClipBoardPoleRef()" class="button" style="font-size: 1.5em"><i class="far fa-clipboard icon--left"></i><span>{{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}</span></h1>
         
         <el-tooltip content="Zoomer sur la carte" placement="bottom" effect="light" open-delay="500">
             <el-button class="icon" icon="fas fa-crosshairs icon--big" @click="CenterOnEdited" size="mini"></el-button>
