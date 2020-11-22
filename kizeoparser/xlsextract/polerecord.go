@@ -154,9 +154,9 @@ func (pr *PoleRecord) WriteComment(dir string) error {
 func (pr *PoleRecord) GetSRORef() string {
 	ref := ""
 	if pr.SRO != "" {
-		ref = strings.Trim(pr.SRO, " ") + " "
+		ref = strings.Trim(pr.SRO, "  ") + " "
 	}
-	ref += strings.Trim(pr.Ref, " ")
+	ref += strings.Trim(pr.Ref, "  ")
 	return ref
 }
 

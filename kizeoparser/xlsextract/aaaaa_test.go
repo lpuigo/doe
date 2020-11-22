@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 	"time"
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Fiitelcom\Kizeo Vittel\`
-	kizeoXlsExtractName string = `Poteau_Fiitelcom_20201121`
-	report              string = `Synthese Kizeo Vittel`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Eiffage Signes\Kizeo TeP\`
+	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201122`
+	report              string = `Synthese Kizeo TeP`
 	kizeoCreatePoleDir  bool   = true
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
@@ -34,6 +35,8 @@ func Test_ExtractReport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
 	}
+
+	checkDuplicate(recs, t)
 
 	for _, rec := range recs {
 		if !rec.ExtractPicture {
@@ -63,5 +66,37 @@ func ensure(dir string, t *testing.T) {
 		if err != nil {
 			t.Fatalf("unable to create '%s': %s", dir, err.Error())
 		}
+	}
+}
+
+func checkDuplicate(recs []*PoleRecord, t *testing.T) {
+	sort.Slice(recs, func(i, j int) bool {
+		if recs[i].SRO != recs[j].SRO {
+			return recs[i].SRO < recs[j].SRO
+		}
+		if recs[i].Ref != recs[j].Ref {
+			return recs[i].Ref < recs[j].Ref
+		}
+		dateI := recs[i].Date + " " + recs[i].Hour
+		dateJ := recs[j].Date + " " + recs[j].Hour
+		return dateI < dateJ
+	})
+
+	dictRefs := make(map[string]int)
+
+	duplicateFound := false
+
+	for _, rec := range recs {
+		// check for duplicate
+		sroref := rec.GetSRORef()
+		dictRefs[sroref]++
+		nb := dictRefs[sroref]
+		if nb > 1 {
+			sroref += fmt.Sprintf(" doublon %d", nb-1)
+			t.Logf("found %s", sroref)
+		}
+	}
+	if duplicateFound {
+		t.Fatalf("Duplicate check failed")
 	}
 }
