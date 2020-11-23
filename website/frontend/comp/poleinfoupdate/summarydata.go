@@ -149,6 +149,17 @@ func GetPoleAction(pole *polesite.Pole) ([]string, []int) {
 	if !pole.IsToBeDone() {
 		return []string{IgnoreColumn}, []int{0}
 	}
+	return poleAction(pole)
+}
+
+func GetPoleActionDone(pole *polesite.Pole) ([]string, []int) {
+	if !pole.IsDone() {
+		return []string{IgnoreColumn}, []int{0}
+	}
+	return poleAction(pole)
+}
+
+func poleAction(pole *polesite.Pole) ([]string, []int) {
 	nb := 1
 	create := pole.HasProduct(poleconst.ProductCreation)
 	couple := pole.HasProduct(poleconst.ProductCouple)
@@ -177,7 +188,7 @@ func GetPoleAction(pole *polesite.Pole) ([]string, []int) {
 	case haub:
 		return []string{"Renf. Hauban"}, []int{nb}
 	default:
-		return []string{"A définir"}, []int{nb}
+		return []string{"Divers"}, []int{nb}
 	}
 }
 

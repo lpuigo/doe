@@ -120,8 +120,8 @@ const template string = `
 						</el-table-column>
 					</el-table>
 				</el-tab-pane>
-				<!-- ================================== Per Pole Action Tab ========================================== -->
-				<el-tab-pane label="Travaux" lazy=true style="padding: 5px 25px;">
+				<!-- ================================== Per Pole Action To Do Tab ========================================== -->
+				<el-tab-pane label="Trx à faire" lazy=true style="padding: 5px 25px;">
 					<el-table
 							:data="summaryPoleActionInfos"
 							stripe size="mini" show-summary :summary-method="SummaryPoleActionTotal"
@@ -132,7 +132,30 @@ const template string = `
 								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
-						<el-table-column v-for="poleAction in GetPoleActionColumns()"
+						<el-table-column v-for="poleAction in PoleActionCols"
+								:resizable="true" align="center"
+								:label="poleAction" width="150px"
+								sortable :sort-by="SortBy(poleAction)"
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.NbPoles[poleAction]}}</span>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-tab-pane>
+				<!-- ================================== Per Pole Action Done Tab ========================================== -->
+				<el-tab-pane label="Trx faits" lazy=true style="padding: 5px 25px;">
+					<el-table
+							:data="summaryPoleActionDoneInfos"
+							stripe size="mini" show-summary :summary-method="SummaryPoleActionTotal"
+							:default-sort = "{prop: 'Line', order: 'ascending'}"
+					>
+						<el-table-column
+								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								width="160px" :resizable=true :show-overflow-tooltip=true
+						></el-table-column>
+		
+						<el-table-column v-for="poleAction in PoleActionDoneCols"
 								:resizable="true" align="center"
 								:label="poleAction" width="150px"
 								sortable :sort-by="SortBy(poleAction)"
@@ -155,7 +178,7 @@ const template string = `
 								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
-						<el-table-column v-for="poleType in GetPoleTypeColumns()"
+						<el-table-column v-for="poleType in PoleTypeCols"
 								:resizable="true" align="center"
 								:label="poleType" width="97px"
 								sortable :sort-by="SortBy(poleType)"
@@ -178,7 +201,7 @@ const template string = `
 								width="160px" :resizable=true :show-overflow-tooltip=true
 						></el-table-column>
 		
-						<el-table-column v-for="poleItem in GetPoleItemColumns()"
+						<el-table-column v-for="poleItem in PoleItemCols"
 								:resizable="true" align="center"
 								:label="poleItem" width="120px"
 								sortable :sort-by="SortBy(poleItem)"
@@ -227,6 +250,14 @@ func componentOptions() []hvue.ComponentOption {
 			pium.PoleActionCols = summer.GetCalcColumns()
 			return summer.SummaryDatas
 		}),
+		hvue.Computed("summaryPoleActionDoneInfos", func(vm *hvue.VM) interface{} {
+			pium := PoleInfoUpdateModelFromJS(vm.Object)
+			summer := NewSummarizer()
+			summer.GetColumn = GetPoleActionDone
+			summer.Calc(pium.Polesite.Poles)
+			pium.PoleActionDoneCols = summer.GetCalcColumns()
+			return summer.SummaryDatas
+		}),
 		hvue.Computed("summaryPoleTypeInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
 			summer := NewSummarizer()
@@ -261,10 +292,11 @@ type PoleInfoUpdateModel struct {
 	StatNbPoleDICTToDo int `js:"statNbPoleDICTToDo"`
 	StatNbPolePending  int `js:"statNbPolePending"`
 
-	StateCols      []string `js:"StateCols"`
-	PoleTypeCols   []string `js:"PoleTypeCols"`
-	PoleActionCols []string `js:"PoleActionCols"`
-	PoleItemCols   []string `js:"PoleItemCols"`
+	StateCols          []string `js:"StateCols"`
+	PoleTypeCols       []string `js:"PoleTypeCols"`
+	PoleActionCols     []string `js:"PoleActionCols"`
+	PoleActionDoneCols []string `js:"PoleActionDoneCols"`
+	PoleItemCols       []string `js:"PoleItemCols"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -284,6 +316,7 @@ func NewPoleInfoUpdateModel(vm *hvue.VM) *PoleInfoUpdateModel {
 	pium.StateCols = []string{}
 	pium.PoleTypeCols = []string{}
 	pium.PoleActionCols = []string{}
+	pium.PoleActionDoneCols = []string{}
 	pium.PoleItemCols = []string{}
 
 	return pium
@@ -355,21 +388,6 @@ func (pium *PoleInfoUpdateModel) GetSummaryStatuses() []string {
 		poleconst.StateDone,
 		poleconst.StateAttachment,
 	}
-}
-
-func (pium *PoleInfoUpdateModel) GetPoleTypeColumns(vm *hvue.VM) []string {
-	pium = PoleInfoUpdateModelFromJS(vm.Object)
-	return pium.PoleTypeCols
-}
-
-func (pium *PoleInfoUpdateModel) GetPoleActionColumns(vm *hvue.VM) []string {
-	pium = PoleInfoUpdateModelFromJS(vm.Object)
-	return pium.PoleActionCols
-}
-
-func (pium *PoleInfoUpdateModel) GetPoleItemColumns(vm *hvue.VM) []string {
-	pium = PoleInfoUpdateModelFromJS(vm.Object)
-	return pium.PoleItemCols
 }
 
 func (pium *PoleInfoUpdateModel) StateName(status string) string {
