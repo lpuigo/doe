@@ -147,7 +147,7 @@ const template string = `
 				<el-tab-pane label="Trx faits" lazy=true style="padding: 5px 25px;">
 					<el-table
 							:data="summaryPoleActionDoneInfos"
-							stripe size="mini" show-summary :summary-method="SummaryPoleActionTotal"
+							stripe size="mini" show-summary :summary-method="SummaryPoleActionDoneTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -433,6 +433,11 @@ func (pium *PoleInfoUpdateModel) SummaryPoleTypeTotal(vm *hvue.VM, param *js.Obj
 func (pium *PoleInfoUpdateModel) SummaryPoleActionTotal(vm *hvue.VM, param *js.Object) []string {
 	pium = PoleInfoUpdateModelFromJS(vm.Object)
 	return pium.summaryTotal(vm, param, pium.PoleActionCols)
+}
+
+func (pium *PoleInfoUpdateModel) SummaryPoleActionDoneTotal(vm *hvue.VM, param *js.Object) []string {
+	pium = PoleInfoUpdateModelFromJS(vm.Object)
+	return pium.summaryTotal(vm, param, pium.PoleActionDoneCols)
 }
 
 func (pium *PoleInfoUpdateModel) SummaryPoleItemTotal(vm *hvue.VM, param *js.Object) []string {
