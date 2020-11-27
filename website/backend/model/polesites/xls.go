@@ -321,9 +321,9 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6} {
 		productKeys[col], _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
 	}
-	if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
-		return ps, nil
-	}
+	//if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
+	//	return ps, nil
+	//}
 
 	cellCoord := func(col, row int) string {
 		return sheetName + "!" + xlsx.RcToAxis(row, col)
