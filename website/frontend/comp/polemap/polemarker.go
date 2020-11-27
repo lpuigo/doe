@@ -146,7 +146,7 @@ func (pm *PoleMarker) UpdateFromState() {
 		html = pmHtmlOutline
 		class = "red"
 	case poleconst.StatePermissionPending:
-		class = "teal"
+		class = "purple"
 	case poleconst.StateDictToDo:
 		class = "darkred"
 	case poleconst.StateDaToDo:
@@ -155,6 +155,8 @@ func (pm *PoleMarker) UpdateFromState() {
 		class = "orange"
 	case poleconst.StateToDo:
 		class = "blue"
+	case poleconst.StateMarked:
+		class = "lightblue"
 	case poleconst.StateNoAccess:
 		class = "purple"
 	case poleconst.StateDenseNetwork:

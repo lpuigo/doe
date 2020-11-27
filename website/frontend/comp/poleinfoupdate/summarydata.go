@@ -153,7 +153,7 @@ func GetPoleAction(pole *polesite.Pole) ([]string, []int) {
 }
 
 func GetPoleActionDone(pole *polesite.Pole) ([]string, []int) {
-	if !pole.IsDone() {
+	if pole.IsAlreadyDone() {
 		return []string{IgnoreColumn}, []int{0}
 	}
 	return poleAction(pole)

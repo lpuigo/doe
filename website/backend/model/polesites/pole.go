@@ -75,6 +75,8 @@ func (p *Pole) IsTodo() bool {
 		return true
 	case poleconst.StateToDo:
 		return true
+	case poleconst.StateMarked:
+		return true
 	case poleconst.StateHoleDone:
 		return true
 	case poleconst.StateIncident:
@@ -98,6 +100,7 @@ func (p *Pole) IsDone() bool {
 	//case poleconst.StateDaExpected:
 	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
+	//case poleconst.StateMarked:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
 	case poleconst.StateDone:
@@ -262,6 +265,8 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 	return res, nil
 }
 
+const polePosPrecision float64 = 0.0000000001
+
 // IsEqual returns true if both Pole are identical (long and lat must be 1e-10 near, TimeStamp is not checked)
 func (p *Pole) IsEqual(pole *Pole) bool {
 	//Id             int
@@ -285,11 +290,11 @@ func (p *Pole) IsEqual(pole *Pole) bool {
 		return false
 	}
 	//Lat            float64
-	if math.Abs(p.Lat-pole.Lat) > 0.00000000001 {
+	if math.Abs(p.Lat-pole.Lat) > polePosPrecision {
 		return false
 	}
 	//Long           float64
-	if math.Abs(p.Long-pole.Long) > 0.00000000001 {
+	if math.Abs(p.Long-pole.Long) > polePosPrecision {
 		return false
 	}
 	//State          string

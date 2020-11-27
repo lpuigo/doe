@@ -176,6 +176,7 @@ func (p *Pole) IsToDo() bool {
 	//case poleconst.StateDaExpected:
 	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
+	//case poleconst.StateMarked:
 	//case poleconst.StateNoAccess:
 	//case poleconst.StateDenseNetwork:
 	//case poleconst.StateHoleDone:
@@ -191,7 +192,7 @@ func (p *Pole) IsToDo() bool {
 	}
 }
 
-// IsToBeDone returns true if pole receiver is yet to be done (ie not canceled, or already done)
+// IsToBeDone returns true if pole receiver is yet to be done (ie state not canceled, or already done)
 func (p *Pole) IsToBeDone() bool {
 	switch p.State {
 	case poleconst.StateNotSubmitted:
@@ -203,8 +204,8 @@ func (p *Pole) IsToBeDone() bool {
 	//case poleconst.StateDaExpected:
 	//case poleconst.StatePermissionPending:
 	//case poleconst.StateToDo:
-	case poleconst.StateNoAccess:
-		return false
+	//case poleconst.StateMarked:
+	//case poleconst.StateNoAccess:
 	//case poleconst.StateDenseNetwork:
 	//case poleconst.StateHoleDone:
 	//case poleconst.StateIncident:
@@ -221,29 +222,31 @@ func (p *Pole) IsToBeDone() bool {
 	}
 }
 
-//
-//func (p *Pole) IsSettingUp() bool {
-//	switch p.State {
-//	//case poleconst.StateNotSubmitted:
-//	//case poleconst.StateNoGo:
-//	//case poleconst.StateDictToDo:
-//	case poleconst.StateDaToDo:
-//		return true
-//	case poleconst.StateDaExpected:
-//		return true
-//	//case poleconst.StatePermissionPending:
-//	//case poleconst.StateToDo:
-//	//case poleconst.StateNoAccess:
-//	//case poleconst.StateDenseNetwork:
-//	//case poleconst.StateHoleDone:
-//	//case poleconst.StateIncident:
-//	//case poleconst.StateDone:
-//	//case poleconst.StateAttachment:
-//	//case poleconst.StateCancelled:
-//	default:
-//		return false
-//	}
-//}
+// IsAlreadyDone returns true if pole receiver is done (ie has strate done or attachement)
+func (p *Pole) IsAlreadyDone() bool {
+	switch p.State {
+	//case poleconst.StateNotSubmitted:
+	//case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
+	//case poleconst.StateToDo:
+	//case poleconst.StateMarked:
+	//case poleconst.StateNoAccess:
+	//case poleconst.StateDenseNetwork:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	case poleconst.StateDone:
+		return true
+	case poleconst.StateAttachment:
+		return true
+	//case poleconst.StateCancelled:
+	//case poleconst.StateDeleted:
+	default:
+		return false
+	}
+}
 
 func (p *Pole) IsInStateToBeChecked() bool {
 	switch p.State {
@@ -256,6 +259,8 @@ func (p *Pole) IsInStateToBeChecked() bool {
 	case poleconst.StatePermissionPending:
 		return true
 	case poleconst.StateToDo:
+		return true
+	case poleconst.StateMarked:
 		return true
 	case poleconst.StateNoAccess:
 		return true
@@ -364,6 +369,8 @@ func (p *Pole) SetState(state string) {
 	switch state {
 	case poleconst.StateToDo:
 		switch {
+		case p.State == poleconst.StateMarked:
+			// do not change
 		case p.HasProduct(poleconst.ProductDenseNetwork):
 			p.State = poleconst.StateDenseNetwork
 		case p.HasProduct(poleconst.ProductNoAccess):
@@ -411,6 +418,15 @@ func (p *Pole) AddProduct(prd string) {
 	p.Get("Product").Call("sort")
 }
 
+func (p *Pole) RemoveProduct(prd string) {
+	for i, product := range p.Product {
+		if product == prd {
+			p.Product = append(p.Product[:i], p.Product[i+1:]...)
+			return
+		}
+	}
+}
+
 // CheckProductConsistency checks for reciever pole's products consistency. Product can be added or discarded on pole receiver
 func (p *Pole) CheckProductConsistency() {
 	if p.HasProduct(poleconst.ProductTrickyReplace) {
@@ -418,6 +434,10 @@ func (p *Pole) CheckProductConsistency() {
 	}
 	if p.HasProduct(poleconst.ProductReplace) {
 		p.AddProduct(poleconst.ProductCreation)
+	}
+	if p.HasProduct(poleconst.ProductStraighten) {
+		p.RemoveProduct(poleconst.ProductCreation)
+		p.RemoveProduct(poleconst.ProductReplace)
 	}
 }
 
@@ -472,6 +492,8 @@ func PoleStateLabel(state string) string {
 		return poleconst.LabelPermissionPending
 	case poleconst.StateToDo:
 		return poleconst.LabelToDo
+	case poleconst.StateMarked:
+		return poleconst.LabelMarked
 	case poleconst.StateNoAccess:
 		return poleconst.LabelNoAccess
 	case poleconst.StateDenseNetwork:
@@ -498,6 +520,7 @@ func GetStatesValueLabel(showAttachment bool) []*elements.ValueLabelDisabled {
 		elements.NewValueLabelDisabled(poleconst.StateNotSubmitted, poleconst.LabelNotSubmitted, false),
 		elements.NewValueLabelDisabled(poleconst.StateNoGo, poleconst.LabelNoGo, false),
 		elements.NewValueLabelDisabled(poleconst.StateToDo, poleconst.LabelToDo, false),
+		elements.NewValueLabelDisabled(poleconst.StateMarked, poleconst.LabelMarked, false),
 		elements.NewValueLabelDisabled(poleconst.StateNoAccess, poleconst.LabelNoAccess, false),
 		elements.NewValueLabelDisabled(poleconst.StateDenseNetwork, poleconst.LabelDenseNetwork, false),
 		elements.NewValueLabelDisabled(poleconst.StateHoleDone, poleconst.LabelHoleDone, false),
@@ -524,17 +547,21 @@ func GetMaterialsValueLabel() []*elements.ValueLabel {
 
 func GetProductsValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
-		elements.NewValueLabel(poleconst.ProductCreation, poleconst.ProductCreation),
-		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
+		elements.NewValueLabel(poleconst.ProductPruning, poleconst.ProductPruning),
 		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
-		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
-		elements.NewValueLabel(poleconst.ProductCouple, poleconst.ProductCouple),
-		elements.NewValueLabel(poleconst.ProductHauban, poleconst.ProductHauban),
-		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
+		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
+		elements.NewValueLabel(poleconst.ProductMechDigging, poleconst.ProductMechDigging),
 		elements.NewValueLabel(poleconst.ProductTrickyReplace, poleconst.ProductTrickyReplace),
-		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
-		elements.NewValueLabel(poleconst.ProductNoAccess, poleconst.ProductNoAccess),
 		elements.NewValueLabel(poleconst.ProductDenseNetwork, poleconst.ProductDenseNetwork),
+		elements.NewValueLabel(poleconst.ProductNoAccess, poleconst.ProductNoAccess),
+		elements.NewValueLabel(poleconst.ProductCreation, poleconst.ProductCreation),
+		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
+		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
+		elements.NewValueLabel(poleconst.ProductCouple, poleconst.ProductCouple),
+		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
+		elements.NewValueLabel(poleconst.ProductHauban, poleconst.ProductHauban),
+		elements.NewValueLabel(poleconst.ProductStraighten, poleconst.ProductStraighten),
+		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
 		elements.NewValueLabel(poleconst.ProductReplenishment, poleconst.ProductReplenishment),
 		elements.NewValueLabel(poleconst.ProductFarReplenishment, poleconst.ProductFarReplenishment),
 	}
@@ -556,6 +583,8 @@ func PoleRowClassName(status string) string {
 	case poleconst.StatePermissionPending:
 		return "pole-row-permission"
 	case poleconst.StateToDo:
+		return "pole-row-todo"
+	case poleconst.StateMarked:
 		return "pole-row-todo"
 	case poleconst.StateNoAccess:
 		return "pole-row-todo-tricky"

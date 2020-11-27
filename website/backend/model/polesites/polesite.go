@@ -95,7 +95,7 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 		case poleconst.StatePermissionPending:
 			total++
 			blocked++
-		case poleconst.StateToDo:
+		case poleconst.StateToDo, poleconst.StateMarked:
 			total++
 		case poleconst.StateNoAccess:
 			total++
@@ -113,6 +113,7 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 			total++
 			billed++
 			//case poleconst.StateCancelled:
+			//case poleconst.StateDeleted:
 		}
 	}
 	return
