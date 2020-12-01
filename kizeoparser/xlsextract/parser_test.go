@@ -6,15 +6,18 @@ import (
 )
 
 func TestParseFile(t *testing.T) {
-	res, err := ParseFile(testXlsFile)
+	res, dupFound, err := ParseFile(testXlsFile)
 	if err != nil {
 		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
+	}
+
+	if dupFound {
+		t.Logf("Warning: duplicate(s) found in Kizeo Report")
 	}
 
 	for i, poleRecord := range res {
 		fmt.Printf("%4d: %s", i, poleRecord.String())
 	}
-
 }
 
 func TestNewParserFile(t *testing.T) {

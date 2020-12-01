@@ -10,24 +10,37 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\Desktop\TEMPORAIRE\Eiffage Signes\Kizeo TeP\`
-	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201122`
-	report              string = `Synthese Kizeo TeP`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Eiffage Signes\Kizeo TeP\`
+	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201201`
+	report              string = `Synthese Kizeo TeP 20201201test`
 	kizeoCreatePoleDir  bool   = true
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
 )
 
 func Test_CreateReport(t *testing.T) {
-	recs, err := ParseFile(kizeoXlsExtractFile)
+	recs, dupFound, err := ParseFile(kizeoXlsExtractFile)
 	if err != nil {
 		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
+	}
+
+	if dupFound {
+		t.Logf("Warning: duplicate(s) found in Kizeo Report")
 	}
 
 	err = WriteXlsReport(kizeoXlsReportFile, recs)
 	if err != nil {
 		t.Fatalf("WriteXlsReport returned unexpected: %s\n", err.Error())
 	}
+}
+
+func Test_CheckDuplicate(t *testing.T) {
+	recs, err := ReadXlsReportFromFile(kizeoXlsReportFile)
+	if err != nil {
+		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
+	}
+
+	checkDuplicate(recs, t)
 }
 
 func Test_ExtractReport(t *testing.T) {

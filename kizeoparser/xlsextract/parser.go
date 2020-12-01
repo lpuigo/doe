@@ -22,21 +22,22 @@ func NewParserFile(xlsfile string) (*xlsPoleParser, error) {
 		return nil, err
 	}
 
-	parser.PrintColumnNames()
+	//parser.PrintColumnNames()
 	return parser, nil
 }
 
-func ParseFile(xlsfile string) ([]*PoleRecord, error) {
+func ParseFile(xlsfile string) ([]*PoleRecord, bool, error) {
 	parser, err := NewParserFile(xlsfile)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	dictRefs := make(map[string]int)
 	res := []*PoleRecord{}
+	dupFound := false
 	for parser.Next() {
 		rec, err := parser.ParseRecord()
 		if err != nil {
-			return nil, fmt.Errorf("could not parse row %4d: %s\n", parser.rowNum, err)
+			return nil, false, fmt.Errorf("could not parse row %4d: %s\n", parser.rowNum, err)
 		}
 
 		// check for duplicate
@@ -45,8 +46,9 @@ func ParseFile(xlsfile string) ([]*PoleRecord, error) {
 		nb := dictRefs[sroref]
 		if nb > 1 {
 			rec.Ref += fmt.Sprintf(" doublon %d", nb-1)
+			dupFound = true
 		}
 		res = append(res, rec)
 	}
-	return res, nil
+	return res, dupFound, nil
 }

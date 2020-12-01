@@ -6,7 +6,7 @@ import (
 )
 
 func TestWriteXlsReport(t *testing.T) {
-	recs, err := ParseFile(testXlsFile)
+	recs, _, err := ParseFile(testXlsFile)
 	if err != nil {
 		t.Fatalf("ParseFile returned unexpected: %s\n", err.Error())
 	}
