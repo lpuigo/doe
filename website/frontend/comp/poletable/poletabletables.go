@@ -89,7 +89,7 @@ func (ptm *PoleTableModel) SetSelectedPole(vm *hvue.VM, p *ps.Pole) {
 		return
 	}
 	ptm = &PoleTableModel{Object: vm.Object}
-	//if p.Id == ptm.Context.SelectedPole {
+	//if p.Id == ptm.Context.SelectedPoleId {
 	//	// no change ... skip
 	//	return
 	//}
@@ -97,7 +97,7 @@ func (ptm *PoleTableModel) SetSelectedPole(vm *hvue.VM, p *ps.Pole) {
 		// deleted pole are not selectable
 		return
 	}
-	ptm.Context.SelectedPole = p.Id
+	ptm.Context.SelectedPoleId = p.Id
 	vm.Emit("update:context", ptm.Context)
 }
 
@@ -112,7 +112,7 @@ func (ptm *PoleTableModel) TableRowClassName(vm *hvue.VM, rowInfo *js.Object) st
 	ptm = &PoleTableModel{Object: vm.Object}
 	p := &ps.Pole{Object: rowInfo.Get("row")}
 	selected := ""
-	if ptm.Context.SelectedPole == p.Id {
+	if ptm.Context.SelectedPoleId == p.Id {
 		selected = "pole-selected "
 	}
 	return selected + ps.PoleRowClassName(p.State)

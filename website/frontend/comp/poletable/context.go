@@ -9,8 +9,8 @@ import (
 type Context struct {
 	*js.Object
 
-	Mode         string `js:"Mode"`
-	SelectedPole int    `js:"SelectedPole"`
+	Mode           string `js:"Mode"`
+	SelectedPoleId int    `js:"SelectedPoleId"`
 
 	AttachmentVisible  bool     `js:"attachmentVisible"`
 	AttachmentRange    []string `js:"attachmentRange"`
@@ -20,12 +20,12 @@ type Context struct {
 	RefGroupVisible bool `js:"refGroupVisible"`
 }
 
-const None int = -100
+const None int = -100000
 
 func NewContext(mode string) *Context {
 	c := &Context{Object: tools.O()}
 	c.Mode = mode
-	c.SelectedPole = None
+	c.SelectedPoleId = None
 
 	c.AttachmentVisible = false
 	c.AttachmentDate = date.TodayAfter(0)

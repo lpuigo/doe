@@ -194,7 +194,7 @@ func (mpm *MainPageModel) CenterMapOnLatLong(lat, long float64) {
 
 func (mpm *MainPageModel) SelectPole(pm *polemap.PoleMarker, drag bool) {
 	mpm.SelectedPoleMarker = pm
-	mpm.TableContext.SelectedPole = pm.Pole.Id
+	mpm.TableContext.SelectedPoleId = pm.Pole.Id
 	pm.StartEditMode(drag)
 	mpm.IsPoleSelected = true
 
@@ -345,7 +345,7 @@ func (mpm *MainPageModel) MarkerClick(poleMarkerObj, event *js.Object) {
 
 // TablePoleSelected handles selected pole via PoleTable Component
 func (mpm *MainPageModel) TablePoleSelected(context *poletable.Context) {
-	pm := mpm.GetPoleMarkerById(context.SelectedPole)
+	pm := mpm.GetPoleMarkerById(context.SelectedPoleId)
 	if pm == nil {
 		return
 	}
@@ -396,7 +396,7 @@ func (mpm *MainPageModel) CloseEditPole() {
 	mpm.IsPoleSelected = false
 	mpm.SelectedPoleMarker.EndEditMode(true)
 	mpm.SelectedPoleMarker = nil
-	mpm.TableContext.SelectedPole = poletable.None
+	mpm.TableContext.SelectedPoleId = poletable.None
 }
 
 func (mpm *MainPageModel) UpdateSearchLocation(vm *hvue.VM) {
@@ -424,7 +424,7 @@ func (mpm *MainPageModel) SearchLocation(vm *hvue.VM) {
 
 // AddPole add given Pole to Polesite, and select new pertaining PoleMarker
 func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
-	mpm.Polesite.AddPole(newPole)
+	mpm.Polesite.AddNewPole(newPole)
 	mpm.RefreshMap()
 
 	newPoleMarker := mpm.GetPoleMarker(newPole)

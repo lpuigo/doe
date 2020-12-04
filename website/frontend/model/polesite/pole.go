@@ -47,7 +47,7 @@ func NewPole() *Pole {
 		Object: tools.O(),
 	}
 
-	np.Id = -100
+	np.Id = -100000
 	np.Ref = ""
 	np.City = ""
 	np.Address = ""

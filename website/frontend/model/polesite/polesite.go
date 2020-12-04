@@ -34,6 +34,7 @@ type Polesite struct {
 	Poles      []*Pole `js:"Poles"`
 }
 
+// getNextId returns the next highest positive pole Id
 func (ps *Polesite) getNextId() int {
 	// ps.Poles must be sorted by ascending Pole Ids
 	// so last Pole has the highest id
@@ -43,7 +44,18 @@ func (ps *Polesite) getNextId() int {
 	}
 	// returns highest + 1
 	return ps.Poles[nbPoles-1].Id + 1
+}
 
+// getNextAddId returns the next lowest to be added pole Id (id negative, starting at -1)
+func (ps *Polesite) getNextAddId() int {
+	// ps.Poles must be sorted by ascending Pole Ids
+	// so last Pole has the highest id
+	nbPoles := len(ps.Poles)
+	if nbPoles == 0 {
+		return -1
+	}
+	// returns lowest - 1
+	return ps.Poles[0].Id - 1
 }
 
 // GetPoles returns all active (ie not deleted) PoleSite' Poles
@@ -62,6 +74,12 @@ func (ps *Polesite) GetPoles() []*Pole {
 func (ps *Polesite) AddPole(pole *Pole) {
 	pole.Id = ps.getNextId()
 	ps.Poles = append(ps.Poles, pole)
+}
+
+// AddNewPole adds the given new to be added pole to polesite, and sets pole's new negative Id to ensure Id unicity
+func (ps *Polesite) AddNewPole(pole *Pole) {
+	pole.Id = ps.getNextAddId()
+	ps.Poles = append([]*Pole{pole}, ps.Poles...)
 }
 
 // DeletePole deletes the given pole and returns true if it was found and deleted, false otherwise (no-op)

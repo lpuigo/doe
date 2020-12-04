@@ -49,6 +49,26 @@ func (ps *PoleSite) GetUpdateDate() string {
 	return ps.UpdateDate
 }
 
+func (ps *PoleSite) Len() int {
+	return len(ps.Poles)
+}
+
+func (ps *PoleSite) Swap(i, j int) {
+	ps.Poles[i], ps.Poles[j] = ps.Poles[j], ps.Poles[i]
+}
+
+func (ps *PoleSite) Less(i, j int) bool {
+	return ps.Poles[i].Id < ps.Poles[j].Id
+}
+
+// NextPoleId returns Id for a new pole to be added. Assume reciever PoleSite is sorted
+func (ps *PoleSite) NextPoleId() int {
+	if len(ps.Poles) == 0 {
+		return 0
+	}
+	return ps.Poles[len(ps.Poles)-1].Id + 1
+}
+
 func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 	psi := fm.NewBEPolesiteInfo()
 
@@ -325,35 +345,65 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) []string {
 	ignoreList := []string{}
 
 	resPoleSite := *ups //shallow copy of updated PoleSite
-	origPoles := make(map[int]*Pole)
-	for _, pole := range ps.Poles {
-		origPoles[pole.Id] = pole
+	updatedPoles := make(map[int]*Pole)
+	for _, updatedPole := range ups.Poles {
+		updatedPoles[updatedPole.Id] = updatedPole
 	}
-	updtPoles := []*Pole{}
-	for _, updtPole := range ups.Poles {
-		origPole, exists := origPoles[updtPole.Id]
+
+	// browse existing poles
+	sort.Sort(ps)
+	for opId, origPole := range ps.Poles {
+		updatedPole, exists := updatedPoles[origPole.Id]
 		if !exists {
-			// its a new pole => let's add it with new timestamp
-			updtPole.TimeStamp = timeStamp
-			updtPoles = append(updtPoles, updtPole)
+			// origPole is not described in ups => keep it as is
 			continue
 		}
-		if updtPole.IsEqual(origPole) {
-			// unchanged => let's add it unchanged
-			updtPoles = append(updtPoles, origPole)
+		if updatedPole.IsEqual(origPole) {
+			// origPole unchanged => keep it as is
+			delete(updatedPoles, updatedPole.Id)
 			continue
 		}
-		// some change occured
-		if updtPole.TimeStamp != origPole.TimeStamp {
+		// updatedPole has changed compared to origPole
+		if updatedPole.TimeStamp != origPole.TimeStamp {
 			// updated pole is outdated compared to current pole info, let's ignore update and keep origPole
-			updtPoles = append(updtPoles, origPole)
-			ignoreList = append(ignoreList, updtPole.ExtendedRef())
+			ignoreList = append(ignoreList, updatedPole.ExtendedRef())
+			delete(updatedPoles, updatedPole.Id)
 			continue
 		}
-		updtPole.TimeStamp = timeStamp
-		updtPoles = append(updtPoles, updtPole)
+		// updatedPole has changed and is legit => update timstamp and replace origPole
+		updatedPole.TimeStamp = timeStamp
+		ps.Poles[opId] = updatedPole
+		delete(updatedPoles, updatedPole.Id)
 	}
-	resPoleSite.Poles = updtPoles
+
+	// browse remaining (unvisited) updatePoles (should be new poles (ie with id < 0))
+	if len(updatedPoles) > 0 {
+		newPoles := make([]*Pole, len(updatedPoles))
+		npId := 0
+		for updatedPoleId, updatedPole := range updatedPoles {
+			if updatedPoleId > 0 {
+				ignoreList = append(ignoreList, "Unexpected "+updatedPole.ExtendedRef())
+				continue
+			}
+			if updatedPole.State == poleconst.StateDeleted {
+				// ignore new added deleted pole
+				continue
+			}
+			newPoles[npId] = updatedPole
+			npId++
+		}
+		newPoles = newPoles[:npId] // remove unused preallocated newPoles entries
+		// sort new added poles in creation order (descending id)
+		resPoleSite.Poles = newPoles
+		sort.Sort(sort.Reverse(&resPoleSite))
+		for _, newPole := range newPoles {
+			newPole.TimeStamp = timeStamp
+			newPole.Id = ps.NextPoleId()
+			ps.Poles = append(ps.Poles, newPole)
+		}
+	}
+	resPoleSite.Poles = ps.Poles
+
 	*ps = resPoleSite //shallow copy of updated PoleSite on receiver PoleSite
 
 	return ignoreList
@@ -390,9 +440,8 @@ func (ps *PoleSite) checkPoleId() []*ConsistencyMsg {
 	if len(ps.Poles) <= 1 {
 		return res
 	}
-	sort.Slice(ps.Poles, func(i, j int) bool {
-		return ps.Poles[i].Id < ps.Poles[j].Id
-	})
+
+	sort.Sort(ps)
 
 	curId := ps.Poles[0].Id
 	for numPole, pole := range ps.Poles[1:] {
