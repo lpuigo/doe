@@ -55,7 +55,11 @@ func (ps *Polesite) getNextAddId() int {
 		return -1
 	}
 	// returns lowest - 1
-	return ps.Poles[0].Id - 1
+	firstId := ps.Poles[0].Id
+	if firstId > 0 {
+		firstId = 0
+	}
+	return firstId - 1
 }
 
 // GetPoles returns all active (ie not deleted) PoleSite' Poles
