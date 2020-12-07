@@ -360,3 +360,72 @@ func GetPolesiteRefKizeo(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 
 	logmsg.AddInfoResponse(fmt.Sprintf("Kizeo Refs for Polesite id %d (%s): %d", rpsid, psr.PoleSite.Ref, len(krDict.Refs)), http.StatusOK)
 }
+
+// PostPolesiteImport
+func PostPolesiteImport(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("PostPolesiteImport").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	reqPolesiteId := mux.Vars(r)["psid"]
+	rpsid, err := strconv.Atoi(reqPolesiteId)
+	if err != nil {
+		AddError(w, logmsg, "mis-formatted Polesite id '"+reqPolesiteId+"'", http.StatusBadRequest)
+		return
+	}
+
+	psr := mgr.Polesites.GetById(rpsid)
+	if psr == nil {
+		AddError(w, logmsg, fmt.Sprintf("Polesite with id %d does not exist", rpsid), http.StatusNotFound)
+		return
+	}
+
+	// Parse our multipart form, 30 << 20 specifies a maximum
+	// upload of 30 MB files.
+	if r.ParseMultipartForm(30<<20) != nil {
+		AddError(w, logmsg, "file info missing", http.StatusBadRequest)
+		return
+	}
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		AddError(w, logmsg, "error retrieving the file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(strings.ToUpper(handler.Filename), ".XLSX") {
+		AddError(w, logmsg, "uploaded file is not a XLSx file", http.StatusBadRequest)
+		return
+	}
+
+	type importPolesResult struct {
+		Errors []string
+		Poles  []*polesites.Pole
+	}
+
+	var ipr *importPolesResult
+	ps, err := polesites.FromXLS(file)
+	if err != nil {
+		ipr = &importPolesResult{
+			Errors: []string{err.Error()},
+			Poles:  []*polesites.Pole{},
+		}
+	} else {
+		msgs := ps.CheckPoleSiteConsistency()
+		errs := make([]string, len(msgs))
+		for i, msg := range msgs {
+			errs[i] = msg.ShortString()
+		}
+		ipr = &importPolesResult{
+			Errors: errs,
+			Poles:  ps.Poles,
+		}
+	}
+
+	json.NewEncoder(w).Encode(ipr)
+
+	logmsg.AddInfoResponse(fmt.Sprintf("%d poles and %d messages for Polesite id %d (%s) returned", len(ipr.Poles), len(ipr.Errors), rpsid, psr.PoleSite.Ref), http.StatusOK)
+}

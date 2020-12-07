@@ -427,6 +427,18 @@ func (m ConsistencyMsg) String() string {
 	return res
 }
 
+func (m ConsistencyMsg) ShortString() string {
+	res := m.Category + ":" + m.Msg
+	if len(m.Poles) > 0 {
+		poleNames := make([]string, len(m.Poles))
+		for i, pole := range m.Poles {
+			poleNames[i] = pole.ExtendedRef()
+		}
+		res += " (" + strings.Join(poleNames, ", ") + ")"
+	}
+	return res
+}
+
 func (ps *PoleSite) CheckPoleSiteConsistency() []*ConsistencyMsg {
 	res := []*ConsistencyMsg{}
 	res = append(res, ps.checkPoleId()...)

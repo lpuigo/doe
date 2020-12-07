@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/lpuig/ewin/doe/website/frontend/comp/poleinfoupdate"
 	"strconv"
 	"strings"
+
+	"github.com/lpuig/ewin/doe/website/frontend/comp/poleinfoupdate"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
@@ -96,14 +97,22 @@ type MainPageModel struct {
 	IsPoleSelected     bool                `js:"IsPoleSelected"`
 	ActiveChapter      []string            `js:"ActiveChapter"`
 	TableContext       *poletable.Context  `js:"TableContext"`
-	SearchAddress      string              `js:"SearchAddress"`
-	SearchAddressMsg   string              `js:"SearchAddressMsg"`
-	VisibleSearchLoc   bool                `js:"VisibleSearchLoc"`
-	VisibleTools       bool                `js:"VisibleTools"`
-	KizeoComplete      bool                `js:"KizeoComplete"`
-	kizeoReport        *kizeoReport        `js:"KizeoReport"`
-	Reference          string              `js:"Reference"`
-	Dirty              bool                `js:"Dirty"`
+
+	SearchAddress    string `js:"SearchAddress"`
+	SearchAddressMsg string `js:"SearchAddressMsg"`
+
+	VisibleSearchLoc    bool   `js:"VisibleSearchLoc"`
+	VisibleTools        bool   `js:"VisibleTools"`
+	VisibleToolsChapter string `js:"VisibleToolsChapter"`
+
+	KizeoComplete bool         `js:"KizeoComplete"`
+	kizeoReport   *kizeoReport `js:"KizeoReport"`
+
+	ImportPoleComplete bool              `js:"ImportPoleComplete"`
+	ImportPoleReport   *ImportPoleReport `js:"ImportPoleReport"`
+
+	Reference string `js:"Reference"`
+	Dirty     bool   `js:"Dirty"`
 
 	//ColumnSelector *poletable.ColumnSelector `js:"ColumnSelector"`
 }
@@ -126,8 +135,13 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false
 	mpm.VisibleTools = false
+	mpm.VisibleToolsChapter = "1"
 	mpm.KizeoComplete = false
 	mpm.kizeoReport = NewKizeoReport()
+
+	mpm.ImportPoleComplete = false
+	mpm.ImportPoleReport = NewImportPoleReport()
+
 	mpm.Reference = ""
 	mpm.Dirty = false
 	//mpm.ColumnSelector = poletable.DefaultColumnSelector()
@@ -222,6 +236,10 @@ func (mpm *MainPageModel) RefExportXlsURL() string {
 
 func (mpm *MainPageModel) KizeoReportURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/kizeo"
+}
+
+func (mpm *MainPageModel) ImportPoleURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/import"
 }
 
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
@@ -435,6 +453,14 @@ func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
 	mpm.SelectPole(newPoleMarker, true)
 }
 
+// AddPoleList add given Pole Slice to Polesite
+func (mpm *MainPageModel) AddPoleList(poles []*polesite.Pole) {
+	for _, pole := range poles {
+		mpm.Polesite.AddNewPole(pole)
+	}
+	mpm.RefreshMap()
+}
+
 //
 func (mpm *MainPageModel) CreatePole(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
@@ -516,14 +542,14 @@ type kizeoRefs struct {
 	Refs map[string]string `js:"Refs"`
 }
 
-func (mpm *MainPageModel) UploadError(vm *hvue.VM, err, file *js.Object) {
+func (mpm *MainPageModel) KizeoUploadError(vm *hvue.VM, err, file *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
 	mpm.VisibleTools = false
 	mpm.KizeoComplete = false
 	message.ErrorStr(vm, err.String(), true)
 }
 
-func (mpm *MainPageModel) UploadSuccess(vm *hvue.VM, response, file *js.Object) {
+func (mpm *MainPageModel) KizeoUploadSuccess(vm *hvue.VM, response, file *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
 	refs := &kizeoRefs{Object: response}
 	//mpm.kizeoReport = &kizeoReport{Object: response}
@@ -578,6 +604,59 @@ func (mpm *MainPageModel) BeforeUpload(vm *hvue.VM, file *js.Object) bool {
 		return false
 	}
 	return true
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Import Pole Upload Methods
+
+type ImportPoleReport struct {
+	*js.Object
+	Errors []string         `js:"Errors"`
+	Poles  []*polesite.Pole `js:"Poles"`
+}
+
+func NewImportPoleReport() *ImportPoleReport {
+	ipr := &ImportPoleReport{Object: tools.O()}
+	ipr.Errors = []string{}
+	ipr.Poles = []*polesite.Pole{}
+	return ipr
+}
+
+func (mpm *MainPageModel) ImportPoleUploadError(vm *hvue.VM, err, file *js.Object) {
+	mpm = &MainPageModel{Object: vm.Object}
+	mpm.VisibleTools = false
+	mpm.ImportPoleComplete = false
+	message.ErrorStr(vm, err.String(), true)
+}
+
+func (mpm *MainPageModel) ImportPoleUploadSuccess(vm *hvue.VM, response, file *js.Object) {
+	mpm = &MainPageModel{Object: vm.Object}
+	mpm.ImportPoleReport = &ImportPoleReport{Object: response}
+	if len(mpm.ImportPoleReport.Errors) == 1 && len(mpm.ImportPoleReport.Poles) == 0 {
+		message.WarningStr(vm, "Import d'appui : "+mpm.ImportPoleReport.Errors[0])
+		return
+	}
+	mpm.AddPoleList(mpm.ImportPoleReport.Poles)
+
+	mpm.ImportPoleComplete = true
+}
+
+func (mpm *MainPageModel) GetImportPoleReportErrorsRefs(max int) []string {
+	nbKo := len(mpm.ImportPoleReport.Errors)
+	nbKoExemples := nbKo
+	offset := 0
+	if nbKo > max {
+		nbKoExemples = max
+		offset = 1
+	}
+	res := make([]string, nbKoExemples)
+	for i := 0; i < nbKoExemples-offset; i++ {
+		res[i] = mpm.ImportPoleReport.Errors[i]
+	}
+	if nbKoExemples < nbKo {
+		res[nbKoExemples-1] = "..."
+	}
+	return res
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
