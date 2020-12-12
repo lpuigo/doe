@@ -11,8 +11,8 @@ import (
 
 const (
 	kizeoXlsExtractDir  string = `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Eiffage Signes\Kizeo TeP\`
-	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201201`
-	report              string = `Synthese Kizeo TeP 20201201test`
+	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20201208`
+	report              string = `Synthese Kizeo TeP 20201208`
 	kizeoCreatePoleDir  bool   = true
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
