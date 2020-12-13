@@ -70,13 +70,16 @@ func (s *Site) GetInfo(clientByName clients.ClientByName) *fm.RipsiteInfo {
 
 	client := clientByName(s.Client)
 	if client == nil {
-
+		//rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = 0, 0, 0
+		//rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = 0, 0, 0
+		//rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = 0, 0, 0
+		return rsi
 	}
 	itms, err := s.Itemize(client.Bpu, false)
 	if err != nil {
-		rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = 0, 0, 0
-		rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = 0, 0, 0
-		rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = 0, 0, 0
+		//rsi.NbPoints, rsi.NbPointsBlocked, rsi.NbPointsDone = 0, 0, 0
+		//rsi.NbPulling, rsi.NbPullingBlocked, rsi.NbPullingDone = 0, 0, 0
+		//rsi.NbJunction, rsi.NbJunctionBlocked, rsi.NbJunctionDone = 0, 0, 0
 		return rsi
 	}
 	points, pulling, junction := s.getPointsNumbers(itms)
@@ -439,6 +442,9 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, doneOnly bool) ([]*items
 		//actorsString := strings.Join(actors, ", ")
 
 		qty2 := measurement.NbFiber
+		if currentBpu.OptionMeasurementPricePerFiber {
+			qty1 = qty2
+		}
 		info := fmt.Sprintf("Mesure %d fibres - %d epissures", qty2, measurement.NbSplice())
 		item := items.NewItem(s.Client, s.Ref, activityMeasurement, measurement.DestNodeName, info, measurement.State.DateEnd, "", mainArticle, qty1, qty2, todo, done, blocked, false)
 		item.StartDate = measurement.State.DateStart

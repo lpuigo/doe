@@ -9,8 +9,9 @@ import (
 )
 
 type Bpu struct {
-	Activities map[string]CategoryArticles // map[Activity]map[Category][]*Article
-	Boxes      map[string]map[string]*Box  // map[Category]map[Name]*Box
+	Activities                     map[string]CategoryArticles // map[Activity]map[Category][]*Article
+	Boxes                          map[string]map[string]*Box  // map[Category]map[Name]*Box
+	OptionMeasurementPricePerFiber bool
 }
 
 func NewBpu() *Bpu {
