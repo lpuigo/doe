@@ -115,7 +115,6 @@ func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 		}
 		AddError(w, logmsg, "user not authorized", http.StatusUnauthorized)
 		return
-		// Todo Exit
 	}
 
 	// found a correct one, set user

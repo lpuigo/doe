@@ -1,10 +1,18 @@
 package manager
 
 type ManagerConfig struct {
-	WorksitesDir  string
-	RipsitesDir   string
-	PolesitesDir  string
-	FoasitesDir   string
+	WorksitesDir      string
+	IsWorksitesActive bool
+
+	RipsitesDir      string
+	IsRipsitesActive bool
+
+	PolesitesDir      string
+	IsPolesitesActive bool
+
+	FoasitesDir      string
+	IsFoasitesActive bool
+
 	UsersDir      string
 	ActorsDir     string
 	ActorInfosDir string

@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/model/actorinfos"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
@@ -32,6 +33,7 @@ type Manager struct {
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
 	CurrentUser    *users.UserRecord
+	Config         ManagerConfig
 }
 
 func NewManager(conf ManagerConfig) (*Manager, error) {
@@ -117,6 +119,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		TemplateEngine: te,
 		SessionStore:   session.NewSessionStore(conf.SessionKey),
 		//CurrentUser: is set during session control transaction
+		Config: conf,
 	}
 
 	err = m.Reload()
@@ -138,27 +141,35 @@ func (m *Manager) Reload() error {
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d public holidays dates", m.DaysOff.NbDays()))
 
-	err = m.Worksites.LoadDirectory()
-	if err != nil {
-		return fmt.Errorf("could not populate worksites: %s", err.Error())
+	if m.Config.IsWorksitesActive {
+		err = m.Worksites.LoadDirectory()
+		if err != nil {
+			return fmt.Errorf("could not populate worksites: %s", err.Error())
+		}
 	}
-	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", m.Worksites.NbWorsites()))
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Worksites", m.Worksites.NbWorksites()))
 
-	err = m.Ripsites.LoadDirectory()
-	if err != nil {
-		return fmt.Errorf("could not populate Ripsites: %s", err.Error())
+	if m.Config.IsRipsitesActive {
+		err = m.Ripsites.LoadDirectory()
+		if err != nil {
+			return fmt.Errorf("could not populate ripsites: %s", err.Error())
+		}
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Ripsites", m.Ripsites.NbSites()))
 
-	err = m.Polesites.LoadDirectory()
-	if err != nil {
-		return fmt.Errorf("could not populate Polesites: %s", err.Error())
+	if m.Config.IsPolesitesActive {
+		err = m.Polesites.LoadDirectory()
+		if err != nil {
+			return fmt.Errorf("could not populate polesites: %s", err.Error())
+		}
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Polesites", m.Polesites.NbSites()))
 
-	err = m.Foasites.LoadDirectory()
-	if err != nil {
-		return fmt.Errorf("could not populate Foasites: %s", err.Error())
+	if m.Config.IsFoasitesActive {
+		err = m.Foasites.LoadDirectory()
+		if err != nil {
+			return fmt.Errorf("could not populate foasites: %s", err.Error())
+		}
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Foasites", m.Foasites.NbSites()))
 

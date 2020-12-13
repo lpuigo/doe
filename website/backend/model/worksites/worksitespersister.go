@@ -33,7 +33,7 @@ func NewWorkSitesPersist(dir string) (*WorkSitesPersister, error) {
 	return wsp, nil
 }
 
-func (wsp WorkSitesPersister) NbWorsites() int {
+func (wsp WorkSitesPersister) NbWorksites() int {
 	return len(wsp.workSites)
 }
 
