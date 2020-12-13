@@ -22,6 +22,9 @@ type Actor struct {
 	Comment   string
 }
 
+// ActorsByGroupId is a getter function to retrieve actors list by GroupId. returns nil if group's id not found
+type ActorsByGroupId func(groupId int) []*Actor
+
 func NewActor(firstName, lastName, company string) *Actor {
 	return &Actor{
 		Id:        0,

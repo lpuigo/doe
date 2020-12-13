@@ -2,14 +2,15 @@ package manager
 
 import "github.com/lpuig/ewin/doe/website/backend/model/items"
 
-// visiblePolesiteFilter returns a filtering function on CurrentUser.Clients visibility
+// visibleItemizableSiteByClientFilter returns a filtering function on CurrentUser.Clients visibility
 func (m *Manager) visibleItemizableSiteByClientFilter() items.IsItemizableSiteVisible {
-	if len(m.CurrentUser.Clients) == 0 {
-		return func(site items.ItemizableSite) bool { return true }
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return func(site items.ItemizableSite) bool { return false }
 	}
 	isVisible := make(map[string]bool)
-	for _, client := range m.CurrentUser.Clients {
-		isVisible[client] = true
+	for _, client := range clts {
+		isVisible[client.Name] = true
 	}
 	return func(site items.ItemizableSite) bool {
 		return isVisible[site.GetClient()]

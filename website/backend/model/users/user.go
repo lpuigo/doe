@@ -5,6 +5,7 @@ type User struct {
 	Name        string
 	Password    string
 	Clients     []string
+	Groups      []int
 	Permissions map[string]bool
 }
 
@@ -14,6 +15,7 @@ func NewUser(name string) *User {
 		Name:        name,
 		Password:    "",
 		Clients:     []string{},
+		Groups:      []int{},
 		Permissions: make(map[string]bool),
 	}
 }

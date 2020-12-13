@@ -2,6 +2,7 @@ package manager
 
 import (
 	"encoding/json"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/groups"
 	"io"
@@ -16,7 +17,7 @@ func (m Manager) UpdateGroups(updatedGroups []*groups.Group) error {
 	return m.Groups.UpdateGroups(updatedGroups)
 }
 
-func (m Manager) GetGroupByName() groups.GroupByName {
+func (m Manager) GenGroupByName() groups.GroupByName {
 	groupByName := make(map[string]*groups.Group)
 	for _, group := range m.Groups.GetGroups() {
 		groupByName[group.Name] = group
@@ -26,7 +27,23 @@ func (m Manager) GetGroupByName() groups.GroupByName {
 	}
 }
 
-func (m Manager) GetGroupById() groups.GroupById {
+func (m Manager) GenActorsByGroupId() actors.ActorsByGroupId {
+	today := date.Today().String()
+	actorsByGroupId := make(map[int][]*actors.Actor)
+	for _, actor := range m.Actors.GetAllActors() {
+		groupId := actor.Groups.ActiveGroupOnDate(today)
+		if groupId == -1 {
+			continue
+		}
+		actorsList := actorsByGroupId[groupId]
+		actorsByGroupId[groupId] = append(actorsList, actor)
+	}
+	return func(groupId int) []*actors.Actor {
+		return actorsByGroupId[groupId]
+	}
+}
+
+func (m Manager) GenGroupById() groups.GroupById {
 	groupById := make(map[int]*groups.Group)
 	for _, group := range m.Groups.GetGroups() {
 		groupById[group.Id] = group

@@ -63,5 +63,5 @@ func (m Manager) GetActorsMonthlyTimeSheetsXLS(writer io.Writer, date string) er
 	})
 	actorRhs := m.ActorInfos.GetActorHRsByActors(actors, true)
 	monthlytimesheet := m.TimeSheets.GetMonthlyTimeSheetFor(date, actors)
-	return m.TemplateEngine.GetActorsMonthlyTimeSheetTemplate(writer, actorRhs, m.GetGroupById(), monthlytimesheet, m.DaysOff.days)
+	return m.TemplateEngine.GetActorsMonthlyTimeSheetTemplate(writer, actorRhs, m.GenGroupById(), monthlytimesheet, m.DaysOff.days)
 }

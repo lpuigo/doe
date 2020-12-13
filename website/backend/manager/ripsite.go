@@ -13,12 +13,13 @@ import (
 
 // visibleRipsiteFilter returns a filtering function on CurrentUser.Clients visibility
 func (m *Manager) visibleRipsiteFilter() rs.IsSiteVisible {
-	if len(m.CurrentUser.Clients) == 0 {
-		return func(*rs.Site) bool { return true }
+	clts, err := m.GetCurrentUserClients()
+	if err != nil {
+		return func(*rs.Site) bool { return false }
 	}
 	isVisible := make(map[string]bool)
-	for _, client := range m.CurrentUser.Clients {
-		isVisible[client] = true
+	for _, client := range clts {
+		isVisible[client.Name] = true
 	}
 	return func(s *rs.Site) bool {
 		return isVisible[s.Client]
@@ -29,7 +30,7 @@ func (m *Manager) visibleRipsiteFilter() rs.IsSiteVisible {
 func (m Manager) GetRipsitesInfo(writer io.Writer) error {
 	clientByName := m.genGetClient()
 	rsis := []*fm.RipsiteInfo{}
-	for _, rsr := range m.Ripsites.GetAll(m.visibleRipsiteFilter()) {
+	for _, rsr := range m.Ripsites.GetAll(m.visibleItemizableSiteByClientFilter()) {
 		rsis = append(rsis, rsr.Site.GetInfo(clientByName))
 	}
 

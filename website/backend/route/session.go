@@ -55,9 +55,25 @@ type authentClient struct {
 
 func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
+	getActorsByGroupId := mgr.GenActorsByGroupId()
+	getGroupById := mgr.GenGroupById()
+	clientActors := make(map[string][]*actors.Actor)
+	for _, groupId := range mgr.CurrentUser.Groups {
+		group := getGroupById(groupId)
+		if group == nil {
+			continue
+		}
+		groupActors := getActorsByGroupId(groupId)
+		for _, clientName := range group.Clients {
+			acts := clientActors[clientName]
+			clientActors[clientName] = append(acts, groupActors...)
+		}
+	}
+
 	for _, client := range clients {
-		actors := mgr.Actors.GetActorsByClient(false, client.Name)
-		authentActors := authentActorsFrom(actors)
+		//actors := mgr.Actors.GetActorsByClient(false, client.Name)
+		//authentActors := authentActorsFrom(actors)
+		authentActors := authentActorsFrom(clientActors[client.Name])
 		authClient := authentClient{
 			Name:     client.Name,
 			Teams:    client.Teams,
@@ -95,7 +111,7 @@ func (au *authentUser) SetFrom(mgr *mgr.Manager, clients []*clients.Client) {
 	au.DaysOff = mgr.DaysOff.GetDays()
 }
 
-// GetUser checks for session cookie, and return pertaining user
+// GetUser checks for session cookie, and returns pertaining user
 //
 // If user is not authenticated, the session is removed
 func GetUser(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

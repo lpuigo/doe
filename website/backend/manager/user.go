@@ -9,12 +9,12 @@ import (
 
 // genGetClient returns a GetClientByName function: func(clientName string) *clients.Client. Returned client is nil if clientName is not found
 func (m *Manager) genGetClient() clients.ClientByName {
+	clientByName := make(map[string]*clients.Client)
+	for _, client := range m.Clients.GetAllClients() {
+		clientByName[client.Name] = client
+	}
 	return func(clientName string) *clients.Client {
-		cr := m.Clients.GetByName(clientName)
-		if cr == nil {
-			return nil
-		}
-		return cr.Client
+		return clientByName[clientName]
 	}
 }
 
@@ -61,21 +61,52 @@ func (m Manager) GetCurrentUserClientsName() []string {
 	return []string{}
 }
 
-// GetCurrentUserClients returns Clients visible by current user (if user has no client, returns all clients)
+// GetCurrentUserClients returns slice of Clients visible by current user (if user has no client, returns all clients)
+//
+// visible Clients are identified by User's group (no group => all client)
+//
+// If no User's Group, by User's Client
 func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
-	res := []*clients.Client{}
+	clientDict := make(map[string]*clients.Client)
 	if m.CurrentUser == nil {
 		return nil, nil
 	}
+	getClientByName := m.genGetClient()
+	// Set Clients via User's Groups
+	if len(m.CurrentUser.Groups) != 0 {
+		getGroupById := m.GenGroupById()
+		for _, groupId := range m.CurrentUser.Groups {
+			group := getGroupById(groupId)
+			if group == nil {
+				continue
+			}
+			for _, clientName := range group.Clients {
+				client := getClientByName(clientName)
+				if client == nil {
+					continue
+				}
+				clientDict[clientName] = client
+			}
+		}
+		res := make([]*clients.Client, len(clientDict))
+		i := 0
+		for _, client := range clientDict {
+			res[i] = client
+			i++
+		}
+		return res, nil
+	}
+	// Set Clients via Users's Clients
 	if len(m.CurrentUser.Clients) == 0 {
 		return m.Clients.GetAllClients(), nil
 	}
+	res := []*clients.Client{}
 	for _, clientName := range m.CurrentUser.Clients {
-		client := m.Clients.GetByName(clientName)
+		client := getClientByName(clientName)
 		if client == nil {
 			return nil, fmt.Errorf("could not retrieve client '%s' info", clientName)
 		}
-		res = append(res, client.Client)
+		res = append(res, client)
 	}
 	return res, nil
 }

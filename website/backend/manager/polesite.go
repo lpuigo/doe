@@ -61,5 +61,5 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(writer).Encode(items.CalcProgress(polesiteStats, m.GetGroupByName(), m.GroupSizeOnMonth(polesiteStats.Dates)))
+	return json.NewEncoder(writer).Encode(items.CalcProgress(polesiteStats, m.GenGroupByName(), m.GroupSizeOnMonth(polesiteStats.Dates)))
 }

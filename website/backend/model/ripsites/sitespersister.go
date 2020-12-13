@@ -64,13 +64,13 @@ func (sp *SitesPersister) LoadDirectory() error {
 }
 
 // GetAll returns all contained SiteRecords for which keep(sr.Site) == true
-func (sp SitesPersister) GetAll(keep func(s *Site) bool) []*SiteRecord {
+func (sp SitesPersister) GetAll(isSiteVisible items.IsItemizableSiteVisible) []*SiteRecord {
 	sp.RLock()
 	defer sp.RUnlock()
 
 	srs := []*SiteRecord{}
 	for _, sr := range sp.sites {
-		if keep(sr.Site) {
+		if isSiteVisible(sr.Site) {
 			srs = append(srs, sr)
 		}
 	}
