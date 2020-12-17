@@ -549,7 +549,6 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.ProductPruning, poleconst.ProductPruning),
 		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
-		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
 		elements.NewValueLabel(poleconst.ProductMechDigging, poleconst.ProductMechDigging),
 		elements.NewValueLabel(poleconst.ProductTrickyReplace, poleconst.ProductTrickyReplace),
 		elements.NewValueLabel(poleconst.ProductDenseNetwork, poleconst.ProductDenseNetwork),
