@@ -547,6 +547,7 @@ func GetMaterialsValueLabel() []*elements.ValueLabel {
 
 func GetProductsValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
+		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
 		elements.NewValueLabel(poleconst.ProductPruning, poleconst.ProductPruning),
 		elements.NewValueLabel(poleconst.ProductHandDigging, poleconst.ProductHandDigging),
 		elements.NewValueLabel(poleconst.ProductMechDigging, poleconst.ProductMechDigging),
@@ -555,7 +556,6 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.ProductNoAccess, poleconst.ProductNoAccess),
 		elements.NewValueLabel(poleconst.ProductCreation, poleconst.ProductCreation),
 		elements.NewValueLabel(poleconst.ProductReplace, poleconst.ProductReplace),
-		elements.NewValueLabel(poleconst.ProductCoated, poleconst.ProductCoated),
 		elements.NewValueLabel(poleconst.ProductCouple, poleconst.ProductCouple),
 		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
 		elements.NewValueLabel(poleconst.ProductHauban, poleconst.ProductHauban),
