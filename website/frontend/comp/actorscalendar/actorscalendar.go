@@ -30,7 +30,7 @@ const (
         <el-table
                 :border=true
                 :data="filteredActors"
-                :default-sort = "{prop: 'Client', order: 'ascending'}"
+                :default-sort = "{prop: 'Ref', order: 'ascending'}"
                 height="100%" size="mini"
 				@row-dblclick="HandleDoubleClickedRow"
         >
@@ -40,6 +40,19 @@ const (
                     index=1 
             ></el-table-column>
         
+			<!--	group   -->
+			<el-table-column
+					:resizable="true" :show-overflow-tooltip=true 
+					prop="Groups" label="Groupe" width="150px"
+					sortable :sort-method="SortGroup"
+					:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+			>
+				<template slot-scope="scope">
+					<span>{{GetGroup(scope.row)}}</span>
+				</template>
+			</el-table-column>
+
+			<!--	client
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Client" label="Clients" width="160px"
@@ -50,14 +63,17 @@ const (
                     <span>{{GetClients(scope.row)}}</span>
                 </template>
             </el-table-column>
-        
+        	-->
+
+			<!--	role   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Role" label="Rôle" width="90px"
-                    sortable :sort-by="['Role', 'State', 'Ref']"
+                    sortable :sort-by="['Role', 'Ref']"
                     :filters="FilterList('Role')" :filter-method="FilterHandler" filter-placement="bottom-end"
             ></el-table-column>
             
+			<!--	name   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Ref" label="Nom Prénom" width="180px"
@@ -71,13 +87,15 @@ const (
                 </template>
             </el-table-column>
             
+			<!--	company   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Company" label="Société" width="110px"
-                    sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
+                    sortable :sort-by="['Company', 'Ref']"
                     :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
             
+			<!--	calendar   -->
             <el-table-column
             >
                 <template slot="header" slot-scope="scope">
@@ -117,7 +135,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.Props("value", "groups", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorsCalendarModel(vm)
 		}),

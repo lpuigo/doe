@@ -20,7 +20,7 @@ const (
 <el-table
         :border=true
         :data="filteredActors"
-		:default-sort = "{prop: 'Client', order: 'ascending'}"
+		:default-sort = "{prop: 'Ref', order: 'ascending'}"
         :row-class-name="TableRowClassName" height="100%" size="mini"
 		@row-dblclick="HandleDoubleClickedRow"
 >
@@ -56,8 +56,8 @@ const (
 			<span>{{GetGroup(scope.row)}}</span>
         </template>
 	</el-table-column>
-    
-	<!--	clients   -->
+
+	<!--	clients   
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Client" label="Clients" width="200px"
@@ -68,6 +68,7 @@ const (
 			<span>{{GetClients(scope.row)}}</span>
         </template>
 	</el-table-column>
+	-->
 
 	<!--	Role   -->
     <el-table-column
@@ -237,14 +238,7 @@ func (atm *ActorsTableModel) SortClient(a, b *actor.Actor) int {
 	ca, cb := atm.GetClients(a), atm.GetClients(b)
 	switch {
 	case ca == cb:
-		switch {
-		case a.State == b.State:
-			return atm.SortRoleRef(a, b)
-		case a.State < b.State:
-			return -1
-		default:
-			return 1
-		}
+		return atm.SortRoleRef(a, b)
 	case ca < cb:
 		return -1
 	default:
@@ -265,14 +259,7 @@ func (atm *ActorsTableModel) SortGroup(vm *hvue.VM, a, b *actor.Actor) int {
 	ca, cb := atm.GetGroup(vm, a), atm.GetGroup(vm, b)
 	switch {
 	case ca == cb:
-		switch {
-		case a.State == b.State:
-			return atm.SortRoleRef(a, b)
-		case a.State < b.State:
-			return -1
-		default:
-			return 1
-		}
+		return atm.SortRoleRef(a, b)
 	case ca < cb:
 		return -1
 	default:
@@ -282,20 +269,28 @@ func (atm *ActorsTableModel) SortGroup(vm *hvue.VM, a, b *actor.Actor) int {
 
 func (atm *ActorsTableModel) SortRoleRef(a, b *actor.Actor) int {
 	switch {
-	case a.Role == b.Role:
-		switch {
-		case a.Ref == b.Ref:
-			return 0
-		case a.Ref < b.Ref:
-			return -1
-		default:
-			return 1
-		}
-	case a.Role < b.Role:
+	case a.Ref == b.Ref:
+		return 0
+	case a.Ref < b.Ref:
 		return -1
 	default:
 		return 1
 	}
+	//switch {
+	//case a.Role == b.Role:
+	//	switch {
+	//	case a.Ref == b.Ref:
+	//		return 0
+	//	case a.Ref < b.Ref:
+	//		return -1
+	//	default:
+	//		return 1
+	//	}
+	//case a.Role < b.Role:
+	//	return -1
+	//default:
+	//	return 1
+	//}
 }
 
 func (atm *ActorsTableModel) FormatState(row, column, cellValue, index *js.Object) string {

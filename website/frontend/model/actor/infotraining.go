@@ -10,8 +10,8 @@ func GetDefaultInfoTraining() []string {
 		actorconst.InfoTrainingAIPR,
 		actorconst.InfoTrainingElec,
 		actorconst.InfoTrainingCacesNacelle,
-		actorconst.InfoTrainingCacesHauteur,
-		actorconst.InfoTrainingCacesChantier,
+		//actorconst.InfoTrainingCacesHauteur,
+		//actorconst.InfoTrainingCacesChantier,
 		actorconst.InfoTrainingCacesGrue,
 	}
 }

@@ -3,6 +3,7 @@ package group
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ref"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
@@ -12,16 +13,17 @@ import (
 type GroupStore struct {
 	*js.Object
 
-	Groups    []*Group `js:"Groups"`
-	Reference string   `js:"Reference"`
-	Dirty     bool     `js:"Dirty"`
+	Groups []*Group `js:"Groups"`
+
+	Ref *ref.Ref `js:"Ref"`
 }
 
 func NewGroupStore() *GroupStore {
 	gs := &GroupStore{Object: tools.O()}
 	gs.Groups = []*Group{}
-	gs.Reference = ""
-	gs.Dirty = false
+	gs.Ref = ref.NewRef(func() string {
+		return json.Stringify(gs.Groups)
+	})
 	return gs
 }
 
@@ -30,22 +32,17 @@ func (gs *GroupStore) GetReference() string {
 }
 
 func (gs *GroupStore) SetReference() {
-	gs.Reference = gs.GetReference()
-	gs.Dirty = false
+	gs.Ref.Reference = gs.GetReference()
+	gs.Ref.Dirty = false
 }
 
 func (gs *GroupStore) GetReferenceGroups() []*Group {
 	refGroups := []*Group{}
-	json.Parse(gs.Reference).Call("forEach", func(item *js.Object) {
+	json.Parse(gs.Ref.Reference).Call("forEach", func(item *js.Object) {
 		grp := GroupFromJS(item)
 		refGroups = append(refGroups, grp)
 	})
 	return refGroups
-}
-
-func (gs *GroupStore) IsDirty() bool {
-	gs.Dirty = gs.Reference == gs.GetReference()
-	return gs.Dirty
 }
 
 func (gs *GroupStore) CallGetGroups(vm *hvue.VM, onSuccess func()) {

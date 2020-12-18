@@ -14,6 +14,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/model/group"
+	"github.com/lpuig/ewin/doe/website/frontend/model/ref"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -48,8 +49,7 @@ func main() {
 		}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
-			mpm.Dirty = mpm.CheckReference()
-			return mpm.Dirty
+			return mpm.Ref.IsDirty()
 		}),
 	)
 
@@ -58,6 +58,7 @@ func main() {
 
 type MainPageModel struct {
 	*js.Object
+	Ref *ref.Ref `js:"Ref"`
 
 	VM   *hvue.VM `js:"VM"`
 	User *fm.User `js:"User"`
@@ -67,8 +68,6 @@ type MainPageModel struct {
 	FilterType  string            `js:"FilterType"`
 	Actors      []*actor.Actor    `js:"Actors"`
 	GroupStore  *group.GroupStore `js:"GroupStore"`
-	Reference   string            `js:"Reference"`
-	Dirty       bool              `js:"Dirty"`
 	NextActorId int               `js:"NextActorId"`
 
 	CraVisible bool   `js:"craVisible"`
@@ -84,8 +83,9 @@ func NewMainPageModel() *MainPageModel {
 	mpm.FilterType = ""
 
 	mpm.Actors = []*actor.Actor{}
-	mpm.Reference = ""
-	mpm.Dirty = false
+	mpm.Ref = ref.NewRef(func() string {
+		return json.Stringify(mpm.Actors)
+	})
 	mpm.NextActorId = -2
 
 	mpm.GroupStore = group.NewGroupStore()
@@ -100,23 +100,22 @@ func NewMainPageModel() *MainPageModel {
 // Update & Undo Methods
 
 func (mpm *MainPageModel) PreventLeave() bool {
-	return mpm.Dirty
+	return mpm.Ref.Dirty
 }
 
-// Ref for Actors
-
-func (mpm *MainPageModel) GetReference() string {
-	return json.Stringify(mpm.Actors)
-}
-
-func (mpm *MainPageModel) SetReference() {
-	mpm.Reference = mpm.GetReference()
-}
-
-// CheckReference returns true when some Actors has changed
-func (mpm *MainPageModel) CheckReference() bool {
-	return mpm.Reference != json.Stringify(mpm.Actors)
-}
+//func (mpm *MainPageModel) GetReference() string {
+//	return json.Stringify(mpm.Actors)
+//}
+//
+//func (mpm *MainPageModel) SetReference() {
+//	mpm.Ref.Reference = mpm.GetReference()
+//	mpm.Ref.Dirty = false
+//}
+//
+//func (mpm *MainPageModel) IsDirty() bool {
+//	mpm.Ref.Dirty = mpm.Ref.Reference != mpm.GetReference()
+//	return mpm.Ref.Dirty
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Management Methods
@@ -144,12 +143,12 @@ func (mpm *MainPageModel) HandleEditedActor(actor *actor.Actor) {
 
 func (mpm *MainPageModel) LoadActors(init bool) {
 	onLoadedActors := func() {
-		mpm.SetReference()
+		mpm.Ref.SetReference()
 		for _, act := range mpm.Actors {
 			act.UpdateState()
 		}
 		// IsDirty is set to true if some update are undertaken
-		if init && mpm.CheckReference() {
+		if init && mpm.Ref.IsDirty() {
 			mpm.SaveActors(mpm.VM)
 		}
 	}
@@ -159,7 +158,7 @@ func (mpm *MainPageModel) LoadActors(init bool) {
 func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
 	mpm = &MainPageModel{Object: vm.Object}
 
-	if mpm.Dirty {
+	if mpm.Ref.Dirty {
 		onUpdatedActors := func() {
 			mpm.LoadActors(false)
 			//mpm.SetReference()
@@ -289,7 +288,7 @@ func (mpm *MainPageModel) callUpdateActors(callback func()) {
 
 func (mpm *MainPageModel) getUpdatedActors() []*actor.Actor {
 	refActors := []*actor.Actor{}
-	json.Parse(mpm.Reference).Call("forEach", func(item *js.Object) {
+	json.Parse(mpm.Ref.Reference).Call("forEach", func(item *js.Object) {
 		act := actor.ActorFromJS(item)
 		refActors = append(refActors, act)
 	})

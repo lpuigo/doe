@@ -30,7 +30,7 @@ const (
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Company" label="Société" width="110px"
-			sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
+			sortable :sort-by="['Company', 'Ref']"
 			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
@@ -40,22 +40,23 @@ const (
             prop="Contract" label="Contrat" width="110px"
     ></el-table-column>
     
-<!--    <el-table-column-->
-<!--            :resizable="true" :show-overflow-tooltip=true -->
-<!--            prop="Client" label="Clients" width="200px"-->
-<!--			sortable :sort-method="SortClient"-->
-<!--			:filters="FilterList('Client')" :filter-method="FilterHandler"	filter-placement="bottom-end"-->
-<!--    >-->
-<!--        <template slot-scope="scope">-->
-<!--			<span>{{GetClients(scope.row)}}</span>-->
-<!--        </template>-->
-<!--	</el-table-column>-->
+	<!--	group   -->
+	<el-table-column
+			:resizable="true" :show-overflow-tooltip=true 
+			prop="Groups" label="Groupe" width="150px"
+			sortable :sort-method="SortGroup"
+			:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+	>
+		<template slot-scope="scope">
+			<span>{{GetGroup(scope.row)}}</span>
+		</template>
+	</el-table-column>
 
 	<!--	Role -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
             prop="Role" label="Rôle" width="110px"
-			sortable :sort-by="['Role', 'State', 'Ref']"
+			sortable :sort-by="['Role', 'Ref']"
 			:filters="FilterList('Role')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
     
@@ -130,16 +131,6 @@ const (
 			<span>{{FormatTrainingDate(scope.row, trainingName)}}</span>
         </template>
 	</el-table-column>
-
-	<!--	Debug -->
-<!--    <el-table-column-->
-<!--            :resizable="true"-->
-<!--            label="Debug Info"-->
-<!--    >-->
-<!--        <template slot-scope="scope">-->
-<!--			<pre>{{scope.row.Info}}</pre>-->
-<!--        </template>-->
-<!--	</el-table-column>-->
 </el-table>
 `
 )
@@ -151,7 +142,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.Props("value", "groups", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorsInfoTableModel(vm)
 		}),

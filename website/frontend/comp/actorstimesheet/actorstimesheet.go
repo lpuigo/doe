@@ -57,16 +57,30 @@ const (
         <el-table
                 :border=true
                 :data="filteredActors"
-                :default-sort = "{prop: 'Client', order: 'ascending'}"
+                :default-sort = "{prop: 'Ref', order: 'ascending'}"
                 height="100%" size="mini"
         >
+			<!--	company   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
                     prop="Company" label="Société" width="100px"
-                    sortable :sort-by="['Company', 'State', 'Role', 'Ref']"
+                    sortable :sort-by="['Company', 'Ref']"
                     :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
             
+			<!--	group   -->
+			<el-table-column
+					:resizable="true" :show-overflow-tooltip=true 
+					prop="Groups" label="Groupe" width="150px"
+					sortable :sort-method="SortGroup"
+					:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+			>
+				<template slot-scope="scope">
+					<span>{{GetGroup(scope.row)}}</span>
+				</template>
+			</el-table-column>
+
+			<!--	Client  
             <el-table-column
                     label="Clients" prop="Client" width="160px"
                     :resizable="true" :show-overflow-tooltip=true 
@@ -77,14 +91,17 @@ const (
                     <span>{{GetClients(scope.row)}}</span>
                 </template>
             </el-table-column>
-        
+			-->
+
+			<!--	role   -->
             <el-table-column
                     label="Rôle" prop="Role" width="110px"
                     :resizable="true" :show-overflow-tooltip=true 
-                    sortable :sort-by="['Role', 'State', 'Ref']"
+                    sortable :sort-by="['Role', 'Ref']"
                     :filters="FilterList('Role')" :filter-method="FilterHandler" filter-placement="bottom-end"
             ></el-table-column>
             
+			<!--	name   -->
             <el-table-column
                     label="Nom Prénom" prop="Ref" width="160px"
                     :resizable="true" :show-overflow-tooltip=true 
@@ -98,6 +115,7 @@ const (
                 </template>
             </el-table-column>
 
+			<!--	Hours   -->
             <el-table-column
                     label="Heures" width="60px" align="center"
             >
@@ -106,6 +124,7 @@ const (
                 </template>
             </el-table-column>
 
+			<!--	activity  -->
 			<el-table-column
 					label="Activité" width="80px" align="center"
 			>
@@ -122,6 +141,7 @@ const (
                 </template>
 			</el-table-column>
 
+			<!--	timesheet  -->
             <el-table-column
             >
                 <template slot="header" slot-scope="scope">
@@ -153,7 +173,7 @@ func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		actortimeedit.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.Props("value", "groups", "user", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewActorsTimeSheetModel(vm)
 		}),

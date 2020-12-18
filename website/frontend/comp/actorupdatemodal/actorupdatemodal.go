@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/model/group"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"strconv"
@@ -37,8 +38,8 @@ const template string = `<el-dialog
         
     -->
     <el-tabs type="border-card" tab-position="left" style="height: 75vh">
-		<!-- ===================================== Bonus Tab ======================================================= -->
-		<el-tab-pane label="Acteur" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+		<!-- ===================================== Acteur Tab ======================================================= -->
+		<el-tab-pane v-if="user.Permissions.HR" label="Acteur" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 	        <!-- Last & First Name -->
 			<el-row :gutter="10" align="middle" class="spaced" type="flex">
 				<el-col :span="4" class="align-right">Nom :</el-col>
@@ -304,14 +305,14 @@ const template string = `<el-dialog
 		</el-tab-pane>
 
 		<!-- ===================================== Bonus Tab ======================================================= -->
-		<el-tab-pane label="Bonus" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+		<el-tab-pane v-if="user.Permissions.HR" label="Bonus" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 			<!-- Bonuses -->
 			<el-row :gutter="10" align="top" class="spaced" type="flex">
 				<el-col :span="3" class="align-right">Bonus :</el-col>
 				<el-col :span="21">
 					<el-table 
 							:data="current_actor.Info.EarnedBonuses"
-							max-height="160" size="mini" border
+							max-height="260" size="mini" border
 					>
 						<el-table-column label="" width="70" :resizable="false">
 							<template slot="header" slot-scope="scope">
@@ -368,7 +369,7 @@ const template string = `<el-dialog
 				<el-col :span="21">
 					<el-table 
 							:data="current_actor.Info.PaidBonuses"
-							max-height="160" size="mini" border
+							max-height="260" size="mini" border
 					>
 						<el-table-column label="" width="70">
 							<template slot="header" slot-scope="scope">
@@ -411,6 +412,53 @@ const template string = `<el-dialog
 					</el-table>
 				</el-col>
 			</el-row>
+		</el-tab-pane>
+
+		<!-- ===================================== Vacancy Tab ======================================================= -->
+		<el-tab-pane label="Absences" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+			<el-table 
+					:border="false"
+					:data="VacationDates"
+					height="100%" size="mini"
+	
+			>
+				<el-table-column
+						label="" width="70px" align="center"
+				>
+					<template slot="header" slot-scope="scope">
+						<el-button type="success" plain icon="fas fa-user-plus" circle size="mini" :disabled="!datesComplete" @click="AddDates()"></el-button>
+					</template>
+					<template slot-scope="scope">
+						<el-button type="danger" icon="fas fa-user-minus" circle size="mini" @click="DeleteDates(scope.$index)"></el-button>
+					</template>
+				</el-table-column>
+				
+				<el-table-column
+						label="Congés" 
+				>
+					<template slot-scope="scope">
+						<el-date-picker
+								v-model="scope.row.Dates"
+								type="daterange" unlink-panels size="mini" style="width: 100%"
+								:picker-options="{firstDayOfWeek:1}" format="dd/MM/yyyy"
+								value-format="yyyy-MM-dd"
+								range-separator="au"
+								start-placeholder="Début"
+								end-placeholder="Fin"
+								@change="ApplyVacationChange()">
+						></el-date-picker>
+					</template>
+				</el-table-column>
+	
+				<el-table-column label="Commentaire">
+					<template slot-scope="scope">
+						<el-input
+								type="textarea" placeholder="Nature du congé" size="mini"
+								v-model="scope.row.Comment" @input="ApplyVacationChange()">
+						</el-input>
+					</template>
+				</el-table-column>
+			</el-table>
 		</el-tab-pane>
 
 		<!-- ===================================== Training Tab ======================================================= -->
@@ -478,6 +526,7 @@ type ActorUpdateModalModel struct {
 	ThisMonth     string            `js:"ThisMonth"`
 	GroupStore    *group.GroupStore `js:"groups"`
 	GroupsControl *GroupsControl    `js:"GroupsControl"`
+	VacationDates []*VacDates       `js:"VacationDates"`
 }
 
 func NewActorUpdateModalModel(vm *hvue.VM) *ActorUpdateModalModel {
@@ -485,6 +534,7 @@ func NewActorUpdateModalModel(vm *hvue.VM) *ActorUpdateModalModel {
 	aumm.ThisMonth = date.GetFirstOfMonth(date.TodayAfter(0))
 	aumm.GroupStore = nil
 	aumm.GroupsControl = NewGroupsControl(nil)
+	aumm.VacationDates = []*VacDates{}
 	return aumm
 }
 
@@ -515,6 +565,10 @@ func componentOptions() []hvue.ComponentOption {
 			aumm := ActorUpdateModalModelFromJS(vm.Object)
 			return aumm.HasChanged()
 		}),
+		hvue.Computed("datesComplete", func(vm *hvue.VM) interface{} {
+			aumm := ActorUpdateModalModelFromJS(vm.Object)
+			return aumm.DatesComplete()
+		}),
 		//hvue.Computed("currentActorRef", func(vm *hvue.VM) interface{} {
 		//	aumm := ActorUpdateModalModelFromJS(vm.Object)
 		//	aumm.CurrentActor.Ref = aumm.CurrentActor.LastName + " " + aumm.CurrentActor.FirstName
@@ -532,6 +586,7 @@ func (aumm *ActorUpdateModalModel) Show(act *actor.Actor, user *fm.User) {
 	aumm.CurrentActor = act.Copy()
 	aumm.GroupsControl.SetAssignments(aumm.CurrentActor)
 	aumm.User = user
+	aumm.UpdateDates()
 	aumm.ShowConfirmDelete = false
 	aumm.Visible = true
 }
@@ -577,8 +632,14 @@ func (aumm *ActorUpdateModalModel) GetClientList(vm *hvue.VM) []*elements.ValueL
 
 func (aumm *ActorUpdateModalModel) ConfirmChange(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.UpdateVacation()
 	aumm.ActorModalModel.ConfirmChange()
 	vm.Emit("edited-actor", aumm.EditedActor)
+}
+
+func (aumm *ActorUpdateModalModel) UndoChange() {
+	aumm.ActorModalModel.UndoChange()
+	aumm.UpdateDates()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -791,4 +852,80 @@ func (aumm *ActorUpdateModalModel) RemoveTraining(vm *hvue.VM, name string) {
 	trainings := aumm.CurrentActor.Info.Trainings
 	delete(trainings, name)
 	aumm.CurrentActor.Info.Trainings = trainings
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Vacancy Tab Methods
+
+func (aumm *ActorUpdateModalModel) DatesComplete() bool {
+	if len(aumm.VacationDates) == 0 {
+		return true
+	}
+	return aumm.VacationDates[0].IsComplete()
+}
+
+func (aumm *ActorUpdateModalModel) AddDates(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.VacationDates = append([]*VacDates{NewVacDates("", "", "")}, aumm.VacationDates...)
+	aumm.UpdateVacation()
+}
+
+func (aumm *ActorUpdateModalModel) DeleteDates(vm *hvue.VM, index int) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.Get("VacationDates").Call("splice", index, 1)
+	aumm.UpdateVacation()
+}
+
+func (aumm *ActorUpdateModalModel) ApplyVacationChange(vm *hvue.VM) {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	aumm.SortDates()
+	aumm.UpdateVacation()
+}
+
+func (aumm *ActorUpdateModalModel) SortDates() {
+	aumm.Get("VacationDates").Call("sort", func(a, b *VacDates) int {
+		switch {
+		case a.Dates[0] == b.Dates[0]:
+			return 0
+		case a.Dates[0] < b.Dates[0]:
+			return 1
+		default:
+			return -1
+		}
+	})
+}
+
+// UpdateDates copies currentactors Vacation' Dates to modal VacationDates
+func (aumm *ActorUpdateModalModel) UpdateDates() {
+	aumm.VacationDates = []*VacDates{}
+	for _, vacPeriod := range aumm.CurrentActor.Vacation {
+		aumm.VacationDates = append(aumm.VacationDates, NewVacDates(vacPeriod.Begin, vacPeriod.End, vacPeriod.Comment))
+	}
+	aumm.SortDates()
+}
+
+// UpdateVacation copies modal VacationDates to currentactors Vacation' Dates
+func (aumm *ActorUpdateModalModel) UpdateVacation() {
+	aumm.CurrentActor.Vacation = []*date.DateRangeComment{}
+	for _, vacDates := range aumm.VacationDates {
+		aumm.CurrentActor.Vacation = append(aumm.CurrentActor.Vacation, date.NewDateRangeCommentFrom(vacDates.Dates[0], vacDates.Dates[1], vacDates.Comment))
+	}
+}
+
+// VacDates type
+type VacDates struct {
+	*js.Object
+	Dates   []string `js:"Dates"`
+	Comment string   `js:"Comment"`
+}
+
+func NewVacDates(beg, end, cmt string) *VacDates {
+	vd := &VacDates{Object: tools.O()}
+	vd.Dates = []string{beg, end}
+	vd.Comment = cmt
+	return vd
+}
+
+func (vd *VacDates) IsComplete() bool {
+	return !tools.Empty(vd.Dates[0]) && !tools.Empty(vd.Dates[1])
 }
