@@ -10,6 +10,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstimesheet"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorupdatemodal"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorvacancyeditmodal"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/groupstable"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
@@ -37,19 +38,19 @@ func main() {
 		actorstimesheet.RegisterComponent(),
 		actorstable.RegisterComponent(),
 		actorinfostable.RegisterComponent(),
+		groupstable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
 			mpm := &MainPageModel{Object: vm.Object}
 			tools.BeforeUnloadConfirmation(mpm.PreventLeave)
 			mpm.GetUserSession(func() {
-				mpm.GroupStore.CallGetGroups(vm, func() {})
 				mpm.LoadActors(true)
 			})
 		}),
 		hvue.Computed("IsDirty", func(vm *hvue.VM) interface{} {
 			mpm := &MainPageModel{Object: vm.Object}
-			return mpm.Ref.IsDirty()
+			return mpm.Ref.IsDirty() || mpm.GroupStore.Ref.IsDirty()
 		}),
 	)
 
@@ -100,22 +101,8 @@ func NewMainPageModel() *MainPageModel {
 // Update & Undo Methods
 
 func (mpm *MainPageModel) PreventLeave() bool {
-	return mpm.Ref.Dirty
+	return mpm.Ref.Dirty || mpm.GroupStore.Ref.Dirty
 }
-
-//func (mpm *MainPageModel) GetReference() string {
-//	return json.Stringify(mpm.Actors)
-//}
-//
-//func (mpm *MainPageModel) SetReference() {
-//	mpm.Ref.Reference = mpm.GetReference()
-//	mpm.Ref.Dirty = false
-//}
-//
-//func (mpm *MainPageModel) IsDirty() bool {
-//	mpm.Ref.Dirty = mpm.Ref.Reference != mpm.GetReference()
-//	return mpm.Ref.Dirty
-//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Management Methods
@@ -129,6 +116,15 @@ func (mpm *MainPageModel) GetUserSession(callback func()) {
 
 func (mpm *MainPageModel) AddActor() {
 	mpm.ShowEditActor(mpm.VM, actor.NewActor())
+}
+
+func (mpm *MainPageModel) ShowAddActor() bool {
+	switch mpm.ActiveMode {
+	case "Groups":
+		return false
+	default:
+		return true
+	}
 }
 
 func (mpm *MainPageModel) HandleEditedActor(actor *actor.Actor) {
@@ -153,6 +149,7 @@ func (mpm *MainPageModel) LoadActors(init bool) {
 		}
 	}
 	go mpm.callGetActors(onLoadedActors)
+	mpm.GroupStore.CallGetGroups(mpm.VM, func() {})
 }
 
 func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
@@ -164,6 +161,13 @@ func (mpm *MainPageModel) SaveActors(vm *hvue.VM) {
 			//mpm.SetReference()
 		}
 		go mpm.callUpdateActors(onUpdatedActors)
+	}
+
+	if mpm.GroupStore.Ref.Dirty {
+		onUpdatedGroups := func() {
+			mpm.GroupStore.CallGetGroups(mpm.VM, func() {})
+		}
+		mpm.GroupStore.CallUpdateGroups(mpm.VM, onUpdatedGroups)
 	}
 }
 

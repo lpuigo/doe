@@ -112,21 +112,6 @@ const template string = `<el-dialog
 	
 			<!-- Client & Role -->
 			<el-row :gutter="10" align="middle" class="doublespaced" type="flex">
-				<el-col :span="4" class="align-right">Client(s) :</el-col>
-				<el-col :span="8">
-					<el-select multiple placeholder="Client" size="mini"
-							   v-model="current_actor.Client"
-							   style="width: 100%"
-					>
-						<el-option v-for="item in GetClientList()"
-								   :key="item.value"
-								   :label="item.label"
-								   :value="item.value"
-						>
-						</el-option>
-					</el-select>
-				</el-col>
-
 				<el-col :span="4" class="align-right">Rôle :</el-col>
 				<el-col :span="8">
 					<el-select filterable allow-create clearable placeholder="Rôle" size="mini"
@@ -153,7 +138,7 @@ const template string = `<el-dialog
 					>
 						<el-table-column label="" width="80">
 							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-user-friends fa-fw" size="mini" @click="AddAssignment()"></el-button>
+								<el-button type="success" plain icon="fas fa-users fa-fw" size="mini" @click="AddAssignment()"></el-button>
 							</template>
 							<template slot-scope="scope">
 								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveAssignment(scope.$index)"></el-button>
@@ -621,15 +606,6 @@ func (aumm *ActorUpdateModalModel) GetRoleList() []*elements.ValueLabel {
 	}
 }
 
-func (aumm *ActorUpdateModalModel) GetClientList(vm *hvue.VM) []*elements.ValueLabel {
-	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	res := []*elements.ValueLabel{}
-	for _, client := range aumm.User.Clients {
-		res = append(res, elements.NewValueLabel(client.Name, client.Name))
-	}
-	return res
-}
-
 func (aumm *ActorUpdateModalModel) ConfirmChange(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	aumm.UpdateVacation()
@@ -677,7 +653,7 @@ func (aumm *ActorUpdateModalModel) UpdateAssignments(vm *hvue.VM) {
 func (aumm *ActorUpdateModalModel) GetAssignmentGroups(vm *hvue.VM) []*elements.ValueLabel {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	res := make([]*elements.ValueLabel, len(aumm.GroupStore.Groups))
-	for i, grp := range aumm.GroupStore.Groups {
+	for i, grp := range aumm.GroupStore.GetGroupsSortedByName() {
 		res[i] = elements.NewValueLabel(strconv.Itoa(grp.Id), grp.Name)
 	}
 	return res

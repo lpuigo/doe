@@ -123,6 +123,15 @@ func (a *Actor) UpdateState() {
 	}
 }
 
+func (a *Actor) IsActive() bool {
+	switch a.State {
+	case actorconst.StateActive, actorconst.StateOnHoliday:
+		return true
+	default:
+		return false
+	}
+}
+
 // GetNextVacation returns actor's next (or current) vacation
 func (a *Actor) GetNextVacation() *date.DateRange {
 	if len(a.Vacation) == 0 {

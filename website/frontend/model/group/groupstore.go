@@ -1,6 +1,8 @@
 package group
 
 import (
+	"sort"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ref"
@@ -27,13 +29,39 @@ func NewGroupStore() *GroupStore {
 	return gs
 }
 
-func (gs *GroupStore) GetReference() string {
-	return json.Stringify(gs.Groups)
+func (gs *GroupStore) GetGroupsSortedByName() []*Group {
+	res := gs.Groups[:]
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Name < res[j].Name
+	})
+	return res
 }
 
-func (gs *GroupStore) SetReference() {
-	gs.Ref.Reference = gs.GetReference()
-	gs.Ref.Dirty = false
+func (gs *GroupStore) sortGroups() {
+	sort.Slice(gs.Groups, func(i, j int) bool {
+		return gs.Groups[i].Id < gs.Groups[j].Id
+	})
+}
+
+func (gs *GroupStore) AddNewGroup(grp *Group) {
+	nextNewGroupId := -1
+	if len(gs.Groups) > 1 {
+		nextNewGroupId = gs.Groups[0].Id - 1
+	}
+	grp.Id = nextNewGroupId
+	gs.Groups = append([]*Group{grp}, gs.Groups...)
+}
+
+func (gs *GroupStore) RemoveGroupById(dgrpId int) {
+	updGrps := []*Group{}
+	for _, group := range gs.Groups {
+		if group.Id == dgrpId {
+			continue
+		}
+		updGrps = append(updGrps, group)
+	}
+	gs.Groups = updGrps
+	gs.sortGroups()
 }
 
 func (gs *GroupStore) GetReferenceGroups() []*Group {
@@ -69,14 +97,19 @@ func (gs *GroupStore) callGetGroups(vm *hvue.VM, onSuccess func()) {
 		loadedGroups = append(loadedGroups, grp)
 	})
 	gs.Groups = loadedGroups
-	gs.SetReference()
+	gs.sortGroups()
+	gs.Ref.SetReference()
 	onSuccess()
 }
 
 func (gs *GroupStore) CallUpdateGroups(vm *hvue.VM, onSuccess func()) {
+	go gs.callUpdateGroups(vm, onSuccess)
+}
+
+func (gs *GroupStore) callUpdateGroups(vm *hvue.VM, onSuccess func()) {
 	updatedGroups := gs.getUpdatedGroups()
 	if len(updatedGroups) == 0 {
-		message.ErrorStr(vm, "Could not find any updated actors", false)
+		message.ErrorStr(vm, "Could not find any updated groups", false)
 		return
 	}
 
@@ -93,7 +126,7 @@ func (gs *GroupStore) CallUpdateGroups(vm *hvue.VM, onSuccess func()) {
 		return
 	}
 	message.NotifySuccess(vm, "Groupes", "Modifications sauvegardées")
-	gs.SetReference()
+	gs.Ref.SetReference()
 	onSuccess()
 }
 
@@ -106,7 +139,7 @@ func (gs *GroupStore) getUpdatedGroups() []*Group {
 	}
 	for _, grp := range gs.Groups {
 		refgrp := groupById[grp.Id]
-		if !(refgrp != nil && json.Stringify(grp) != json.Stringify(refgrp)) {
+		if !(refgrp != nil && json.Stringify(grp) == json.Stringify(refgrp)) {
 			updGrps = append(updGrps, grp)
 		}
 	}

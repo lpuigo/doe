@@ -40,11 +40,11 @@
                 <span></span>
 
                 <el-button-group size="mini">
-                    <el-tooltip content="Enregistrer les modifications" placement="bottom" effect="light" open-delay=500>
+                    <el-tooltip v-if="User.Permissions.Update" content="Enregistrer les modifications" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-cloud-upload-alt icon--medium" @click="SaveActors"
                                    :disabled="!IsDirty"></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay=500>
+                    <el-tooltip content="Annuler les modifications / Recharger les informations" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="LoadActors(false)"></el-button>
                     </el-tooltip>
                 </el-button-group>
@@ -59,7 +59,7 @@
 
                 <el-button-group size="mini">
                     <el-tooltip v-if="User.Permissions.HR" content="Créer un nouvel acteur" placement="bottom" effect="light" open-delay=500>
-                        <el-button class="icon" icon="fas fa-user-plus icon--medium" @click="AddActor()"></el-button>
+                        <el-button class="icon" icon="fas fa-user-plus icon--medium" @click="AddActor()" :disabled="!ShowAddActor()"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
@@ -78,6 +78,9 @@
                     </el-tooltip>
                     <el-tooltip v-if="User.Permissions.HR" content="Informations RH Acteurs" placement="bottom" effect="light" open-delay=500>
                         <el-radio-button label="HRTable"><i class="fas fa-id-card icon--medium"></i></el-radio-button>
+                    </el-tooltip>
+                    <el-tooltip v-if="User.Permissions.Admin" content="Groupes d'acteurs" placement="bottom" effect="light" open-delay=500>
+                        <el-radio-button label="Groups"><i class="fas fa-users icon--medium"></i></el-radio-button>
                     </el-tooltip>
                 </el-radio-group>
 
@@ -169,6 +172,12 @@
                               :filter="Filter" :filtertype="FilterType"
                               @edit-actor="ShowEditActor"
             ></actorinfos-table>
+            <groups-table v-if="ActiveMode=='Groups'"
+                              v-model="GroupStore"
+                              :actors="Actors"
+                              :user="User"
+                              @edit-group=""
+            ></groups-table>
         </el-main>
     </el-container>
 </div>
@@ -187,6 +196,6 @@
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
 <script src="/Assets/highcharts/highcharts.js"></script>
-<script type="text/javascript" src="actors.js?v=1.0"></script>
+<script type="text/javascript" src="actors.js?v=1.1"></script>
 
 </html>

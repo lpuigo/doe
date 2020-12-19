@@ -1,6 +1,8 @@
 package model
 
 import (
+	"sort"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -49,6 +51,16 @@ func (u *User) GetClientByName(clientName string) *Client {
 		}
 	}
 	return nil
+}
+
+// GetClientByName returns the client with given name (nil if not found)
+func (u *User) GetSortedClientNames() []string {
+	res := make([]string, len(u.Clients))
+	for i, c := range u.Clients {
+		res[i] = c.Name
+	}
+	sort.Strings(res)
+	return res
 }
 
 func (u *User) GetTeamValueLabelsFor(clientName string) []*elements.ValueLabel {
