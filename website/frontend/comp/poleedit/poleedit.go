@@ -326,7 +326,7 @@ const template string = `<div>
             <!-- Status -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6" class="align-right">Status:</el-col>
-                <el-col :span="18">
+                <el-col :span="15">
                     <el-select v-model="editedpolemarker.Pole.State" filterable size="mini" style="width: 100%"
                                @clear=""
                                @change="UpdateState()"
@@ -340,6 +340,11 @@ const template string = `<div>
                         ></el-option>
                     </el-select>
                 </el-col>
+				<el-col :span="3">
+					<el-tooltip content="Passer l'appui à Fait" placement="bottom" effect="light" open-delay="500">
+						<el-button type="success" plain style="width: 100%" class="icon" icon="fas fa-check" size="mini" @click="PoleDone" :disabled="ShowDate"></el-button>
+					</el-tooltip>	
+				</el-col>
             </el-row>
 
             <!-- Actors -->
@@ -365,14 +370,15 @@ const template string = `<div>
                 </el-col>
             </el-row>
 
-            <!-- Date Aspiratrice -->
-            <el-row :gutter="5" type="flex" align="middle" class="spaced">
-                <el-col :span="6" class="align-right">Aspiratrice:</el-col>
+            <!-- Date -->
+            <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Réalisation:</el-col>
                 <el-col :span="18">
                     <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
                                     style="width: 100%" type="date"
-                                    v-model="editedpolemarker.Pole.AspiDate"
+                                    v-model="editedpolemarker.Pole.Date"
                                     value-format="yyyy-MM-dd"
+                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -387,15 +393,14 @@ const template string = `<div>
                 </el-col>
             </el-row>
         
-            <!-- Date -->
-            <el-row v-if="ShowDate" :gutter="5" type="flex" align="middle" class="spaced">
-                <el-col :span="6" class="align-right">Réalisation:</el-col>
+            <!-- Date Aspiratrice -->
+            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+                <el-col :span="6" class="align-right">Aspiratrice:</el-col>
                 <el-col :span="18">
                     <el-date-picker format="dd/MM/yyyy" placeholder="Date" size="mini"
                                     style="width: 100%" type="date"
-                                    v-model="editedpolemarker.Pole.Date"
+                                    v-model="editedpolemarker.Pole.AspiDate"
                                     value-format="yyyy-MM-dd"
-                                    :picker-options="{firstDayOfWeek:1, disabledDate(time) { return time.getTime() > Date.now(); }}"
                     ></el-date-picker>
                 </el-col>
             </el-row>
@@ -618,6 +623,17 @@ func (pem *PoleEditModel) CheckPermissions(vm *hvue.VM) {
 	if ep.Pole.State != currentState {
 		pem.UpdateState(vm)
 	}
+}
+
+// PoleDone
+func (pem *PoleEditModel) PoleDone(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	ep := pem.EditedPoleMarker
+	if ep.Pole.IsAlreadyDone() {
+		return
+	}
+	ep.Pole.State = poleconst.StateDone
+	pem.UpdateState(vm)
 }
 
 // UpdateState
