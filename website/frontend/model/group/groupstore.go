@@ -43,9 +43,10 @@ func (gs *GroupStore) sortGroups() {
 	})
 }
 
+// AddNewGroup sets the given Group a new negative ID, and adds it to the receiver GroupStore
 func (gs *GroupStore) AddNewGroup(grp *Group) {
 	nextNewGroupId := -1
-	if len(gs.Groups) > 1 {
+	if len(gs.Groups) > 1 && gs.Groups[0].Id <= 0 {
 		nextNewGroupId = gs.Groups[0].Id - 1
 	}
 	grp.Id = nextNewGroupId

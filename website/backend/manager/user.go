@@ -1,11 +1,24 @@
 package manager
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"strconv"
+
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"strconv"
+	"github.com/lpuig/ewin/doe/website/backend/model/users"
 )
+
+func (m Manager) GetUsers(writer io.Writer) error {
+	usrs := m.Users.GetUsers()
+	return json.NewEncoder(writer).Encode(usrs)
+}
+
+func (m Manager) UpdateUsers(updatedUsers []*users.User) error {
+	return m.Users.UpdateUsers(updatedUsers)
+}
 
 // genGetClient returns a GetClientByName function: func(clientName string) *clients.Client. Returned client is nil if clientName is not found
 func (m *Manager) genGetClient() clients.ClientByName {
@@ -61,11 +74,13 @@ func (m Manager) GetCurrentUserClientsName() []string {
 	return []string{}
 }
 
-// GetCurrentUserClients returns slice of Clients visible by current user (if user has no client, returns all clients)
+// GetCurrentUserClients returns slice of Clients visible by current user
 //
-// visible Clients are identified by User's group (no group => all client)
+// Rules:
 //
-// If no User's Group, by User's Client
+// - if current user has attached groups, visible Clients are identified by User's groups Clients list
+//
+// - otherwise, returns User's Client list
 func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 	clientDict := make(map[string]*clients.Client)
 	if m.CurrentUser == nil {

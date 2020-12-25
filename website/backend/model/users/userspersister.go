@@ -129,3 +129,29 @@ func (up *UsersPersister) GetByName(name string) *UserRecord {
 	}
 	return nil
 }
+
+func (up *UsersPersister) GetUsers() []*User {
+	up.RLock()
+	defer up.RUnlock()
+
+	res := make([]*User, len(up.users))
+	for i, ur := range up.users {
+		res[i] = ur.User
+	}
+	return res
+}
+
+func (up *UsersPersister) UpdateUsers(updatedUsers []*User) error {
+	for _, updUsr := range updatedUsers {
+		updUsrRec := NewUserRecordFromUser(updUsr)
+		if updUsrRec.Id < 0 { // New User, add it instead of update
+			up.Add(updUsrRec)
+			continue
+		}
+		err := up.Update(updUsrRec)
+		if err != nil {
+			fmt.Errorf("could not update user '%s' (id: %d)", updUsrRec.Name, updUsrRec.Id)
+		}
+	}
+	return nil
+}

@@ -25,6 +25,7 @@ func (r *Ref) SetReference() {
 	r.Dirty = false
 }
 
+// IsDirty sets Dirty flag to true if Reference if no longer up to date, false otherwise, and return its new value
 func (r *Ref) IsDirty() bool {
 	r.Dirty = r.Reference != r.GetReference()
 	return r.Dirty

@@ -49,6 +49,19 @@ func NewValueLabel(value, label string) *ValueLabel {
 	return vl
 }
 
+type IntValueLabel struct {
+	*js.Object
+	Value int    `js:"value"`
+	Label string `js:"label"`
+}
+
+func NewIntValueLabel(value int, label string) *IntValueLabel {
+	vl := &IntValueLabel{Object: tools.O()}
+	vl.Value = value
+	vl.Label = label
+	return vl
+}
+
 type ValueLabelDisabled struct {
 	*js.Object
 	Value    string `js:"value"`

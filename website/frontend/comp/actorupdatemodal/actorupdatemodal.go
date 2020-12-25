@@ -35,7 +35,6 @@ const template string = `<el-dialog
     <!-- 
         Modal Body
         style="height: 100%;"
-        
     -->
     <el-tabs type="border-card" tab-position="left" style="height: 75vh">
 		<!-- ===================================== Acteur Tab ======================================================= -->

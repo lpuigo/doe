@@ -47,3 +47,11 @@ func NewUserRecordFromFile(file string) (ur *UserRecord, err error) {
 	}
 	return
 }
+
+// NewUserRecordFromUser returns a UserRecord populated from given User
+func NewUserRecordFromUser(usr *User) *UserRecord {
+	ur := NewUserRecord()
+	ur.User = usr
+	ur.SetId(ur.Id)
+	return ur
+}
