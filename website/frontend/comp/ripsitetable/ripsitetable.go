@@ -77,8 +77,8 @@ func NewRipsiteTableModel(vm *hvue.VM) *RipsiteTableModel {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Event Related Methods
 
-func (rtm *RipsiteTableModel) SetSelectedRipsite(rsi *fm.RipsiteInfo) {
-	rtm.VM.Emit("selected_ripsite", rsi.Id)
+func (rtm *RipsiteTableModel) SetSelectedRipsite(id int) {
+	js.Global.Get("window").Call("open", "ripsite.html?v=1.0&rsid="+strconv.Itoa(id))
 }
 
 func (rtm *RipsiteTableModel) AddRipsite(vm *hvue.VM) {

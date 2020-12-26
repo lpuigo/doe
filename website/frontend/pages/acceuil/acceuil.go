@@ -240,7 +240,7 @@ func (m *MainPageModel) UpdateWorksite(id int) {
 //}
 //
 func (m *MainPageModel) OpenRipsite(id int) {
-	js.Global.Get("window").Call("open", "ripsite.html?rsid="+strconv.Itoa(id))
+	js.Global.Get("window").Call("open", "ripsite.html?v=1.0&rsid="+strconv.Itoa(id))
 }
 
 func (m *MainPageModel) OpenActors() {

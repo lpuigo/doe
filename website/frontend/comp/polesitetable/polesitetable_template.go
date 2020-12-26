@@ -19,7 +19,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 		<el-table
 				:data="filteredPolesites"
 				:row-class-name="TableRowClassName"
-				:default-sort = "{prop: 'OrderDate', order: 'descending'}"
+				:default-sort = "{prop: 'UpdateDate', order: 'descending'}"
 				height="100%"
 				:border=true size="mini"
 				@row-dblclick="SetSelectedPolesite"

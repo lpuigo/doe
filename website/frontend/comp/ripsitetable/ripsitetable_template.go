@@ -19,7 +19,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 		<el-table
 				:data="filteredRipsites"
 				:row-class-name="TableRowClassName"
-				:default-sort = "{prop: 'OrderDate', order: 'descending'}"
+				:default-sort = "{prop: 'UpdateDate', order: 'descending'}"
 				height="100%"
 				:border=true size="mini"
 				@row-dblclick="SetSelectedRipsite"
@@ -44,7 +44,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 			>        
 				<template slot-scope="scope">
                     <div class="header-menu-container">
-                        <span @click="SetSelectedRipsite(scope.row)" class="link">{{scope.row.Ref}}</span>
+                        <span @click="SetSelectedRipsite(scope.row.Id)" class="link">{{scope.row.Ref}}</span>
 						<a v-if="user.Permissions.Invoice" :href="AttachmentUrl(scope.row.Id)"><i class="link fas fa-file-excel"></i></a>
                     </div>
 				</template>
@@ -67,11 +67,11 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
 			</el-table-column>
 			-->
 
-            <el-table-column
-                    label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"
-                    width="110px" :resizable=true :show-overflow-tooltip=true
-                    align="center"	:formatter="FormatDate"
-            ></el-table-column>
+<!--            <el-table-column-->
+<!--                    label="Soumission" prop="OrderDate" sortable :sort-by="['OrderDate', 'Ref']"-->
+<!--                    width="110px" :resizable=true :show-overflow-tooltip=true-->
+<!--                    align="center"	:formatter="FormatDate"-->
+<!--            ></el-table-column>-->
 
             <el-table-column
                     label="Nb. Points" width="130px" :resizable=true align="center"
