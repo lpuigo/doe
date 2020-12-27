@@ -127,7 +127,7 @@ func (amm *AdminModalModel) GroupList(vm *hvue.VM, usr *beuser.BeUser) string {
 		groupNames[i] = amm.GroupStore.GetGroupNameById(grpId)
 	}
 	if len(groupNames) == 0 {
-		return "Aucun"
+		return "Tous"
 	}
 	sort.Strings(groupNames)
 	return strings.Join(groupNames, ", ")
