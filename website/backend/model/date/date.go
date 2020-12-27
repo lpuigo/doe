@@ -13,6 +13,9 @@ const (
 	TimeStampLayout string = "2006-01-02 15:04:05.000"
 	TimeJSLayout    string = "2006-01-02"
 	TimeLayout      string = "02/01/2006"
+
+	TimeJSMinDate string = "0000-01-01"
+	TimeJSMaxDate string = "9999-12-31"
 )
 
 func DateFrom(d string) Date {

@@ -96,7 +96,7 @@ func (sp *SitesPersister) Add(sr *SiteRecord) *SiteRecord {
 	defer sp.Unlock()
 
 	// Set the Update Date
-	sr.Site.UpdateDate = date.Today().String()
+	sr.Site.SetUpdateDate()
 
 	// give the record its new ID
 	sp.persister.Add(sr)
@@ -115,7 +115,7 @@ func (sp *SitesPersister) Update(usr *SiteRecord) error {
 		return fmt.Errorf("id not found")
 	}
 	osr.Site = usr.Site
-	osr.Site.UpdateDate = date.Today().String()
+	osr.Site.SetUpdateDate()
 	sp.persister.MarkDirty(osr)
 	return nil
 }

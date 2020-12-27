@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/lpuig/ewin/doe/website/backend/model/archives"
-	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 )
@@ -95,7 +94,7 @@ func (psp *PoleSitesPersister) Add(psr *PoleSiteRecord) *PoleSiteRecord {
 	defer psp.Unlock()
 
 	// Set the Update Date
-	psr.PoleSite.UpdateDate = date.Today().String()
+	psr.PoleSite.SetUpdateDate()
 
 	// give the record its new ID
 	psp.persister.Add(psr)
@@ -115,7 +114,7 @@ func (psp *PoleSitesPersister) Update(psr *PoleSiteRecord) ([]string, error) {
 	}
 	//osr.PoleSite = usr.PoleSite
 	ignoredPolesRefs = osr.UpdateWith(psr.PoleSite)
-	osr.PoleSite.UpdateDate = date.Today().String()
+	osr.PoleSite.SetUpdateDate()
 	psp.persister.MarkDirty(osr)
 	psr.PoleSite = osr.PoleSite // psr now points to server updated polesite
 	return ignoredPolesRefs, nil

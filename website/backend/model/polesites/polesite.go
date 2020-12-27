@@ -139,6 +139,23 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 	return
 }
 
+// SetUpdateDate set UpdateDate for receiver PoleSite, based on pole date (if no pole date available, use Today' date)
+func (ps *PoleSite) SetUpdateDate() {
+	updatedate := date.TimeJSMinDate
+	for _, pole := range ps.Poles {
+		if pole.Date == "" {
+			continue
+		}
+		if pole.Date > updatedate {
+			updatedate = pole.Date
+		}
+	}
+	if updatedate == date.TimeJSMinDate {
+		updatedate = date.Today().String()
+	}
+	ps.UpdateDate = updatedate
+}
+
 type IsPolesiteVisible func(s *PoleSite) bool
 
 // Itemize returns slice of item pertaining to polesite poles list
@@ -157,40 +174,6 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, 
 	}
 	return res, nil
 }
-
-// AddStat adds Stats into values for given Polesite
-//func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
-//	actorById clients.ActorNameById, currentBpu *bpu.Bpu, showprice bool) error {
-//
-//	addValue := func(date, serie string, actors []string, value float64) {
-//		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)
-//		if sc.ShowTeam && len(actors) > 0 {
-//			value /= float64(len(actors))
-//			for _, actName := range actors {
-//				stats.AddStatValue(ps.Ref, ps.Client+" : "+actName, date, "", serie, value)
-//			}
-//		}
-//	}
-//
-//	calcItems, err := ps.Itemize(currentBpu)
-//	if err != nil {
-//		return fmt.Errorf("error on polesite stat itemize for '%s':%s", ps.Ref, err.Error())
-//	}
-//	for _, item := range calcItems {
-//		if !item.Done {
-//			continue
-//		}
-//		actorsName := make([]string, len(item.Actors))
-//		for i, actId := range item.Actors {
-//			actorsName[i] = actorById(actId)
-//		}
-//		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
-//		if showprice {
-//			addValue(sc.DateFor(item.Date), items.StatSeriePrice, actorsName, item.Price())
-//		}
-//	}
-//	return nil
-//}
 
 // ExportName returns the PoleSite XLS export file name
 func (ps *PoleSite) ExportName() string {

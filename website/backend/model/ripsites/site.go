@@ -2,12 +2,14 @@ package ripsites
 
 import (
 	"fmt"
-	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
-	"github.com/lpuig/ewin/doe/website/backend/model/clients"
-	"github.com/lpuig/ewin/doe/website/backend/model/items"
-	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"strconv"
 	"strings"
+
+	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/clients"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 )
 
 type Site struct {
@@ -452,6 +454,32 @@ func (s *Site) itemizeMeasurements(currentBpu *bpu.Bpu, doneOnly bool) ([]*items
 		res = append(res, item)
 	}
 	return res, nil
+}
+
+// SetUpdateDate set UpdateDate for receiver Site, based on item date (if no item date available, use Today' date)
+func (s *Site) SetUpdateDate() {
+	updatedate := date.TimeJSMinDate
+	checkStateDate := func(st State) {
+		if st.DateStart != "" && st.DateStart > updatedate {
+			updatedate = st.DateStart
+		}
+		if st.DateEnd != "" && st.DateEnd > updatedate {
+			updatedate = st.DateEnd
+		}
+	}
+	for _, itm := range s.Pullings {
+		checkStateDate(itm.State)
+	}
+	for _, itm := range s.Junctions {
+		checkStateDate(itm.State)
+	}
+	for _, itm := range s.Measurements {
+		checkStateDate(itm.State)
+	}
+	if updatedate == date.TimeJSMinDate {
+		updatedate = date.Today().String()
+	}
+	s.UpdateDate = updatedate
 }
 
 func getCableSize(cableName string) (int, error) {
