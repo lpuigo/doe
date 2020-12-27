@@ -10,9 +10,9 @@ const (
 )
 
 type StatKey struct {
-	Team    string
-	Date    string
-	Site    string
-	Article string
-	Serie   string
+	Graph        string
+	Date         string
+	StackedSerie string
+	Article      string
+	Serie        string
 }

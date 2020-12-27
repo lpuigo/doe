@@ -9,14 +9,15 @@ import (
 )
 
 type StatContext struct {
-	DayIncr       int
-	MaxVal        int
-	StartDate     string
-	DateFor       date.DateAggreg
-	IsTeamVisible clients.IsTeamVisible
-	ClientByName  clients.ClientByName
-	ActorNameById clients.ActorNameById
-	GraphName     func(item *Item) string
+	DayIncr          int
+	MaxVal           int
+	StartDate        string
+	DateFor          date.DateAggreg
+	IsTeamVisible    clients.IsTeamVisible
+	ClientByName     clients.ClientByName
+	ActorNameById    clients.ActorNameById
+	GraphName        func(item *Item) string
+	StackedSerieName func(item *Item) string
 
 	ShowTeam bool
 
@@ -79,13 +80,16 @@ func NewStatContext(freq string) (*StatContext, error) {
 		GraphName: func(item *Item) string {
 			return item.Client
 		},
+		StackedSerieName: func(item *Item) string {
+			return item.Site
+		},
 	}, nil
 }
 
 func (sc *StatContext) SetSerieTeamSiteConf() {
-	sc.Data1 = func(s StatKey) string { return s.Serie } // Bars Family
-	sc.Data2 = func(s StatKey) string { return s.Team }  // Graphs
-	sc.Data3 = func(s StatKey) string { return s.Site }  // side block
+	sc.Data1 = func(s StatKey) string { return s.Serie }        // Bars Family
+	sc.Data2 = func(s StatKey) string { return s.Graph }        // Graphs
+	sc.Data3 = func(s StatKey) string { return s.StackedSerie } // side block
 	sc.Filter1 = KeepAll
 	sc.Filter2 = KeepAll
 	sc.Filter3 = KeepAll
@@ -112,12 +116,13 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {
 	addValue := func(item *Item, statDate, serie string, actors []string, value float64) {
-		team := sc.GraphName(item)
-		stats.AddStatValue(item.Site, team, statDate, "", serie, value)
+		graphName := sc.GraphName(item)
+		stackedSerie := sc.StackedSerieName(item)
+		stats.AddStatValue(stackedSerie, graphName, statDate, "", serie, value)
 		if sc.ShowTeam && len(actors) > 0 {
 			value /= float64(len(actors))
 			for _, actName := range actors {
-				stats.AddStatValue(item.Site, team+" : "+actName, statDate, "", serie, value)
+				stats.AddStatValue(stackedSerie, graphName+" : "+actName, statDate, "", serie, value)
 			}
 		}
 	}

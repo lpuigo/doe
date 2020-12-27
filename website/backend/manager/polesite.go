@@ -50,7 +50,7 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	defaultGroup := m.Groups.GetById(0).Name
 	getActorById := m.genActorById()
 	getGroupById := m.GenGroupById()
-	// GraphName returns group name
+	// GraphName returns group name, based on item actors
 	statContext.GraphName = func(item *items.Item) string {
 		if len(item.Actors) == 0 {
 			groupName, found := groupNameByClient[item.Client]

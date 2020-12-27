@@ -44,24 +44,21 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 	}
 
 	switch groupBy {
-	case "activity", "site":
-		ripsiteStats, err := m.Ripsites.GetProdStats(*statContext, m.visibleRipsiteFilter(), m.CurrentUser.Permissions["Invoice"], groupBy)
-		if err != nil {
-			return err
+	case "activity":
+		statContext.StackedSerieName = func(item *items.Item) string {
+			return item.Activity
 		}
-		return json.NewEncoder(writer).Encode(ripsiteStats)
-
-	case "mean":
-		ripsiteStats, err := m.Ripsites.GetMeanProdStats(*statContext, m.visibleRipsiteFilter(), m.genGetClient(), m.genActorInfoById())
-		if err != nil {
-			return err
-		}
-		meanStats := items.CalcTeamMean(ripsiteStats, 1)
-		return json.NewEncoder(writer).Encode(meanStats)
+	case "site":
 
 	default:
 		return fmt.Errorf("unsupported group type '%s'", groupBy)
 	}
+
+	ripsiteStats, err := statContext.CalcStats(m.Ripsites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(ripsiteStats)
 }
 
 func (m Manager) GetRipsitesActorsActivity(writer io.Writer, freq string) error {

@@ -13,13 +13,13 @@ func NewStats() Stats {
 	return make(Stats)
 }
 
-func (s Stats) AddStatValue(site, team, date, article, serie string, value float64) {
+func (s Stats) AddStatValue(stackedSerie, graphName, date, article, serie string, value float64) {
 	s[StatKey{
-		Team:    team,
-		Date:    date,
-		Site:    site,
-		Article: article,
-		Serie:   serie,
+		Graph:        graphName,
+		Date:         date,
+		StackedSerie: stackedSerie,
+		Article:      article,
+		Serie:        serie,
 	}] += value
 }
 
@@ -29,10 +29,10 @@ func (s Stats) AddStatValue(site, team, date, article, serie string, value float
 func (s Stats) Aggregate(sc StatContext) *rs.RipsiteStats {
 
 	//create client-team, sites, Series & dates Lists
-	serieset := make(ElemSet) // d1
-	teamset := make(ElemSet)  // d2
-	siteset := make(ElemSet)  // d3
-	dateset := make(ElemSet)
+	serieSet := make(ElemSet)        // d1
+	graphSet := make(ElemSet)        // d2
+	stackedSerieSet := make(ElemSet) // d3
+	dateSet := make(ElemSet)
 
 	end := date.Today()
 	start := end.String()
@@ -43,76 +43,76 @@ func (s Stats) Aggregate(sc StatContext) *rs.RipsiteStats {
 		k1 := sc.Data1(key)
 		k2 := sc.Data2(key)
 		k3 := sc.Data3(key)
-		serieset[k1] = 1 // d1
-		teamset[k2] = 1  // d2
-		siteset[k3] = 1  // d3
+		serieSet[k1] = 1        // d1
+		graphSet[k2] = 1        // d2
+		stackedSerieSet[k3] = 1 // d3
 		if key.Date < start {
 			start = key.Date
 		}
 		agrValues[StatKey{
-			Serie:   k1, // d1
-			Team:    k2, // d2
-			Site:    k3, // d3
-			Article: "", // d4 always aggregated
-			Date:    key.Date,
+			Serie:        k1, // d1
+			Graph:        k2, // d2
+			StackedSerie: k3, // d3
+			Article:      "", // d4 always aggregated
+			Date:         key.Date,
 		}] += val
 	}
 
 	curDate := date.DateFrom(sc.StartDate)
-	for len(dateset) < sc.MaxVal {
+	for len(dateSet) < sc.MaxVal {
 		curStringDate := sc.DateFor(curDate.String())
-		dateset[curStringDate] = 1
+		dateSet[curStringDate] = 1
 		curDate = curDate.AddDays(sc.DayIncr)
 	}
 
-	series := serieset.SortedKeys(sc.Filter1) // d1
-	teams := teamset.SortedKeys(sc.Filter2)   // d2
-	sites := siteset.SortedKeys(sc.Filter3)   // d3
-	dates := dateset.SortedKeys(KeepAll)      // d4
+	series := serieSet.SortedKeys(sc.Filter1)               // d1
+	graphs := graphSet.SortedKeys(sc.Filter2)               // d2
+	stackedSeries := stackedSerieSet.SortedKeys(sc.Filter3) // d3
+	dates := dateSet.SortedKeys(KeepAll)                    // d4
 
-	// ws.Values : map{D1}[#D2]{D3}[#D4]float64
-	ws := rs.NewBERipsiteStats()
-	ws.Dates = dates // d4
+	// stats.Values : map{D1}[#D2]{D3}[#D4]float64
+	stats := rs.NewBERipsiteStats()
+	stats.Dates = dates // d4
 	sitesmap := map[string]bool{}
 
-	for _, teamName := range teams {
-		teamActivity := 0.0
+	for _, graphName := range graphs {
+		graphActivity := 0.0
 		values := make(map[string]map[string][]float64)
 		for _, serie := range series {
 			values[serie] = make(map[string][]float64)
-			for _, site := range sites {
+			for _, stackedSerie := range stackedSeries {
 				siteData := make([]float64, len(dates))
 				siteActivity := 0.0
 				for dateNum, d := range dates {
 					val := agrValues[StatKey{
-						Team:    teamName,
-						Date:    d,
-						Site:    site,
-						Article: "",
-						Serie:   serie,
+						Graph:        graphName,
+						Date:         d,
+						StackedSerie: stackedSerie,
+						Article:      "",
+						Serie:        serie,
 					}]
-					teamActivity += val
+					graphActivity += val
 					siteActivity += val
 					siteData[dateNum] = val
 				}
 				if siteActivity > 0 {
-					sitesmap[site] = true
-					values[serie][site] = siteData
+					sitesmap[stackedSerie] = true
+					values[serie][stackedSerie] = siteData
 				}
 			}
 		}
-		if teamActivity == 0 {
-			// current team as no activity on the time laps, skip it // d2
+		if graphActivity == 0 {
+			// current graph as no activity on the time laps, skip it // d2
 			continue
 		}
-		ws.Teams = append(ws.Teams, teamName) // d2
+		stats.Teams = append(stats.Teams, graphName) // d2
 		for _, serie := range series {
-			ws.Values[serie] = append(ws.Values[serie], values[serie]) // d1
+			stats.Values[serie] = append(stats.Values[serie], values[serie]) // d1
 		}
 	}
-	ws.Sites = sitesmap // d3
+	stats.Sites = sitesmap // d3
 
-	return ws
+	return stats
 }
 
 // CalcTeamMean adds in given RipsiteStats mean values for each teams (D2 dimension) : map{D1}[#D2]{D3}[#date]float64

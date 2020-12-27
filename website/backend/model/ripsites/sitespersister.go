@@ -2,15 +2,15 @@ package ripsites
 
 import (
 	"fmt"
+	"path/filepath"
+	"sync"
+	"time"
+
 	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
-	rs "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
-	"path/filepath"
-	"sync"
-	"time"
 )
 
 type SitesPersister struct {
@@ -176,102 +176,102 @@ func (sp *SitesPersister) getSitesItems(isRSVisible IsSiteVisible, clientByName 
 }
 
 // GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, showprice bool, groupBy string) (*rs.RipsiteStats, error) {
-	sp.RLock()
-	defer sp.RUnlock()
-
-	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, sc.ClientByName, true)
-	if err != nil {
-		return nil, err
-	}
-
-	// create Prod Stats
-	stats := items.NewStats()
-
-	addValue := func(site, team, date, serie string, actors []string, value float64) {
-		stats.AddStatValue(site, team, date, "", serie, value)
-		if sc.ShowTeam && len(actors) > 0 {
-			value /= float64(len(actors))
-			for _, actName := range actors {
-				stats.AddStatValue(site, team+" : "+actName, date, "", serie, value)
-			}
-		}
-	}
-
-	for _, item := range sitesItems {
-		actorsName := make([]string, len(item.Actors))
-		for i, actId := range item.Actors {
-			actorsName[i] = sc.ActorNameById(actId)
-		}
-		dateFor := sc.DateFor(item.Date)
-		switch groupBy {
-		case "activity":
-			//AddStatValue(site, team, date, article, serie string, value float64)
-			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
-			if showprice {
-				addValue(item.Activity, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
-			}
-		case "site":
-			addValue(item.Site, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
-			if showprice {
-				addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
-			}
-		//case "mean":
-		//	addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
-		default:
-			return nil, fmt.Errorf("unsupported groupBy value '%s'", groupBy)
-		}
-	}
-
-	aggrStats := stats.Aggregate(sc)
-
-	return aggrStats, nil
-}
+//func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteVisible, showprice bool, groupBy string) (*rs.RipsiteStats, error) {
+//	sp.RLock()
+//	defer sp.RUnlock()
+//
+//	// Build Item List
+//	sitesItems, err := sp.getSitesItems(isRSVisible, sc.ClientByName, true)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// create Prod Stats
+//	stats := items.NewStats()
+//
+//	addValue := func(site, team, date, serie string, actors []string, value float64) {
+//		stats.AddStatValue(site, team, date, "", serie, value)
+//		if sc.ShowTeam && len(actors) > 0 {
+//			value /= float64(len(actors))
+//			for _, actName := range actors {
+//				stats.AddStatValue(site, team+" : "+actName, date, "", serie, value)
+//			}
+//		}
+//	}
+//
+//	for _, item := range sitesItems {
+//		actorsName := make([]string, len(item.Actors))
+//		for i, actId := range item.Actors {
+//			actorsName[i] = sc.ActorNameById(actId)
+//		}
+//		dateFor := sc.DateFor(item.Date)
+//		switch groupBy {
+//		case "activity":
+//			//AddStatValue(site, team, date, article, serie string, value float64)
+//			addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+//			if showprice {
+//				addValue(item.Activity, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
+//			}
+//		case "site":
+//			addValue(item.Site, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+//			if showprice {
+//				addValue(item.Site, item.Client, dateFor, items.StatSeriePrice, actorsName, item.Price())
+//			}
+//		//case "mean":
+//		//	addValue(item.Activity, item.Client, dateFor, items.StatSerieWork, actorsName, item.Work())
+//		default:
+//			return nil, fmt.Errorf("unsupported groupBy value '%s'", groupBy)
+//		}
+//	}
+//
+//	aggrStats := stats.Aggregate(sc)
+//
+//	return aggrStats, nil
+//}
 
 // GetProdStats returns all Stats about all contained RipsiteRecords visible with isWSVisible = true and IsTeamVisible = true
-func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorInfoById clients.ActorInfoById) (*rs.RipsiteStats, error) {
-	sp.RLock()
-	defer sp.RUnlock()
-
-	// Build Item List
-	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, true)
-	if err != nil {
-		return nil, err
-	}
-
-	// create Prod Stats
-	stats := items.NewStats()
-
-	for _, item := range sitesItems {
-		dateFor := sc.DateFor(item.Date)
-
-		nbActors := float64(len(item.Actors))
-		var work float64
-		if nbActors > 0 {
-			work = item.Work() / nbActors
-		}
-		for _, actId := range item.Actors {
-			actInfos := actorInfoById(actId)
-			if len(actInfos) < 2 {
-				continue
-			}
-			actRole, actName := actInfos[0], actInfos[1]
-
-			client := item.Client
-			clientRole := item.Client + " : " + actRole
-			clientRoleName := item.Client + " : " + actRole + " / " + actName
-
-			stats.AddStatValue(actRole, client, dateFor, "", items.StatSerieWork, work)
-			stats.AddStatValue(actRole, clientRole, dateFor, "", items.StatSerieWork, work)
-			stats.AddStatValue(actRole, clientRoleName, dateFor, "", items.StatSerieWork, work)
-		}
-	}
-
-	aggrStats := stats.Aggregate(sc)
-
-	return aggrStats, nil
-}
+//func (sp *SitesPersister) GetMeanProdStats(sc items.StatContext, isRSVisible IsSiteVisible, clientByName clients.ClientByName, actorInfoById clients.ActorInfoById) (*rs.RipsiteStats, error) {
+//	sp.RLock()
+//	defer sp.RUnlock()
+//
+//	// Build Item List
+//	sitesItems, err := sp.getSitesItems(isRSVisible, clientByName, true)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// create Prod Stats
+//	stats := items.NewStats()
+//
+//	for _, item := range sitesItems {
+//		dateFor := sc.DateFor(item.Date)
+//
+//		nbActors := float64(len(item.Actors))
+//		var work float64
+//		if nbActors > 0 {
+//			work = item.Work() / nbActors
+//		}
+//		for _, actId := range item.Actors {
+//			actInfos := actorInfoById(actId)
+//			if len(actInfos) < 2 {
+//				continue
+//			}
+//			actRole, actName := actInfos[0], actInfos[1]
+//
+//			client := item.Client
+//			clientRole := item.Client + " : " + actRole
+//			clientRoleName := item.Client + " : " + actRole + " / " + actName
+//
+//			stats.AddStatValue(actRole, client, dateFor, "", items.StatSerieWork, work)
+//			stats.AddStatValue(actRole, clientRole, dateFor, "", items.StatSerieWork, work)
+//			stats.AddStatValue(actRole, clientRoleName, dateFor, "", items.StatSerieWork, work)
+//		}
+//	}
+//
+//	aggrStats := stats.Aggregate(sc)
+//
+//	return aggrStats, nil
+//}
 
 func (sp *SitesPersister) GetAllItems(firstDate string, dateFor date.DateAggreg, isRSVisible IsSiteVisible, clientByName clients.ClientByName) ([]*items.Item, error) {
 
