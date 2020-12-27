@@ -130,7 +130,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.SelectedPoleMarker = nil
 	mpm.IsPoleSelected = false
 	mpm.ActiveChapter = []string{}
-	mpm.TableContext = poletable.NewContext("followup")
+	mpm.TableContext = poletable.NewContext("billing")
 	mpm.SearchAddress = ""
 	mpm.SearchAddressMsg = ""
 	mpm.VisibleSearchLoc = false
