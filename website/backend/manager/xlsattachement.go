@@ -26,5 +26,5 @@ func (m Manager) GetItemizableSiteXLSAttachementName(site items.ItemizableSite) 
 }
 
 func (m Manager) GetItemizableSiteXLSAttachement(writer io.Writer, site items.ItemizableSite) error {
-	return m.TemplateEngine.GetItemizableSiteXLSAttachement(writer, site, m.genGetClient(), m.genActorById())
+	return m.TemplateEngine.GetItemizableSiteXLSAttachement(writer, site, m.genGetClient(), m.genActorNameById())
 }

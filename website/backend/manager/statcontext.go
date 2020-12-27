@@ -15,7 +15,7 @@ func (m Manager) NewStatContext(freq string) (*items.StatContext, error) {
 
 	statContext.IsTeamVisible = isActorVisible
 	statContext.ClientByName = m.genGetClient()
-	statContext.ActorById = m.genActorById()
+	statContext.ActorNameById = m.genActorNameById()
 	statContext.ShowTeam = !m.CurrentUser.Permissions["Review"]
 
 	statContext.SetSerieTeamSiteConf()

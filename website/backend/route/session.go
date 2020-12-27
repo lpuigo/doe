@@ -53,17 +53,16 @@ type authentClient struct {
 	Articles []string
 }
 
+// getAuthentClientFrom returns a slice of authentClient based on given clients list
+//
+// authentClient are populated with visible actors, based on current User group visibility
 func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
 	getActorsByGroupId := mgr.GenActorsByGroupId()
-	getGroupById := mgr.GenGroupById()
 	clientActors := make(map[string][]*actors.Actor)
-	for _, groupId := range mgr.CurrentUser.Groups {
-		group := getGroupById(groupId)
-		if group == nil {
-			continue
-		}
-		groupActors := getActorsByGroupId(groupId)
+
+	for _, group := range mgr.GetCurrentUserVisibleGroups() {
+		groupActors := getActorsByGroupId(group.Id)
 		for _, clientName := range group.Clients {
 			acts := clientActors[clientName]
 			clientActors[clientName] = append(acts, groupActors...)

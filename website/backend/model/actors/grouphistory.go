@@ -33,7 +33,7 @@ func (gh GroupHistory) getDateGroupList() []dategroupid {
 	return res
 }
 
-// ActiveGroupOnDate returns the assigned group" id on given date (-1 if no group found)
+// ActiveGroupOnDate returns the assigned group" id on given date (-1 if no group assigned)
 func (gh GroupHistory) ActiveGroupOnDate(day string) int {
 	if len(gh) == 0 {
 		return -1

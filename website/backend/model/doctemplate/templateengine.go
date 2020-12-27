@@ -187,7 +187,7 @@ func (te *DocTemplateEngine) GetDOEArchiveZIP(w io.Writer, ws *model.Worksite) e
 }
 
 // GetSiteXLSAttachement generates and writes on given writer the attachment data pertaining to given FoaSite
-func (te *DocTemplateEngine) GetItemizableSiteXLSAttachement(w io.Writer, site items.ItemizableSite, getClient clients.ClientByName, actorById clients.ActorById) error {
+func (te *DocTemplateEngine) GetItemizableSiteXLSAttachement(w io.Writer, site items.ItemizableSite, getClient clients.ClientByName, actorById clients.ActorNameById) error {
 	client := getClient(site.GetClient())
 	if client == nil {
 		return fmt.Errorf("unknown client '%s'", site.GetClient())
@@ -202,7 +202,7 @@ func (te *DocTemplateEngine) GetItemizableSiteXLSAttachement(w io.Writer, site i
 }
 
 // GetItemsXLSAttachement generates and writes on given writer the attachment data pertaining to given items
-func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorById) error {
+func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.Item, actorById clients.ActorNameById) error {
 	file := filepath.Join(te.tmplDir, xlsRipsiteAttachementFile)
 	xf, err := excelize.OpenFile(file)
 	if err != nil {

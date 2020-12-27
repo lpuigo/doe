@@ -202,7 +202,7 @@ func (sp *SitesPersister) GetProdStats(sc items.StatContext, isRSVisible IsSiteV
 	for _, item := range sitesItems {
 		actorsName := make([]string, len(item.Actors))
 		for i, actId := range item.Actors {
-			actorsName[i] = sc.ActorById(actId)
+			actorsName[i] = sc.ActorNameById(actId)
 		}
 		dateFor := sc.DateFor(item.Date)
 		switch groupBy {

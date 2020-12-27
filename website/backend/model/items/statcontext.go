@@ -15,8 +15,8 @@ type StatContext struct {
 	DateFor       date.DateAggreg
 	IsTeamVisible clients.IsTeamVisible
 	ClientByName  clients.ClientByName
-	ActorById     clients.ActorById
-	GraphName     func(site ItemizableSite) string
+	ActorNameById clients.ActorNameById
+	GraphName     func(item *Item) string
 
 	ShowTeam bool
 
@@ -76,8 +76,8 @@ func NewStatContext(freq string) (*StatContext, error) {
 		MaxVal:    maxVal,
 		StartDate: startDate,
 		DateFor:   dateFor,
-		GraphName: func(site ItemizableSite) string {
-			return site.GetClient()
+		GraphName: func(item *Item) string {
+			return item.Client
 		},
 	}, nil
 }
@@ -111,13 +111,13 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 }
 
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {
-	addValue := func(date, serie string, actors []string, value float64) {
-		team := sc.GraphName(site)
-		stats.AddStatValue(site.GetRef(), team, date, "", serie, value)
+	addValue := func(item *Item, statDate, serie string, actors []string, value float64) {
+		team := sc.GraphName(item)
+		stats.AddStatValue(item.Site, team, statDate, "", serie, value)
 		if sc.ShowTeam && len(actors) > 0 {
 			value /= float64(len(actors))
 			for _, actName := range actors {
-				stats.AddStatValue(site.GetRef(), team+" : "+actName, date, "", serie, value)
+				stats.AddStatValue(item.Site, team+" : "+actName, statDate, "", serie, value)
 			}
 		}
 	}
@@ -127,17 +127,17 @@ func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.
 		return fmt.Errorf("error on %s stat itemize for '%s':%s", site.GetType(), site.GetRef(), err.Error())
 	}
 	for _, item := range calcItems {
-		dateItem := sc.DateFor(item.Date)
-		if dateItem < sc.StartDate {
+		statDate := sc.DateFor(item.Date)
+		if statDate < sc.StartDate {
 			continue
 		}
 		actorsName := make([]string, len(item.Actors))
 		for i, actId := range item.Actors {
-			actorsName[i] = sc.ActorById(actId)
+			actorsName[i] = sc.ActorNameById(actId)
 		}
-		addValue(dateItem, StatSerieWork, actorsName, item.Work())
+		addValue(item, statDate, StatSerieWork, actorsName, item.Work())
 		if showprice {
-			addValue(dateItem, StatSeriePrice, actorsName, item.Price())
+			addValue(item, statDate, StatSeriePrice, actorsName, item.Price())
 		}
 	}
 	return nil

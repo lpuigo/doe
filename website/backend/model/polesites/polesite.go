@@ -160,7 +160,7 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, 
 
 // AddStat adds Stats into values for given Polesite
 //func (ps *PoleSite) AddStat(stats items.Stats, sc items.StatContext,
-//	actorById clients.ActorById, currentBpu *bpu.Bpu, showprice bool) error {
+//	actorById clients.ActorNameById, currentBpu *bpu.Bpu, showprice bool) error {
 //
 //	addValue := func(date, serie string, actors []string, value float64) {
 //		stats.AddStatValue(ps.Ref, ps.Client, date, "", serie, value)

@@ -31,25 +31,9 @@ func (m *Manager) genGetClient() clients.ClientByName {
 	}
 }
 
-// genActorById returns a ActorById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
-func (m *Manager) genActorById() clients.ActorById {
-	return func(actorId string) string {
-		var ar *actors.ActorRecord
-		if actId, err := strconv.Atoi(actorId); err == nil {
-			ar = m.Actors.GetById(actId)
-		} else {
-			ar = m.Actors.GetByRef(actorId)
-		}
-		if ar == nil {
-			return ""
-		}
-		return ar.Actor.GetLabel()
-	}
-}
-
-// genActorInfoById returns a ActorInfoById function: func(actorId string) []string which returns nil if actorId is not known, or [0] Actor Role [1] Actor Ref
-func (m *Manager) genActorInfoById() clients.ActorInfoById {
-	return func(actorId string) []string {
+// genActorById returns a ActorById function: func(actorId string) *actors.Actor. Returned *actors.Actor is nil if actorId is not found
+func (m *Manager) genActorById() func(actorId string) *actors.Actor {
+	return func(actorId string) *actors.Actor {
 		var ar *actors.ActorRecord
 		if actId, err := strconv.Atoi(actorId); err == nil {
 			ar = m.Actors.GetById(actId)
@@ -59,7 +43,31 @@ func (m *Manager) genActorInfoById() clients.ActorInfoById {
 		if ar == nil {
 			return nil
 		}
-		return []string{ar.Actor.Role, ar.Actor.Ref}
+		return ar.Actor
+	}
+}
+
+// genActorNameById returns a ActorNameById function: func(actorId string) string. Returned string (actor ref) is "" if actorId is not found
+func (m *Manager) genActorNameById() clients.ActorNameById {
+	getActorById := m.genActorById()
+	return func(actorId string) string {
+		act := getActorById(actorId)
+		if act == nil {
+			return ""
+		}
+		return act.GetLabel()
+	}
+}
+
+// genActorInfoById returns a ActorInfoById function: func(actorId string) []string which returns nil if actorId is not known, or [0] Actor Role [1] Actor Ref
+func (m *Manager) genActorInfoById() clients.ActorInfoById {
+	getActorById := m.genActorById()
+	return func(actorId string) []string {
+		act := getActorById(actorId)
+		if act == nil {
+			return nil
+		}
+		return []string{act.Role, act.Ref}
 	}
 }
 

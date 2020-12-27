@@ -16,7 +16,7 @@ type ItemCalendar struct {
 }
 
 // AddItemsCalendar adds a Sheet to given XLSx File with Items Calendar
-func AddItemsCalendar(xf *excelize.File, its []*items.Item, actorById clients.ActorById) {
+func AddItemsCalendar(xf *excelize.File, its []*items.Item, actorById clients.ActorNameById) {
 	sheetName := "Calendrier"
 	xf.NewSheet(sheetName)
 

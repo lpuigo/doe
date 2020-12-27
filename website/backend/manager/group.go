@@ -27,6 +27,27 @@ func (m Manager) GenGroupByName() groups.GroupByName {
 	}
 }
 
+// GetCurrentUserVisibleGroups returns a slice of groups.Group visible by current user
+func (m Manager) GetCurrentUserVisibleGroups() []*groups.Group {
+	res := []*groups.Group{}
+	getGroupById := m.GenGroupById()
+	if len(m.CurrentUser.Groups) > 0 { // Current User has a restricted group visibility
+		for _, grpId := range m.CurrentUser.Groups {
+			grp := getGroupById(grpId)
+			if grp == nil {
+				continue
+			}
+			res = append(res, grp)
+		}
+		return res
+	}
+	// Current user has a global group visibility
+	for _, grp := range m.Groups.GetGroups() {
+		res = append(res, grp)
+	}
+	return res
+}
+
 func (m Manager) GenActorsByGroupId() actors.ActorsByGroupId {
 	today := date.Today().String()
 	actorsByGroupId := make(map[int][]*actors.Actor)
@@ -53,8 +74,9 @@ func (m Manager) GenGroupById() groups.GroupById {
 	}
 }
 
-func (m Manager) GroupSizeOnMonth(days []string) map[string][]int {
-	monthRange := date.DateStringRange{
+// GroupSizePerDays returns a map of groupName -> []int giving number of active actors for groupName for each day within given days slice
+func (m Manager) GroupSizePerDays(days []string) map[string][]int {
+	daysRange := date.DateStringRange{
 		Begin: days[0],
 		End:   days[len(days)-1],
 	}
@@ -64,7 +86,7 @@ func (m Manager) GroupSizeOnMonth(days []string) map[string][]int {
 	}
 
 	for _, actor := range m.Actors.GetAllActors() {
-		if !actor.IsActiveOnDateRange(monthRange) {
+		if !actor.IsActiveOnDateRange(daysRange) {
 			continue
 		}
 		actorActivity := make([]int, len(days))

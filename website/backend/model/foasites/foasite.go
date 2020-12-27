@@ -142,7 +142,7 @@ func (fs *FoaSite) Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, e
 //	for _, item := range calcItems {
 //		actorsName := make([]string, len(item.Actors))
 //		for i, actId := range item.Actors {
-//			actorsName[i] = sc.ActorById(actId)
+//			actorsName[i] = sc.ActorNameById(actId)
 //		}
 //		addValue(sc.DateFor(item.Date), items.StatSerieWork, actorsName, item.Work())
 //		if showprice {
