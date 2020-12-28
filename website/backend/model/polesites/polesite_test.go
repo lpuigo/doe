@@ -66,9 +66,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 // TestPoleSite_AppendXlsToJson : add a XLSx PoleSite description to an already provided PoleSite JSON file.
 // New Poles are appended next to already existing ones
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\NRO 88-020\2020-11-25 Landaville`
-	psXlsfile := `Polesite.xlsx`
-	psJsonFile := `000035.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-12-28 54 & 88\Test`
+	psXlsfile := `Polesite Sogetrel Poteau-Losange 88-006.xlsx`
+	psJsonFile := `000051.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)

@@ -25,6 +25,7 @@ const (
 const (
 	colPoleId int = iota + 1
 	colPoleRef
+	colPoleSticker
 	colPoleCity
 	colPoleAddress
 	colPoleLat
@@ -33,7 +34,6 @@ const (
 	colPoleActors
 	colPoleDate
 	colPoleAttachmentDate
-	colPoleSticker
 	colPoleDtRef
 	colPoleDictRef
 	colPoleDictDate
@@ -73,6 +73,7 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	// Set Poles infos
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleId), "pole")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleRef), "Ref")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleSticker), "Sticker")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleCity), "City")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleAddress), "Address")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleLat), "Lat")
@@ -81,7 +82,6 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleActors), "Actors")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleDate), "Date")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleAttachmentDate), "AttachmentDate")
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleSticker), "Sticker")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleDtRef), "DtRef")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleDictRef), "DictRef")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleDictDate), "DictDate")
@@ -93,16 +93,18 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleComment), "Comment")
 
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+0), poleconst.ProductCreation)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+1), poleconst.ProductCoated)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+2), poleconst.ProductMoise)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+1), poleconst.ProductReplace)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+2), poleconst.ProductStraighten)
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+3), poleconst.ProductCouple)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+4), poleconst.ProductReplace)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+5), poleconst.ProductRemove)
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+6), poleconst.ProductHauban)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+4), poleconst.ProductMoise)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+5), poleconst.ProductHauban)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+6), poleconst.ProductCoated)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+7), poleconst.ProductRemove)
 
 	for i, pole := range ps.Poles {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleId), "pole")
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleRef), pole.Ref)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleSticker), pole.Sticker)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleCity), pole.City)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleAddress), pole.Address)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleLat), pole.Lat)
@@ -111,7 +113,6 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleActors), "")      // Actor ("Pierre, Paul, Jacques")
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleDate), pole.Date) // Date
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleAttachmentDate), pole.AttachmentDate)
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleSticker), pole.Sticker)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleDtRef), pole.DtRef)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleDictRef), pole.DictRef)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleDictDate), pole.DictDate)
@@ -126,12 +127,13 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 			products[product] = "1"
 		}
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+0), products[poleconst.ProductCreation])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+1), products[poleconst.ProductCoated])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductMoise])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+1), products[poleconst.ProductReplace])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+2), products[poleconst.ProductStraighten])
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+3), products[poleconst.ProductCouple])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+4), products[poleconst.ProductReplace])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+5), products[poleconst.ProductRemove])
-		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+6), products[poleconst.ProductHauban])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+4), products[poleconst.ProductMoise])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+5), products[poleconst.ProductHauban])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+6), products[poleconst.ProductCoated])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+7), products[poleconst.ProductRemove])
 	}
 
 	err := xf.Write(w)
@@ -318,7 +320,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return nil, err
 	}
 	productKeys := map[int]string{}
-	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6} {
+	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6, colPoleProduct + 7} {
 		productKeys[col], _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
 	}
 	//if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
