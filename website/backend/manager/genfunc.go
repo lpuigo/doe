@@ -7,6 +7,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/groups"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
 )
 
 // ====================================================================================================
@@ -116,6 +117,43 @@ func (m *Manager) genActorInfoById(visibleActorsOnly bool) clients.ActorInfoById
 			return nil
 		}
 		return []string{act.Role, act.Ref}
+	}
+}
+
+// SetGraphNameByClient sets given StatContext.GraphName to group by Group / Actors
+func (m *Manager) SetGraphNameByGroup(sc *items.StatContext) {
+	getActById := m.genActorById(true)
+	getGroupById := m.GenGroupById()
+	sc.GraphName = func(item *items.Item) []items.NamePct {
+		defaultGroupName := getGroupById(0).Name
+		gName := defaultGroupName
+		res := []items.NamePct{}
+		globPct := 1.0
+		if sc.ShowTeam && len(item.Actors) > 0 {
+			pct := 1.0 / float64(len(item.Actors))
+			globPct = 0.0
+			for _, actId := range item.Actors {
+				actor := getActById(actId, item.Date)
+				if actor == nil { // Skip unknown or not visible Actors
+					continue
+				}
+				gName = defaultGroupName
+				grp := getGroupById(actor.Groups.ActiveGroupOnDate(item.Date))
+				if grp != nil {
+					gName = grp.Name
+				}
+				res = append(res, items.NamePct{
+					Name: gName + " : " + actor.GetLabel(),
+					Pct:  pct,
+				})
+				globPct += pct
+			}
+		}
+		res = append(res, items.NamePct{
+			Name: gName,
+			Pct:  globPct,
+		})
+		return res
 	}
 }
 

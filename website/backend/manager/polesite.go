@@ -27,10 +27,12 @@ func (m Manager) GetPolesitesStats(writer io.Writer, freq, groupBy string) error
 	}
 
 	switch groupBy {
+	case "client":
+		// default statContext
 	case "actor":
 		statContext.SetGraphNameByActor()
-	case "client":
-
+	case "group":
+		m.SetGraphNameByGroup(statContext)
 	default:
 		return fmt.Errorf("unsupported group type '%s'", groupBy)
 	}
@@ -51,50 +53,7 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 	statContext.StartDate = month
 	// Extract all month's days
 	statContext.MaxVal = date.NbDaysBetween(month, date.GetMonth(date.GetDateAfter(month, 32)))
-	groupNameByClient := make(map[string]string)
-	for _, group := range m.Groups.GetGroups() {
-		for _, client := range group.Clients {
-			groupNameByClient[client] = group.Name
-		}
-	}
-	defaultGroup := m.Groups.GetById(0).Name
-	getActorById := m.genActorById(true)
-	getGroupById := m.GenGroupById()
-	// GraphName returns group name, based on item actors
-	statContext.GraphName = func(item *items.Item) []items.NamePct {
-		var mainName string
-		groupName, found := groupNameByClient[item.Client]
-		if !found {
-			mainName = defaultGroup
-		}
-		mainName = groupName
-		res := []items.NamePct{}
-		globPct := 1.0
-		if statContext.ShowTeam && len(item.Actors) > 0 {
-			pct := 1.0 / float64(len(item.Actors))
-			globPct = 0.0
-			for _, actId := range item.Actors {
-				act := getActorById(actId, item.Date)
-				if act == nil { // Skip unknown or not visible Actors
-					continue
-				}
-				grp := getGroupById(act.Groups.ActiveGroupOnDate(item.Date))
-				if grp == nil {
-					grp = getGroupById(0)
-				}
-				res = append(res, items.NamePct{
-					Name: grp.Name + " : " + act.GetLabel(),
-					Pct:  pct,
-				})
-				globPct += pct
-			}
-		}
-		res = append(res, items.NamePct{
-			Name: mainName,
-			Pct:  globPct,
-		})
-		return res
-	}
+	m.SetGraphNameByGroup(statContext)
 	statContext.Data3 = func(s items.StatKey) string { return items.StatSiteProgress }
 	//statContext.Data3 = func(s items.StatKey) string { return s.Team}
 

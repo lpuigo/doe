@@ -27,6 +27,7 @@ const template string = `
             <el-radio-group v-if="SiteMode=='Poles'" v-model="PoleGroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="client">Par client</el-radio-button>
                 <el-radio-button label="actor">Par acteur</el-radio-button>
+                <el-radio-button label="group">Par équipe</el-radio-button>
             </el-radio-group>
 			<el-radio-group v-model="PeriodMode" size="mini" @change="RefreshStat">
                 <el-radio-button v-if="SiteMode!='Orange'" label="day">Jour</el-radio-button>

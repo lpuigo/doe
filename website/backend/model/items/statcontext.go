@@ -86,6 +86,38 @@ func NewStatContext(freq string) (*StatContext, error) {
 			return item.Site
 		},
 	}
+	sc.SetGraphNameByClient()
+	return sc, nil
+}
+
+// SetGraphNameByClient sets StatContext.GraphName to group by Actor Name
+func (sc *StatContext) SetGraphNameByActor() {
+	sc.GraphName = func(item *Item) []NamePct {
+		res := []NamePct{}
+		if len(item.Actors) > 0 {
+			pct := 1.0 / float64(len(item.Actors))
+			for _, actId := range item.Actors {
+				actName := sc.ActorNameById(actId, item.Date)
+				if actName == "" { // Skip unknown or not visible Actors
+					continue
+				}
+				res = append(res, NamePct{
+					Name: actName,
+					Pct:  pct,
+				})
+			}
+		} else {
+			res = []NamePct{{
+				Name: "Pas d'acteur",
+				Pct:  1.0,
+			}}
+		}
+		return res
+	}
+}
+
+// SetGraphNameByClient sets StatContext.GraphName to group by Client / Actors
+func (sc *StatContext) SetGraphNameByClient() {
 	sc.GraphName = func(item *Item) []NamePct {
 		mainName := item.Client
 		res := []NamePct{}
@@ -111,7 +143,6 @@ func NewStatContext(freq string) (*StatContext, error) {
 		})
 		return res
 	}
-	return sc, nil
 }
 
 func (sc *StatContext) SetSerieTeamSiteConf() {
@@ -121,31 +152,6 @@ func (sc *StatContext) SetSerieTeamSiteConf() {
 	sc.Filter1 = KeepAll
 	sc.Filter2 = KeepAll
 	sc.Filter3 = KeepAll
-}
-
-func (sc *StatContext) SetGraphNameByActor() {
-	sc.GraphName = func(item *Item) []NamePct {
-		res := []NamePct{}
-		if len(item.Actors) > 0 {
-			pct := 1.0 / float64(len(item.Actors))
-			for _, actId := range item.Actors {
-				actName := sc.ActorNameById(actId, item.Date)
-				if actName == "" { // Skip unknown or not visible Actors
-					continue
-				}
-				res = append(res, NamePct{
-					Name: actName,
-					Pct:  pct,
-				})
-			}
-		} else {
-			res = []NamePct{{
-				Name: "Pas d'acteur",
-				Pct:  1.0,
-			}}
-		}
-		return res
-	}
 }
 
 func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
