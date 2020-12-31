@@ -22,6 +22,11 @@ const template string = `
             <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="activity">Par activité</el-radio-button>
                 <el-radio-button label="site">Par site</el-radio-button>
+                <el-radio-button label="actor">Par acteur</el-radio-button>
+           </el-radio-group>
+            <el-radio-group v-if="SiteMode=='Poles'" v-model="PoleGroupMode" size="mini" @change="RefreshStat">
+                <el-radio-button label="client">Par client</el-radio-button>
+                <el-radio-button label="actor">Par acteur</el-radio-button>
             </el-radio-group>
 			<el-radio-group v-model="PeriodMode" size="mini" @change="RefreshStat">
                 <el-radio-button v-if="SiteMode!='Orange'" label="day">Jour</el-radio-button>
@@ -59,7 +64,7 @@ const template string = `
 				</div>	
 			</div>
 			<div v-else style="height: 100%">
-				<!--	Progress Stat for ORANGE -->
+				<!--	Progress Stat  -->
 				<div v-if="PeriodMode == 'progress'" style="height: 100%">
 					<el-row type="flex" align="middle" :gutter="10" style="margin-bottom: 5px">
 						<el-col :span="4" class="align-right">Progression du mois :</el-col>

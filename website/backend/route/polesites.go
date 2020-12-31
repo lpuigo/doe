@@ -122,20 +122,14 @@ func GetPolesitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 	var err error
 
 	vars := mux.Vars(r)
+	groupBy := vars["groupby"]
 	freq := vars["freq"]
-	switch freq {
-	case "day", "week", "month":
-		err = mgr.GetPolesitesStats(w, freq)
-	default:
-		AddError(w, logmsg, "unsupported stat type '"+freq+"'", http.StatusBadRequest)
-		return
-	}
-
+	err = mgr.GetPolesitesStats(w, freq, groupBy)
 	if err != nil {
 		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logmsg.AddInfoResponse(fmt.Sprintf("%s polesite stats produced", freq), http.StatusOK)
+	logmsg.AddInfoResponse(fmt.Sprintf("%s polesite %s stats produced", freq, groupBy), http.StatusOK)
 }
 
 func GetPolesitesProgress(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

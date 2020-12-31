@@ -58,10 +58,11 @@ type TeamProductivityModalModel struct {
 	SelectedSites map[string]bool                       `js:"SelectedSites"`
 	SiteColors    ripteamproductivitychart.SiteColorMap `js:"SiteColors"`
 
-	PeriodMode string `js:"PeriodMode"`
-	GroupMode  string `js:"GroupMode"`
-	InfoMode   string `js:"InfoMode"`
-	Month      string `js:"Month"`
+	PeriodMode    string `js:"PeriodMode"`
+	GroupMode     string `js:"GroupMode"`
+	PoleGroupMode string `js:"PoleGroupMode"`
+	InfoMode      string `js:"InfoMode"`
+	Month         string `js:"Month"`
 }
 
 func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
@@ -83,6 +84,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 
 	tpmm.PeriodMode = "week"
 	tpmm.GroupMode = "activity"
+	tpmm.PoleGroupMode = "client"
 	tpmm.InfoMode = "prod"
 	tpmm.Month = date.GetFirstOfMonth(date.TodayAfter(0))
 	return tpmm
@@ -130,7 +132,7 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 		if tpmm.PeriodMode == "progress" {
 			go tpmm.callGetRipsitesStats("/api/polesites/progress/" + tpmm.Month)
 		} else {
-			go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.PeriodMode)
+			go tpmm.callGetRipsitesStats("/api/polesites/stat/" + tpmm.PoleGroupMode + "/" + tpmm.PeriodMode)
 		}
 	case "Foa":
 		go tpmm.callGetRipsitesStats("/api/foasites/stat/" + tpmm.PeriodMode)

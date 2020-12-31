@@ -96,6 +96,7 @@ func (tpc *TeamProductivityChart) setColumnChart() {
 		"tooltip": js.M{
 			//"shared":      true,
 			//"pointFormat": "<b>{series.name}:</b> {point.y:.1f}",
+			"footerFormat":  "Total: <b>{point.total:.1f}</b>",
 			"valueDecimals": 1,
 		},
 		"plotOptions": js.M{

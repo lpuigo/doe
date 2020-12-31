@@ -48,6 +48,8 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		statContext.StackedSerieName = func(item *items.Item) string {
 			return item.Activity
 		}
+	case "actor":
+		statContext.SetGraphNameByActor()
 	case "site":
 
 	default:

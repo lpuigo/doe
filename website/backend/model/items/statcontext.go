@@ -8,6 +8,11 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 )
 
+type NamePct struct {
+	Name string
+	Pct  float64
+}
+
 type StatContext struct {
 	DayIncr          int
 	MaxVal           int
@@ -16,7 +21,7 @@ type StatContext struct {
 	IsTeamVisible    clients.IsTeamVisible
 	ClientByName     clients.ClientByName
 	ActorNameById    clients.ActorNameById
-	GraphName        func(item *Item) string
+	GraphName        func(item *Item) []NamePct
 	StackedSerieName func(item *Item) string
 
 	ShowTeam bool
@@ -72,18 +77,41 @@ func NewStatContext(freq string) (*StatContext, error) {
 		return nil, fmt.Errorf("unsupported stat period '%s'", freq)
 	}
 
-	return &StatContext{
+	sc := &StatContext{
 		DayIncr:   dayIncr,
 		MaxVal:    maxVal,
 		StartDate: startDate,
 		DateFor:   dateFor,
-		GraphName: func(item *Item) string {
-			return item.Client
-		},
 		StackedSerieName: func(item *Item) string {
 			return item.Site
 		},
-	}, nil
+	}
+	sc.GraphName = func(item *Item) []NamePct {
+		mainName := item.Client
+		res := []NamePct{}
+		globPct := 1.0
+		if sc.ShowTeam && len(item.Actors) > 0 {
+			pct := 1.0 / float64(len(item.Actors))
+			globPct = 0.0
+			for _, actId := range item.Actors {
+				actorName := sc.ActorNameById(actId)
+				if actorName == "" { // Skip unknown or not visible Actors
+					continue
+				}
+				res = append(res, NamePct{
+					Name: mainName + " : " + actorName,
+					Pct:  pct,
+				})
+				globPct += pct
+			}
+		}
+		res = append(res, NamePct{
+			Name: mainName,
+			Pct:  globPct,
+		})
+		return res
+	}
+	return sc, nil
 }
 
 func (sc *StatContext) SetSerieTeamSiteConf() {
@@ -93,6 +121,31 @@ func (sc *StatContext) SetSerieTeamSiteConf() {
 	sc.Filter1 = KeepAll
 	sc.Filter2 = KeepAll
 	sc.Filter3 = KeepAll
+}
+
+func (sc *StatContext) SetGraphNameByActor() {
+	sc.GraphName = func(item *Item) []NamePct {
+		res := []NamePct{}
+		if len(item.Actors) > 0 {
+			pct := 1.0 / float64(len(item.Actors))
+			for _, actId := range item.Actors {
+				actName := sc.ActorNameById(actId)
+				if actName == "" { // Skip unknown or not visible Actors
+					continue
+				}
+				res = append(res, NamePct{
+					Name: actName,
+					Pct:  pct,
+				})
+			}
+		} else {
+			res = []NamePct{{
+				Name: "Pas d'acteur",
+				Pct:  1.0,
+			}}
+		}
+		return res
+	}
 }
 
 func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemizableSiteVisible, showprice bool) (*ripsite.RipsiteStats, error) {
@@ -115,15 +168,10 @@ func (sc StatContext) CalcStats(sites ItemizableContainer, isSiteVisible IsItemi
 }
 
 func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.Bpu, showprice bool) error {
-	addValue := func(item *Item, statDate, serie string, actors []string, value float64) {
-		graphName := sc.GraphName(item)
+	addValue := func(item *Item, statDate, serie string, value float64) {
 		stackedSerie := sc.StackedSerieName(item)
-		stats.AddStatValue(stackedSerie, graphName, statDate, "", serie, value)
-		if sc.ShowTeam && len(actors) > 0 {
-			value /= float64(len(actors))
-			for _, actName := range actors {
-				stats.AddStatValue(stackedSerie, graphName+" : "+actName, statDate, "", serie, value)
-			}
+		for _, gNP := range sc.GraphName(item) {
+			stats.AddStatValue(stackedSerie, gNP.Name, statDate, "", serie, value*gNP.Pct)
 		}
 	}
 
@@ -136,13 +184,9 @@ func (sc StatContext) addStat(stats Stats, site ItemizableSite, currentBpu *bpu.
 		if statDate < sc.StartDate {
 			continue
 		}
-		actorsName := make([]string, len(item.Actors))
-		for i, actId := range item.Actors {
-			actorsName[i] = sc.ActorNameById(actId)
-		}
-		addValue(item, statDate, StatSerieWork, actorsName, item.Work())
+		addValue(item, statDate, StatSerieWork, item.Work())
 		if showprice {
-			addValue(item, statDate, StatSeriePrice, actorsName, item.Price())
+			addValue(item, statDate, StatSeriePrice, item.Price())
 		}
 	}
 	return nil
