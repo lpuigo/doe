@@ -23,3 +23,8 @@ func NewUser(name string) *User {
 func (u *User) HasPermissionHR() bool {
 	return u.Permissions["HR"]
 }
+
+// IsSeeingAllGroups returns true if user has unrestricted Groups access
+func (u *User) IsSeeingAllGroups() bool {
+	return len(u.Groups) == 0
+}

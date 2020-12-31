@@ -89,5 +89,5 @@ func (m Manager) GetRipsitesActorsActivity(writer io.Writer, freq string) error 
 	if err != nil {
 		return err
 	}
-	return m.TemplateEngine.GetItemsXLSAttachement(writer, itms, m.genActorNameById())
+	return m.TemplateEngine.GetItemsXLSAttachement(writer, itms, m.genActorNameById(false))
 }

@@ -235,7 +235,7 @@ func (te *DocTemplateEngine) GetItemsXLSAttachement(w io.Writer, its []*items.It
 		row++
 		actors := []string{}
 		for _, actorId := range item.Actors {
-			if act := actorById(actorId); act != "" {
+			if act := actorById(actorId, item.Date); act != "" {
 				actors = append(actors, act)
 			}
 		}

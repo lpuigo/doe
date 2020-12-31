@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -110,6 +111,18 @@ func (ap *ActorsPersister) Remove(ra *ActorRecord) error {
 	ap.actors[len(ap.actors)-1] = nil // or the zero value of T
 	ap.actors = ap.actors[:len(ap.actors)-1]
 	return nil
+}
+
+// GetActorsDict returns map[string]*Actor of existing actor, where string is eather actors id or actors name
+func (ap *ActorsPersister) GetActorsDict() map[string]*Actor {
+	ap.RLock()
+	defer ap.RUnlock()
+	res := make(map[string]*Actor)
+	for _, ar := range ap.actors {
+		res[strconv.Itoa(ar.Id)] = ar.Actor
+		res[ar.Ref] = ar.Actor
+	}
+	return res
 }
 
 // GetById returns the ActorRecord with given Id (or nil if Id not found)

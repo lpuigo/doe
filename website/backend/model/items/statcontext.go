@@ -94,7 +94,7 @@ func NewStatContext(freq string) (*StatContext, error) {
 			pct := 1.0 / float64(len(item.Actors))
 			globPct = 0.0
 			for _, actId := range item.Actors {
-				actorName := sc.ActorNameById(actId)
+				actorName := sc.ActorNameById(actId, item.Date)
 				if actorName == "" { // Skip unknown or not visible Actors
 					continue
 				}
@@ -129,7 +129,7 @@ func (sc *StatContext) SetGraphNameByActor() {
 		if len(item.Actors) > 0 {
 			pct := 1.0 / float64(len(item.Actors))
 			for _, actId := range item.Actors {
-				actName := sc.ActorNameById(actId)
+				actName := sc.ActorNameById(actId, item.Date)
 				if actName == "" { // Skip unknown or not visible Actors
 					continue
 				}

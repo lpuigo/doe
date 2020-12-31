@@ -58,7 +58,7 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 		}
 	}
 	defaultGroup := m.Groups.GetById(0).Name
-	getActorById := m.genActorById()
+	getActorById := m.genActorById(true)
 	getGroupById := m.GenGroupById()
 	// GraphName returns group name, based on item actors
 	statContext.GraphName = func(item *items.Item) []items.NamePct {
@@ -74,7 +74,7 @@ func (m Manager) GetPolesitesProgress(writer io.Writer, month string) error {
 			pct := 1.0 / float64(len(item.Actors))
 			globPct = 0.0
 			for _, actId := range item.Actors {
-				act := getActorById(actId)
+				act := getActorById(actId, item.Date)
 				if act == nil { // Skip unknown or not visible Actors
 					continue
 				}

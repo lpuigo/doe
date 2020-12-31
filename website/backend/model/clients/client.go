@@ -22,8 +22,8 @@ type ClientTeam struct {
 type ClientByName func(clientName string) *Client
 type IsTeamVisible func(ClientTeam) bool
 type TeamNameByMember func(string) string
-type ActorNameById func(id string) string
-type ActorInfoById func(id string) []string
+type ActorNameById func(id string, day string) string
+type ActorInfoById func(id string, day string) []string
 
 //type IsActorVisible func(ClientActor) string
 

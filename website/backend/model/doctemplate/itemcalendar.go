@@ -39,7 +39,7 @@ func AddItemsCalendar(xf *excelize.File, its []*items.Item, actorById clients.Ac
 		}
 		for actNum, actorId := range item.Actors {
 			actName := "_ Non Défini"
-			if act := actorById(actorId); act != "" {
+			if act := actorById(actorId, item.Date); act != "" {
 				actName = act
 			}
 			ic.ActorNames[actNum] = actName
