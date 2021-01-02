@@ -1,5 +1,7 @@
 package actor
 
+import "github.com/lpuig/ewin/doe/website/frontend/tools/date"
+
 type GroupHistory map[string]int
 
 func NewGroupHistory() GroupHistory {
@@ -10,8 +12,9 @@ func NewGroupHistory() GroupHistory {
 func (gh GroupHistory) GetCurrentInfo() (currentId int, assignDate string) {
 	defaultDate := "0001-01-01"
 	assignDate = defaultDate
+	currentDate := date.TodayAfter(0)
 	for d, id := range gh {
-		if d > assignDate {
+		if d <= currentDate {
 			assignDate = d
 			currentId = id
 		}

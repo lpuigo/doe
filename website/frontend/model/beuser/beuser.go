@@ -17,7 +17,11 @@ type BeUser struct {
 }
 
 func BeUserFromJS(obj *js.Object) *BeUser {
-	return &BeUser{Object: obj}
+	bu := &BeUser{Object: obj}
+	if bu.Get("Groups") == nil {
+		bu.Groups = []int{}
+	}
+	return bu
 }
 
 func NewBeUser() *BeUser {
