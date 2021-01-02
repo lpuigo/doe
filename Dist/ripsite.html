@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui@2.12.0/lib/theme-chalk/index.css">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=1.1">
     <link rel="stylesheet" href="ripsite.css?v=1.2">
 
 </head>
@@ -91,13 +91,13 @@
             <rip-pulling-update
                     v-if="ActivityMode == 'Pulling'"
                     v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"
-                    @update-state="UpdateState"
             ></rip-pulling-update>
+            <!--    @update-state="UpdateState"-->
             <rip-junction-update
                     v-if="ActivityMode == 'Junction'"
                     v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"
-                    @update-state="UpdateState"
             ></rip-junction-update>
+            <!--    @update-state="UpdateState"-->
             <rip-measurement-update v-if="ActivityMode == 'Measurement'" v-model="Ripsite" :user="User" :filter="Filter" :filtertype="FilterType"></rip-measurement-update>
         </el-main>
     </el-container>
@@ -115,6 +115,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="ripsites.js?v=1.2"></script>
+<script type="text/javascript" src="ripsites.js?v=1.3"></script>
 
 </html>

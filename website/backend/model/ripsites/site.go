@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/extraactivities"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 )
@@ -24,9 +25,10 @@ type Site struct {
 	Nodes      map[string]*Node
 	Troncons   map[string]*Troncon
 
-	Pullings     []*Pulling
-	Junctions    []*Junction
-	Measurements []*Measurement
+	Pullings        []*Pulling
+	Junctions       []*Junction
+	Measurements    []*Measurement
+	ExtraActivities []*extraactivities.ExtraActivity
 }
 
 func (s *Site) GetRef() string {

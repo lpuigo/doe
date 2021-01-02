@@ -2,6 +2,7 @@ package ripsite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/extraactivity"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite/ripconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -21,13 +22,18 @@ type Ripsite struct {
 	Nodes     map[string]*Node    `js:"Nodes"`
 	Troncons  map[string]*Troncon `js:"Troncons"`
 
-	Pullings     []*Pulling     `js:"Pullings"`
-	Junctions    []*Junction    `js:"Junctions"`
-	Measurements []*Measurement `js:"Measurements"`
+	Pullings        []*Pulling                     `js:"Pullings"`
+	Junctions       []*Junction                    `js:"Junctions"`
+	Measurements    []*Measurement                 `js:"Measurements"`
+	ExtraActivities []*extraactivity.ExtraActivity `js:"ExtraActivities"`
 }
 
 func RipsiteFromJS(o *js.Object) *Ripsite {
-	return &Ripsite{Object: o}
+	nrs := &Ripsite{Object: o}
+	if nrs.Get("ExtraActivities") == nil {
+		nrs.ExtraActivities = []*extraactivity.ExtraActivity{}
+	}
+	return nrs
 }
 
 func NewRisite() *Ripsite {
@@ -44,6 +50,7 @@ func NewRisite() *Ripsite {
 	rs.Pullings = nil
 	rs.Junctions = nil
 	rs.Measurements = nil
+	rs.ExtraActivities = nil
 
 	return rs
 }
@@ -73,6 +80,10 @@ func (rs *Ripsite) Copy(ors *Ripsite) {
 	for im, meas := range ors.Measurements {
 		measurements[im] = meas.Clone()
 	}
+	extraActivities := make([]*extraactivity.ExtraActivity, len(rs.ExtraActivities))
+	for ie, extraActivity := range ors.ExtraActivities {
+		extraActivities[ie] = extraActivity.Clone()
+	}
 	rs.Id = ors.Id
 	rs.Client = ors.Client
 	rs.Ref = ors.Ref
@@ -85,6 +96,7 @@ func (rs *Ripsite) Copy(ors *Ripsite) {
 	rs.Pullings = pullings
 	rs.Junctions = junctions
 	rs.Measurements = measurements
+	rs.ExtraActivities = extraActivities
 }
 
 func (rs *Ripsite) Clone() *Ripsite {

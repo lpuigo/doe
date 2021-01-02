@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripinfoupdate"
@@ -8,7 +10,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripmeasurementupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/rippullingupdate"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripsiteinfo"
-	"github.com/lpuig/ewin/doe/website/frontend/comp/stateupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
@@ -18,7 +19,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
-	"strconv"
 )
 
 //go:generate bash ./makejs.sh
@@ -29,7 +29,7 @@ func main() {
 	hvue.NewVM(
 		ripsiteinfo.RegisterComponent(),
 		ripinfoupdate.RegisterComponent(),
-		stateupdatemodal.RegisterComponent(),
+		//stateupdatemodal.RegisterComponent(),
 		rippullingupdate.RegisterComponent(),
 		ripjunctionupdate.RegisterComponent(),
 		ripmeasurementupdate.RegisterComponent(),
@@ -181,8 +181,8 @@ func (mpm *MainPageModel) SetActivityMode() {
 
 //
 func (mpm *MainPageModel) UpdateState(state *fmrip.State) {
-	sum := stateupdatemodal.StateUpdateModalModelFromJS(mpm.VM.Refs("StateUpdateModal"))
-	sum.Show(state)
+	//sum := stateupdatemodal.StateUpdateModalModelFromJS(mpm.VM.Refs("StateUpdateModal"))
+	//sum.Show(state)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ func (mpm *MainPageModel) callGetRipsite(rsid int, callback func()) {
 		return
 	}
 	mpm.Ripsite = fmrip.RipsiteFromJS(req.Response)
-	mpm.Reference = json.Stringify(req.Response)
+	mpm.Reference = json.Stringify(mpm.Ripsite)
 	newTitle := mpm.Ripsite.Ref + " - " + mpm.Ripsite.Client
 	js.Global.Get("document").Set("title", newTitle)
 }

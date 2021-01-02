@@ -3,6 +3,7 @@ package ripinfoupdate
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/extraactivityupdatetable"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/ripprogressbar"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
@@ -156,6 +157,19 @@ const template string = `
             ></ripsiteinfo-progress-bar>
         </el-col>
     </el-row>
+
+	<!--	Extra Activities-->
+    <el-row :gutter="10" type="flex" align="top" class="doublespaced">
+        <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Activité complémentaire :</h4></el-col>
+        <el-col :span="19">
+			<extra-activities-table
+					v-model="value.ExtraActivities"
+					:User="user"
+					:Client="value.Client"
+			></extra-activities-table>
+		</el-col>
+    </el-row>
+
 </div>
 `
 
@@ -166,6 +180,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		ripprogressbar.RegisterComponent(),
+		extraactivityupdatetable.RegisterComponent(),
 		hvue.Template(template),
 		hvue.Props("value", "user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
