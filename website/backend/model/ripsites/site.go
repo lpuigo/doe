@@ -232,6 +232,7 @@ func (s *Site) Itemize(bpu *bpu.Bpu, doneOnly bool) ([]*items.Item, error) {
 	res = append(res, pullItems...)
 	res = append(res, junctItems...)
 	res = append(res, measItems...)
+	res = append(res, extraactivities.Itemize(s.ExtraActivities, s, doneOnly)...)
 
 	return res, nil
 }

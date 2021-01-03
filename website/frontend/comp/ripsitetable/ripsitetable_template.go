@@ -90,7 +90,7 @@ const template string = `<!--header-row-class-name="prjptf-light"-->
             </el-table-column>
 
             <el-table-column
-                    label="Racordement" width="130px" :resizable=true align="center"
+                    label="Raccordement" width="130px" :resizable=true align="center"
             >
                 <template slot-scope="scope">
                     <ripsiteinfo-progress-bar :total="scope.row.NbJunction" :blocked="scope.row.NbJunctionBlocked" :done="scope.row.NbJunctionDone"></ripsiteinfo-progress-bar>

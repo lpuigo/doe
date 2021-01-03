@@ -9,6 +9,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
+// Ripsite reflects backend/model/ripsites.site struct
 type Ripsite struct {
 	*js.Object
 

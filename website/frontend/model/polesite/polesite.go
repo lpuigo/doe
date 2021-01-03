@@ -2,6 +2,7 @@ package polesite
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/extraactivity"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
@@ -23,15 +24,28 @@ func UpdatedFromJS(o *js.Object) *UpdatedPoleSite {
 type Polesite struct {
 	*js.Object
 
-	Id         int     `js:"Id"`
-	Client     string  `js:"Client"`
-	Ref        string  `js:"Ref"`
-	Manager    string  `js:"Manager"`
-	OrderDate  string  `js:"OrderDate"`
-	UpdateDate string  `js:"UpdateDate"`
-	Status     string  `js:"Status"`
-	Comment    string  `js:"Comment"`
-	Poles      []*Pole `js:"Poles"`
+	Id              int                            `js:"Id"`
+	Client          string                         `js:"Client"`
+	Ref             string                         `js:"Ref"`
+	Manager         string                         `js:"Manager"`
+	OrderDate       string                         `js:"OrderDate"`
+	UpdateDate      string                         `js:"UpdateDate"`
+	Status          string                         `js:"Status"`
+	Comment         string                         `js:"Comment"`
+	Poles           []*Pole                        `js:"Poles"`
+	ExtraActivities []*extraactivity.ExtraActivity `js:"ExtraActivities"`
+}
+
+func NewPolesite() *Polesite {
+	return &Polesite{Object: tools.O()}
+}
+
+func PolesiteFromJS(o *js.Object) *Polesite {
+	ps := &Polesite{Object: o}
+	if ps.Get("ExtraActivities") == nil {
+		ps.ExtraActivities = []*extraactivity.ExtraActivity{}
+	}
+	return ps
 }
 
 // getNextId returns the next highest positive pole Id
@@ -105,14 +119,6 @@ func (ps *Polesite) DeletePole(pole *Pole) bool {
 func (ps *Polesite) DuplicatePole(pole *Pole) bool {
 	print("DuplicatePole", pole.Object)
 	return true
-}
-
-func NewPolesite() *Polesite {
-	return &Polesite{Object: tools.O()}
-}
-
-func PolesiteFromJS(o *js.Object) *Polesite {
-	return &Polesite{Object: o}
 }
 
 func (ps *Polesite) SearchInString() string {

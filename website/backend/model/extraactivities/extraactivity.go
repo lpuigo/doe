@@ -1,5 +1,10 @@
 package extraactivities
 
+import (
+	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/items"
+)
+
 type ExtraActivity struct {
 	Name           string
 	State          string
@@ -9,4 +14,45 @@ type ExtraActivity struct {
 	AttachmentDate string
 	Actors         []string
 	Comment        string
+}
+
+func (ea *ExtraActivity) MakeArticle() *bpu.Article {
+	article := bpu.NewArticle()
+	article.Name = "Activité Supplémentaire"
+	article.Price = ea.Income
+	article.Work = ea.NbPoints
+	return article
+}
+
+func Itemize(eas []*ExtraActivity, site items.ItemizableSite, doneOnly bool) []*items.Item {
+	res := []*items.Item{}
+	for _, ea := range eas {
+		done := len(ea.Actors) > 0 && ea.Date != ""
+		billed := done && ea.AttachmentDate != ""
+		if doneOnly && !done {
+			continue
+		}
+		item := items.NewItem(
+			site.GetClient(),
+			site.GetRef(),
+			"Extra",
+			ea.Name,
+			"",
+			ea.Date,
+			"",
+			ea.MakeArticle(),
+			1,
+			1,
+			true,
+			done,
+			false,
+			billed,
+		)
+		item.StartDate = ea.Date
+		item.Actors = ea.Actors[:]
+		item.Work()
+
+		res = append(res, item)
+	}
+	return res
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
+	"github.com/lpuig/ewin/doe/website/backend/model/extraactivities"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
@@ -30,7 +31,8 @@ type PoleSite struct {
 	Status     string
 	Comment    string
 
-	Poles []*Pole
+	Poles           []*Pole
+	ExtraActivities []*extraactivities.ExtraActivity
 }
 
 func (ps *PoleSite) GetRef() string {
@@ -172,6 +174,7 @@ func (ps *PoleSite) Itemize(currentBpu *bpu.Bpu, doneOnly bool) ([]*items.Item, 
 		}
 		res = append(res, items...)
 	}
+	res = append(res, extraactivities.Itemize(ps.ExtraActivities, ps, doneOnly)...)
 	return res, nil
 }
 
