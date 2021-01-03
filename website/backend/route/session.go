@@ -18,29 +18,39 @@ type authentActor struct {
 	FirstName string
 	Role      string
 	Active    bool
+	Assigned  bool
 }
 
-func authentActorsFrom(acs []*actors.Actor) []authentActor {
+// authentActorsFrom returns a []authentActor populated with all Actor in given visibleActors map.
+//
+// authentActor.Assigned is set to true if given Actor is also in given assignedActors map
+//
+// Result Slice is sorted by Actors Properties : Active (true first) then Assigned (true first) then full name
+func authentActorsFrom(mgr *mgr.Manager, visibleActors, assignedActors map[int]*actors.Actor) []authentActor {
 	today := date.Today().String()
-	res := make([]authentActor, len(acs))
-	for i, actor := range acs {
+	res := make([]authentActor, len(visibleActors))
+	i := 0
+	for _, actor := range visibleActors {
+		active := actor.IsActiveOn(today)
 		res[i] = authentActor{
 			Id:        actor.Id,
 			LastName:  actor.LastName,
 			FirstName: actor.FirstName,
 			Role:      actor.Role,
-			Active:    actor.IsActiveOn(today),
+			Active:    active,
+			Assigned:  active && assignedActors[actor.Id] != nil,
 		}
+		i++
 	}
 	sort.Slice(res, func(i, j int) bool {
 		if res[i].Active != res[j].Active {
-			if res[i].Active {
-				return true
-			}
-			return false
+			return res[i].Active
 		}
-		si := res[i].Role + " " + res[i].LastName + " " + res[i].FirstName
-		sj := res[j].Role + " " + res[j].LastName + " " + res[j].FirstName
+		if res[i].Assigned != res[j].Assigned {
+			return res[i].Assigned
+		}
+		si := res[i].LastName + " " + res[i].FirstName
+		sj := res[j].LastName + " " + res[j].FirstName
 		return si < sj
 	})
 	return res
@@ -55,24 +65,37 @@ type authentClient struct {
 
 // getAuthentClientFrom returns a slice of authentClient based on given clients list
 //
-// authentClient are populated with visible actors, based on current User group visibility
+// authentClient are populated with visible actors, based on client visibility via actor's groups
 func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authentClient {
 	res := []authentClient{}
-	getActorsByGroupId := mgr.GenActorsByGroupId()
-	clientActors := make(map[string][]*actors.Actor)
+	getActorsByClientName := mgr.GenActorsByClientName()
+	getAssignedActorsByGroupId := mgr.GenCurrentlyAssignedActorsByGroupId()
+	clientActors := make(map[string]map[int]*actors.Actor)         // client's eligible actors
+	clientAssignedActors := make(map[string]map[int]*actors.Actor) // client's assigned actors
 
+	// actors visible by client name
+	for _, client := range clients {
+		clientActors[client.Name] = getActorsByClientName(client.Name)
+	}
+
+	// actors assigned by client name
 	for _, group := range mgr.GetCurrentUserVisibleGroups() {
-		groupActors := getActorsByGroupId(group.Id)
+		groupAssignActors := getAssignedActorsByGroupId(group.Id)
 		for _, clientName := range group.Clients {
-			acts := clientActors[clientName]
-			clientActors[clientName] = append(acts, groupActors...)
+			assignedActs := clientAssignedActors[clientName]
+			if assignedActs == nil {
+				assignedActs = make(map[int]*actors.Actor)
+			}
+			for _, actor := range groupAssignActors {
+				assignedActs[actor.Id] = actor
+			}
+			clientAssignedActors[clientName] = assignedActs
 		}
 	}
 
+	// create authentClient list
 	for _, client := range clients {
-		//actors := mgr.Actors.GetActorsByClient(false, client.Name)
-		//authentActors := authentActorsFrom(actors)
-		authentActors := authentActorsFrom(clientActors[client.Name])
+		authentActors := authentActorsFrom(mgr, clientActors[client.Name], clientAssignedActors[client.Name])
 		authClient := authentClient{
 			Name:     client.Name,
 			Teams:    client.Teams,
@@ -85,18 +108,16 @@ func getAuthentClientFrom(mgr *mgr.Manager, clients []*clients.Client) []authent
 }
 
 type authentUser struct {
-	Name    string
-	Clients []authentClient
-	//Groups      []*groups.Group
+	Name        string
+	Clients     []authentClient
 	Permissions map[string]bool
 	DaysOff     map[string]string
 }
 
 func newAuthentUser() authentUser {
 	return authentUser{
-		Name:    "",
-		Clients: []authentClient{},
-		//Groups:      []*groups.Group{},
+		Name:        "",
+		Clients:     []authentClient{},
 		Permissions: make(map[string]bool),
 		DaysOff:     make(map[string]string),
 	}
@@ -105,7 +126,6 @@ func newAuthentUser() authentUser {
 func (au *authentUser) SetFrom(mgr *mgr.Manager, clients []*clients.Client) {
 	au.Name = mgr.CurrentUser.Name
 	au.Clients = getAuthentClientFrom(mgr, clients)
-	//au.Groups = getGroupsFrom(mgr)
 	au.Permissions = mgr.CurrentUser.Permissions
 	au.DaysOff = mgr.DaysOff.GetDays()
 }

@@ -7,7 +7,6 @@ import (
 	fmrip "github.com/lpuig/ewin/doe/website/frontend/model/ripsite"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-	"strconv"
 )
 
 const template string = `
@@ -157,7 +156,7 @@ func (sum *StateUpdateModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabl
 
 	res := []*elements.ValueLabelDisabled{}
 	for _, actor := range client.Actors {
-		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), actor.GetRef(), !actor.Active))
+		res = append(res, actor.GetElementsValueLabelDisabled())
 	}
 	return res
 }

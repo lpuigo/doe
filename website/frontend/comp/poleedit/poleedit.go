@@ -360,6 +360,7 @@ const template string = `<div>
                                 :key="item.value"
                                 :label="item.label"
                                 :value="item.value"
+								:disabled="item.disabled"
                         >
                             <!--
                             <span style="float: left">{{ item.value }}</span>
@@ -534,20 +535,15 @@ func (pem *PoleEditModel) CopyClipBoardPoleRef(vm *hvue.VM) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Comp Methods
 
-func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabel {
+func (pem *PoleEditModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDisabled {
 	pem = PoleEditModelFromJS(vm.Object)
 	client := pem.User.GetClientByName(pem.Polesite.Client)
 	if client == nil {
 		return nil
 	}
-	res := []*elements.ValueLabel{}
+	res := []*elements.ValueLabelDisabled{}
 	for _, actor := range client.Actors {
-		if !actor.Active {
-			// skip inactive actors
-			continue
-		}
-		ref := actor.GetRef()
-		res = append(res, elements.NewValueLabel(strconv.Itoa(actor.Id), ref))
+		res = append(res, actor.GetElementsValueLabelDisabled())
 	}
 	return res
 }

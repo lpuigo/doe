@@ -49,7 +49,8 @@ func (m Manager) GenGroupByName() groups.GroupByName {
 	}
 }
 
-func (m Manager) GenActorsByGroupId() actors.ActorsByGroupId {
+// GenCurrentlyAssignedActorsByGroupId returns a actors.ActorsByGroupId function returning currently (as of today) assigned actor to given groupId
+func (m Manager) GenCurrentlyAssignedActorsByGroupId() actors.ActorsByGroupId {
 	today := date.Today().String()
 	actorsByGroupId := make(map[int][]*actors.Actor)
 	for _, actor := range m.Actors.GetAllActors() {
@@ -59,6 +60,23 @@ func (m Manager) GenActorsByGroupId() actors.ActorsByGroupId {
 		}
 		actorsList := actorsByGroupId[groupId]
 		actorsByGroupId[groupId] = append(actorsList, actor)
+	}
+	return func(groupId int) []*actors.Actor {
+		return actorsByGroupId[groupId]
+	}
+}
+
+// GenActorsByGroupId returns a actors.ActorsByGroupId function returning all assigned (past, present and futur) actors to given groupId
+func (m Manager) GenActorsByGroupId() actors.ActorsByGroupId {
+	actorsByGroupId := make(map[int][]*actors.Actor)
+	for _, actor := range m.Actors.GetAllActors() {
+		groupIds := actor.Groups.AssignedGroup()
+		if groupIds == nil {
+			continue
+		}
+		for _, groupId := range groupIds {
+			actorsByGroupId[groupId] = append(actorsByGroupId[groupId], actor)
+		}
 	}
 	return func(groupId int) []*actors.Actor {
 		return actorsByGroupId[groupId]
@@ -117,6 +135,35 @@ func (m *Manager) genActorInfoById(visibleActorsOnly bool) clients.ActorInfoById
 			return nil
 		}
 		return []string{act.Role, act.Ref}
+	}
+}
+
+// GenActorsByClientName returns a func(clientName string) map[int]*actors.Actor function returning all assigned (past, present and futur) actors to given client name
+func (m Manager) GenActorsByClientName() func(clientName string) map[int]*actors.Actor {
+	getGroupById := m.GenGroupById()
+	actorsByClientName := make(map[string]map[int]*actors.Actor)
+	for _, actor := range m.Actors.GetAllActors() {
+		groupIds := actor.Groups.AssignedGroup()
+		if groupIds == nil {
+			continue
+		}
+		for _, groupId := range groupIds {
+			grp := getGroupById(groupId)
+			if grp == nil {
+				continue
+			}
+			for _, clientName := range grp.Clients {
+				actByClient := actorsByClientName[clientName]
+				if actByClient == nil {
+					actByClient = make(map[int]*actors.Actor)
+				}
+				actByClient[actor.Id] = actor
+				actorsByClientName[clientName] = actByClient
+			}
+		}
+	}
+	return func(clientName string) map[int]*actors.Actor {
+		return actorsByClientName[clientName]
 	}
 }
 

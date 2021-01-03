@@ -11,7 +11,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-	"strconv"
 )
 
 const template string = `
@@ -293,7 +292,7 @@ func (fumm *FoaUpdateModalModel) GetActors(vm *hvue.VM) []*elements.ValueLabelDi
 
 	res := []*elements.ValueLabelDisabled{}
 	for _, actor := range client.Actors {
-		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), actor.GetRef(), !actor.Active))
+		res = append(res, actor.GetElementsValueLabelDisabled())
 	}
 	return res
 }

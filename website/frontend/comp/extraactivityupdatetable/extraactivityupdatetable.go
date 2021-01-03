@@ -225,8 +225,7 @@ func (eatm *ExtraActivityTableModel) GetActors(vm *hvue.VM) []*elements.ValueLab
 	}
 	res := []*elements.ValueLabelDisabled{}
 	for _, actor := range client.Actors {
-		ref := actor.GetRef()
-		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), ref, !actor.Active))
+		res = append(res, actor.GetElementsValueLabelDisabled())
 	}
 	return res
 }

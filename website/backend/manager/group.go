@@ -32,10 +32,7 @@ func (m Manager) GetCurrentUserVisibleGroups() []*groups.Group {
 		return res
 	}
 	// Current user has a global group visibility
-	for _, grp := range m.Groups.GetGroups() {
-		res = append(res, grp)
-	}
-	return res
+	return m.Groups.GetGroups()
 }
 
 // GroupSizePerDays returns a map of groupName -> []int giving number of active actors for groupName for each day within given days slice

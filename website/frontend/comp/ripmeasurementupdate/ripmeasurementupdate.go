@@ -189,7 +189,7 @@ func (rmum *RipMeasurementUpdateModel) GetActors(vm *hvue.VM) []*elements.ValueL
 
 	res := []*elements.ValueLabelDisabled{}
 	for _, actor := range client.Actors {
-		res = append(res, elements.NewValueLabelDisabled(strconv.Itoa(actor.Id), actor.GetRef(), !actor.Active))
+		res = append(res, actor.GetElementsValueLabelDisabled())
 	}
 	return res
 }
