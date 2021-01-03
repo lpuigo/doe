@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	mgr "github.com/lpuig/ewin/doe/website/backend/manager"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/ripsites"
 	"github.com/lpuig/ewin/doe/website/backend/model/ripsites/measurementreport"
 	"net/http"
@@ -130,6 +131,28 @@ func GetRipsitesStats(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	logmsg.AddInfoResponse(fmt.Sprintf("%s ripsites %s stats produced", freq, groupBy), http.StatusOK)
+}
+
+func GetRipsitesProgress(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	logmsg := logger.TimedEntry("Route").AddRequest("GetRipsitesProgress").AddUser(mgr.CurrentUser.Name)
+	defer logmsg.Log()
+
+	w.Header().Set("Content-Type", "application/json")
+	var err error
+	vars := mux.Vars(r)
+	month := vars["month"]
+	if date.GetMonth(month) != month {
+		AddError(w, logmsg, "misformated date '"+month+"'", http.StatusBadRequest)
+		return
+	}
+
+	err = mgr.GetRipsitesProgress(w, month)
+	if err != nil {
+		AddError(w, logmsg, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	logmsg.AddInfoResponse(fmt.Sprintf("ripsite progress produced for %s", month), http.StatusOK)
 }
 
 func GetRipsitesActorsActivity(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {

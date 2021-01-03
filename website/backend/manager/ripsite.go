@@ -48,10 +48,12 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		statContext.StackedSerieName = func(item *items.Item) string {
 			return item.Activity
 		}
+	case "client":
+		// default statContext
 	case "actor":
 		statContext.SetGraphNameByActor()
-	case "site":
-
+	case "group":
+		m.SetGraphNameByGroup(statContext)
 	default:
 		return fmt.Errorf("unsupported group type '%s'", groupBy)
 	}
@@ -61,6 +63,26 @@ func (m Manager) GetRipsitesStats(writer io.Writer, freq, groupBy string) error 
 		return err
 	}
 	return json.NewEncoder(writer).Encode(ripsiteStats)
+}
+
+func (m Manager) GetRipsitesProgress(writer io.Writer, month string) error {
+	statContext, err := m.NewStatContext("day")
+	if err != nil {
+		return err
+	}
+	// start on month first
+	statContext.StartDate = month
+	// Extract all month's days
+	statContext.MaxVal = date.NbDaysBetween(month, date.GetMonth(date.GetDateAfter(month, 32)))
+	m.SetGraphNameByGroup(statContext)
+	statContext.Data3 = func(s items.StatKey) string { return items.StatSiteProgress }
+	//statContext.Data3 = func(s items.StatKey) string { return s.Team}
+
+	ripsiteStats, err := statContext.CalcStats(m.Ripsites, m.visibleItemizableSiteByClientFilter(), m.CurrentUser.Permissions["Invoice"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(writer).Encode(items.CalcProgress(ripsiteStats, m.GenGroupByName(), m.GroupSizePerDays(ripsiteStats.Dates)))
 }
 
 func (m Manager) GetRipsitesActorsActivity(writer io.Writer, freq string) error {

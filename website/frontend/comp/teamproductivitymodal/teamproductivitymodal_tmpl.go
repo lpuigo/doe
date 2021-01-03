@@ -21,8 +21,9 @@ const template string = `
             </el-radio-group>
             <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="activity">Par activité</el-radio-button>
-                <el-radio-button label="site">Par site</el-radio-button>
+                <el-radio-button label="client">Par client</el-radio-button>
                 <el-radio-button label="actor">Par acteur</el-radio-button>
+                <el-radio-button label="group">Par équipe</el-radio-button>
            </el-radio-group>
             <el-radio-group v-if="SiteMode=='Poles'" v-model="PoleGroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="client">Par client</el-radio-button>

@@ -91,29 +91,38 @@ func (gh GroupHistory) AssignedGroup() []int {
 	return res
 }
 
-// ActiveGroupPerDay returns slice of active groupId for each given days (group id 0 is used as default if no group is assigned)
-func (gh GroupHistory) ActiveGroupPerDay(days []string) []int {
-	res := make([]int, len(days))
+// ActiveGroupPerDay returns slice of active groupId for each given days (group id 0 is used as default if no group is assigned) and a slice with assigned group' ids
+func (gh GroupHistory) ActiveGroupPerDay(days []string) (groupIdPerDay, groupIds []int) {
+	groupIdPerDay = make([]int, len(days))
+	groupIds = []int{}
 	if len(gh) == 0 {
-		return res
+		return
 	}
-	groups := gh.getDateGroupList()
+	groupIdDict := make(map[int]int)
+	dateGroups := gh.getDateGroupList()
+	// search first assigned Group on Period
 	currentGroupId := 0
-	nextGroupId := 0
-	for i, group := range groups {
-		nextGroupId = i
-		if days[0] < group.date {
+	nextdateGroupIndex := 0
+	for dateGroupIndex, dateGroup := range dateGroups {
+		nextdateGroupIndex = dateGroupIndex
+		if days[0] < dateGroup.date {
 			break
 		}
-		currentGroupId = group.gid
+		currentGroupId = dateGroup.gid
 	}
-	res[0] = currentGroupId
+	groupIdPerDay[0] = currentGroupId
+	groupIdDict[currentGroupId]++
+	// browse all period days
 	for i, day := range days[1:] {
-		if nextGroupId < len(groups) && day >= groups[nextGroupId].date {
-			currentGroupId = groups[nextGroupId].gid
-			nextGroupId++
+		if nextdateGroupIndex < len(dateGroups) && day >= dateGroups[nextdateGroupIndex].date {
+			currentGroupId = dateGroups[nextdateGroupIndex].gid
+			groupIdDict[currentGroupId]++
+			nextdateGroupIndex++
 		}
-		res[i+1] = currentGroupId
+		groupIdPerDay[i+1] = currentGroupId
 	}
-	return res
+	for grpId, _ := range groupIdDict {
+		groupIds = append(groupIds, grpId)
+	}
+	return groupIdPerDay, groupIds
 }

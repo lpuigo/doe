@@ -134,6 +134,7 @@ func main() {
 	router.HandleFunc("/api/ripsites", withUserManager("GetRipsitesInfo", route.GetRipsitesInfo)).Methods("GET")
 	//router.HandleFunc("/api/ripsites", withUserManager("CreateRipSite", route.CreateRipSite)).Methods("POST")
 	router.HandleFunc("/api/ripsites/stat/{groupby}/{freq}", withUserManager("GetRipsitesStats", route.GetRipsitesStats)).Methods("GET")
+	router.HandleFunc("/api/ripsites/progress/{month}", withUserManager("GetRipsitesProgress", route.GetRipsitesProgress)).Methods("GET")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("GetRipSite", route.GetRipSite)).Methods("GET")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("UpdateRipSite", route.UpdateRipSite)).Methods("PUT")
 	router.HandleFunc("/api/ripsites/{rsid:[0-9]+}", withUserManager("DeleteRipSite", route.DeleteRipSite)).Methods("DELETE")

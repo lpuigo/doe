@@ -35,35 +35,38 @@ func (m Manager) GetCurrentUserVisibleGroups() []*groups.Group {
 	return m.Groups.GetGroups()
 }
 
-// GroupSizePerDays returns a map of groupName -> []int giving number of active actors for groupName for each day within given days slice
+// GroupSizePerDays returns a map of "groupName" and "groupName : actorLabel" -> []int giving number of active actors for each day within given days slice
 func (m Manager) GroupSizePerDays(days []string) map[string][]int {
 	daysRange := date.DateStringRange{
 		Begin: days[0],
 		End:   days[len(days)-1],
 	}
 	res := make(map[string][]int)
+	groupNameDict := make(map[int]string)
 	for _, group := range m.Groups.GetGroups() {
 		res[group.Name] = make([]int, len(days))
+		groupNameDict[group.Id] = group.Name
 	}
 
 	for _, actor := range m.Actors.GetAllActors() {
+		actorLabel := actor.GetLabel()
 		if !actor.IsActiveOnDateRange(daysRange) {
 			continue
 		}
-		actorActivity := make([]int, len(days))
-		actorGroups := actor.Groups.ActiveGroupPerDay(days)
+		groupIdPerDay, groupIds := actor.Groups.ActiveGroupPerDay(days)
+		for _, groupId := range groupIds {
+			res[groupNameDict[groupId]+" : "+actorLabel] = make([]int, len(days))
+		}
 		for dayNum, day := range days {
 			if !actor.IsWorkingOn(day) {
 				continue
 			}
-			actorActivity[dayNum] = 1
-			gr := m.Groups.GetById(actorGroups[dayNum])
-			if gr == nil {
-				continue
-			}
-			res[gr.Name][dayNum]++
+			grpName := groupNameDict[groupIdPerDay[dayNum]]
+			res[grpName][dayNum]++
+			res[grpName+" : "+actorLabel][dayNum] = 1
 		}
-		res[actor.GetLabel()] = actorActivity
 	}
+	// force default group activity to 0
+	res[groupNameDict[0]] = make([]int, len(days))
 	return res
 }

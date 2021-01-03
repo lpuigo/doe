@@ -83,7 +83,7 @@ func NewTeamProductivityModalModel(vm *hvue.VM) *TeamProductivityModalModel {
 	tpmm.SiteColors = ripteamproductivitychart.SiteColorMap{}
 
 	tpmm.PeriodMode = "week"
-	tpmm.GroupMode = "activity"
+	tpmm.GroupMode = "client"
 	tpmm.PoleGroupMode = "client"
 	tpmm.InfoMode = "prod"
 	tpmm.Month = date.GetFirstOfMonth(date.TodayAfter(0))
@@ -127,7 +127,11 @@ func (tpmm *TeamProductivityModalModel) RefreshStat() {
 	tpmm.Loading = true
 	switch tpmm.SiteMode {
 	case "Rip":
-		go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.PeriodMode)
+		if tpmm.PeriodMode == "progress" {
+			go tpmm.callGetRipsitesStats("/api/ripsites/progress/" + tpmm.Month)
+		} else {
+			go tpmm.callGetRipsitesStats("/api/ripsites/stat/" + tpmm.GroupMode + "/" + tpmm.PeriodMode)
+		}
 	case "Poles":
 		if tpmm.PeriodMode == "progress" {
 			go tpmm.callGetRipsitesStats("/api/polesites/progress/" + tpmm.Month)

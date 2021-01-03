@@ -279,18 +279,18 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 	var serieNameTarget string
 
 	isActiveDate := make([]bool, len(aggrStat.Dates))
-	nbActiveDay := 0
-	// TODO manage dayoff calendar
+	//nbActiveDay := 0
+	// dayoff calendar not to be managed
 	for dateId, day := range aggrStat.Dates {
 		if date.DateFrom(day).IsSaturdaySunday() {
 			continue
 		}
 		isActiveDate[dateId] = true
-		nbActiveDay++
+		//nbActiveDay++
 	}
 
-	newValues := make(map[string][]map[string][]float64)
-	for serieName, serieValues := range aggrStat.Values {
+	newSerieTeamDataValues := make(map[string][]map[string][]float64)
+	for serieName, teamDataValues := range aggrStat.Values {
 		//_ = serieName: Price | Work
 		switch serieName {
 		case StatSerieWork:
@@ -298,25 +298,26 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 		case StatSeriePrice:
 			serieNameTarget = StatSeriePriceTarget
 		}
-		newSerieValues := make([]map[string][]float64, len(serieValues))
-		for teamIndex, sitesValues := range serieValues {
+		newTeamDataValues := make([]map[string][]float64, len(teamDataValues))
+		for teamIndex, dataValues := range teamDataValues {
 			//_ = teamIndex <=> group & actor per graph
 
-			// Calc Cumulative values
-			for _, dateValues := range sitesValues {
+			// Replace values by Cumulative values
+			for _, values := range dataValues {
 				//_ = siteName
-				for dateId := 1; dateId < len(dateValues); dateId++ {
-					dateValues[dateId] += dateValues[dateId-1]
+				for dateId := 1; dateId < len(values); dateId++ {
+					values[dateId] += values[dateId-1]
 				}
 			}
 
 			// check if teamIndex is group or individual actor
-			groupActor := strings.Split(aggrStat.Teams[teamIndex], " : ")
+			teamName := aggrStat.Teams[teamIndex]
+			groupActor := strings.Split(teamName, " : ")
 			groupName := groupActor[0] // retrieve group Name
-			actorLabel := ""
-			if len(groupActor) > 1 {
-				actorLabel = groupActor[1]
-			}
+			//actorLabel := ""
+			//if len(groupActor) > 1 {
+			//	actorLabel = groupActor[1]
+			//}
 			incrVal := 0.0
 			switch serieName {
 			case StatSerieWork:
@@ -325,31 +326,33 @@ func CalcProgress(aggrStat *rs.RipsiteStats, groupByName groups.GroupByName, gro
 				incrVal = groupByName(groupName).ActorDailyIncome
 			}
 
-			newSitesValues := make(map[string][]float64)
+			newDataValues := make(map[string][]float64)
 			// if team[teamIndex] == main team
 			// 		Calc incremental target
 			nbDays := len(aggrStat.Dates)
+			//name := actorLabel
+			//if actorLabel == "" {
+			//	// current team is an group
+			//	name = groupName
+			//}
+			activity, found := groupSize[teamName]
 			targetVal := 0.0
-			target := make([]float64, nbDays)
-			for dateId := 0; dateId < nbDays; dateId++ {
-				if isActiveDate[dateId] {
-					if actorLabel != "" {
-						actorActivity, found := groupSize[actorLabel]
-						if found {
-							targetVal += incrVal * float64(actorActivity[dateId]) // Current team is an actor
-						}
-					} else {
-						targetVal += incrVal * float64(groupSize[groupName][dateId]) // Current Team is a group
+			targetValues := make([]float64, nbDays)
+			if found {
+				for dateId := 0; dateId < nbDays; dateId++ {
+					if isActiveDate[dateId] {
+						targetVal += incrVal * float64(activity[dateId])
 					}
+					targetValues[dateId] = targetVal
 				}
-				target[dateId] = targetVal
 			}
-			newSitesValues[StatSiteProgressTarget] = target
-			newSerieValues[teamIndex] = newSitesValues
+			newDataValues[StatSiteProgressTarget] = targetValues
+			newTeamDataValues[teamIndex] = newDataValues
 		}
-		newValues[serieNameTarget] = newSerieValues
+		newSerieTeamDataValues[serieNameTarget] = newTeamDataValues
 	}
-	for serieName, serieValues := range newValues {
+	// Add newSerieTeamDataValues to existing values
+	for serieName, serieValues := range newSerieTeamDataValues {
 		aggrStat.Values[serieName] = serieValues
 	}
 	aggrStat.Sites[StatSiteProgressTarget] = true
