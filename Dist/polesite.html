@@ -115,15 +115,20 @@
                 <span class="rd-large-screen"></span>
 
                 <!-- test -->
-                <el-popover placement="bottom" width="360" title="Outils :"
-                            v-model="VisibleTools"  class="rd-large-screen">
+                <el-popover v-if="!User.Permissions.Review"
+                            placement="bottom" width="360" title="Outils :"
+                            v-model="VisibleTools" class="rd-large-screen">
                     <el-collapse v-model="VisibleToolsChapter" accordion>
                         <el-collapse-item title="Export" name="1">
                             <div>
-                                <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive des DICT</el-link>
+                                <el-link icon="fas fa-file-archive icon--left" :href="DictZipArchiveURL()">Archive des
+                                    DICT
+                                </el-link>
                             </div>
                             <div>
-                                <el-link icon="fas fa-file-excel icon--left" :href="RefExportXlsURL()">Export XLSx Références</el-link>
+                                <el-link icon="fas fa-file-excel icon--left" :href="RefExportXlsURL()">Export XLSx
+                                    Références
+                                </el-link>
                             </div>
                             <div>
                                 <el-link icon="fas fa-file-excel icon--left" :href="ProgressXlsURL()">Avancement XLSx</el-link>

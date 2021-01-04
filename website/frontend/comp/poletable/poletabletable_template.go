@@ -121,7 +121,7 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
                 width="80px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
-        <el-table-column
+        <el-table-column v-if="!user.Permissions.Review"
                 label="Acteurs"
                 width="90px" :resizable=true :show-overflow-tooltip=true
         >
@@ -271,7 +271,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
                 width="80px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
-        <el-table-column
+        <el-table-column v-if="!user.Permissions.Review"
                 label="Acteurs"
                 width="90px" :resizable=true :show-overflow-tooltip=true
         >
@@ -414,7 +414,7 @@ const template_billing string = `<el-container  style="height: 100%; padding: 0p
                 width="80px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 
-        <el-table-column
+        <el-table-column v-if="!user.Permissions.Review"
                 label="Acteurs"
                 width="90px" :resizable=true :show-overflow-tooltip=true
         >

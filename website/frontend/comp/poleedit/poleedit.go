@@ -348,7 +348,7 @@ const template string = `<div>
             </el-row>
 
             <!-- Actors -->
-            <el-row :gutter="5" type="flex" align="middle" class="spaced">
+            <el-row  v-if="!user.Permissions.Review" :gutter="5" type="flex" align="middle" class="spaced">
                 <el-col :span="6" class="align-right">Acteurs:</el-col>
                 <el-col :span="18">
                     <el-select v-model="editedpolemarker.Pole.Actors" multiple placeholder="Acteurs" size="mini" style="width: 100%"

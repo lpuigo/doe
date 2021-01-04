@@ -20,21 +20,21 @@ const template string = `
                 <el-radio-button label="stock">Stock</el-radio-button>
             </el-radio-group>
             <el-radio-group v-if="SiteMode=='Rip'" v-model="GroupMode" size="mini" @change="RefreshStat">
-                <el-radio-button label="activity">Par activité</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review" label="activity">Par activité</el-radio-button>
                 <el-radio-button label="client">Par client</el-radio-button>
-                <el-radio-button label="actor">Par acteur</el-radio-button>
-                <el-radio-button label="group">Par équipe</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review" label="actor">Par acteur</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review" label="group">Par équipe</el-radio-button>
            </el-radio-group>
             <el-radio-group v-if="SiteMode=='Poles'" v-model="PoleGroupMode" size="mini" @change="RefreshStat">
                 <el-radio-button label="client">Par client</el-radio-button>
-                <el-radio-button label="actor">Par acteur</el-radio-button>
-                <el-radio-button label="group">Par équipe</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review" label="actor">Par acteur</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review" label="group">Par équipe</el-radio-button>
             </el-radio-group>
 			<el-radio-group v-model="PeriodMode" size="mini" @change="RefreshStat">
                 <el-radio-button v-if="SiteMode!='Orange'" label="day">Jour</el-radio-button>
                 <el-radio-button label="week">Hebdo</el-radio-button>
                 <el-radio-button label="month">Mensuel</el-radio-button>
-                <el-radio-button v-if="SiteMode!='Orange'" label="progress">Progression</el-radio-button>
+                <el-radio-button v-if="!user.Permissions.Review && SiteMode!='Orange'" label="progress">Progression</el-radio-button>
             </el-radio-group>
 
             <a v-if="SiteMode=='Rip' && user.Permissions.Invoice" :href="GetActorsActivity()"><i class="far fa-file-excel icon--big"></i></a>

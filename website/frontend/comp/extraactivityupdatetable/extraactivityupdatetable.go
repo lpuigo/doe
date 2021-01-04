@@ -77,7 +77,7 @@ const (
 	</el-table-column>
 
 	<!--	Actors   -->
-	<el-table-column
+	<el-table-column v-if="!User.Permissions.Review"
 			width="270px"
 			prop="Actors" label="Acteurs"
 	>

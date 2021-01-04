@@ -110,7 +110,7 @@ const template string = `
         <el-col :span="19" >
 			<el-tabs tab-position="top">
 				<!-- ================================== Per Status Tab ============================================= -->
-				<el-tab-pane label="Statuts" lazy=true style="padding: 5px 25px;">
+				<el-tab-pane label="Statuts" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryStatusInfos"
 							stripe size="mini" show-summary :summary-method="SummaryStatusTotal"
@@ -133,7 +133,7 @@ const template string = `
 					</el-table>
 				</el-tab-pane>
 				<!-- ================================== Per Pole Action To Do Tab ========================================== -->
-				<el-tab-pane label="Trx à faire" lazy=true style="padding: 5px 25px;">
+				<el-tab-pane label="Trx à faire" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleActionInfos"
 							stripe size="mini" show-summary :summary-method="SummaryPoleActionTotal"
@@ -156,7 +156,7 @@ const template string = `
 					</el-table>
 				</el-tab-pane>
 				<!-- ================================== Per Pole Action Done Tab ========================================== -->
-				<el-tab-pane label="Trx faits" lazy=true style="padding: 5px 25px;">
+				<el-tab-pane label="Trx faits" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleActionDoneInfos"
 							stripe size="mini" show-summary :summary-method="SummaryPoleActionDoneTotal"
@@ -179,7 +179,7 @@ const template string = `
 					</el-table>
 				</el-tab-pane>
 				<!-- ================================== Per Pole Type Tab ========================================== -->
-				<el-tab-pane label="Besoin Appuis" lazy=true style="padding: 5px 25px;">
+				<el-tab-pane label="Besoin Appuis" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleTypeInfos"
 							stripe size="mini" show-summary :summary-method="SummaryPoleTypeTotal"
@@ -202,7 +202,7 @@ const template string = `
 					</el-table>
 				</el-tab-pane>
 				<!-- ================================== Per Pole Item Tab ========================================== -->
-				<el-tab-pane label="Besoin Matériel" lazy=true style="padding: 5px 25px;">
+				<el-tab-pane label="Besoin Matériel" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleItemInfos"
 							stripe size="mini" show-summary :summary-method="SummaryPoleItemTotal"
