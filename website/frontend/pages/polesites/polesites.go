@@ -632,6 +632,9 @@ func (mpm *MainPageModel) ImportPoleUploadError(vm *hvue.VM, err, file *js.Objec
 func (mpm *MainPageModel) ImportPoleUploadSuccess(vm *hvue.VM, response, file *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
 	mpm.ImportPoleReport = &ImportPoleReport{Object: response}
+	if mpm.ImportPoleReport.Get("Poles") == nil {
+		mpm.ImportPoleReport.Poles = []*polesite.Pole{}
+	}
 	if len(mpm.ImportPoleReport.Errors) == 1 && len(mpm.ImportPoleReport.Poles) == 0 {
 		message.WarningStr(vm, "Import d'appui : "+mpm.ImportPoleReport.Errors[0])
 		return

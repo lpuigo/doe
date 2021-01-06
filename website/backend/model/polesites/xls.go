@@ -312,6 +312,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 	}
 	ps.Status, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 7))
 	ps.Comment, _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPolesiteInfo, 8))
+	ps.Poles = []*Pole{}
 
 	//
 	// Read Poles Header & Info
