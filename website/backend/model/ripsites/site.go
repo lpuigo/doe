@@ -488,11 +488,11 @@ func (s *Site) SetUpdateDate() {
 func getCableSize(cableName string) (int, error) {
 	parts := strings.Split(cableName, "_")
 	if len(parts) < 2 {
-		return 0, fmt.Errorf("misformatted cable type '%': can not detect _nnFO_ chunk", cableName)
+		return 0, fmt.Errorf("misformatted cable type '%s': can not detect _nnFO_ chunk", cableName)
 	}
 	size, e := strconv.ParseInt(strings.TrimSuffix(parts[1], "FO"), 10, 64)
 	if e != nil {
-		return 0, fmt.Errorf("misformatted cable type: can not get number of fiber in '%'", parts[1])
+		return 0, fmt.Errorf("misformatted cable type: can not get number of fiber in '%s'", parts[1])
 	}
 	return int(size), nil
 }
