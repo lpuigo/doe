@@ -100,6 +100,8 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+5), poleconst.ProductHauban)
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+6), poleconst.ProductCoated)
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+7), poleconst.ProductRemove)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+8), poleconst.ProductNoAccess)
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, colPoleProduct+9), poleconst.ProductDenseNetwork)
 
 	for i, pole := range ps.Poles {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleId), "pole")
@@ -134,6 +136,8 @@ func ToExportXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+5), products[poleconst.ProductHauban])
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+6), products[poleconst.ProductCoated])
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+7), products[poleconst.ProductRemove])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+8), products[poleconst.ProductNoAccess])
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(rowPoleInfo+i, colPoleProduct+9), products[poleconst.ProductDenseNetwork])
 	}
 
 	err := xf.Write(w)
@@ -321,7 +325,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		return nil, err
 	}
 	productKeys := map[int]string{}
-	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6, colPoleProduct + 7} {
+	for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4, colPoleProduct + 5, colPoleProduct + 6, colPoleProduct + 7, colPoleProduct + 8, colPoleProduct + 9} {
 		productKeys[col], _ = xf.GetCellValue(sheetName, xlsx.RcToAxis(rowPoleHeader, col))
 	}
 	//if err := checkValue(xf, sheetName, xlsx.RcToAxis(rowPoleInfo, colPoleId), "pole"); err != nil {
