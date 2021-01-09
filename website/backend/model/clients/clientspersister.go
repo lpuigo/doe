@@ -149,6 +149,21 @@ func (cp *ClientsPersister) GetAllClients() []*Client {
 	return res
 }
 
+func (cp *ClientsPersister) UpdateClients(updatedClients []*Client) error {
+	for _, updClt := range updatedClients {
+		ucl := NewClientRecordFromClient(updClt)
+		if updClt.Id < 0 { // New Group, add it instead of update
+			cp.Add(ucl)
+			continue
+		}
+		err := cp.Update(ucl)
+		if err != nil {
+			fmt.Errorf("could not update group '%s' (id: %d)", ucl.Name, ucl.Id)
+		}
+	}
+	return nil
+}
+
 func (cp *ClientsPersister) CalcPriceByClientArticleGetter() func(clientName, articleName string, qty int) (float64, error) {
 	cp.RLock()
 	defer cp.RUnlock()

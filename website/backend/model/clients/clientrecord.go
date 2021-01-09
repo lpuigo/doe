@@ -47,3 +47,11 @@ func NewClientRecordFromFile(file string) (ur *ClientRecord, err error) {
 	}
 	return
 }
+
+// NewClientRecordFromClient returns a ClientRecord populated from the given client
+func NewClientRecordFromClient(clt *Client) *ClientRecord {
+	cr := NewClientRecord()
+	cr.Client = clt
+	cr.SetId(cr.Id)
+	return cr
+}

@@ -171,6 +171,10 @@ func main() {
 	router.HandleFunc("/api/groups", withUserManager("GetGroups", route.GetGroups)).Methods("GET")
 	router.HandleFunc("/api/groups", withUserManager("UpdateGroups", route.UpdateGroups)).Methods("PUT")
 
+	// Clients methods
+	router.HandleFunc("/api/clients", withUserManager("GetClients", route.GetClients)).Methods("GET")
+	router.HandleFunc("/api/clients", withUserManager("UpdateClients", route.UpdateClients)).Methods("PUT")
+
 	// Users methods
 	router.HandleFunc("/api/users", withUserManager("GetUsers", route.GetUsers)).Methods("GET")
 	router.HandleFunc("/api/users", withUserManager("UpdateUsers", route.UpdateUsers)).Methods("PUT")

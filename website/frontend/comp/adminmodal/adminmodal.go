@@ -1,6 +1,7 @@
 package adminmodal
 
 import (
+	"github.com/lpuig/ewin/doe/website/frontend/model/beclient"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,9 +21,10 @@ import (
 type AdminModalModel struct {
 	*modal.ModalModel
 
-	User       *fm.User          `js:"user"`
-	UsersStore *beuser.Store     `js:"UsersStore"`
-	GroupStore *group.GroupStore `js:"GroupStore"`
+	User         *fm.User          `js:"user"`
+	UsersStore   *beuser.Store     `js:"UsersStore"`
+	GroupStore   *group.GroupStore `js:"GroupStore"`
+	ClientsStore *beclient.Store   `js:"ClientsStore"`
 }
 
 func NewAdminModalModel(vm *hvue.VM) *AdminModalModel {
@@ -32,6 +34,7 @@ func NewAdminModalModel(vm *hvue.VM) *AdminModalModel {
 	tpmm.User = fm.NewUser()
 	tpmm.UsersStore = beuser.NewStore()
 	tpmm.GroupStore = group.NewGroupStore()
+	tpmm.ClientsStore = beclient.NewStore()
 	return tpmm
 }
 
@@ -79,14 +82,27 @@ func (amm *AdminModalModel) Show(user *fm.User) {
 	amm.Loading = false
 	amm.UsersStore.CallGetUsers(amm.VM, func() {})
 	amm.GroupStore.CallGetGroups(amm.VM, func() {})
+	amm.ClientsStore.CallGetClients(amm.VM, func() {})
 	amm.ModalModel.Show()
 }
 
 func (amm *AdminModalModel) HideWithControl(user *fm.User) {
 	if amm.UsersStore.Ref.Dirty {
-		message.ConfirmCancelWarning(amm.VM, "Sauvegarder les modifications apportées ?",
+		message.ConfirmCancelWarning(amm.VM, "Sauvegarder les modifications utilisateurs apportées ?",
 			func() { // confirm
 				amm.UsersStore.CallUpdateUsers(amm.VM, func() {
+					amm.ModalModel.Hide()
+				})
+			},
+			func() {
+				amm.ModalModel.Hide()
+			},
+		)
+	}
+	if amm.ClientsStore.Ref.Dirty {
+		message.ConfirmCancelWarning(amm.VM, "Sauvegarder les modifications clients apportées ?",
+			func() { // confirm
+				amm.ClientsStore.CallUpdateClients(amm.VM, func() {
 					amm.ModalModel.Hide()
 				})
 			},
@@ -98,11 +114,21 @@ func (amm *AdminModalModel) HideWithControl(user *fm.User) {
 }
 
 func (amm *AdminModalModel) UndoChange() {
-	amm.UsersStore.Users = amm.UsersStore.GetReferenceUsers()
+	if amm.UsersStore.Ref.Dirty {
+		amm.UsersStore.Users = amm.UsersStore.GetReferenceUsers()
+	}
+	if amm.ClientsStore.Ref.Dirty {
+		amm.ClientsStore.Clients = amm.ClientsStore.GetReferenceClients()
+	}
 }
 
 func (amm *AdminModalModel) ConfirmChange() {
-	amm.UsersStore.CallUpdateUsers(amm.VM, func() {})
+	if amm.UsersStore.Ref.Dirty {
+		amm.UsersStore.CallUpdateUsers(amm.VM, func() {})
+	}
+	if amm.ClientsStore.Ref.Dirty {
+		amm.ClientsStore.CallUpdateClients(amm.VM, func() {})
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

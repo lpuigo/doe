@@ -176,6 +176,11 @@ const template string = `<el-dialog
 				</el-table-column>
 			</el-table>
 		</el-tab-pane>
+
+		<!-- ========================================== Clients Tab ================================================= -->
+		<el-tab-pane label="Clients" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+			<h1>A FAIRE</h1>
+		</el-tab-pane>
     </el-tabs>
 
     <!-- 

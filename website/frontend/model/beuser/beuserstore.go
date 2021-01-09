@@ -71,10 +71,10 @@ func (bus *Store) callGetUsers(vm *hvue.VM, onSuccess func()) {
 }
 
 func (bus *Store) CallUpdateUsers(vm *hvue.VM, onSuccess func()) {
-	go bus.callUpdateGroups(vm, onSuccess)
+	go bus.callUpdateUsers(vm, onSuccess)
 }
 
-func (bus *Store) callUpdateGroups(vm *hvue.VM, onSuccess func()) {
+func (bus *Store) callUpdateUsers(vm *hvue.VM, onSuccess func()) {
 	updatedUsers := bus.getUpdatedUsers()
 	if len(updatedUsers) == 0 {
 		message.ErrorStr(vm, "Could not find any updated user", false)
