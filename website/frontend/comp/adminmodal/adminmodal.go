@@ -21,10 +21,12 @@ import (
 type AdminModalModel struct {
 	*modal.ModalModel
 
-	User         *fm.User          `js:"user"`
-	UsersStore   *beuser.Store     `js:"UsersStore"`
-	GroupStore   *group.GroupStore `js:"GroupStore"`
-	ClientsStore *beclient.Store   `js:"ClientsStore"`
+	User             *fm.User          `js:"user"`
+	UsersStore       *beuser.Store     `js:"UsersStore"`
+	GroupStore       *group.GroupStore `js:"GroupStore"`
+	ClientsStore     *beclient.Store   `js:"ClientsStore"`
+	EditedBeClientId int               `js:"EditedBeClientId"`
+	EditedActivity   string            `js:"EditedActivity"`
 }
 
 func NewAdminModalModel(vm *hvue.VM) *AdminModalModel {
@@ -35,6 +37,8 @@ func NewAdminModalModel(vm *hvue.VM) *AdminModalModel {
 	tpmm.UsersStore = beuser.NewStore()
 	tpmm.GroupStore = group.NewGroupStore()
 	tpmm.ClientsStore = beclient.NewStore()
+	tpmm.EditedBeClientId = 0
+	tpmm.EditedActivity = ""
 	return tpmm
 }
 
@@ -63,9 +67,18 @@ func componentOption() []hvue.ComponentOption {
 			amm := AdminModalModelFromJS(vm.Object)
 			return amm.UsersStore.Users
 		}),
+		hvue.Computed("editedBeClient", func(vm *hvue.VM) interface{} {
+			amm := AdminModalModelFromJS(vm.Object)
+			if len(amm.ClientsStore.Clients) == 0 {
+				return nil
+			}
+			return amm.ClientsStore.GetClientById(amm.EditedBeClientId)
+		}),
 		hvue.Computed("hasChanged", func(vm *hvue.VM) interface{} {
 			amm := AdminModalModelFromJS(vm.Object)
-			return amm.UsersStore.Ref.IsDirty()
+			userDirty := amm.UsersStore.Ref.IsDirty()
+			clientDirty := amm.ClientsStore.Ref.IsDirty()
+			return userDirty || clientDirty
 		}),
 	}
 }
@@ -270,6 +283,18 @@ func (amm *AdminModalModel) FilterList(vm *hvue.VM, prop string) []*elements.Val
 			fa = "Vide"
 		}
 		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Clients Tabs Methods
+
+func (amm *AdminModalModel) GetBeClientList(vm *hvue.VM) []*elements.IntValueLabel {
+	amm = AdminModalModelFromJS(vm.Object)
+	res := []*elements.IntValueLabel{}
+	for _, beclient := range amm.ClientsStore.Clients {
+		res = append(res, elements.NewIntValueLabel(beclient.Id, beclient.Name))
 	}
 	return res
 }

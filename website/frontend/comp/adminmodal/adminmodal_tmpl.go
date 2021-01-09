@@ -178,8 +178,130 @@ const template string = `<el-dialog
 		</el-tab-pane>
 
 		<!-- ========================================== Clients Tab ================================================= -->
-		<el-tab-pane label="Clients" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
-			<h1>A FAIRE</h1>
+		<el-tab-pane label="Clients" lazy=true style="height: 70vh; padding: 0px 0px;">
+			<el-row :gutter="5" type="flex" align="middle">
+				<el-col :span="2" class="align-right"><h4>Client:</h4></el-col>
+				<el-col :span="7">
+					<el-select placeholder="Nom du Client" size="mini"
+							   v-model="EditedBeClientId"
+							   style="width: 100%"
+					>
+						<el-option v-for="item in GetBeClientList()"
+								   :key="item.value"
+								   :label="item.label"
+								   :value="item.value"
+						>
+						</el-option>
+					</el-select>
+				</el-col>
+			</el-row>
+			<div v-if="editedBeClient">
+				<!-- 	Client Name 	-->
+				<el-row :gutter="5" type="flex" align="middle" class="spaced">
+					<el-col :span="2" class="align-right">Nom:</el-col>
+					<el-col :span="10">
+						<el-input v-model="editedBeClient.Name" size="mini" style="width: 100%"></el-input>
+					</el-col>
+					<el-col :offset="2" :span="10">
+						<el-switch
+								v-model="editedBeClient.OptionMeasurementPricePerFiber"
+								active-text="mesures par fibre"
+								inactive-text="mesures par boite">
+						</el-switch>
+					</el-col>
+				</el-row>
+				<!-- 	Client Attribute 	-->
+<!-- overflow-x: hidden;overflow-y: auto;-->
+				<el-tabs type="border-card" tab-position="left" style="height: 59vh">
+					<!-- 	Activities Attribute 	-->
+					<el-tab-pane label="Activités" lazy=true style="height: 58vh; padding: 0px 0px;">
+						<el-tabs type="border-card" tab-position="left" style="height: 57vh">
+							<!-- 	activityType 	-->
+							<el-tab-pane v-for="(activityType, activityTypeName) in editedBeClient.Activities" :key="activityTypeName"
+									:label="activityTypeName" lazy=true 
+									style="height: 56vh; padding: 0px 0px;"
+							>
+								<el-tabs type="border-card" tab-position="left" style="height: 55vh">
+									<!-- 	activity 	-->
+									<el-tab-pane v-for="(activity, activityName) in activityType" :key="activityName"
+											:label="activityName" lazy=true 
+											style="height: 54vh; padding: 0px 0px; overflow-x: hidden;overflow-y: auto;"
+									>
+										<el-row :gutter="10" type="flex" align="middle" class="spaced">
+											<el-col :span="9">Nom</el-col>
+											<el-col :span="3">Unité</el-col>
+											<el-col :span="4">Nb. Points</el-col>
+											<el-col :span="4">Prix €</el-col>
+										</el-row>
+										<!-- 	item 	-->
+										<el-row v-for="(item, index) in activity" :key="index"
+												:gutter="10" type="flex" align="middle" class="spaced"
+										>
+											<!-- 	item Name 	-->
+											<el-col :span="9">
+												<el-input v-model="item.Name" size="mini" style="width: 100%"></el-input>
+											</el-col>
+											<!-- 	item Unit 	-->
+											<el-col :span="3">
+												<el-input-number v-model="item.Unit" size="mini" style="width: 100%" :precision="0" :min="1" controls-position="right"></el-input-number>
+											</el-col>
+											<!-- 	item Work 	-->
+											<el-col :span="4">
+												<el-input-number v-model="item.Work" size="mini" style="width: 100%" :precision="3" controls-position="right"></el-input-number>
+											</el-col>
+											<!-- 	item Price 	-->
+											<el-col :span="4">
+												<el-input-number v-model="item.Price" size="mini" style="width: 100%" :precision="3" controls-position="right":step="10"></el-input-number>
+											</el-col>
+										</el-row>
+									</el-tab-pane>
+								</el-tabs>
+							</el-tab-pane>
+						</el-tabs>
+					</el-tab-pane>
+
+					<!-- 	Boxes Attribute 	-->
+					<el-tab-pane label="Boitiers" lazy=true style="height: 58vh; padding: 0px 0px;">
+						<el-tabs type="border-card" tab-position="left" style="height: 57vh">
+							<!-- 	Boxes Type 	-->
+							<el-tab-pane v-for="(boxes, boxesName) in editedBeClient.Boxes" :key="boxesName"
+									:label="boxesName" lazy=true 
+									style="height: 54vh; padding: 0px 0px; overflow-x: hidden;overflow-y: auto;"
+							>
+								<el-row :gutter="10" type="flex" align="middle" class="spaced">
+									<el-col :span="4" class="align-right">Nom boîte</el-col>
+									<el-col :span="5">Nom</el-col>
+									<el-col :span="3">Taille  (FO)</el-col>
+									<el-col :span="5">Usage</el-col>
+								</el-row>
+								<!-- 	Boxes 	-->
+								<el-row v-for="(box, boxName) in boxes" :key="boxName"
+										:gutter="10" type="flex" align="middle" class="spaced"
+								>
+									<el-col :span="4" class="align-right">{{boxName}}:</el-col>
+									<!-- 	Box Name 	-->
+									<el-col :span="5">
+										<el-input v-model="box.Name" size="mini" style="width: 100%"></el-input>
+									</el-col>
+									<!-- 	Box Size 	-->
+									<el-col :span="3">
+										<el-input-number v-model="box.Size" size="mini" style="width: 100%" :precision="0" :min="1" controls-position="right"></el-input-number>
+									</el-col>
+									<!-- 	Box Usage 	-->
+									<el-col :span="5">
+										<el-input v-model="box.Usage" size="mini" style="width: 100%"></el-input>
+									</el-col>
+								</el-row>
+							</el-tab-pane>
+						</el-tabs>
+					</el-tab-pane>
+
+					<!-- 	PRE TO DELETE 	-->
+					<el-tab-pane label="PRE" lazy=true style="height: 55vh; padding: 0px 0px; overflow-x: hidden;overflow-y: auto;">
+						<pre>{{editedBeClient}}</pre>
+					</el-tab-pane>
+				</el-tabs>
+			</div>
 		</el-tab-pane>
     </el-tabs>
 

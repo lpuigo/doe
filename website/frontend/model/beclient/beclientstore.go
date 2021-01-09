@@ -8,6 +8,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
+	"sort"
 )
 
 type Store struct {
@@ -47,6 +48,15 @@ func (bcs *Store) GetReferenceClients() []*BeClient {
 	return refClients
 }
 
+func (bcs *Store) GetClientById(id int) *BeClient {
+	for _, beClient := range bcs.Clients {
+		if beClient.Id == id {
+			return beClient
+		}
+	}
+	return nil
+}
+
 // API Methods
 
 func (bcs *Store) CallGetClients(vm *hvue.VM, onSuccess func()) {
@@ -71,6 +81,9 @@ func (bcs *Store) callGetClients(vm *hvue.VM, onSuccess func()) {
 	req.Response.Call("forEach", func(item *js.Object) {
 		bclt := BeClientFromJS(item)
 		loadedClients = append(loadedClients, bclt)
+	})
+	sort.Slice(loadedClients, func(i, j int) bool {
+		return loadedClients[i].Name < loadedClients[j].Name
 	})
 	bcs.Clients = loadedClients
 	bcs.Ref.SetReference()
