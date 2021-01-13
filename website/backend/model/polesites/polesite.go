@@ -216,27 +216,45 @@ func (ps *PoleSite) DictZipName() string {
 
 // ExportName returns the PoleSite XLS export file name
 func (ps *PoleSite) DictZipArchive(w io.Writer) error {
+	type cityCount map[string]int
+
 	zw := zip.NewWriter(w)
-
 	path := strings.TrimSuffix(ps.DictZipName(), ".zip")
-
 	makeDir := func(base ...string) string {
 		return filepath.Join(base...) + "/"
 	}
 
-	// Create sorted List of DICT in PoleSite
-	dicts := map[string]int{}
+	// Create sorted List of DICT / citycount in PoleSite
+	dicts := map[string]cityCount{}
 	for _, pole := range ps.Poles {
 		dict := strings.Trim(pole.DictRef, " \t")
 		if dict == "" {
 			continue
 		}
-		dicts[pole.DictRef]++
+		cc := dicts[pole.DictRef]
+		if cc == nil {
+			cc = make(cityCount)
+			dicts[pole.DictRef] = cc
+		}
+		cc[pole.City]++
 	}
 	dictList := make([]string, len(dicts))
 	i := 0
-	for dict, _ := range dicts {
-		dictList[i] = dict
+	for dict, citycount := range dicts {
+		// choose most common city
+		selectedCity := ""
+		maxcount := -1
+		for city, count := range citycount {
+			if count > maxcount {
+				count = maxcount
+				selectedCity = city
+			}
+		}
+		res := dict
+		if selectedCity != "" {
+			res += " - " + selectedCity
+		}
+		dictList[i] = res
 		i++
 	}
 	sort.Strings(dictList)
