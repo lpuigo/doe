@@ -432,7 +432,7 @@ func (m ConsistencyMsg) String() string {
 }
 
 func (m ConsistencyMsg) ShortString() string {
-	res := m.Category + ":" + m.Msg
+	res := m.Msg
 	if len(m.Poles) > 0 {
 		poleNames := make([]string, len(m.Poles))
 		for i, pole := range m.Poles {

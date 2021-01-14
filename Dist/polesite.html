@@ -178,7 +178,8 @@
                                                @click="ImportPoleComplete = false"></el-button>
                                 </div>
                                 <div v-if="ImportPoleReport.Errors.length > 0">
-                                    <div style="color: #dd781a">{{ImportPoleReport.Errors.length}} anomalies:
+                                    <div style="color: #dd781a">{{ImportPoleReport.Errors.length}} anomalie(s)
+                                        détectée(s):
                                     </div>
                                     <div v-for="item in GetImportPoleReportErrorsRefs(10)" style="margin-left: 8px">{{item}}</div>
                                 </div>
@@ -261,6 +262,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.19"></script>
+<script type="text/javascript" src="polesites.js?v=1.20"></script>
 
 </html>

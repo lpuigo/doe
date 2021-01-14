@@ -456,6 +456,7 @@ func (mpm *MainPageModel) AddPole(newPole *polesite.Pole) {
 // AddPoleList add given Pole Slice to Polesite
 func (mpm *MainPageModel) AddPoleList(poles []*polesite.Pole) {
 	for _, pole := range poles {
+		pole.CheckInfoConsistency()
 		mpm.Polesite.AddNewPole(pole)
 	}
 	mpm.RefreshMap()
@@ -635,6 +636,7 @@ func (mpm *MainPageModel) ImportPoleUploadSuccess(vm *hvue.VM, response, file *j
 	if mpm.ImportPoleReport.Get("Poles") == nil {
 		mpm.ImportPoleReport.Poles = []*polesite.Pole{}
 	}
+	// if import pole failed
 	if len(mpm.ImportPoleReport.Errors) == 1 && len(mpm.ImportPoleReport.Poles) == 0 {
 		message.WarningStr(vm, "Import d'appui : "+mpm.ImportPoleReport.Errors[0])
 		return

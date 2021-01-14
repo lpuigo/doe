@@ -408,7 +408,10 @@ func PostPolesiteImport(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request
 			Poles:  []*polesites.Pole{},
 		}
 	} else {
-		msgs := ps.CheckPoleSiteConsistency()
+		checkPs := psr.PoleSite.CloneInfoForArchive()
+		checkPs.Poles = psr.PoleSite.Poles[:]
+		checkPs.AppendPolesFrom(ps)
+		msgs := checkPs.CheckPoleSiteConsistency()
 		errs := make([]string, len(msgs))
 		for i, msg := range msgs {
 			errs[i] = msg.ShortString()
