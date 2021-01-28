@@ -58,7 +58,12 @@ type FormulaireData struct {
 
 func (fd *FormulaireData) String() string {
 	res := strings.Builder{}
-	res.WriteString("Form " + fd.RecordNumber + " (" + fd.UpdateAnswerTime + ") by " + fd.UpdateUserName + "\n")
+	res.WriteString("Form " + fd.ID + " by " + fd.UpdateUserName + "\n")
+	res.WriteString("CreateTime       : " + fd.CreateTime + "\n")
+	res.WriteString("UpdateTime       : " + fd.UpdateTime + "\n")
+	res.WriteString("UpdateAnswerTime : " + fd.UpdateAnswerTime + "\n")
+	res.WriteString("AnswerTime       : " + fd.AnswerTime + "\n")
+	res.WriteString("History          : " + fd.History + "\n")
 	for fieldName, field := range fd.Fields {
 		if field.Hidden == "true" {
 			continue

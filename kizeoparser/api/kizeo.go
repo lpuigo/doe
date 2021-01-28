@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -138,6 +141,37 @@ func (kc *KizeoContext) FormDatas(formId string) ([]*DataMin, error) {
 	return formDataResp.Data, nil
 }
 
+func (kc *KizeoContext) FormUnreadDatas(formId string) ([]*DataMin, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("%sforms/%s/data/readnew", kc.URL, formId)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request: %s", err.Error())
+	}
+	kc.addAuth(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP call failed: %s", err.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("response has non ok HTTP status: %d", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	var formDataResp struct {
+		Status string     `json:"status"`
+		Data   []*DataMin `json:"data"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&formDataResp)
+	if err != nil {
+		return nil, fmt.Errorf("decoding response body failed: %s\nRecieved Response: %v", err.Error(), resp.Body)
+	}
+	if formDataResp.Status != "ok" {
+		return nil, fmt.Errorf("unexpected response: %+v", formDataResp)
+	}
+	return formDataResp.Data, nil
+}
+
 func (kc *KizeoContext) FormData(formId, dataId string) (*FormulaireData, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%sforms/%s/data/%s", kc.URL, formId, dataId)
@@ -168,4 +202,31 @@ func (kc *KizeoContext) FormData(formId, dataId string) (*FormulaireData, error)
 		return nil, fmt.Errorf("unexpected response: %+v", formDataResp)
 	}
 	return formDataResp.Data, nil
+}
+
+func (kc *KizeoContext) FormDataPicture(formId, dataId, picId string) (image.Image, string, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("%sforms/%s/data/%s/medias/%s", kc.URL, formId, dataId, picId)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, "", fmt.Errorf("could not create request: %s", err.Error())
+	}
+	kc.addAuth(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, "", fmt.Errorf("HTTP call failed: %s", err.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, "", fmt.Errorf("response has non ok HTTP status: %d", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	if !strings.HasPrefix(resp.Header.Get("Content-Type"), "image") {
+		return nil, "", fmt.Errorf("response is not an image")
+	}
+	img, err := jpeg.Decode(resp.Body)
+	if err != nil {
+		return nil, "", fmt.Errorf("decoding image failed : %s", err.Error())
+	}
+	return img, "", nil
 }
