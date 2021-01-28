@@ -604,9 +604,15 @@ func (pem *PoleEditModel) UpdateProduct(vm *hvue.VM) {
 	ep := pem.EditedPoleMarker.Pole
 	ep.CheckProductConsistency()
 	ep.Get("Product").Call("sort")
-	if ep.IsInStateToBeChecked() {
-		ep.SetState(poleconst.StateToDo)
+	if ep.State == poleconst.StateNoAccess && !ep.HasProduct(poleconst.ProductNoAccess) {
+		ep.State = poleconst.StateToDo
 	}
+	if ep.State == poleconst.StateIncident && !ep.HasProduct(poleconst.ProductIncident) {
+		ep.State = poleconst.StateToDo
+	}
+	//if ep.IsInStateToBeChecked() {
+	//	ep.SetState(poleconst.StateToDo)
+	//}
 	pem.UpdateState(vm)
 }
 

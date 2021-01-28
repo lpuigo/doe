@@ -315,6 +315,13 @@ func (p *Pole) SetAttachmentDate(d string) {
 func (p *Pole) UpdateState() {
 	today := date.TodayAfter(0)
 
+	if p.State == poleconst.StateIncident {
+		p.AddProduct(poleconst.ProductIncident)
+	}
+	if p.State == poleconst.StateNoAccess {
+		p.AddProduct(poleconst.ProductNoAccess)
+	}
+
 	testDICTandDAdates := func() {
 		// check if DICT if to be done => StateDictToDo
 		if tools.Empty(p.DictRef) {

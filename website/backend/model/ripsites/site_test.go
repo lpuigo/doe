@@ -16,10 +16,10 @@ func siteRecordFromFile(t *testing.T, dir, file string) *SiteRecord {
 }
 
 func Test_FixSite(t *testing.T) {
-	dir := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Sogetrel\Chantier Fibre Aube\2020-11-27 SRO 10_050_279`
-	origFile := "000058_orig.json"
-	newFile := "000058-fix.json"
-	resFile := "000058.json"
+	dir := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Sogetrel\Chantier Fibre Aube\2020-11-30 SRO 10_018_098`
+	origFile := "000057_orig.json"
+	newFile := "000057_fixed.json"
+	resFile := "000057.json"
 
 	origSite := siteRecordFromFile(t, dir, origFile)
 	newSite := siteRecordFromFile(t, dir, newFile)

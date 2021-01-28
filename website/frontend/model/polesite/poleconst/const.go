@@ -100,6 +100,7 @@ const (
 	ProductDenseNetwork     string = "Réseaux denses"
 	ProductReplenishment    string = "Réappro."
 	ProductFarReplenishment string = "Réappro. (>50km)"
+	ProductIncident         string = "Incident"
 )
 
 const (

@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	kizeoXlsExtractDir  string = `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Eiffage Signes\Kizeo Cad\`
-	kizeoXlsExtractName string = `Poteau_Eiffage_Signes_20210127`
-	report              string = `Synthese Kizeo Cad 20210127`
+	kizeoXlsExtractDir  string = `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Fiitelcom\Kizeo Vittel\`
+	kizeoXlsExtractName string = `Poteau_Fiitelcom_20210128`
+	report              string = `Synthese Kizeo 20210128 all`
 	kizeoCreatePoleDir  bool   = true
 	kizeoXlsExtractFile string = kizeoXlsExtractDir + kizeoXlsExtractName + ".xlsx"
 	kizeoXlsReportFile  string = kizeoXlsExtractDir + report + ".xlsx"
