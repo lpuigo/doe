@@ -85,6 +85,7 @@ const (
 
 	ProductCreation         string = "Création"
 	ProductCoated           string = "Enrobé"
+	ProductInRow            string = "Enfilade"
 	ProductHandDigging      string = "Implantation manuelle"
 	ProductMechDigging      string = "Terrassement mécanique"
 	ProductPruning          string = "Elagage"

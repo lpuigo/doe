@@ -561,6 +561,7 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.ProductHauban, poleconst.ProductHauban),
 		elements.NewValueLabel(poleconst.ProductStraighten, poleconst.ProductStraighten),
 		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
+		elements.NewValueLabel(poleconst.ProductInRow, poleconst.ProductInRow),
 		elements.NewValueLabel(poleconst.ProductReplenishment, poleconst.ProductReplenishment),
 		elements.NewValueLabel(poleconst.ProductFarReplenishment, poleconst.ProductFarReplenishment),
 	}
