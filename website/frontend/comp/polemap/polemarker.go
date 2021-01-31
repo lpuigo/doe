@@ -1,6 +1,8 @@
 package polemap
 
 import (
+	"strconv"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
@@ -134,10 +136,14 @@ const (
 	pmHtmlDragEdited   string = `<i class="fas fa-expand-arrows-alt fa-fw fa-2x pole-marker drag"></i>`
 )
 
-// UpdateFromState updates the look of receiver depending on its pole's state and product, and its marker state (no refresh undertaken nor layer group updated)
+// UpdateFromState updates the look of PoleMarker receiver depending on its map' Categorizer state and its data (no refresh undertaken nor layer group updated)
 func (pm *PoleMarker) UpdateFromState() {
-	var html, class string
+	pm.Map.Categorizer.PoleMarkerVisual(pm)
+	pm.UpdateDivIconClassname(pm.Class)
+	pm.UpdateDivIconHtml()
+}
 
+func (pm *PoleMarker) visualByState() (html, class string) {
 	switch pm.Pole.State {
 	case poleconst.StateNotSubmitted:
 		//html = pmHtmlPin
@@ -198,12 +204,51 @@ func (pm *PoleMarker) UpdateFromState() {
 			//	html = pmHtmlCreation
 		}
 	}
+	return
+}
 
-	pm.Html = html
-	pm.Class = class
-
-	pm.UpdateDivIconClassname(class)
-	pm.UpdateDivIconHtml()
+func (pm *PoleMarker) visualByAge(groupName string) (html, class string) {
+	// as only class are modified, call visual by state to retreive polemarker html
+	html, class = pm.visualByState()
+	// set class trivial case
+	switch groupName {
+	case "BO":
+		class = "red"
+		return
+	case "NS":
+		class = "grey"
+		return
+	case "ERR":
+		class = "darkred"
+		return
+	}
+	// set class for non trivial case
+	nbWeek, _ := strconv.Atoi(groupName)
+	if nbWeek < 0 {
+		// pole is ready until N weeks
+		nbWeek = -nbWeek
+		switch nbWeek {
+		case 1:
+			class = "lightblue"
+		case 2, 3:
+			class = "blue"
+		default:
+			class = "darkblue"
+		}
+		return
+	}
+	// pole will be ready in N weeks
+	switch nbWeek {
+	case 0:
+		class = "orange"
+	case 1:
+		class = "darkorange"
+	case 2:
+		class = "red"
+	default:
+		class = "darkred"
+	}
+	return
 }
 
 // UpdateDivIconHtml updates the look and the shadow of receiver (no refresh undertaken)

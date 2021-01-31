@@ -57,6 +57,7 @@ func componentOptions() []hvue.ComponentOption {
 
 type PoleMap struct {
 	*leafletmap.LeafletMap
+	Categorizer         *Categorizer                   `js:"Categorizer"`
 	PoleLine            *PoleLine                      `js:"PoleLine"`
 	Poles               []*polesite.Pole               `js:"poles"`
 	PoleMarkers         []*PoleMarker                  `js:"PoleMarkers"`
@@ -73,6 +74,7 @@ func NewPoleMap(vm *hvue.VM) *PoleMap {
 	pm := &PoleMap{LeafletMap: leafletmap.NewLeafletMap(vm)}
 	//pm.LeafletMap.VM = vm
 	//pm.LeafletMap.Init()
+	pm.Categorizer = NewCategorizer()
 	pm.PoleLine = nil
 	pm.Poles = nil
 	pm.clearPoleMarkersGroups()
@@ -172,8 +174,9 @@ func (pm *PoleMap) setPoleMarkersGroups() {
 
 	// create group
 	for _, poleMarker := range pm.PoleMarkers {
-		pms[poleMarker.Pole.State] = append(pms[poleMarker.Pole.State], poleMarker)
-		polesLayer[poleMarker.Pole.State] = append(polesLayer[poleMarker.Pole.State], &poleMarker.Layer)
+		groupName := pm.Categorizer.GroupName(poleMarker)
+		pms[groupName] = append(pms[groupName], poleMarker)
+		polesLayer[groupName] = append(polesLayer[groupName], &poleMarker.Layer)
 	}
 	pm.PoleMarkersByState = pms
 
@@ -190,7 +193,7 @@ func (pm *PoleMap) setPoleMarkersGroups() {
 		nlg := leaflet.NewLayerGroup(nl.Layers)
 		pmg[nl.Name] = nlg
 		nlg.AddTo(pm.LeafletMap.Map)
-		groupName := polesite.PoleStateLabel(nl.Name) + " (" + strconv.Itoa(len(nl.Layers)) + ")"
+		groupName := pm.Categorizer.GroupLabel(nl.Name) + " (" + strconv.Itoa(len(nl.Layers)) + ")"
 		pm.LeafletMap.ControlLayers.AddOverlay(&nlg.Layer, groupName)
 	}
 	pm.PoleMarkersGroup = pmg

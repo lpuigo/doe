@@ -17,7 +17,7 @@
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"> -->
     <link rel="stylesheet" href="/Assets/web-fonts-with-css.5.6/css/all.min.css">
     <link rel="stylesheet" href="index.css?v=1.1">
-    <link rel="stylesheet" href="polesite.css?v=1.6">
+    <link rel="stylesheet" href="polesite.css?v=1.7">
 </head>
 
 <body>
@@ -113,6 +113,15 @@
                 </div>
 
                 <span class="rd-large-screen"></span>
+
+                <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
+                    <el-button
+                            class="icon rd-large-screen" icon="far fa-calendar-check icon--big" size="mini"
+                            :type='GroupByAge ? "primary" : ""'
+                            v-model="GroupByAge"
+                            @click="UpdatePoleGrouping"
+                    ></el-button>
+                </el-tooltip>
 
                 <!-- test -->
                 <el-popover v-if="!User.Permissions.Review"
@@ -262,6 +271,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.21"></script>
+<script type="text/javascript" src="polesites.js?v=1.22"></script>
 
 </html>

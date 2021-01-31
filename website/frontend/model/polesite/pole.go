@@ -615,3 +615,114 @@ func PoleRowClassName(status string) string {
 	}
 	return res
 }
+
+// GetPermissionDateRange returns a number (nb week) depending on receiver pole permissions dates
+//
+// - positive number : the pole will be ok in N week(s)
+//
+// - negative number : the pole is OK for N weeks
+//
+// - "NS" if result is not significant (ie pole aldready done, or not submited)
+//
+// - "BO" if Back Office work has yet to be done
+func (p *Pole) GetPermissionDateRange(checkDA bool) string {
+	waitFor := func() string {
+		if tools.Empty(p.DictDate) {
+			return "BO"
+		}
+		today := date.TodayAfter(0)
+		nbDays := int(date.NbDaysBetween(today, p.DictDate))
+		if checkDA {
+			if !(p.DaValidation && !tools.Empty(p.DaStartDate)) {
+				return "BO"
+			}
+			nbDaDays := int(date.NbDaysBetween(today, p.DaStartDate))
+			if nbDaDays > nbDays {
+				nbDays = nbDaDays
+			}
+		}
+		return strconv.Itoa(nbDays / 7)
+	}
+
+	stillOkFor := func() string {
+		if tools.Empty(p.DictDate) {
+			return "BO"
+		}
+		today := date.TodayAfter(0)
+		nbDays := int(date.NbDaysBetween(today, p.DictDate)) + poleconst.DictValidityDuration
+		if checkDA {
+			if !(p.DaValidation && !tools.Empty(p.DaEndDate)) {
+				return "BO"
+			}
+			nbDaDays := int(date.NbDaysBetween(today, p.DaEndDate))
+			if nbDaDays < nbDays {
+				nbDays = nbDaDays
+			}
+		}
+		return strconv.Itoa(-nbDays/7 - 1)
+	}
+
+	// check for early decision
+	if checkDA { // early decision depending on DA
+		switch p.State {
+		case poleconst.StateDaToDo:
+			return "BO"
+		case poleconst.StateDaExpected:
+			return "BO"
+		}
+	}
+	switch p.State {
+	case poleconst.StateNotSubmitted:
+		return "NS"
+	case poleconst.StateNoGo:
+		return "NS"
+	case poleconst.StateDictToDo:
+		return "BO"
+	case poleconst.StateDaToDo:
+		return waitFor()
+	case poleconst.StateDaExpected:
+		return waitFor()
+	case poleconst.StatePermissionPending:
+		return waitFor()
+	case poleconst.StateToDo:
+		return stillOkFor()
+	case poleconst.StateMarked:
+		return stillOkFor()
+	case poleconst.StateNoAccess:
+		return stillOkFor()
+	case poleconst.StateDenseNetwork:
+		return stillOkFor()
+	case poleconst.StateHoleDone:
+		return stillOkFor()
+	case poleconst.StateIncident:
+		return stillOkFor()
+	case poleconst.StateDone:
+		return "NS"
+	case poleconst.StateAttachment:
+		return "NS"
+	case poleconst.StateCancelled:
+		return "NS"
+	case poleconst.StateDeleted:
+		return "NS"
+	}
+	return "ERR"
+}
+
+func GetGroupNameByAge(name string) string {
+	switch name {
+	case "NS":
+		return "Non Significatif"
+	case "BO":
+		return "A traiter par BO"
+	case "ERR":
+		return "Erreur"
+	}
+	nbWeeks, err := strconv.Atoi(name)
+	if err != nil {
+		return "Erreur " + name
+	}
+	if nbWeeks >= 0 {
+		return "OK dans " + strconv.Itoa(nbWeeks) + " sem"
+	}
+	return "OK pendant " + strconv.Itoa(-nbWeeks) + " sem"
+}

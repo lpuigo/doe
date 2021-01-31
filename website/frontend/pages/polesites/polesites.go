@@ -105,6 +105,8 @@ type MainPageModel struct {
 	VisibleTools        bool   `js:"VisibleTools"`
 	VisibleToolsChapter string `js:"VisibleToolsChapter"`
 
+	GroupByAge bool `js:"GroupByAge"`
+
 	KizeoComplete bool         `js:"KizeoComplete"`
 	kizeoReport   *kizeoReport `js:"KizeoReport"`
 
@@ -136,6 +138,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm.VisibleSearchLoc = false
 	mpm.VisibleTools = false
 	mpm.VisibleToolsChapter = "1"
+	mpm.GroupByAge = false
 	mpm.KizeoComplete = false
 	mpm.kizeoReport = NewKizeoReport()
 
@@ -520,6 +523,20 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 		return
 	}
 	mpm.ApplyFilterOnMap()
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UpdatePoleGrouping Methods
+
+func (mpm *MainPageModel) UpdatePoleGrouping(vm *hvue.VM) {
+	mpm = &MainPageModel{Object: vm.Object}
+	mpm.GroupByAge = !mpm.GroupByAge
+	if mpm.GroupByAge {
+		mpm.GetPoleMap().Categorizer.SetByAge()
+	} else {
+		mpm.GetPoleMap().Categorizer.SetByState()
+	}
+	mpm.RefreshMap()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

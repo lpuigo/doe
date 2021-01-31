@@ -37,6 +37,10 @@ html, body {
     color: #00d2e6;
 }
 
+.darkblue {
+    color: #2851a0;
+}
+
 .blue {
     color: #3673de;
 }
@@ -47,6 +51,10 @@ html, body {
 
 .orange {
     color: #ff8c1a;
+}
+
+.darkorange {
+    color: #d27416;
 }
 
 .red {
