@@ -114,14 +114,26 @@
 
                 <span class="rd-large-screen"></span>
 
-                <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
-                    <el-button
-                            class="icon rd-large-screen" icon="far fa-calendar-check icon--big" size="mini"
-                            :type='GroupByAge ? "primary" : ""'
-                            v-model="GroupByAge"
-                            @click="UpdatePoleGrouping"
-                    ></el-button>
-                </el-tooltip>
+                <div v-if="!User.Permissions.Review" class="rd-large-screen" >
+                    <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
+                        <el-button
+                                class="icon" icon="far fa-calendar-check icon--big" size="mini"
+                                :type='GroupByAge ? "primary" : ""'
+                                v-model="GroupByAge"
+                                @click="UpdatePoleGrouping"
+                        ></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="Avec ACs" placement="bottom" effect="light" open-delay="500">
+                        <el-button
+                                class="icon" icon="fas fa-traffic-light icon--big" size="mini"
+                                :type='GroupByAgeCheckAC ? "primary" : ""'
+                                v-model="GroupByAgeCheckAC"
+                                @click="UpdatePoleGroupingCheckAC"
+                                :disabled="!GroupByAge"
+                        ></el-button>
+                    </el-tooltip>
+                </div>
+
 
                 <!-- test -->
                 <el-popover v-if="!User.Permissions.Review"

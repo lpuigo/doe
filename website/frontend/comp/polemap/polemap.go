@@ -192,9 +192,12 @@ func (pm *PoleMap) setPoleMarkersGroups() {
 	for _, nl := range slGroup {
 		nlg := leaflet.NewLayerGroup(nl.Layers)
 		pmg[nl.Name] = nlg
-		nlg.AddTo(pm.LeafletMap.Map)
 		groupName := pm.Categorizer.GroupLabel(nl.Name) + " (" + strconv.Itoa(len(nl.Layers)) + ")"
 		pm.LeafletMap.ControlLayers.AddOverlay(&nlg.Layer, groupName)
+		if nl.Name == "NS" {
+			continue
+		}
+		nlg.AddTo(pm.LeafletMap.Map)
 	}
 	pm.PoleMarkersGroup = pmg
 }
