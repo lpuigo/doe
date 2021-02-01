@@ -160,7 +160,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
 		<el-table-column type="index"></el-table-column>
         <el-table-column
                 label="Ref" prop="Ref" sortable :sort-by="PoleRefName"
-                width="150px" :resizable=true :show-overflow-tooltip=true
+                width="150px" :resizable=true 
         >
 			<template slot-scope="scope">
 				<span>{{PoleRefName(scope.row)}}</span>
@@ -169,7 +169,7 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
 
         <el-table-column
                 label="Ville" prop="City" sortable :sort-by="['City', 'Ref']"
-                width="100px" :resizable=true :show-overflow-tooltip=true
+                width="100px" :resizable=true
                 :filters="FilterList('City')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
         ></el-table-column>
 
@@ -184,6 +184,16 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
                 width="130px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
 		-->
+
+        <el-table-column
+                label="Date pivot" prop="Date" sortable
+                width="100px" :resizable=true :sort-by="RawDateInfo"
+                align="center" 
+        >
+            <template slot-scope="scope">
+                <span>{{DateInfo(scope.row)}}</span>
+            </template>
+        </el-table-column>
 
         <el-table-column
                 label="DICT" prop="DictRef" sortable
@@ -257,12 +267,6 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
                 label="Statut" prop="State" :formatter="FormatState" sortable :sort-method="SortState"
                 width="100px" :resizable=true :show-overflow-tooltip=true
                 :filters="FilterList('State')"	:filter-method="FilterHandler"	filter-placement="bottom-end" :filtered-value="FilteredStatusValue('followup')"
-        ></el-table-column>
-
-        <el-table-column
-                label="Date" prop="Date" sortable
-                width="100px" :resizable=true
-                align="center"	:formatter="FormatDate"
         ></el-table-column>
 
 		<!--

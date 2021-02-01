@@ -130,6 +130,15 @@ func (ptm *PoleTableModel) PoleRefName(p *ps.Pole) string {
 	return res
 }
 
+func (ptm *PoleTableModel) DateInfo(p *ps.Pole) string {
+	dateInfo := p.GetDateInfo()
+	return date.DateString(dateInfo)
+}
+
+func (ptm *PoleTableModel) RawDateInfo(p *ps.Pole) string {
+	return p.GetDateInfo()
+}
+
 func (ptm *PoleTableModel) DictEndDate(d string) string {
 	if tools.Empty(d) {
 		return "-"

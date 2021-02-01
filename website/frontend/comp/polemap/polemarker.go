@@ -164,15 +164,15 @@ func (pm *PoleMarker) visualByState() (html, class string) {
 	case poleconst.StateMarked:
 		class = "lightblue"
 	case poleconst.StateNoAccess:
-		class = "purple"
+		class = "darkblue"
 	case poleconst.StateDenseNetwork:
-		class = "purple"
+		class = "darkblue"
 	case poleconst.StateHoleDone:
 		html = pmHtmlHole
-		class = "orange"
+		class = "blue"
 	case poleconst.StateIncident:
 		html = pmHtmlExclam
-		class = "red"
+		class = "blue"
 	case poleconst.StateDone:
 		class = "green"
 	case poleconst.StateAttachment:
@@ -224,11 +224,11 @@ func (pm *PoleMarker) visualByAge(groupName string) (html, class string) {
 	}
 	// set class for non trivial case
 	nbWeek, _ := strconv.Atoi(groupName)
-	if nbWeek < 0 {
+	if nbWeek <= 0 {
 		// pole is ready until N weeks
 		nbWeek = -nbWeek
 		switch nbWeek {
-		case 1:
+		case 0, 1:
 			class = "lightblue"
 		case 2, 3:
 			class = "blue"
@@ -239,14 +239,12 @@ func (pm *PoleMarker) visualByAge(groupName string) (html, class string) {
 	}
 	// pole will be ready in N weeks
 	switch nbWeek {
-	case 0:
-		class = "orange"
 	case 1:
-		class = "darkorange"
+		class = "purple"
 	case 2:
-		class = "red"
+		class = "orange"
 	default:
-		class = "darkred"
+		class = "darkorange"
 	}
 	return
 }

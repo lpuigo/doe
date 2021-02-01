@@ -641,6 +641,9 @@ func (p *Pole) GetPermissionDateRange(checkDA bool) string {
 				nbDays = nbDaDays
 			}
 		}
+		if nbDays < 7 {
+			nbDays = 7
+		}
 		return strconv.Itoa(nbDays / 7)
 	}
 
@@ -659,7 +662,7 @@ func (p *Pole) GetPermissionDateRange(checkDA bool) string {
 				nbDays = nbDaDays
 			}
 		}
-		return strconv.Itoa(-nbDays/7 - 1)
+		return strconv.Itoa(-nbDays / 7)
 	}
 
 	// check for early decision
@@ -722,7 +725,97 @@ func GetGroupNameByAge(name string) string {
 		return "Erreur " + name
 	}
 	if nbWeeks >= 0 {
-		return "OK dans " + strconv.Itoa(nbWeeks) + " sem"
+		return "Dans " + strconv.Itoa(nbWeeks) + " sem"
 	}
-	return "OK pendant " + strconv.Itoa(-nbWeeks) + " sem"
+	return "OK pour " + strconv.Itoa(-nbWeeks) + " sem"
+}
+
+func (p *Pole) GetDateInfo() string {
+	dictStart := func() string {
+		if tools.Empty(p.DictDate) {
+			return ""
+		}
+		return p.DictDate
+	}
+
+	daStart := func() string {
+		if !(p.DaValidation && !tools.Empty(p.DaStartDate)) {
+			return ""
+		}
+		return p.DaStartDate
+	}
+
+	dictEnd := func() string {
+		if tools.Empty(p.DictDate) {
+			return ""
+		}
+		return date.After(p.DictDate, poleconst.DictValidityDuration)
+	}
+
+	daEnd := func() string {
+		if !(p.DaValidation && !tools.Empty(p.DaEndDate)) {
+			return ""
+		}
+		return p.DaEndDate
+	}
+
+	startDate := func() string {
+		begDict := dictStart()
+		begDA := daStart()
+		if begDict == "" {
+			return ""
+		}
+		if begDA != "" && begDA > begDict {
+			return begDA
+		}
+		return begDict
+	}
+
+	endDate := func() string {
+		endDict := dictEnd()
+		endDA := daEnd()
+		if endDict == "" {
+			return ""
+		}
+		if endDA != "" && endDA < endDict {
+			return endDA
+		}
+		return endDict
+	}
+
+	switch p.State {
+	case poleconst.StateNotSubmitted:
+		return ""
+	case poleconst.StateNoGo:
+		return ""
+	case poleconst.StateDictToDo:
+		return ""
+	case poleconst.StateDaToDo:
+		return startDate()
+	case poleconst.StateDaExpected:
+		return startDate()
+	case poleconst.StatePermissionPending:
+		return startDate()
+	case poleconst.StateToDo:
+		return endDate()
+	case poleconst.StateMarked:
+		return endDate()
+	case poleconst.StateNoAccess:
+		return endDate()
+	case poleconst.StateDenseNetwork:
+		return endDate()
+	case poleconst.StateHoleDone:
+		return endDate()
+	case poleconst.StateIncident:
+		return endDate()
+	case poleconst.StateDone:
+		return ""
+	case poleconst.StateAttachment:
+		return ""
+	case poleconst.StateCancelled:
+		return ""
+	case poleconst.StateDeleted:
+		return ""
+	}
+	return "ERR"
 }

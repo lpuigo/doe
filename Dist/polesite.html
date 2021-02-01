@@ -94,27 +94,25 @@
                 <span class="rd-large-screen"></span>
                 <span class="rd-large-screen"></span>
 
-                <div>
-                    <el-input v-model="Filter" size="mini" style="width: 25vw; min-width: 130px"
-                              @input="ApplyFilter">
-                        <el-select v-model="FilterType"
-                                   @change="ApplyFilter"
-                                   slot="prepend" placeholder="Tous"
-                                   style="width: 10vw; min-width: 60px; max-width: 120px; margin-right: -10px">
-                            <el-option
-                                    v-for="item in GetFilterType()"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value"
-                            ></el-option>
-                        </el-select>
-                        <el-button slot="append" icon="far fa-times-circle" @click="ClearFilter"></el-button>
-                    </el-input>
-                </div>
+                <el-input v-model="Filter" size="mini" style="width: 25vw; min-width: 130px"
+                          @input="ApplyFilter">
+                    <el-select v-model="FilterType"
+                               @change="ApplyFilter"
+                               slot="prepend" placeholder="Tous"
+                               style="width: 10vw; min-width: 60px; max-width: 120px; margin-right: -10px">
+                        <el-option
+                                v-for="item in GetFilterType()"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                        ></el-option>
+                    </el-select>
+                    <el-button slot="append" icon="far fa-times-circle" @click="ClearFilter"></el-button>
+                </el-input>
 
                 <span class="rd-large-screen"></span>
 
-                <div v-if="!User.Permissions.Review" class="rd-large-screen" >
+                <div v-if="!User.Permissions.Review" class="rd-large-screen" style="display: flex; align-items: center;">
                     <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
                         <el-button
                                 class="icon" icon="far fa-calendar-check icon--big" size="mini"
@@ -283,6 +281,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.22"></script>
+<script type="text/javascript" src="polesites.js?v=1.23"></script>
 
 </html>
