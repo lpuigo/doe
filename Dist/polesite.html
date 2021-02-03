@@ -112,25 +112,27 @@
 
                 <span class="rd-large-screen"></span>
 
-                <div v-if="!User.Permissions.Review" class="rd-large-screen" style="display: flex; align-items: center;">
-                    <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
-                        <el-button
-                                class="icon" icon="far fa-calendar-check icon--big" size="mini"
-                                :type='GroupByAge ? "primary" : ""'
-                                v-model="GroupByAge"
-                                @click="UpdatePoleGrouping"
-                        ></el-button>
-                    </el-tooltip>
-                    <el-tooltip content="Avec ACs" placement="bottom" effect="light" open-delay="500">
-                        <el-button
-                                class="icon" icon="fas fa-traffic-light icon--big" size="mini"
-                                :type='GroupByAgeCheckAC ? "primary" : ""'
-                                v-model="GroupByAgeCheckAC"
-                                @click="UpdatePoleGroupingCheckAC"
-                                :disabled="!GroupByAge"
-                        ></el-button>
-                    </el-tooltip>
-                </div>
+                <div v-if="!User.Permissions.Review" class="rd-large-screen">
+                    <div style="display: flex; align-items: center;">
+                        <el-tooltip content="Délais d'autorisation" placement="bottom" effect="light" open-delay="500">
+                            <el-button
+                                    class="icon" icon="far fa-calendar-check icon--big" size="mini"
+                                    :type='GroupByAge ? "primary" : ""'
+                                    v-model="GroupByAge"
+                                    @click="UpdatePoleGrouping"
+                            ></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="Avec ACs" placement="bottom" effect="light" open-delay="500">
+                            <el-button
+                                    class="icon" icon="fas fa-traffic-light icon--big" size="mini"
+                                    :type='GroupByAgeCheckAC ? "primary" : ""'
+                                    v-model="GroupByAgeCheckAC"
+                                    @click="UpdatePoleGroupingCheckAC"
+                                    :disabled="!GroupByAge"
+                            ></el-button>
+                        </el-tooltip>
+                    </div>
+               </div>
 
 
                 <!-- test -->
@@ -281,6 +283,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.23"></script>
+<script type="text/javascript" src="polesites.js?v=1.24"></script>
 
 </html>
