@@ -15,12 +15,14 @@ type SummaryData struct {
 
 	Line    string         `js:"Line"`
 	NbPoles map[string]int `js:"NbPoles"`
+	Total   int            `js:"Total"`
 }
 
 func NewSummaryData(line string) *SummaryData {
 	sd := &SummaryData{Object: tools.O()}
 	sd.Line = line
 	sd.NbPoles = make(map[string]int)
+	sd.Total = 0
 	return sd
 }
 
@@ -38,13 +40,19 @@ type Summarizer struct {
 	GetColumn func(*polesite.Pole) ([]string, []int)
 }
 
-func NewSummarizer() *Summarizer {
+func NewSummarizer(lineByCity bool) *Summarizer {
 	s := &Summarizer{Object: tools.O()}
 	s.Colums = []string{}
 	s.SummaryDatas = []*SummaryData{}
 
-	s.GetLine = func(pole *polesite.Pole) string {
-		return pole.City
+	if lineByCity {
+		s.GetLine = func(pole *polesite.Pole) string {
+			return pole.City
+		}
+	} else {
+		s.GetLine = func(pole *polesite.Pole) string {
+			return pole.Ref
+		}
 	}
 	s.GetColumn = func(pole *polesite.Pole) ([]string, []int) {
 		state := pole.State
@@ -222,6 +230,7 @@ func (s *Summarizer) Calc(poles []*polesite.Pole) {
 			//sd.NbPoles[pole.State]++
 			nb := sd.Get("NbPoles").Get(column).Int()
 			sd.Get("NbPoles").Set(column, nb+amounts[i])
+			sd.Total += amounts[i]
 		}
 	}
 

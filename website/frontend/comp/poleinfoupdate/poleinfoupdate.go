@@ -108,6 +108,14 @@ const template string = `
     <el-row :gutter="10" type="flex" class="doublespaced">
         <el-col :span="3" class="align-right"><h4 style="margin: 20px 0px 10px 0px">Synthèse :</h4></el-col>
         <el-col :span="19" >
+			<el-switch
+				  style="display: block"
+				  v-model="LineByCity"
+				  active-color="#13ce66"
+				  inactive-color="#ff4949"
+				  active-text="Par Ville"
+				  inactive-text="Par Référence"
+			></el-switch>
 			<el-tabs tab-position="top">
 				<!-- ================================== Per Status Tab ============================================= -->
 				<el-tab-pane label="Statuts" lazy=true style="padding: 0px 0px;">
@@ -117,9 +125,13 @@ const template string = `
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								:label='LineByCity?"Ville":"Référence"' prop="Line" sortable :sort-by="['Line']"
 								width="160px" :resizable=true :show-overflow-tooltip=true
-						></el-table-column>
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.Line}} : {{scope.row.Total}}</span>
+							</template>
+						</el-table-column>
 		
 						<el-table-column v-for="status in GetSummaryStatuses()"
 								:resizable="true" align="center"
@@ -140,9 +152,13 @@ const template string = `
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								:label='LineByCity?"Ville":"Référence"' prop="Line" sortable :sort-by="['Line']"
 								width="160px" :resizable=true :show-overflow-tooltip=true
-						></el-table-column>
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.Line}} : {{scope.row.Total}}</span>
+							</template>
+						</el-table-column>
 		
 						<el-table-column v-for="poleAction in PoleActionCols"
 								:resizable="true" align="center"
@@ -163,9 +179,13 @@ const template string = `
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								:label='LineByCity?"Ville":"Référence"' prop="Line" sortable :sort-by="['Line']"
 								width="160px" :resizable=true :show-overflow-tooltip=true
-						></el-table-column>
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.Line}} : {{scope.row.Total}}</span>
+							</template>
+						</el-table-column>
 		
 						<el-table-column v-for="poleAction in PoleActionDoneCols"
 								:resizable="true" align="center"
@@ -186,9 +206,13 @@ const template string = `
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								:label='LineByCity?"Ville":"Référence"' prop="Line" sortable :sort-by="['Line']"
 								width="160px" :resizable=true :show-overflow-tooltip=true
-						></el-table-column>
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.Line}} : {{scope.row.Total}}</span>
+							</template>
+						</el-table-column>
 		
 						<el-table-column v-for="poleType in PoleTypeCols"
 								:resizable="true" align="center"
@@ -209,9 +233,13 @@ const template string = `
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
-								label="Ville" prop="Line" sortable :sort-by="['Line']"
+								:label='LineByCity?"Ville":"Référence"' prop="Line" sortable :sort-by="['Line']"
 								width="160px" :resizable=true :show-overflow-tooltip=true
-						></el-table-column>
+						>
+							<template slot-scope="scope">
+								<span>{{scope.row.Line}} : {{scope.row.Total}}</span>
+							</template>
+						</el-table-column>
 		
 						<el-table-column v-for="poleItem in PoleItemCols"
 								:resizable="true" align="center"
@@ -251,14 +279,14 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryStatusInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer()
+			summer := NewSummarizer(pium.LineByCity)
 			summer.Calc(pium.Polesite.Poles)
 			pium.StateCols = pium.GetSummaryStatuses()
 			return summer.SummaryDatas
 		}),
 		hvue.Computed("summaryPoleActionInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer()
+			summer := NewSummarizer(pium.LineByCity)
 			summer.GetColumn = GetPoleAction
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleActionCols = summer.GetCalcColumns()
@@ -266,7 +294,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleActionDoneInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer()
+			summer := NewSummarizer(pium.LineByCity)
 			summer.GetColumn = GetPoleActionDone
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleActionDoneCols = summer.GetCalcColumns()
@@ -274,7 +302,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleTypeInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer()
+			summer := NewSummarizer(pium.LineByCity)
 			summer.GetColumn = GetPoleType
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleTypeCols = summer.GetCalcColumns()
@@ -282,7 +310,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleItemInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer()
+			summer := NewSummarizer(pium.LineByCity)
 			summer.GetColumn = GetPoleItem
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleItemCols = summer.GetCalcColumns()
@@ -306,6 +334,7 @@ type PoleInfoUpdateModel struct {
 	StatNbPoleDICTToDo int `js:"statNbPoleDICTToDo"`
 	StatNbPolePending  int `js:"statNbPolePending"`
 
+	LineByCity         bool     `js:"LineByCity"`
 	StateCols          []string `js:"StateCols"`
 	PoleTypeCols       []string `js:"PoleTypeCols"`
 	PoleActionCols     []string `js:"PoleActionCols"`
@@ -327,6 +356,7 @@ func NewPoleInfoUpdateModel(vm *hvue.VM) *PoleInfoUpdateModel {
 	pium.StatNbPoleDICTToDo = 0
 	pium.StatNbPolePending = 0
 
+	pium.LineByCity = true
 	pium.StateCols = []string{}
 	pium.PoleTypeCols = []string{}
 	pium.PoleActionCols = []string{}
