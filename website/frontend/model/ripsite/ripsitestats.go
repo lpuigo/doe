@@ -54,7 +54,7 @@ func (rs *RipsiteStats) CreateTeamStats(showSite map[string]bool) []*TeamStats {
 	prevTS := NewTeamStats()
 	for numTeam, team := range rs.Teams {
 		isTeamClient := false
-		if !(currentTeam != "" && strings.HasPrefix(team, currentTeam)) {
+		if !(currentTeam != "" && strings.HasPrefix(team, currentTeam) && strings.Contains(team, " : ")) {
 			currentTeam = team
 			isTeamClient = true
 		} else {
