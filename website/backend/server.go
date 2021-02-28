@@ -1,15 +1,16 @@
 package main
 
 import (
+	"net/http"
+	_ "net/http/pprof"
+	"os/exec"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/config"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/route"
-	"net/http"
-	_ "net/http/pprof"
-	"os/exec"
 )
 
 type Conf struct {
@@ -43,6 +44,7 @@ const (
 	CalendarFile  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
 	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
 	GroupsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Groups`
+	VehiculesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Vehicules`
 	TemplatesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 
 	LaunchWebBrowser = true
@@ -69,6 +71,7 @@ func main() {
 			CalendarFile:      CalendarFile,
 			ClientsDir:        ClientsDir,
 			GroupsDir:         GroupsDir,
+			VehiculesDir:      VehiculesDir,
 			TemplatesDir:      TemplatesDir,
 			SessionKey:        SessionKey,
 		},
@@ -170,6 +173,10 @@ func main() {
 	// Groups methods
 	router.HandleFunc("/api/groups", withUserManager("GetGroups", route.GetGroups)).Methods("GET")
 	router.HandleFunc("/api/groups", withUserManager("UpdateGroups", route.UpdateGroups)).Methods("PUT")
+
+	// Vehicules methods
+	router.HandleFunc("/api/vehicules", withUserManager("GetVehicules", route.GetVehicules)).Methods("GET")
+	router.HandleFunc("/api/vehicules", withUserManager("UpdateVehicules", route.UpdateVehicules)).Methods("PUT")
 
 	// Clients methods
 	router.HandleFunc("/api/clients", withUserManager("GetClients", route.GetClients)).Methods("GET")

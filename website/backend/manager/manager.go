@@ -15,6 +15,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/session"
 	"github.com/lpuig/ewin/doe/website/backend/model/timesheets"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
+	"github.com/lpuig/ewin/doe/website/backend/model/vehicules"
 	ws "github.com/lpuig/ewin/doe/website/backend/model/worksites"
 )
 
@@ -30,6 +31,7 @@ type Manager struct {
 	DaysOff        *Calendar
 	Clients        *clients.ClientsPersister
 	Groups         *groups.GroupsPersister
+	Vehicules      *vehicules.VehiculesPersister
 	TemplateEngine *doc.DocTemplateEngine
 	SessionStore   *session.SessionStore
 	CurrentUser    *users.UserRecord
@@ -97,6 +99,12 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		return nil, fmt.Errorf("could not create groups: %s", err.Error())
 	}
 
+	// Init Vehicules persister
+	vp, err := vehicules.NewVehiculesPersister(conf.VehiculesDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not create vehicules: %s", err.Error())
+	}
+
 	// Init DocTemplate engine
 	te, err := doc.NewDocTemplateEngine(conf.TemplatesDir)
 	if err != nil {
@@ -116,6 +124,7 @@ func NewManager(conf ManagerConfig) (*Manager, error) {
 		DaysOff:        NewCalendar(conf.CalendarFile),
 		Clients:        cp,
 		Groups:         gp,
+		Vehicules:      vp,
 		TemplateEngine: te,
 		SessionStore:   session.NewSessionStore(conf.SessionKey),
 		//CurrentUser: is set during session control transaction
@@ -208,6 +217,12 @@ func (m *Manager) Reload() error {
 		return fmt.Errorf("could not populate group: %s", err.Error())
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Groups", m.Groups.NbGroups()))
+
+	err = m.Vehicules.LoadDirectory()
+	if err != nil {
+		return fmt.Errorf("could not populate vehicule: %s", err.Error())
+	}
+	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Vehicules", m.Vehicules.NbVehicules()))
 
 	return nil
 }

@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Sogetrel\Chantier Meuse\2020-11-30 Ajout Poteaux\Polesite.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Lyon\2021-02-24 Analyse Pot Alpes\Polesite Eiffage Lyon-Chambery.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -38,7 +38,7 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
 
-	PoleSiteConsistency(t, ps)
+	//PoleSiteConsistency(t, ps)
 
 	xfr, err := os.Create(filepath.Join(path, outFile))
 	if err != nil {

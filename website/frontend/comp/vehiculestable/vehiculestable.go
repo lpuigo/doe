@@ -1,0 +1,305 @@
+package vehiculestable
+
+import (
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/gopherjs/gopherjs/js"
+	"github.com/huckridgesw/hvue"
+	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule"
+	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule/vehiculeconst"
+	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+)
+
+const (
+	template string = `
+<el-table
+        :border=true
+        :data="filteredVehicules"
+		:default-sort = "{prop: 'Immat', order: 'ascending'}"
+        :row-class-name="TableRowClassName" height="100%" size="mini"
+		@row-dblclick="HandleDoubleClickedRow"
+>
+	<!--	Index   -->
+	<el-table-column
+			label="N°" width="40px" align="right"
+			type="index"
+			index=1 
+	></el-table-column>
+
+	<!--	Compagny   -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            prop="Company" label="Société" width="110px"
+			sortable :sort-by="['Company', 'Type', 'Immat']"
+			:filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+    ></el-table-column>
+    
+	<!--	Type   -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            prop="Type" label="Type" width="110px"
+			sortable :sort-by="['Type', 'Immat']"
+			:filters="FilterList('Type')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+    ></el-table-column>
+        
+	<!--	Contract   -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true
+            prop="Immat" label="Immatriculation" width="110px"
+			sortable
+    ></el-table-column>
+    
+	<!--	group   -->
+<!--    <el-table-column-->
+<!--            :resizable="true" :show-overflow-tooltip=true -->
+<!--            prop="Groups" label="Groupe" width="150px"-->
+<!--			sortable :sort-method="SortGroup"-->
+<!--			:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"-->
+<!--    >-->
+<!--        <template slot-scope="scope">-->
+<!--			<span>{{GetGroup(scope.row)}}</span>-->
+<!--        </template>-->
+<!--	</el-table-column>-->
+
+<!--	&lt;!&ndash;	Last & First Name   &ndash;&gt;-->
+<!--    <el-table-column-->
+<!--            :resizable="true" :show-overflow-tooltip=true -->
+<!--            prop="Ref" label="Nom Prénom" width="200px"-->
+<!--			sortable :sort-by="['Ref']"-->
+<!--    >-->
+<!--        <template slot-scope="scope">-->
+<!--            <div class="header-menu-container on-hover">-->
+<!--            	<span>{{scope.row.Ref}}</span>-->
+<!--				<i v-if="user.Permissions.HR" class="show link fas fa-edit" @click="EditVehicule(scope.row)"></i>-->
+<!--            </div>-->
+<!--        </template>-->
+<!--	</el-table-column>-->
+    
+	<!--	Start Day   -->
+    <el-table-column
+            label="Mise en Service" sortable :sort-by="SortDate('ServiceDate')"
+            width="110px" :resizable="true" 
+			align="center"	:formatter="FormatDate"
+    >
+		<template slot-scope="scope">
+			<span>{{FormatDate(scope.row.ServiceDate)}}</span>
+		</template>
+    </el-table-column>
+        
+	<!--	Comment   -->
+    <el-table-column
+            :resizable="true" prop="Comment" label="Commentaire"
+    ></el-table-column>
+</el-table>
+`
+)
+
+func RegisterComponent() hvue.ComponentOption {
+	return hvue.Component("vehicules-table", componentOptions()...)
+}
+
+func componentOptions() []hvue.ComponentOption {
+	return []hvue.ComponentOption{
+		hvue.Template(template),
+		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.DataFunc(func(vm *hvue.VM) interface{} {
+			return NewVehiculesTableModel(vm)
+		}),
+		hvue.MethodsOf(&VehiculesTableModel{}),
+		hvue.Computed("filteredVehicules", func(vm *hvue.VM) interface{} {
+			vtm := VehiculesTableModelFromJS(vm.Object)
+			return vtm.GetFilteredVehicules()
+		}),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Comp Model
+
+type VehiculesTableModel struct {
+	*js.Object
+
+	Vehicules  []*vehicule.Vehicule `js:"value"`
+	User       *fm.User             `js:"user"`
+	Filter     string               `js:"filter"`
+	FilterType string               `js:"filtertype"`
+
+	VM *hvue.VM `js:"VM"`
+}
+
+func NewVehiculesTableModel(vm *hvue.VM) *VehiculesTableModel {
+	atm := &VehiculesTableModel{Object: tools.O()}
+	atm.VM = vm
+	atm.Vehicules = []*vehicule.Vehicule{}
+	atm.User = fm.NewUser()
+	atm.Filter = ""
+	atm.FilterType = ""
+	return atm
+}
+
+func VehiculesTableModelFromJS(o *js.Object) *VehiculesTableModel {
+	return &VehiculesTableModel{Object: o}
+}
+
+func (vtm *VehiculesTableModel) GetFilteredVehicules() []*vehicule.Vehicule {
+	if vtm.FilterType == vehiculeconst.FilterValueAll && vtm.Filter == "" {
+		return vtm.Vehicules
+	}
+	res := []*vehicule.Vehicule{}
+	expected := strings.ToUpper(vtm.Filter)
+	filter := func(v *vehicule.Vehicule) bool {
+		sis := v.SearchString(vtm.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+
+	for _, vehic := range vtm.Vehicules {
+		if filter(vehic) {
+			res = append(res, vehic)
+		}
+	}
+	return res
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Format & Style Functions
+
+func (vtm *VehiculesTableModel) TableRowClassName(rowInfo *js.Object) string {
+	vehic := vehicule.VehiculeFromJS(rowInfo.Get("row"))
+	return GetRowStyle(vehic)
+}
+
+//func (vtm *VehiculesTableModel) GetClients(act *actor.Actor) string {
+//	return strings.Join(act.Client, ", ")
+//}
+//
+//func (vtm *VehiculesTableModel) SortClient(a, b *actor.Actor) int {
+//	ca, cb := vtm.GetClients(a), vtm.GetClients(b)
+//	switch {
+//	case ca == cb:
+//		return vtm.SortRoleRef(a, b)
+//	case ca < cb:
+//		return -1
+//	default:
+//		return 1
+//	}
+//}
+
+func (vtm *VehiculesTableModel) FormatDate(d string) string {
+	return date.DateString(d)
+}
+
+func (vtm *VehiculesTableModel) SortDate(attrib1 string) func(obj *js.Object) string {
+	return func(obj *js.Object) string {
+		val := obj.Get(attrib1).String()
+		if val == "" {
+			return "9999-12-31"
+		}
+		return val
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Column Filtering Related Methods
+
+func (vtm *VehiculesTableModel) FilterHandler(vm *hvue.VM, value string, p *js.Object, col *js.Object) bool {
+	prop := col.Get("property").String()
+	//switch prop {
+	//case "Client":
+	//	clients := strings.Split(p.Get(prop).String(), ",")
+	//	for _, c := range clients {
+	//		if c == value {
+	//			return true
+	//		}
+	//	}
+	//	return false
+	//case "Groups":
+	//	vtm = VehiculesTableModelFromJS(vm.Object)
+	//	act := actor.ActorFromJS(p)
+	//	return vtm.GetGroup(vm, act) == value
+	//}
+	return p.Get(prop).String() == value
+}
+
+func (vtm *VehiculesTableModel) FilterList(vm *hvue.VM, prop string) []*elements.ValText {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	count := map[string]int{}
+	attribs := []string{}
+
+	var translate func(string) string
+	switch prop {
+	//case "State":
+	//	translate = func(state string) string {
+	//		return GetStateLabel(state)
+	//	}
+	default:
+		translate = func(val string) string { return val }
+	}
+
+	attrib := ""
+	for _, act := range vtm.Vehicules {
+		attrib = act.Object.Get(prop).String()
+		var attrs []string
+		switch prop {
+		//case "Client":
+		//	attrs = strings.Split(attrib, ",")
+		default:
+			attrs = []string{attrib}
+		}
+		for _, a := range attrs {
+			if _, exist := count[a]; !exist {
+				attribs = append(attribs, a)
+			}
+			count[a]++
+		}
+	}
+	sort.Strings(attribs)
+	res := []*elements.ValText{}
+	for _, a := range attribs {
+		fa := a
+		if fa == "" {
+			fa = "Vide"
+		}
+		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Tools Functions
+
+func GetRowStyle(vehic *vehicule.Vehicule) string {
+	switch vehic.Type {
+	case vehiculeconst.TypeTariere:
+		return "vehicule-row-tariere"
+	case vehiculeconst.TypeNacelle:
+		return "vehicule-row-nacelle"
+	case vehiculeconst.TypeFourgon:
+		return "vehicule-row-fourgon"
+	case vehiculeconst.TypeCar:
+		return "vehicule-row-car"
+	case vehiculeconst.TypePorteTouret:
+		return "vehicule-row-portetouret"
+	default:
+		return "vehicule-row-error"
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action Methods
+
+func (vtm *VehiculesTableModel) EditVehicule(vm *hvue.VM, vehic *vehicule.Vehicule) {
+	vm.Emit("edit-vehicule", vehic)
+}
+
+func (vtm *VehiculesTableModel) HandleDoubleClickedRow(vm *hvue.VM, vehic *vehicule.Vehicule) {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	vtm.EditVehicule(vm, vehic)
+}

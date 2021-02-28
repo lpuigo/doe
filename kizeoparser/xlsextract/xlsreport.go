@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,6 +16,14 @@ func WriteXlsReport(file string, recs []*PoleRecord) error {
 		curRow: 1,
 	}
 	rw.file.SetSheetName(rw.file.GetSheetName(0), rw.sheet)
+
+	// sort recs
+	sort.Slice(recs, func(i, j int) bool {
+		if recs[i].SRO != recs[j].SRO {
+			return recs[i].SRO < recs[j].SRO
+		}
+		return recs[i].Ref < recs[j].Ref
+	})
 
 	// Write Header
 	err := rw.writeHeader()

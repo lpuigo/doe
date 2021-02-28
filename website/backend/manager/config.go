@@ -20,6 +20,7 @@ type ManagerConfig struct {
 	CalendarFile  string
 	ClientsDir    string
 	GroupsDir     string
+	VehiculesDir  string
 	TemplatesDir  string
 	SessionKey    string
 }

@@ -1,0 +1,125 @@
+/* ====================================================================================================================
+    === Actor Table style ===
+ */
+
+.el-table .vehicule-row-tariere {
+    background: #e6eeff;
+}
+
+.el-table .vehicule-row-tariere:hover {
+    background: #d5e0eb;
+    transition: background-color .15s ease;
+}
+
+.el-table .vehicule-row-nacelle {
+    background: #e6ffff;
+}
+
+.el-table .vehicule-row-nacelle:hover {
+    background: #d3ebeb;
+    transition: background-color .15s ease;
+}
+
+.el-table .vehicule-row-fourgon {
+    background: #e6ffe6;
+}
+
+.el-table .vehicule-row-fourgon:hover {
+    background: #d3ebd3;
+    transition: background-color .15s ease;
+}
+
+.el-table .vehicule-row-car {
+    background: #ffffff;
+}
+
+.el-table .vehicule-row-car:hover {
+    background: #d8e3f2;
+    transition: background-color .15s ease;
+}
+
+.el-table .vehicule-row-portetouret {
+    background: #eae6ff;
+}
+
+.el-table .vehicule-row-portetouret:hover {
+    background: #d7d3eb;
+    transition: background-color .15s ease;
+}
+
+.el-table .vehicule-row-error {
+    background: #ff644d;
+}
+
+.el-table .vehicule-row-error:hover {
+    background: #ed5d4a;
+    transition: background-color .15s ease;
+}
+
+/* ====================================================================================================================
+    === Actor Calendar style ===
+ */
+
+.calendar-row {
+    display: flex !important;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0px 0px !important;
+}
+
+.calendar-row .calendar-slot {
+    flex: 1 1 0;
+    margin: 1px 1px;
+    text-align: center;
+    border-style: solid;
+    border-width: 0px;
+    border-radius: 3px;
+    border-color: #696969;
+}
+
+.calendar-slot.header {
+    background: #eeeeee;
+}
+
+.calendar-slot.header.week-end {
+    background: #bbbbbb;
+}
+
+.calendar-slot.header.day-off {
+    background: #aa82b8;
+    color: #f8e6ff;
+}
+
+.calendar-slot.day-off {
+    background: #c394d4;
+}
+
+.calendar-slot.active.day-off {
+    background: #bbbbbb;
+}
+
+.calendar-slot.active {
+    background: #86d47f;
+}
+
+.calendar-slot.active.week-end {
+    background: #83b37d;
+}
+
+.calendar-slot.holiday {
+    background: #c394d4;
+}
+
+.calendar-slot.error {
+    background: #f0a878;
+}
+
+.calendar-slot.inactive {
+    background: #eeeeee;
+}
+
+.calendar-slot.today {
+    margin: 0px 1px;
+    border-width: 1px;
+}
