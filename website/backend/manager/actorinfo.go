@@ -10,8 +10,7 @@ func (m Manager) GetActorInfos(writer io.Writer) error {
 	if !m.CurrentUser.HasPermissionHR() {
 		return fmt.Errorf("%s ne dispose pas des droits suffisants", m.CurrentUser.Name)
 	}
-	clientsNames := m.GetCurrentUserClientsName()
-	actors := m.Actors.GetActorsByClient(false, clientsNames...)
+	actors := m.GetCurrentUserActors()
 	actorinfos := m.ActorInfos.GetActorInfosByActors(actors)
 	return json.NewEncoder(writer).Encode(actorinfos)
 }

@@ -10,8 +10,7 @@ import (
 )
 
 func (m Manager) GetActors(writer io.Writer) error {
-	clientsNames := m.GetCurrentUserClientsName()
-	actors := m.Actors.GetActorsByClient(false, clientsNames...)
+	actors := m.GetCurrentUserActors()
 	actorsHrs := m.ActorInfos.GetActorHRsByActors(actors, m.CurrentUser.HasPermissionHR())
 	return json.NewEncoder(writer).Encode(actorsHrs)
 }
