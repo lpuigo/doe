@@ -3,7 +3,9 @@ package manager
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/actors"
 	"io"
+	"sort"
 
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	"github.com/lpuig/ewin/doe/website/backend/model/users"
@@ -79,4 +81,29 @@ func (m Manager) GetCurrentUserClients() ([]*clients.Client, error) {
 		res = append(res, client)
 	}
 	return res, nil
+}
+
+// GetCurrentUserActors returns slice of actors.Actor visible by current user
+//
+// Rules:
+//
+// - for all user  attached groups, extract all pertaining actors (ppast, present and future)
+func (m Manager) GetCurrentUserActors() []*actors.Actor {
+	actorsByGroupId := m.GenActorsByGroupId()
+	actDict := make(map[int]*actors.Actor)
+	for _, group := range m.GetCurrentUserVisibleGroups() {
+		for _, actor := range actorsByGroupId(group.Id) {
+			actDict[actor.Id] = actor
+		}
+	}
+	actors := make([]*actors.Actor, len(actDict))
+	i := 0
+	for _, actor := range actDict {
+		actors[i] = actor
+		i++
+	}
+	sort.Slice(actors, func(i, j int) bool {
+		return actors[i].Ref < actors[i].Ref
+	})
+	return actors
 }

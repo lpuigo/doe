@@ -6,8 +6,7 @@ import (
 )
 
 func (m Manager) GetTimeSheet(writer io.Writer, weekdate string) error {
-	clientsNames := m.GetCurrentUserClientsName()
-	actors := m.Actors.GetActorsByClient(false, clientsNames...)
+	actors := m.GetCurrentUserActors()
 	timesheet, err := m.TimeSheets.GetTimeSheetFor(weekdate, actors)
 	if err != nil {
 		return err
