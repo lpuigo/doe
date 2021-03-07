@@ -1,6 +1,9 @@
 package vehicule
 
-import "github.com/gopherjs/gopherjs/js"
+import (
+	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
+)
 
 // Type InventoryItem reflects ewin/doe/website/backend/model/vehicules.InventoryItem
 type InventoryItem struct {
@@ -20,4 +23,12 @@ type Inventory struct {
 	ControledDate string          `js:"ControledDate"`
 	Items         []InventoryItem `js:"Items"`
 	Comment       string          `js:"Comment"`
+}
+
+func InventoryFromJS(obj *js.Object) *Inventory {
+	return &Inventory{Object: obj}
+}
+
+func (i *Inventory) Copy() *Inventory {
+	return InventoryFromJS(json.Parse(json.Stringify(i.Object)))
 }

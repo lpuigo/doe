@@ -6,6 +6,8 @@ const (
 	TypeFourgon     string = "Fourgon"
 	TypeCar         string = "Voiture"
 	TypePorteTouret string = "Porte-Touret"
+
+	InChargeNotAffected string = "non affecté"
 )
 
 const (

@@ -194,6 +194,23 @@ outer:
 	return res
 }
 
+func (a *Actor) StateLabel() string {
+	switch a.State {
+	case actorconst.StateCandidate:
+		return actorconst.StateLabelCandidate
+	case actorconst.StateActive:
+		return actorconst.StateLabelActive
+	case actorconst.StateOnHoliday:
+		return actorconst.StateLabelOnHoliday
+	case actorconst.StateGone:
+		return actorconst.StateLabelGone
+	case actorconst.StateDefection:
+		return actorconst.StateLabelDefection
+	default:
+		return "Erreur"
+	}
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(actorconst.FilterValueAll, actorconst.FilterLabelAll),
@@ -202,4 +219,11 @@ func GetFilterTypeValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(actorconst.FilterValueClient, actorconst.FilterLabelClient),
 		elements.NewValueLabel(actorconst.FilterValueComment, actorconst.FilterLabelComment),
 	}
+}
+
+func (a *Actor) GetRefStatus() string {
+	if !a.IsActive() {
+		return a.Ref + " (" + a.StateLabel() + ")"
+	}
+	return a.Ref
 }

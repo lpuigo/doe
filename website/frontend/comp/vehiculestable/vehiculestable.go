@@ -1,6 +1,7 @@
 package vehiculestable
 
 import (
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"sort"
 	"strconv"
 	"strings"
@@ -47,10 +48,10 @@ const (
 			:filters="FilterList('Type')" :filter-method="FilterHandler"	filter-placement="bottom-end"
     ></el-table-column>
         
-	<!--	Contract   -->
+	<!--	Immat   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true
-            prop="Immat" label="Immatriculation" width="110px"
+            prop="Immat" label="Immatriculation" width="130px"
 			sortable
     ></el-table-column>
     
@@ -83,11 +84,21 @@ const (
 	<!--	Start Day   -->
     <el-table-column
             label="Mise en Service" sortable :sort-by="SortDate('ServiceDate')"
-            width="110px" :resizable="true" 
-			align="center"	:formatter="FormatDate"
+            width="130px" :resizable="true" 
+			align="center"
     >
 		<template slot-scope="scope">
-			<span>{{FormatDate(scope.row.ServiceDate)}}</span>
+			<span>{{FormatServiceDate(scope.row)}}</span>
+		</template>
+    </el-table-column>
+        
+	<!--	InCharge   -->
+    <el-table-column
+            label="Responsable"
+            width="140px" :resizable="true"
+    >
+		<template slot-scope="scope">
+			<span>{{InChargeName(scope.row)}}</span>
 		</template>
     </el-table-column>
         
@@ -106,7 +117,7 @@ func RegisterComponent() hvue.ComponentOption {
 func componentOptions() []hvue.ComponentOption {
 	return []hvue.ComponentOption{
 		hvue.Template(template),
-		hvue.Props("value", "user", "filter", "filtertype"),
+		hvue.Props("value", "user", "actorstore", "filter", "filtertype"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewVehiculesTableModel(vm)
 		}),
@@ -126,6 +137,7 @@ type VehiculesTableModel struct {
 
 	Vehicules  []*vehicule.Vehicule `js:"value"`
 	User       *fm.User             `js:"user"`
+	ActorStr   *actor.ActorStore    `js:"actorstore"`
 	Filter     string               `js:"filter"`
 	FilterType string               `js:"filtertype"`
 
@@ -137,6 +149,7 @@ func NewVehiculesTableModel(vm *hvue.VM) *VehiculesTableModel {
 	atm.VM = vm
 	atm.Vehicules = []*vehicule.Vehicule{}
 	atm.User = fm.NewUser()
+	atm.ActorStr = actor.NewActorStore()
 	atm.Filter = ""
 	atm.FilterType = ""
 	return atm
@@ -194,6 +207,24 @@ func (vtm *VehiculesTableModel) TableRowClassName(rowInfo *js.Object) string {
 
 func (vtm *VehiculesTableModel) FormatDate(d string) string {
 	return date.DateString(d)
+}
+
+func (vtm *VehiculesTableModel) FormatServiceDate(vehic *vehicule.Vehicule) string {
+	if tools.Empty(vehic.EndServiceDate) {
+		return date.DateString(vehic.ServiceDate)
+	}
+	return date.DateString(vehic.ServiceDate) + " à " + date.DateString(vehic.EndServiceDate)
+}
+
+func (vtm *VehiculesTableModel) InChargeName(vm *hvue.VM, vehic *vehicule.Vehicule) string {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	actId := vehic.GetInChargeActorId(date.TodayAfter(0))
+	print("InChargeName actorStore:", actId, vtm.ActorStr.Object)
+	act := vtm.ActorStr.GetActorById(actId)
+	if act == nil {
+		return vehiculeconst.InChargeNotAffected
+	}
+	return act.GetRefStatus()
 }
 
 func (vtm *VehiculesTableModel) SortDate(attrib1 string) func(obj *js.Object) string {

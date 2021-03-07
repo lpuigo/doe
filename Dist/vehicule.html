@@ -14,17 +14,16 @@
 <body>
 <div id="vehicule_app" style="height: 100%;">
     <!-- -->
-<!--    <actor-update-modal-->
-<!--            ref="ActorEditModal"-->
-<!--            :groups.sync="GroupStore"-->
-<!--            @edited-actor="HandleEditedActor"-->
-<!--    ></actor-update-modal>-->
+    <vehicule-update-modal
+            ref="VehiculeUpdateModal"
+            @edited-vehicule="HandleEditedVehicule"
+    ></vehicule-update-modal>
 
     <el-container style="height: 100%;border: 1px solid #eee">
         <el-header class="ewin" style="height: 40px">
             <div class="header-menu-container">
                 <el-row :gutter="20" type="flex" align="middle">
-                    <h2 class="content"><i class="fas fa-users icon--left"></i>EWIN Services Véhicules</h2>
+                    <h2 class="content"><i class="fas fa-truck icon--left"></i>EWIN Services Véhicules</h2>
                 </el-row>
 
                 <span></span>
@@ -43,7 +42,8 @@
 
                 <el-button-group size="mini">
                     <el-tooltip v-if="User.Permissions.HR" content="Créer un nouveau véhicule" placement="bottom" effect="light" open-delay=500>
-                        <el-button class="icon" icon="fas fa-user-plus icon--medium" @click="AddVehicule()" :disabled="!ShowAddVehicule()"></el-button>
+                        <el-button class="icon" icon="fas fa-truck icon--medium" @click="AddVehicule()"
+                                   :disabled="!ShowAddVehicule()"></el-button>
                     </el-tooltip>
                 </el-button-group>
 
@@ -105,10 +105,11 @@
         </el-header>
         <el-main style="height: 100%; padding: 5px 0px 0px 0px">
             <vehicules-table
-                          v-model="Vehicules"
-                          :user="User"
-                          :filter="Filter" :filtertype="FilterType"
-                          @edit-vehicule="ShowEditVehicule"
+                    v-model="Vehicules"
+                    :user="User"
+                    :actorstore="ActorStr"
+                    :filter="Filter" :filtertype="FilterType"
+                    @edit-vehicule="ShowEditVehicule"
             ></vehicules-table>
         </el-main>
     </el-container>

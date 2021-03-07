@@ -12,30 +12,34 @@ import (
 type Vehicule struct {
 	*js.Object
 
-	Id          int            `js:"Id"`
-	Type        string         `js:"Type"`
-	Company     string         `js:"Company"`
-	Immat       string         `js:"Immat"`
-	InCharge    []ActorHistory `js:"InCharge"`
-	ServiceDate string         `js:"ServiceDate"`
-	Comment     string         `js:"Comment"`
+	Id             int             `js:"Id"`
+	Type           string          `js:"Type"`
+	Model          string          `js:"Model"`
+	Company        string          `js:"Company"`
+	Immat          string          `js:"Immat"`
+	InCharge       []*ActorHistory `js:"InCharge"`
+	ServiceDate    string          `js:"ServiceDate"`
+	EndServiceDate string          `js:"EndServiceDate"`
+	Comment        string          `js:"Comment"`
 
-	Inventories []Inventory `js:"Inventories"`
-	Events      []Event     `js:"Events"`
+	Inventories []*Inventory `js:"Inventories"`
+	Events      []*Event     `js:"Events"`
 }
 
 func NewVehicule() *Vehicule {
 	nv := &Vehicule{Object: tools.O()}
 	nv.Id = -1
 	nv.Type = ""
+	nv.Model = ""
 	nv.Company = ""
 	nv.Immat = ""
-	nv.InCharge = []ActorHistory{}
+	nv.InCharge = []*ActorHistory{}
 	nv.ServiceDate = ""
+	nv.EndServiceDate = ""
 	nv.Comment = ""
 
-	nv.Inventories = []Inventory{}
-	nv.Events = []Event{}
+	nv.Inventories = []*Inventory{}
+	nv.Events = []*Event{}
 
 	return nv
 }
@@ -46,6 +50,37 @@ func VehiculeFromJS(obj *js.Object) *Vehicule {
 
 func (v *Vehicule) Copy() *Vehicule {
 	return VehiculeFromJS(json.Parse(json.Stringify(v.Object)))
+}
+
+func (v *Vehicule) Clone(ov *Vehicule) {
+	v.Id = ov.Id
+	v.Type = ov.Type
+	v.Model = ov.Model
+	v.Company = ov.Company
+	v.Immat = ov.Immat
+
+	inCharge := make([]*ActorHistory, len(ov.InCharge))
+	for i, ah := range ov.InCharge {
+		inCharge[i] = ah.Copy()
+	}
+	v.InCharge = inCharge
+
+	v.ServiceDate = ov.ServiceDate
+	v.EndServiceDate = ov.EndServiceDate
+	v.Comment = ov.Comment
+
+	inventories := make([]*Inventory, len(ov.Inventories))
+	for i, inv := range ov.Inventories {
+		inventories[i] = inv.Copy()
+	}
+	v.Inventories = inventories
+
+	v.Events = []*Event{}
+	events := make([]*Event, len(ov.Events))
+	for i, ev := range ov.Events {
+		events[i] = ev.Copy()
+	}
+	v.Events = events
 }
 
 func (v *Vehicule) SearchString(filter string) string {
@@ -74,4 +109,17 @@ func GetFilterTypeValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(vehiculeconst.FilterValueType, vehiculeconst.FilterLabelType),
 		elements.NewValueLabel(vehiculeconst.FilterValueComment, vehiculeconst.FilterLabelComment),
 	}
+}
+
+func (v *Vehicule) SortInCharge() {
+	v.Get("InCharge").Call("sort", CompareActorHistory)
+}
+
+func (v *Vehicule) GetInChargeActorId(day string) int {
+	for _, ah := range v.InCharge {
+		if day >= ah.Date {
+			return ah.ActorId
+		}
+	}
+	return -1
 }

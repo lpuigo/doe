@@ -3,7 +3,10 @@ package main
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/vehiculestable"
+	"github.com/lpuig/ewin/doe/website/frontend/comp/vehiculeupdatemodal"
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor"
 	"github.com/lpuig/ewin/doe/website/frontend/model/ref"
 	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule"
 	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule/vehiculeconst"
@@ -21,8 +24,8 @@ func main() {
 
 	hvue.NewVM(
 		hvue.El("#vehicule_app"),
-		//vehiculeupdatemodal.RegisterComponent(),
-		//vehiculestable.RegisterComponent(),
+		vehiculeupdatemodal.RegisterComponent(),
+		vehiculestable.RegisterComponent(),
 		hvue.DataS(mpm),
 		hvue.MethodsOf(mpm),
 		hvue.Mounted(func(vm *hvue.VM) {
@@ -45,8 +48,9 @@ type MainPageModel struct {
 	*js.Object
 	Ref *ref.Ref `js:"Ref"`
 
-	VM   *hvue.VM `js:"VM"`
-	User *fm.User `js:"User"`
+	VM       *hvue.VM          `js:"VM"`
+	User     *fm.User          `js:"User"`
+	ActorStr *actor.ActorStore `js:"ActorStr"`
 
 	//ActiveMode  string            `js:"ActiveMode"`
 	Filter         string               `js:"Filter"`
@@ -59,7 +63,7 @@ func NewMainPageModel() *MainPageModel {
 	mpm := &MainPageModel{Object: tools.O()}
 	mpm.VM = nil
 	mpm.User = fm.NewUser()
-	//mpm.ActiveMode = "Calendar"
+	mpm.ActorStr = actor.NewActorStore()
 	mpm.Filter = ""
 	mpm.FilterType = ""
 
@@ -104,7 +108,6 @@ func (mpm *MainPageModel) HandleEditedVehicule(vehic *vehicule.Vehicule) {
 		mpm.Vehicules = append(mpm.Vehicules, vehic)
 		mpm.NextVehiculeId--
 	}
-	print("HandleEditedVehicule", vehic.Object)
 }
 
 func (mpm *MainPageModel) LoadVehicules(init bool) {
@@ -116,6 +119,7 @@ func (mpm *MainPageModel) LoadVehicules(init bool) {
 		}
 	}
 	go mpm.callGetVehicules(onLoadedVehicules)
+	mpm.ActorStr.CallGetActors(mpm.VM, func() {})
 }
 
 func (mpm *MainPageModel) SaveVehicules(vm *hvue.VM) {
@@ -149,9 +153,8 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 
 //
 func (mpm *MainPageModel) ShowEditVehicule(vm *hvue.VM, vehic *vehicule.Vehicule) {
-	print("ShowEditVehicule :", vehic.Object)
-	//vem := actorupdatemodal.ActorUpdateModalModelFromJS(mpm.VM.Refs("VehiculeEditModal"))
-	//vem.Show(vehic, mpm.User)
+	vum := vehiculeupdatemodal.VehiculeUpdateModalModelFromJS(mpm.VM.Refs("VehiculeUpdateModal"))
+	vum.Show(vehic, mpm.User, mpm.ActorStr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

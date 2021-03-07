@@ -13,13 +13,15 @@ type Event struct {
 }
 
 type Vehicule struct {
-	Id          int
-	Type        string
-	Company     string
-	Immat       string
-	InCharge    []ActorHistory
-	ServiceDate string
-	Comment     string
+	Id             int
+	Type           string
+	Model          string
+	Company        string
+	Immat          string
+	InCharge       []ActorHistory
+	ServiceDate    string
+	EndServiceDate string
+	Comment        string
 
 	Inventories []Inventory
 	Events      []Event

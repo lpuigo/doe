@@ -247,6 +247,10 @@ func (m *MainPageModel) OpenActors() {
 	js.Global.Get("window").Call("open", "actor.html")
 }
 
+func (m *MainPageModel) OpenVehicules() {
+	js.Global.Get("window").Call("open", "vehicule.html")
+}
+
 func (m *MainPageModel) CreateNewWorksite() {
 	m.EditWorksite(-1)
 }
