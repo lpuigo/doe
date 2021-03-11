@@ -123,3 +123,16 @@ func (v *Vehicule) GetInChargeActorId(day string) int {
 	}
 	return -1
 }
+
+func (v *Vehicule) SortInventoriesByDate() {
+	v.Get("Inventories").Call("sort", CompareInventoryDate)
+}
+
+func (v *Vehicule) InventoryIndexByDate(day string) int {
+	for iNum, inventory := range v.Inventories {
+		if day >= inventory.ReferenceDate {
+			return iNum
+		}
+	}
+	return -1
+}

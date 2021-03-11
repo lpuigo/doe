@@ -147,8 +147,54 @@ const template string = `<el-dialog
 					</el-table>
 				</el-col>
 			</el-row>
-		
 		</el-tab-pane>	
+
+		<!-- ===================================== Inventory Tab ======================================================= -->
+		<el-tab-pane v-if="user.Permissions.Update" label="Inventaire" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+	        <!-- Inventory list & add inventory -->
+			<el-row :gutter="10" align="middle" class="doublespaced" type="flex">
+				<el-col :span="4" class="align-right">Inventaires :</el-col>
+				<el-col :span="8">
+  					<el-select v-model="InventoryNum" placeholder="Select" size="mini" style="width: 100%">
+						<el-option
+							v-for="item in GetInventoryDates()"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value">
+						</el-option>
+  					</el-select>
+  				</el-col>
+	
+				<el-col :span="4" class="align-right">Actions :</el-col>
+				<el-col :span="8">
+					<el-button :disabled="false" type="success" @click="AddInventory" plain size="mini">Nouvel Inventaire</el-button>
+  				</el-col>
+			</el-row>
+
+	        <!-- Current Inventory -->
+			<div>
+
+			</div>
+			<el-row :gutter="10" align="middle" class="doublespaced" type="flex">
+				<el-col :span="4" class="align-right">Inventaires :</el-col>
+				<el-col :span="8">
+  					<el-select v-model="InventoryNum" placeholder="Select" size="mini" style="width: 100%">
+						<el-option
+							v-for="item in GetInventoryDates()"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value">
+						</el-option>
+  					</el-select>
+  				</el-col>
+	
+				<el-col :span="4" class="align-right">Actions :</el-col>
+				<el-col :span="8">
+					<el-button :disabled="false" type="success" @click="AddInventory" plain size="mini">Nouvel Inventaire</el-button>
+  				</el-col>
+			</el-row>
+		</el-tab-pane>	
+
     </el-tabs>
 
     <!-- 

@@ -8,6 +8,7 @@ const (
 	TypePorteTouret string = "Porte-Touret"
 
 	InChargeNotAffected string = "non affecté"
+	InventoryNotFound   string = "pas d'inventaire"
 )
 
 const (
