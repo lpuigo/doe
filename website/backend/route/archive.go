@@ -36,6 +36,10 @@ func GetRecordsArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request)
 		container = mgr.TimeSheets
 	case "groups":
 		container = mgr.Groups
+	case "vehicules":
+		container = mgr.Vehicules
+	case "users":
+		container = mgr.Users
 	default:
 		AddError(w, logmsg, "unsupported archive type '"+recordType+"'", http.StatusBadRequest)
 		return

@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/persist"
 	"path/filepath"
 	"sync"
@@ -154,4 +155,21 @@ func (up *UsersPersister) UpdateUsers(updatedUsers []*User) error {
 		}
 	}
 	return nil
+}
+
+// Implement Archives interface methods
+
+func (up *UsersPersister) GetAllSites() []archives.ArchivableRecord {
+	up.RLock()
+	defer up.RUnlock()
+
+	archivableSites := make([]archives.ArchivableRecord, len(up.users))
+	for i, site := range up.users {
+		archivableSites[i] = site
+	}
+	return archivableSites
+}
+
+func (up *UsersPersister) GetName() string {
+	return "Users"
 }
