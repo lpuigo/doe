@@ -1,9 +1,6 @@
 package polesite
 
 func GetCenterAndBounds(poles []*Pole) (clat, clong, blat1, blong1, blat2, blong2 float64) {
-	if len(poles) == 0 {
-		return 47, 5, 46.5, 4.5, 47.5, 5.5
-	}
 
 	min := func(pole *Pole) {
 		if pole.Lat < blat1 {
@@ -24,14 +21,23 @@ func GetCenterAndBounds(poles []*Pole) (clat, clong, blat1, blong1, blat2, blong
 	}
 
 	blat1, blong1 = 500, 500
+	var nbPole int = 0
 	for _, pole := range poles {
+		if pole.Deleted() {
+			continue
+		}
+		nbPole++
 		clat += pole.Lat
 		clong += pole.Long
 		min(pole)
 		max(pole)
 	}
 
-	nb := float64(len(poles))
+	if nbPole == 0 {
+		return 47, 5, 46.5, 4.5, 47.5, 5.5
+	}
+
+	nb := float64(nbPole)
 	clat /= nb
 	clong /= nb
 	return
