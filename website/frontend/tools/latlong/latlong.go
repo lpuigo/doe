@@ -8,8 +8,14 @@ import (
 )
 
 func DecToDeg(val float64) string {
+	sign := ""
+	if val < 0 {
+		sign = "-"
+		val = -val
+	}
+
 	main, remain := math.Modf(val)
-	res := strconv.Itoa(int(main)) + "°"
+	res := sign + strconv.Itoa(int(main)) + "°"
 
 	min, sec := math.Modf(remain * 60.0)
 	res += strconv.Itoa(int(min)) + "'" + strconv.FormatFloat(sec*60.0, 'f', 3, 64)
@@ -21,7 +27,6 @@ func DegToDec(val string) (float64, error) {
 	vals := strings.FieldsFunc(strings.Replace(val, ",", ".", -1), func(r rune) bool {
 		switch r {
 		case '°', '\'', '"':
-
 			return true
 		default:
 			return false
@@ -34,6 +39,11 @@ func DegToDec(val string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	sign := 1.0
+	if strings.HasPrefix(val, "-") {
+		sign = -1
+		deg = -deg
+	}
 	min, err := strconv.Atoi(strings.Trim(vals[1], " "))
 	if err != nil {
 		return 0, err
@@ -42,5 +52,5 @@ func DegToDec(val string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return float64(deg) + float64(min)/60 + float64(sec)/3600, nil
+	return (float64(deg) + float64(min)/60 + float64(sec)/3600) * sign, nil
 }

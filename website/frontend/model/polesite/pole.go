@@ -298,6 +298,10 @@ func (p *Pole) IsDone() bool {
 	return p.State == poleconst.StateDone
 }
 
+func (p *Pole) Deleted() bool {
+	return p.State == poleconst.StateDeleted
+}
+
 func (p *Pole) IsAttachment() bool {
 	return p.State == poleconst.StateAttachment
 }
