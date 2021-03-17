@@ -198,7 +198,7 @@ func (mpm *MainPageModel) RefreshMap() {
 
 // CenterMapOnPoles centers PoleMap component to show all poles
 func (mpm *MainPageModel) CenterMapOnPoles() {
-	mpm.GetPoleMap().CenterOnPoles()
+	mpm.GetPoleMap().CenterOnAllPoles()
 }
 
 // GetMapCenter returns PoleMap center location
@@ -250,43 +250,13 @@ func (mpm *MainPageModel) ImportPoleURL() string {
 // ApplyFilterOnMap applies current Filter-Type and Filter value to Poles Markers and Map Region
 func (mpm *MainPageModel) ApplyFilterOnMap() {
 	poleMap := mpm.GetPoleMap()
-	//defer poleMap.PoleMarkersGroup.Refresh()
 	defer poleMap.RefreshGroup()
 
 	if mpm.FilterType == poleconst.FilterValueAll && mpm.Filter == "" {
 		for _, poleMarker := range poleMap.GetPoleMarkers() {
 			poleMarker.SetOpacity(poleconst.OpacityNormal)
 		}
-		//mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
-		//	pm := polemap.PoleMarkerFromJS(l.Object)
-		//	pm.SetOpacity(poleconst.OpacityNormal)
-		//})
 		return
-	}
-
-	var minLat, minLong, maxLat, maxLong float64 = 500, 500, 0, 0
-	min := func(lat, long float64) {
-		if lat < minLat {
-			minLat = lat
-		}
-		if long < minLong {
-			minLong = long
-		}
-	}
-
-	max := func(lat, long float64) {
-		if lat > maxLat {
-			maxLat = lat
-		}
-		if long > maxLong {
-			maxLong = long
-		}
-	}
-
-	minmax := func(pm *polemap.PoleMarker) {
-		lat, long := pm.GetLatLong().ToFloats()
-		min(lat, long)
-		max(lat, long)
 	}
 
 	expected := strings.ToUpper(strings.Trim(mpm.Filter, " "))
@@ -298,27 +268,19 @@ func (mpm *MainPageModel) ApplyFilterOnMap() {
 		return strings.Contains(strings.ToUpper(sis), expected)
 	}
 	found := false
+	filteredPoleMarkers := []*polemap.PoleMarker{}
 	for _, poleMarker := range poleMap.GetPoleMarkers() {
 		if filter(poleMarker) {
-			minmax(poleMarker)
+			filteredPoleMarkers = append(filteredPoleMarkers, poleMarker)
+			//minmax(poleMarker)
 			poleMarker.SetOpacity(poleconst.OpacityFiltered)
 			found = true
 		} else {
 			poleMarker.SetOpacity(poleconst.OpacityBlur)
 		}
 	}
-	//mpm.PolesGroup.ForEach(func(l *leaflet.Layer) {
-	//	pm := polemap.PoleMarkerFromJS(l.Object)
-	//	if filter(pm) {
-	//		minmax(pm)
-	//		pm.SetOpacity(poleconst.OpacityFiltered)
-	//		found = true
-	//	} else {
-	//		pm.SetOpacity(poleconst.OpacityBlur)
-	//	}
-	//})
 	if found {
-		poleMap.FitBounds(leaflet.NewLatLng(minLat, minLong), leaflet.NewLatLng(maxLat, maxLong))
+		mpm.GetPoleMap().CenterOnPoleMarkers(filteredPoleMarkers)
 	}
 }
 

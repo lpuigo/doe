@@ -21,6 +21,7 @@ func GetCenterAndBounds(poles []*Pole) (clat, clong, blat1, blong1, blat2, blong
 	}
 
 	blat1, blong1 = 500, 500
+	blat2, blong2 = -500, -500
 	var nbPole int = 0
 	for _, pole := range poles {
 		if pole.Deleted() {
