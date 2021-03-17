@@ -259,16 +259,17 @@ func (pm *PoleMap) CenterOnPoleMarkers(pms []*PoleMarker) {
 	for i, poleMarker := range pms {
 		poles[i] = poleMarker.Pole
 	}
+	pm.CenterOnPoles(poles)
+}
+
+func (pm *PoleMap) CenterOnPoles(poles []*polesite.Pole) {
 	_, _, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(poles)
 	pm.LeafletMap.Map.Stop()
 	pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minlat, minlong), leaflet.NewLatLng(maxlat, maxlong))
 }
 
-func (pm *PoleMap) CenterOnPoles() {
-	clat, clong, minlat, minlong, maxlat, maxlong := polesite.GetCenterAndBounds(pm.Poles)
-	pm.LeafletMap.Map.Stop()
-	pm.LeafletMap.Map.SetView(leaflet.NewLatLng(clat, clong), 12)
-	pm.LeafletMap.Map.FitBounds(leaflet.NewLatLng(minlat, minlong), leaflet.NewLatLng(maxlat, maxlong))
+func (pm *PoleMap) CenterOnAllPoles() {
+	pm.CenterOnPoles(pm.Poles)
 }
 
 func (pm *PoleMap) CenterOn(lat, long float64, zoom int) {
