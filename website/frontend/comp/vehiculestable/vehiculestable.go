@@ -236,7 +236,6 @@ func (vtm *VehiculesTableModel) FormatServiceDate(vehic *vehicule.Vehicule) stri
 func (vtm *VehiculesTableModel) InChargeName(vm *hvue.VM, vehic *vehicule.Vehicule) string {
 	vtm = VehiculesTableModelFromJS(vm.Object)
 	actId := vehic.GetInChargeActorId(date.TodayAfter(0))
-	print("InChargeName actorStore:", actId, vtm.ActorStr.Object)
 	act := vtm.ActorStr.GetActorById(actId)
 	if act == nil {
 		return vehiculeconst.InChargeNotAffected

@@ -131,9 +131,9 @@ const template string = `<el-dialog
 	
 						<el-table-column label="Acteur">
 							<template slot-scope="scope">
-								<el-select placeholder="Acteur" size="mini"
-										   v-model="scope.row.ActorId"
-										   @change="UpdateInCharge" style="width: 100%"
+								<el-select v-model="scope.row.ActorId"
+										placeholder="Acteur" size="mini" filterable
+										@change="UpdateInCharge" style="width: 100%"
 								>
 									<el-option v-for="item in GetActors()"
 											   :key="item.value"
@@ -155,7 +155,11 @@ const template string = `<el-dialog
 			<el-row :gutter="10" align="middle" class="spaced" type="flex">
 				<el-col :span="4" class="align-right">Inventaires :</el-col>
 				<el-col :span="8">
-  					<el-select v-model="InventoryNum" placeholder="Select" size="mini" style="width: 100%" @change="UpdateInventoryNum()">
+  					<el-select v-model="InventoryNum" 
+  							placeholder="Select" size="mini" style="width: 100%" 
+  							@change="UpdateInventoryNum()"
+							:disabled="current_vehicule.Inventories.length==0"
+  					>
 						<el-option
 							v-for="item in GetInventoryDates()"
 							:key="item.value"
@@ -166,11 +170,61 @@ const template string = `<el-dialog
   				</el-col>
 	
 				<el-col :span="4" class="align-right">Actions :</el-col>
-				<el-col :span="8">
-					<el-button :disabled="false" type="success" @click="AddInventory" plain size="mini">Nouvel inventaire</el-button>
+				<el-col :span="4" v-if="current_vehicule.Inventories.length==0">
+					<el-popover placement="bottom" title="Nouvel inventaire sur le modele d'un autre véhicule :"
+								trigger="click"
+								width="400"
+								v-model="AddInventoryModelVisible"
+					>
+						<div>
+							<el-switch style="margin-bottom: 8px;"
+								v-model="AddInventoryModelSameType"
+								active-text="Même type"
+								inactive-text="Tout type">
+							</el-switch>
+							<el-row :gutter="10" align="middle" class="spaced" type="flex">
+								<el-col :span="8" class="align-right">Modèle :</el-col>
+								<el-col :span="16">
+									<el-select v-model="AddInventoryModelVehicId" filterable
+											   size="mini"
+											   placeholder="Inventaire Véhicule"
+											   style="width: 100%;"
+									>
+										<el-option
+												v-for="item in GetInventoryModelVehiculeId()"
+												:key="item.value"
+												:label="item.label"
+												:value="item.value"
+										>
+										</el-option>
+									</el-select>
+								</el-col>
+							</el-row>
+							<div v-if="AddInventoryModelVehicId >= 0" >
+								<el-row >
+									<el-col :span="20">Article</el-col>
+									<el-col :span="4">Quantité</el-col>
+								</el-row>
+								<div style="max-height: 45vh; overflow-x: hidden;overflow-y: auto;">
+									<el-row v-for="item in GetInventoryModelItems()"
+											:key="item.Name"										
+									>
+										<el-col :span="20">{{item.Name}}</el-col>
+										<el-col :span="4">{{item.ReferenceQuantity}}</el-col>
+									</el-row>
+								</div>
+							</div>
+						</div>
+						<el-row :gutter="10" align="middle" class="doublespaced" type="flex" >
+							<el-col :offset="18" :span="6">
+								<el-button type="success" plain size="mini" @click="AddInventoryModel">Valider</el-button>
+							</el-col>
+						</el-row>
+						<el-button slot="reference" type="success" plain size="mini">Modele d'inventaire</el-button>
+					</el-popover>
   				</el-col>
-				<el-col :span="8">
-					<el-button :disabled="false" type="success" @click="AddModelInventory" plain size="mini">Modele d'inventaire</el-button>
+				<el-col :span="4" v-if="user.Permissions.Admin">
+					<el-button type="warning" plain size="mini" @click="DeleteInventory" :disabled="current_vehicule.Inventories.length==0">Supprimer l'inventaire</el-button>
   				</el-col>
 			</el-row>
 
@@ -191,7 +245,7 @@ const template string = `<el-dialog
 					</el-col>
 		
 					<el-col :span="3" class="align-right">
-						<el-checkbox v-model="Control" size="mini">Date de contrôle :</el-checkbox>
+						<el-checkbox v-model="Control" size="mini" :disabled="InventoryNum == 0 && !user.Permissions.Admin">Date de contrôle :</el-checkbox>
 					</el-col>
 					<el-col :span="4">
 						<el-date-picker :picker-options="{firstDayOfWeek:1}" 
@@ -201,6 +255,9 @@ const template string = `<el-dialog
 									@change=""
 									:disabled="!Control"
 						></el-date-picker>
+					</el-col>
+					<el-col v-if="Control && InventoryNum == 0" :span="4">
+						<el-button :disabled="current_vehicule.Inventories.length==0" type="warning" @click="ValidateInventoryControl" plain size="mini">Valider le contrôle</el-button>
 					</el-col>
 				</el-row>
 				<!-- Comment -->
@@ -233,7 +290,7 @@ const template string = `<el-dialog
 							<el-table-column label="Articles" width="1030">
 								<template slot-scope="scope">
 									<el-row :gutter="10" align="middle" type="flex">
-										<el-col :span="11" >
+										<el-col :span="10" >
 											<el-input v-model="scope.row.Name"
 												  clearable placeholder="Article" size="mini"
 												  @change="" :disabled="Control"
@@ -247,7 +304,7 @@ const template string = `<el-dialog
 											></el-input>
 										</el-col>
 
-										<el-col v-if="Control" :span="1" >Qte : {{scope.row.ReferenceQuantity}}</el-col>
+										<el-col v-if="Control" :span="2">Qte : {{scope.row.ReferenceQuantity}}</el-col>
 									</el-row>
 								</template>
 							</el-table-column>

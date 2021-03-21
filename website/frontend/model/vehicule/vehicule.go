@@ -30,7 +30,7 @@ type Vehicule struct {
 func NewVehicule() *Vehicule {
 	nv := &Vehicule{Object: tools.O()}
 	nv.Id = -1
-	nv.Type = ""
+	nv.Type = vehiculeconst.TypeCar
 	nv.Model = ""
 	nv.Company = ""
 	nv.Immat = ""
@@ -123,6 +123,11 @@ func (v *Vehicule) GetInChargeActorId(day string) int {
 		}
 	}
 	return -1
+}
+
+func (v *Vehicule) AddInventory(ni *Inventory) {
+	v.Inventories = append(v.Inventories, ni)
+	v.SortInventoriesByDate()
 }
 
 func (v *Vehicule) SortInventoriesByDate() {

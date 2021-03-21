@@ -53,6 +53,35 @@ func NewInventory() *Inventory {
 	return ni
 }
 
+func NewInventoryFromModel(mi *Inventory) *Inventory {
+	ni := NewInventory()
+	items := make([]*InventoryItem, len(mi.Items))
+	for index, item := range mi.Items {
+		nii := NewInventoryItem()
+		nii.Name = item.Name
+		nii.ReferenceQuantity = item.ReferenceQuantity
+		items[index] = nii
+	}
+	ni.Items = items
+	return ni
+}
+
+func NewInventoryFromControledModel(mi *Inventory) *Inventory {
+	ni := NewInventory()
+	ni.ReferenceDate = date.After(mi.ControledDate, 1)
+	ni.Comment = mi.Comment
+	items := make([]*InventoryItem, len(mi.Items))
+	for index, item := range mi.Items {
+		nii := NewInventoryItem()
+		nii.Name = item.Name
+		nii.Comment = item.Comment
+		nii.ReferenceQuantity = item.ControledQuantity
+		items[index] = nii
+	}
+	ni.Items = items
+	return ni
+}
+
 func CompareInventoryDate(a, b Inventory) int {
 	if a.ReferenceDate > b.ReferenceDate {
 		return -1
