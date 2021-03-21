@@ -6,6 +6,7 @@ import (
 	fm "github.com/lpuig/ewin/doe/website/frontend/model"
 	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -82,4 +83,8 @@ func (vumm *VehiculeModalModel) ConfirmChange() {
 
 func (vumm *VehiculeModalModel) UndoChange() {
 	vumm.CurrentVehicule.Clone(vumm.EditedVehicule)
+}
+
+func (vumm *VehiculeModalModel) FormatDate(d string) string {
+	return date.DateString(d)
 }

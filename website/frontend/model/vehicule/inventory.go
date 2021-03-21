@@ -3,6 +3,7 @@ package vehicule
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
 
@@ -14,6 +15,15 @@ type InventoryItem struct {
 	ReferenceQuantity int    `js:"ReferenceQuantity"`
 	ControledQuantity int    `js:"ControledQuantity"`
 	Comment           string `js:"Comment"`
+}
+
+func NewInventoryItem() *InventoryItem {
+	ni := &InventoryItem{Object: tools.O()}
+	ni.Name = ""
+	ni.ReferenceQuantity = 1
+	ni.ControledQuantity = 0
+	ni.Comment = ""
+	return ni
 }
 
 // Type Inventory reflects ewin/doe/website/backend/model/vehicules.Inventory
@@ -36,7 +46,7 @@ func (i *Inventory) Copy() *Inventory {
 
 func NewInventory() *Inventory {
 	ni := &Inventory{Object: tools.O()}
-	ni.ReferenceDate = ""
+	ni.ReferenceDate = date.TodayAfter(0)
 	ni.ControledDate = ""
 	ni.Comment = ""
 	ni.Items = []*InventoryItem{}

@@ -53,7 +53,14 @@ const (
             :resizable="true" :show-overflow-tooltip=true
             prop="Immat" label="Immatriculation" width="130px"
 			sortable
-    ></el-table-column>
+    >
+		<template slot-scope="scope">
+            <div class="header-menu-container on-hover">
+            	<span>{{scope.row.Immat}}</span>
+				<i class="show link fas fa-edit" @click="EditVehicule(scope.row)"></i>
+            </div>
+        </template>
+	</el-table-column>
     
 	<!--	group   -->
 <!--    <el-table-column-->
@@ -99,6 +106,16 @@ const (
     >
 		<template slot-scope="scope">
 			<span>{{InChargeName(scope.row)}}</span>
+		</template>
+    </el-table-column>
+        
+	<!--	Inventaire   -->
+    <el-table-column
+            label="Inventaire"
+            width="140px" :resizable="true"
+    >
+		<template slot-scope="scope">
+			<span>{{LastInventory(scope.row)}}</span>
 		</template>
     </el-table-column>
         
@@ -333,4 +350,13 @@ func (vtm *VehiculesTableModel) EditVehicule(vm *hvue.VM, vehic *vehicule.Vehicu
 func (vtm *VehiculesTableModel) HandleDoubleClickedRow(vm *hvue.VM, vehic *vehicule.Vehicule) {
 	vtm = VehiculesTableModelFromJS(vm.Object)
 	vtm.EditVehicule(vm, vehic)
+}
+
+func (vtm *VehiculesTableModel) LastInventory(vm *hvue.VM, vehic *vehicule.Vehicule) string {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	if len(vehic.Inventories) == 0 {
+		return "A Faire"
+	}
+	lastInvent := vehic.Inventories[0]
+	return date.DateString(lastInvent.ReferenceDate)
 }

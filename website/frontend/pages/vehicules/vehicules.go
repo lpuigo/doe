@@ -154,7 +154,7 @@ func (mpm *MainPageModel) ApplyFilter(vm *hvue.VM) {
 //
 func (mpm *MainPageModel) ShowEditVehicule(vm *hvue.VM, vehic *vehicule.Vehicule) {
 	vum := vehiculeupdatemodal.VehiculeUpdateModalModelFromJS(mpm.VM.Refs("VehiculeUpdateModal"))
-	vum.Show(vehic, mpm.User, mpm.ActorStr)
+	vum.Show(vehic, mpm.User, mpm.ActorStr, mpm.Vehicules)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

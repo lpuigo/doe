@@ -111,10 +111,10 @@
                     <span></span>
 
                     <el-button-group>
-                        <el-button v-if="User.Permissions.Update" class="icon" icon="fas fa-truck icon--big"
-                                   @click="OpenVehicules" size="mini"></el-button>
                         <el-button v-if="User.Permissions.Update || User.Permissions.Invoice" class="icon"
                                    icon="fas fa-users icon--big" @click="OpenActors" size="mini"></el-button>
+                        <el-button v-if="User.Permissions.Update" class="icon" icon="fas fa-truck icon--big"
+                                   @click="OpenVehicules" size="mini"></el-button>
                     </el-button-group>
 
 

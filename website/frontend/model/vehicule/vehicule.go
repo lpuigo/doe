@@ -4,6 +4,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/vehicule/vehiculeconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 )
@@ -33,8 +34,8 @@ func NewVehicule() *Vehicule {
 	nv.Model = ""
 	nv.Company = ""
 	nv.Immat = ""
-	nv.InCharge = []*ActorHistory{}
-	nv.ServiceDate = ""
+	nv.InCharge = []*ActorHistory{NewActorHistory()}
+	nv.ServiceDate = date.TodayAfter(0)
 	nv.EndServiceDate = ""
 	nv.Comment = ""
 

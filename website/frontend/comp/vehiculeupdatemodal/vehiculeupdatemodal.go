@@ -17,13 +17,17 @@ type VehiculeUpdateModalModel struct {
 
 	ActorStore *actor.ActorStore `js:"ActorStore"`
 
-	InventoryNum int `js:"InventoryNum"`
+	VehiculeList []*vehicule.Vehicule `js:"VehiculeList"`
+	InventoryNum int                  `js:"InventoryNum"`
+	Control      bool                 `js:"Control"`
 }
 
 func NewVehiculeUpdateModalModel(vm *hvue.VM) *VehiculeUpdateModalModel {
 	vumm := &VehiculeUpdateModalModel{VehiculeModalModel: NewVehiculeModalModel(vm)}
 	vumm.ActorStore = actor.NewActorStore()
+	vumm.VehiculeList = []*vehicule.Vehicule{}
 	vumm.InventoryNum = -1
+	vumm.Control = true
 	return vumm
 }
 
@@ -66,9 +70,11 @@ func componentOptions() []hvue.ComponentOption {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
-func (vumm *VehiculeUpdateModalModel) Show(vehic *vehicule.Vehicule, user *fm.User, actorStore *actor.ActorStore) {
+func (vumm *VehiculeUpdateModalModel) Show(vehic *vehicule.Vehicule, user *fm.User, actorStore *actor.ActorStore, vehicList []*vehicule.Vehicule) {
 	vumm.ActorStore = actorStore
+	vumm.VehiculeList = vehicList
 	vumm.VehiculeModalModel.Show(vehic, user)
+	vumm.SetDefaultInventory()
 }
 
 func (vumm *VehiculeUpdateModalModel) ConfirmChange(vm *hvue.VM) {
@@ -127,10 +133,26 @@ func (vumm *VehiculeUpdateModalModel) GetActors(vm *hvue.VM) []*elements.IntValu
 
 // Inventory Methods ===================================================================================================
 
+func (vumm *VehiculeUpdateModalModel) SetDefaultInventory() {
+	if len(vumm.CurrentVehicule.Inventories) == 0 {
+		vumm.InventoryNum = -1
+		return
+	}
+	vumm.InventoryNum = 0
+	vumm.Control = true
+}
+
+func (vumm *VehiculeUpdateModalModel) UpdateInventoryNum(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.Control = true
+}
+
 func (vumm *VehiculeUpdateModalModel) GetInventoryDates(vm *hvue.VM) []*elements.IntValueLabel {
 	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
-	na := elements.NewIntValueLabel(-1, vehiculeconst.InventoryNotFound)
-	res := []*elements.IntValueLabel{na}
+	if len(vumm.CurrentVehicule.Inventories) == 0 {
+		return []*elements.IntValueLabel{elements.NewIntValueLabel(-1, vehiculeconst.InventoryNotFound)}
+	}
+	res := []*elements.IntValueLabel{}
 	for iNum, inventory := range vumm.CurrentVehicule.Inventories {
 		res = append(res, elements.NewIntValueLabel(iNum, date.DateString(inventory.ReferenceDate)))
 	}
@@ -144,4 +166,27 @@ func (vumm *VehiculeUpdateModalModel) AddInventory(vm *hvue.VM) {
 	vumm.CurrentVehicule.Inventories = append(vumm.CurrentVehicule.Inventories, ni)
 	vumm.CurrentVehicule.SortInventoriesByDate()
 	vumm.InventoryNum = vumm.CurrentVehicule.InventoryIndexByDate(ni.ReferenceDate)
+	vumm.Control = false
+}
+
+func (vumm *VehiculeUpdateModalModel) AddItem(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	if vumm.InventoryNum < 0 {
+		return
+	}
+	currentInventory := vumm.CurrentVehicule.Inventories[vumm.InventoryNum]
+	currentInventory.Items = append(currentInventory.Items, vehicule.NewInventoryItem())
+}
+
+func (vumm *VehiculeUpdateModalModel) RemoveItem(vm *hvue.VM, pos int) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	if vumm.InventoryNum < 0 {
+		return
+	}
+	currentInventory := vumm.CurrentVehicule.Inventories[vumm.InventoryNum]
+	currentInventory.Get("Items").Call("splice", pos, 1)
+}
+
+func (vumm *VehiculeUpdateModalModel) UpdateControlQuantity(inventItem *vehicule.InventoryItem) {
+	inventItem.ControledQuantity = inventItem.ReferenceQuantity
 }

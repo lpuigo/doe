@@ -31,7 +31,10 @@ func NewActorStore() *ActorStore {
 func (as *ActorStore) GetActorsSortedByName() []*Actor {
 	res := as.Actors[:]
 	sort.Slice(res, func(i, j int) bool {
-		return res[i].Ref < res[j].Ref
+		if res[i].IsActive() == res[j].IsActive() {
+			return res[i].Ref < res[j].Ref
+		}
+		return res[i].IsActive()
 	})
 	return res
 }
