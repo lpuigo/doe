@@ -142,3 +142,7 @@ func (v *Vehicule) InventoryIndexByDate(day string) int {
 	}
 	return -1
 }
+
+func (v *Vehicule) SortEventsByDate() {
+	v.Get("Events").Call("sort", CompareEventDate)
+}

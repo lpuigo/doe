@@ -287,3 +287,31 @@ func (vumm *VehiculeUpdateModalModel) ValidateInventoryControl(vm *hvue.VM) {
 	vumm.InventoryNum = 0
 	vumm.Control = false
 }
+
+func (vumm *VehiculeUpdateModalModel) AddEvent(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.CurrentVehicule.Events = append(vumm.CurrentVehicule.Events, vehicule.NewEvent())
+	vumm.CurrentVehicule.SortEventsByDate()
+}
+
+// Event Methods ===================================================================================================
+
+func (vumm *VehiculeUpdateModalModel) RemoveEvent(vm *hvue.VM, pos int) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.CurrentVehicule.Get("Events").Call("splice", pos, 1)
+}
+
+func (vumm *VehiculeUpdateModalModel) UpdateEvent(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.CurrentVehicule.SortEventsByDate()
+}
+
+func (vumm *VehiculeUpdateModalModel) GetEventTypes(vm *hvue.VM) []*elements.ValueLabel {
+	res := []*elements.ValueLabel{
+		elements.NewValueLabel(vehiculeconst.EventTypeMisc, vehiculeconst.EventTypeMisc),
+		elements.NewValueLabel(vehiculeconst.EventTypeCheck, vehiculeconst.EventTypeCheck),
+		elements.NewValueLabel(vehiculeconst.EventTypeRepair, vehiculeconst.EventTypeRepair),
+		elements.NewValueLabel(vehiculeconst.EventTypeIncident, vehiculeconst.EventTypeIncident),
+	}
+	return res
+}

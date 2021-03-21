@@ -12,6 +12,13 @@ const (
 )
 
 const (
+	EventTypeIncident string = "Accident"
+	EventTypeRepair   string = "Reparation"
+	EventTypeCheck    string = "Contrôle"
+	EventTypeMisc     string = "Divers"
+)
+
+const (
 	FilterValueAll     string = ""
 	FilterValueCompany string = "CMPY:"
 	FilterValueImmat   string = "IMAT:"

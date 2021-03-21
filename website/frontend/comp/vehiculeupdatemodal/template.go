@@ -338,7 +338,76 @@ const template string = `<el-dialog
 			</div>
 		</el-tab-pane>	
 
+		<!-- ===================================== Event Tab ======================================================= -->
+		<el-tab-pane v-if="user.Permissions.Update" label="Evenements" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+			<!-- Event History -->
+			<el-row :gutter="10" align="middle" class="spaced" type="flex">
+				<el-col :span="2" class="align-right">Evenements :</el-col>
+				<el-col :span="22">
+					<el-table 
+							:data="current_vehicule.Events"
+							height="calc(75vh - 50px)" size="mini" border
+					>
+						<el-table-column label="" width="68">
+							<template slot="header" slot-scope="scope">
+								<el-button type="success" plain icon="fas fa-plus fa-fw" size="mini" @click="AddEvent" :disabled="false"></el-button>
+							</template>
+							<template slot-scope="scope">
+								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveEvent(scope.$index)" :disabled="!user.Permissions.Admin"></el-button>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Début" width="180">
+							<template slot-scope="scope">
+								<el-date-picker :picker-options="{firstDayOfWeek:1}" 
+											placeholder="Date" size="mini" style="width: 100%"
+											type="date" format="dd/MM/yyyy" value-format="yyyy-MM-dd"
+											v-model="scope.row.StartDate"
+											@change="UpdateEvent"
+								></el-date-picker>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Fin" width="180">
+							<template slot-scope="scope">
+								<el-date-picker :picker-options="{firstDayOfWeek:1}" 
+											placeholder="Date" size="mini" style="width: 100%"
+											type="date" format="dd/MM/yyyy" value-format="yyyy-MM-dd"
+											v-model="scope.row.EndDate"
+											@change=""
+								></el-date-picker>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Type" width="150">
+							<template slot-scope="scope">
+								<el-select v-model="scope.row.Type"
+										placeholder="Type" size="mini" filterable
+										@change="" style="width: 100%"
+								>
+									<el-option v-for="item in GetEventTypes()"
+											   :key="item.value"
+											   :label="item.label"
+											   :value="item.value"
+									>
+									</el-option>
+								</el-select>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Commentaire">
+							<template slot-scope="scope">
+								<el-input type="textarea" :autosize="{ minRows: 1, maxRows: 5}" placeholder="Commentaire"
+										  v-model="scope.row.Comment" clearable size="mini"
+								></el-input>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-col>
+			</el-row>
+		</el-tab-pane>
     </el-tabs>
+
 
     <!-- 
         Modal Footer Action Bar
