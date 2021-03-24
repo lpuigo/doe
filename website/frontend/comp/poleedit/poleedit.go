@@ -224,7 +224,7 @@ const template string = `<div>
 		<!-- ======================== Chapter DICT DT DA ===================================-->
         <el-collapse-item name="dict">
             <template slot="title">
-                <h2 class="title">DT, DICT et DA&nbsp;<a v-if="editedpolemarker.Pole.DictRef != ''" :href="GetDICTUrl()" rel="noopener noreferrer" target="_blank">(Carte DICT.fr)</a></h1>
+                <h2 class="title">DT, DICT et DA&nbsp;<a v-if="editedpolemarker.Pole.DictRef != ''" :href="GetDICTUrl()" rel="noopener noreferrer" target="_blank">(DICT.fr)</a></h1>
             </template>
             <!-- DT -->
             <el-row :gutter="5" type="flex" align="middle" class="spaced">
@@ -799,7 +799,8 @@ func (pem *PoleEditModel) GetDICTUrl(vm *hvue.VM) string {
 	if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
 		return ""
 	}
-	url := "https://apps.sogelink.fr/declaration/?tmstp=1574760154241#!/suivi/carto/302791299?idAgence=86986&filtre=" + pem.EditedPoleMarker.Pole.DictRef
+	//url := "https://apps.sogelink.fr/declaration/?tmstp=1574760154241#!/suivi/carto/302791299?idAgence=86986&filtre=" + pem.EditedPoleMarker.Pole.DictRef
+	url := "https://apps.sogelink.fr/declaration/#/suivi/dossier/?filtre=" + pem.EditedPoleMarker.Pole.DictRef
 	return url
 }
 
