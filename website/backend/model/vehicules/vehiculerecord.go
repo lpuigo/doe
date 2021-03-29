@@ -31,6 +31,7 @@ func NewVehiculeRecordFrom(r io.Reader) (vr *VehiculeRecord, err error) {
 		return
 	}
 	vr.SetId(vr.Id)
+	vr.CheckConsistency()
 	return
 }
 

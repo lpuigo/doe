@@ -88,6 +88,16 @@ const (
 <!--        </template>-->
 <!--	</el-table-column>-->
     
+	<!--	InCharge   -->
+    <el-table-column
+            label="Responsable"
+            width="140px" :resizable="true"
+    >
+		<template slot-scope="scope">
+			<span>{{InChargeName(scope.row)}}</span>
+		</template>
+    </el-table-column>
+        
 	<!--	Start Day   -->
     <el-table-column
             label="Mise en Service" sortable :sort-by="SortDate('ServiceDate')"
@@ -99,13 +109,20 @@ const (
 		</template>
     </el-table-column>
         
-	<!--	InCharge   -->
+	<!--	Carte Carb.   -->
     <el-table-column
-            label="Responsable"
+            label="Carte Carb." prop="FuelCard" 
+            width="130px" :resizable="true" 
+			align="center"
+    ></el-table-column>
+        
+	<!--	Kilometrage   -->
+    <el-table-column
+            label="Kilométrage"
             width="140px" :resizable="true"
     >
 		<template slot-scope="scope">
-			<span>{{InChargeName(scope.row)}}</span>
+			<span>{{TravelledKms(scope.row)}}</span>
 		</template>
     </el-table-column>
         
@@ -241,6 +258,15 @@ func (vtm *VehiculesTableModel) InChargeName(vm *hvue.VM, vehic *vehicule.Vehicu
 		return vehiculeconst.InChargeNotAffected
 	}
 	return act.GetRefStatus()
+}
+
+func (vtm *VehiculesTableModel) TravelledKms(vm *hvue.VM, vehic *vehicule.Vehicule) string {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	cth := vehic.GetCurrentTravelledKms()
+	if cth == nil {
+		return "Non connu"
+	}
+	return date.DateString(cth.Date) + " : " + strconv.Itoa(cth.Kms) + " kms"
 }
 
 func (vtm *VehiculesTableModel) SortDate(attrib1 string) func(obj *js.Object) string {

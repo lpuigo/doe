@@ -21,10 +21,12 @@ type Vehicule struct {
 	InCharge       []*ActorHistory `js:"InCharge"`
 	ServiceDate    string          `js:"ServiceDate"`
 	EndServiceDate string          `js:"EndServiceDate"`
+	FuelCard       string          `js:"FuelCard"`
 	Comment        string          `js:"Comment"`
 
-	Inventories []*Inventory `js:"Inventories"`
-	Events      []*Event     `js:"Events"`
+	TravelledKms []*TravelledHistory `js:"TravelledKms"`
+	Inventories  []*Inventory        `js:"Inventories"`
+	Events       []*Event            `js:"Events"`
 }
 
 func NewVehicule() *Vehicule {
@@ -37,8 +39,10 @@ func NewVehicule() *Vehicule {
 	nv.InCharge = []*ActorHistory{NewActorHistory()}
 	nv.ServiceDate = date.TodayAfter(0)
 	nv.EndServiceDate = ""
+	nv.FuelCard = ""
 	nv.Comment = ""
 
+	nv.TravelledKms = []*TravelledHistory{}
 	nv.Inventories = []*Inventory{}
 	nv.Events = []*Event{}
 
@@ -68,7 +72,14 @@ func (v *Vehicule) Clone(ov *Vehicule) {
 
 	v.ServiceDate = ov.ServiceDate
 	v.EndServiceDate = ov.EndServiceDate
+	v.FuelCard = ov.FuelCard
 	v.Comment = ov.Comment
+
+	travelledKms := make([]*TravelledHistory, len(ov.TravelledKms))
+	for i, th := range ov.TravelledKms {
+		travelledKms[i] = th.Copy()
+	}
+	v.TravelledKms = travelledKms
 
 	inventories := make([]*Inventory, len(ov.Inventories))
 	for i, inv := range ov.Inventories {
@@ -102,6 +113,14 @@ func (v *Vehicule) SearchString(filter string) string {
 	return res
 }
 
+func (v *Vehicule) Status() string {
+	if !tools.Empty(v.EndServiceDate) && v.EndServiceDate < date.TodayAfter(0) {
+		return vehiculeconst.StatusReturned
+	}
+	//TODO detect vehiculeconst.StatusInRepair
+	return vehiculeconst.StatusInUse
+}
+
 func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(vehiculeconst.FilterValueAll, vehiculeconst.FilterLabelAll),
@@ -123,6 +142,18 @@ func (v *Vehicule) GetInChargeActorId(day string) int {
 		}
 	}
 	return -1
+}
+
+// GetCurrentTravelledKms returns current (latest) TravelledHistory if exists, nil otherwise
+func (v *Vehicule) GetCurrentTravelledKms() *TravelledHistory {
+	if len(v.TravelledKms) > 0 {
+		return v.TravelledKms[0]
+	}
+	return nil
+}
+
+func (v *Vehicule) SortTravelledKmsByDate() {
+	v.Get("TravelledKms").Call("sort", CompareTravelledHistory)
 }
 
 func (v *Vehicule) AddInventory(ni *Inventory) {

@@ -5,6 +5,11 @@ type ActorHistory struct {
 	ActorId int
 }
 
+type TravelledHistory struct {
+	Date string
+	Kms  int
+}
+
 type Event struct {
 	StartDate string
 	EndDate   string
@@ -21,19 +26,28 @@ type Vehicule struct {
 	InCharge       []ActorHistory
 	ServiceDate    string
 	EndServiceDate string
+	FuelCard       string
 	Comment        string
 
-	Inventories []Inventory
-	Events      []Event
+	TravelledKms []TravelledHistory
+	Inventories  []Inventory
+	Events       []Event
 }
 
 func NewVehicule(vType, immat string) *Vehicule {
 	return &Vehicule{
-		Id:          0,
-		Type:        vType,
-		Immat:       immat,
-		InCharge:    []ActorHistory{},
-		Inventories: []Inventory{},
+		Id:           0,
+		Type:         vType,
+		Immat:        immat,
+		TravelledKms: []TravelledHistory{},
+		InCharge:     []ActorHistory{},
+		Inventories:  []Inventory{},
+	}
+}
+
+func (v *Vehicule) CheckConsistency() {
+	if v.TravelledKms == nil {
+		v.TravelledKms = []TravelledHistory{}
 	}
 }
 

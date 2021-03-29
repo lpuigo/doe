@@ -144,6 +144,30 @@ func (vumm *VehiculeUpdateModalModel) GetActors(vm *hvue.VM) []*elements.IntValu
 	return res
 }
 
+// TravelledKms Methods ====================================================================================================
+
+func (vumm *VehiculeUpdateModalModel) AddTravelledKms(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	nth := vehicule.NewTravelledHistory()
+	nth.Date = date.TodayAfter(0)
+	if len(vumm.CurrentVehicule.TravelledKms) > 0 {
+		nth.Kms = vumm.CurrentVehicule.TravelledKms[0].Kms + 1000
+	} else {
+		nth.Kms = 1000
+	}
+	vumm.CurrentVehicule.TravelledKms = append([]*vehicule.TravelledHistory{nth}, vumm.CurrentVehicule.TravelledKms...)
+}
+
+func (vumm *VehiculeUpdateModalModel) RemoveTravelledKms(vm *hvue.VM, pos int) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.CurrentVehicule.Get("TravelledKms").Call("splice", pos, 1)
+}
+
+func (vumm *VehiculeUpdateModalModel) UpdateTravelledKms(vm *hvue.VM) {
+	vumm = VehiculeUpdateModalModelFromJS(vm.Object)
+	vumm.CurrentVehicule.SortTravelledKmsByDate()
+}
+
 // Inventory Methods ===================================================================================================
 
 func (vumm *VehiculeUpdateModalModel) SetDefaultInventory() {

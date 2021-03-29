@@ -12,6 +12,12 @@ const (
 )
 
 const (
+	StatusInUse    string = "Disponible"
+	StatusInRepair string = "En réparation"
+	StatusReturned string = "Rendu"
+)
+
+const (
 	EventTypeIncident string = "Accident"
 	EventTypeRepair   string = "Reparation"
 	EventTypeCheck    string = "Contrôle"

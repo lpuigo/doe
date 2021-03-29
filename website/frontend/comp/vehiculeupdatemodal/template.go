@@ -91,6 +91,54 @@ const template string = `<el-dialog
 				</el-col>
 			</el-row>
 			
+	        <!-- FuelCard & TravelledKms -->
+			<el-row :gutter="10" align="middle" class="doublespaced" type="flex">
+				<el-col :span="4" class="align-right">Carte Carburant :</el-col>
+				<el-col :span="8">
+					<el-input v-model="current_vehicule.FuelCard" 
+							  clearable placeholder="info carte" size="mini"
+							  @change=""
+					></el-input>
+				</el-col>
+
+				<el-col :span="4" class="align-right">Kilométrage :</el-col>
+				<el-col :span="8">
+					<el-table 
+							:data="current_vehicule.TravelledKms"
+							max-height="160" size="mini" border
+					>
+						<el-table-column label="" width="80">
+							<template slot="header" slot-scope="scope">
+								<el-button type="success" plain icon="fas fa-plus fa-fw" size="mini" @click="AddTravelledKms()"></el-button>
+							</template>
+							<template slot-scope="scope">
+								<el-button type="danger" plain icon="far fa-trash-alt fa-fw" size="mini" @click="RemoveTravelledKms(scope.$index)"></el-button>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Date" width="180">
+							<template slot-scope="scope">
+								<el-date-picker :picker-options="{firstDayOfWeek:1}" 
+											placeholder="Date" size="mini" style="width: 100%"
+											type="date" format="dd/MM/yyyy" value-format="yyyy-MM-dd"
+											v-model="scope.row.Date"
+											@change="UpdateTravelledKms"
+								></el-date-picker>
+							</template>
+						</el-table-column>
+	
+						<el-table-column label="Kms au compteur">
+							<template slot-scope="scope">
+								<el-input-number v-model="scope.row.Kms" 
+										:min="0" :step="1000" size="mini" style="width: 100%;"
+										@change=""
+								></el-input-number>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-col>
+			</el-row>
+			
 			<!-- Comment -->
 			<el-row :gutter="10" align="top" class="doublespaced" type="flex">
 				<el-col :span="4" class="align-right">Commentaire :</el-col>
