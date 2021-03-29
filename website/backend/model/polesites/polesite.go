@@ -92,6 +92,9 @@ func (ps *PoleSite) GetInfo() *fm.PolesiteInfo {
 	fmt.Fprintf(&searchBuilder, "%s:%s,", "OrderDate", strings.ToUpper(ps.OrderDate))
 	fmt.Fprintf(&searchBuilder, "%s:%s,", "Comment", strings.ToUpper(ps.Comment))
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		fmt.Fprintf(&searchBuilder, "%s,", pole.SearchString())
 	}
 	psi.Search = searchBuilder.String()
@@ -145,6 +148,9 @@ func (ps *PoleSite) GetPolesNumbers() (total, blocked, done, billed int) {
 func (ps *PoleSite) SetUpdateDate() {
 	updatedate := date.TimeJSMinDate
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		if pole.Date == "" {
 			continue
 		}
@@ -227,6 +233,9 @@ func (ps *PoleSite) DictZipArchive(w io.Writer) error {
 	// Create sorted List of DICT / citycount in PoleSite
 	dicts := map[string]cityCount{}
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		dict := strings.Trim(pole.DictRef, " \t")
 		if dict == "" {
 			continue
@@ -291,6 +300,9 @@ func (ps *PoleSite) MoveCompletedGroupTo(aps *PoleSite) int {
 	doArchive := make(map[string]bool)
 
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		doArchivePole := pole.IsArchivable()
 		if doArchiveRef, found := doArchive[pole.Ref]; !found {
 			doArchive[pole.Ref] = doArchivePole // first encountered pole state sets initial pertaining ref state
@@ -304,6 +316,9 @@ func (ps *PoleSite) MoveCompletedGroupTo(aps *PoleSite) int {
 	apid := 0
 	unArchivedPoles := []*Pole{}
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		doArch := doArchive[pole.Ref]
 		if strings.HasPrefix(pole.Ref, "Dépôt") && pole.IsArchivable() {
 			doArch = true
@@ -478,6 +493,9 @@ func (ps *PoleSite) checkDuplicatedRef() []*ConsistencyMsg {
 	refDict := make(map[string][]*Pole)
 	duplicateFound := false
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		ref := pole.ExtendedRef()
 		if refDict[ref] == nil {
 			refDict[ref] = []*Pole{pole}
@@ -515,6 +533,9 @@ func (ps *PoleSite) checkDuplicatedLocation(prec float64) []*ConsistencyMsg {
 	posDict := make(map[geoFence][]*Pole)
 	duplicateFound := false
 	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		geofence := geoFence{
 			lat:  int(pole.Lat * prec),
 			long: int(pole.Long * prec),

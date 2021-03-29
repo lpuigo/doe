@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Lyon\2021-02-24 Analyse Pot Alpes\Polesite Eiffage Lyon-Chambery.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\2021-03-29 Maj Référentiel Ecart\Polesite Fiitelcom Poteau-SRO 88-020.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -106,9 +106,9 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 
 // Polesite generation from directory containing Orange "Fiche Appui" xlsx files
 func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
-	faDir := `C:\Users\Laurent\Desktop\TEMPORAIRE\Eiffage Rodez`
-	polesiteId := 50
-	polesiteName := "Rodez"
+	faDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians Alsace\Chantiers Poteaux\2021-03-23 Appuis NRO-88-005`
+	polesiteId := 102
+	polesiteName := "NRO 88-005"
 
 	ps := &PoleSite{
 		Id:         polesiteId,
@@ -139,7 +139,7 @@ func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
 		}
 		// dir & files to process
 		fmt.Printf("processessing: %s\n", path)
-		if processFicheAppuiXlsxFile(path, faDir, ps) != nil {
+		if err = processFicheAppuiXlsxFile(path, faDir, ps); err != nil {
 			fmt.Printf("error occured : %s\n", err.Error())
 		}
 		return nil
@@ -183,6 +183,18 @@ func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
 	ope, _ := xf.GetCellValue(sheetName, "M53")
 	target, _ := xf.GetCellValue(sheetName, "M52")
 
+	product := []string{}
+	if !strings.Contains(strings.ToLower(ope), "renfor") {
+		product = append(product, poleconst.ProductCreation)
+	}
+	if strings.Contains(strings.ToLower(ope), "remplac") {
+		product = append(product, poleconst.ProductReplace)
+	}
+
+	mat := ""
+	height := 0
+	mat, height = DecodeCAPFTPoleInfo(target, &product)
+
 	pole := &Pole{
 		Id:             0,
 		Ref:            pa,
@@ -202,12 +214,12 @@ func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
 		DaValidation:   false,
 		DaStartDate:    "",
 		DaEndDate:      "",
-		Height:         0,
-		Material:       "",
+		Height:         height,
+		Material:       mat,
 		AspiDate:       "",
 		Kizeo:          "",
 		Comment:        strings.Trim(ope+" "+target, " \t"),
-		Product:        nil,
+		Product:        product,
 		AttachmentDate: "",
 		TimeStamp:      "",
 	}

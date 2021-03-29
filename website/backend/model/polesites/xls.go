@@ -397,13 +397,26 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if state == "" {
 			state = poleconst.StateDictToDo
 		}
-		height := 8
-		if getCol(colPoleHeight) != "" {
-			height, err = strconv.Atoi(getCol(colPoleHeight))
-			if err != nil {
-				return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), getCol(colPoleHeight), err.Error())
+		height := 0
+		material := getCol(colPoleMaterial)
+		products := []string{}
+		if material != "" && getCol(colPoleHeight) == "" {
+			// Decode CAPFT info
+			material, height = DecodeCAPFTPoleInfo(material, &products)
+		} else {
+			if getCol(colPoleHeight) != "" {
+				height, err = strconv.Atoi(getCol(colPoleHeight))
+				if err != nil {
+					return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), getCol(colPoleHeight), err.Error())
+				}
 			}
 		}
+		for col := colPoleProduct; col < colPoleProduct+len(productKeys); col++ {
+			if getCol(col) == "1" {
+				products = append(products, productKeys[col])
+			}
+		}
+
 		pdate, err := parseDate(getCol(colPoleDate))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", cellCoord(colPoleDate, line), err.Error())
@@ -427,13 +440,6 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 				actors[i] = strings.Trim(actor, " ")
 			}
 		}
-		products := []string{}
-		//for _, col := range []int{colPoleProduct, colPoleProduct + 1, colPoleProduct + 2, colPoleProduct + 3, colPoleProduct + 4}
-		for col := colPoleProduct; col < colPoleProduct+len(productKeys); col++ {
-			if getCol(col) == "1" {
-				products = append(products, productKeys[col])
-			}
-		}
 
 		comment := getCol(colPoleComment)
 		if geomsg != "" {
@@ -443,7 +449,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		pole := &Pole{
 			Id:             id,
 			Ref:            getCol(colPoleRef),
-			City:           getCol(colPoleCity),
+			City:           strings.Title(strings.ToLower(getCol(colPoleCity))),
 			Address:        getCol(colPoleAddress),
 			Lat:            lat,
 			Long:           long,
@@ -457,14 +463,13 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 			DictDate:       dddate,
 			DictInfo:       getCol(colPoleDictInfo),
 			Height:         height,
-			Material:       getCol(colPoleMaterial),
+			Material:       material,
 			AspiDate:       aspdate,
 			Kizeo:          getCol(colPoleKizeo),
 			Comment:        comment,
 			Product:        products,
 			TimeStamp:      timeStamp,
 		}
-
 		ps.Poles = append(ps.Poles, pole)
 		id++
 	}

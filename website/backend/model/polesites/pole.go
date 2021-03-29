@@ -383,3 +383,40 @@ func (p *Pole) IsEqual(pole *Pole) bool {
 	// not compared
 	return true
 }
+
+func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height int) {
+	targetWords := strings.Split(strings.Trim(strings.ToUpper(info), " "), " ")
+	if len(targetWords) > 0 && len(targetWords[0]) > 2 {
+		switch targetWords[0][0:2] {
+		case "BS":
+			mat = poleconst.MaterialWood
+
+		case "BH":
+			mat = poleconst.MaterialWood
+			*products = append(*products, poleconst.ProductHauban)
+
+		case "BC":
+			mat = poleconst.MaterialWood
+			*products = append(*products, poleconst.ProductCouple)
+
+		case "MI", "MS":
+			mat = poleconst.MaterialMetal
+
+		case "MC":
+			mat = poleconst.MaterialMetal
+			*products = append(*products, poleconst.ProductCouple)
+
+		case "M4", "MF", "MR":
+			mat = poleconst.MaterialEnforcedMetal
+
+		case "FR":
+			mat = poleconst.MaterialEnforcedComp
+		}
+
+		height = int(targetWords[0][2] - '0')
+		if height == 1 {
+			height = 10
+		}
+	}
+	return
+}
