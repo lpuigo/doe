@@ -26,3 +26,14 @@ func NewDateRangeFrom(beg, end string) *DateRange {
 	dr.End = end
 	return dr
 }
+
+func (dr *DateRange) Overlap(odr *DateRange) bool {
+	switch {
+	case dr.Begin > odr.End:
+		return false
+	case dr.End < odr.Begin:
+		return false
+	default:
+		return true
+	}
+}

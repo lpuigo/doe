@@ -8,6 +8,9 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -30,7 +33,7 @@ const (
         <el-table
                 :border=true
                 :data="filteredActors"
-                :default-sort = "{prop: 'Ref', order: 'ascending'}"
+                :default-sort = "{prop: 'Actor.Ref', order: 'ascending'}"
                 height="100%" size="mini"
 				@row-dblclick="HandleDoubleClickedRow"
         >
@@ -43,14 +46,10 @@ const (
 			<!--	group   -->
 			<el-table-column
 					:resizable="true" :show-overflow-tooltip=true 
-					prop="Groups" label="Groupe" width="150px"
+					prop="GroupName" label="Groupe" width="150px"
 					sortable :sort-method="SortGroup"
-					:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
-			>
-				<template slot-scope="scope">
-					<span>{{GetGroup(scope.row)}}</span>
-				</template>
-			</el-table-column>
+					:filters="FilterList('GroupName')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+			></el-table-column>
 
 			<!--	client
             <el-table-column
@@ -68,21 +67,21 @@ const (
 			<!--	role   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Role" label="Rôle" width="90px"
-                    sortable :sort-by="['Role', 'Ref']"
+                    prop="Actor.Role" label="Rôle" width="90px"
+                    sortable :sort-by="['Actor.Role', 'Actor.Ref']"
                     :filters="FilterList('Role')" :filter-method="FilterHandler" filter-placement="bottom-end"
             ></el-table-column>
             
 			<!--	name   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Ref" label="Nom Prénom" width="180px"
-                    sortable :sort-by="['Ref']"
+                    prop="Actor.Ref" label="Nom Prénom" width="180px"
+                    sortable :sort-by="['Actor.Ref']"
             >
                 <template slot-scope="scope">
                     <div class="header-menu-container on-hover">
-                        <span>{{scope.row.Ref}}</span>
-                        <i class="show link fas fa-edit" @click="EditActorVacancy(scope.row)"></i>
+                        <span>{{scope.row.Actor.Ref}}</span>
+                        <i class="show link fas fa-edit" @click="EditActorVacancy(scope.row.Actor)"></i>
                     </div>
                 </template>
             </el-table-column>
@@ -90,8 +89,8 @@ const (
 			<!--	company   -->
             <el-table-column
                     :resizable="true" :show-overflow-tooltip=true 
-                    prop="Company" label="Société" width="110px"
-                    sortable :sort-by="['Company', 'Ref']"
+                    prop="Actor.Company" label="Société" width="110px"
+                    sortable :sort-by="['Actor.Company', 'Actor.Ref']"
                     :filters="FilterList('Company')" :filter-method="FilterHandler"	filter-placement="bottom-end"
             ></el-table-column>
             
@@ -142,7 +141,8 @@ func componentOptions() []hvue.ComponentOption {
 		hvue.MethodsOf(&ActorsCalendarModel{}),
 		hvue.Computed("filteredActors", func(vm *hvue.VM) interface{} {
 			acm := ActorsCalendarModelFromJS(vm.Object)
-			return acm.GetFilteredActors()
+			acm.GroupActors = acm.GetFilteredGroupActors()
+			return acm.GroupActors
 		}),
 	}
 }
@@ -153,19 +153,33 @@ func componentOptions() []hvue.ComponentOption {
 type ActorsCalendarModel struct {
 	*actorstable.ActorsTableModel
 
-	CurrentDate string `js:"CurrentDate"`
-	DateRange   int    `js:"DateRange"`
+	CurrentDate string        `js:"CurrentDate"`
+	DateRange   int           `js:"DateRange"`
+	GroupActors []*GroupActor `js:"GroupActors"`
 }
 
 func NewActorsCalendarModel(vm *hvue.VM) *ActorsCalendarModel {
 	acm := &ActorsCalendarModel{ActorsTableModel: actorstable.NewActorsTableModel(vm)}
 	acm.ResetCurrentDate()
 	acm.DateRange = 5 * 7
+	acm.GroupActors = []*GroupActor{}
 	return acm
 }
 
 func ActorsCalendarModelFromJS(o *js.Object) *ActorsCalendarModel {
 	return &ActorsCalendarModel{ActorsTableModel: actorstable.ActorsTableModelFromJS(o)}
+}
+
+func (acm *ActorsCalendarModel) GetFilteredGroupActors() []*GroupActor {
+	calendarRange := date.NewDateRangeFrom(acm.CurrentDate, acm.CurrentRangeEnd())
+	res := []*GroupActor{}
+	for _, actor := range acm.GetFilteredActors() {
+		for _, assign := range actor.Groups.GetGroupAssignsInRange(calendarRange) {
+			grpName := acm.GroupStore.GetGroupNameById(assign.Id)
+			res = append(res, NewGroupActor(actor, grpName, assign.Period))
+		}
+	}
+	return res
 }
 
 func (acm *ActorsCalendarModel) GetFilteredActors() []*actor.Actor {
@@ -216,6 +230,65 @@ func (acm *ActorsCalendarModel) GetInRangeActors() []*actor.Actor {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Format & Style Functions
+func (acm *ActorsCalendarModel) SortGroup(vm *hvue.VM, a, b *GroupActor) int {
+	switch {
+	case a.GroupName == b.GroupName:
+		return acm.SortRoleRef(a.Actor, b.Actor)
+	case a.GroupName < b.GroupName:
+		return -1
+	default:
+		return 1
+	}
+}
+
+func (acm *ActorsCalendarModel) FilterHandler(vm *hvue.VM, value string, p *js.Object, col *js.Object) bool {
+	prop := col.Get("property").String()
+	prop = strings.TrimPrefix(prop, "Actor.")
+	switch prop {
+	case "GroupName":
+		return p.Get(prop).String() == value
+	default:
+		return p.Get("Actor").Get(prop).String() == value
+	}
+}
+
+func (acm *ActorsCalendarModel) FilterList(vm *hvue.VM, prop string) []*elements.ValText {
+	acm = ActorsCalendarModelFromJS(vm.Object)
+	count := map[string]int{}
+	attribs := []string{}
+
+	attrib := ""
+	for _, act := range acm.GroupActors {
+		if prop == "GroupName" {
+			attrib = act.Object.Get(prop).String()
+		} else {
+			attrib = act.Object.Get("Actor").Get(prop).String()
+		}
+		var attrs []string
+		switch prop {
+		case "Client":
+			attrs = strings.Split(attrib, ",")
+		default:
+			attrs = []string{attrib}
+		}
+		for _, a := range attrs {
+			if _, exist := count[a]; !exist {
+				attribs = append(attribs, a)
+			}
+			count[a]++
+		}
+	}
+	sort.Strings(attribs)
+	res := []*elements.ValText{}
+	for _, a := range attribs {
+		fa := a
+		if fa == "" {
+			fa = "Vide"
+		}
+		res = append(res, elements.NewValText(a, fa+" ("+strconv.Itoa(count[a])+")"))
+	}
+	return res
+}
 
 func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
 	acm = ActorsCalendarModelFromJS(vm.Object)
@@ -241,8 +314,10 @@ func (acm *ActorsCalendarModel) GetHeaderClassState(vm *hvue.VM) []string {
 	return res
 }
 
-func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) []*CalendarDayInfo {
+func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*CalendarDayInfo {
 	acm = ActorsCalendarModelFromJS(vm.Object)
+	gract := GroupActorFromJS(o)
+	act := gract.Actor
 	rangeStart := acm.CurrentDate
 	rangeEnd := acm.CurrentRangeEnd()
 	rangeLength := acm.DateRange
@@ -260,6 +335,19 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 	if !tools.Empty(act.Period.End) && act.Period.End <= rangeEnd {
 		// Actor left before period end
 		departure -= int(date.NbDaysBetween(act.Period.End, rangeEnd))
+	}
+
+	// assignIn / assignOut
+	assignIn := 0
+	if gract.Assignment.Begin > rangeStart {
+		// Actor assigned afterward
+		assignIn = int(date.NbDaysBetween(rangeStart, gract.Assignment.Begin))
+	}
+
+	assignOut := rangeLength
+	if gract.Assignment.End <= rangeEnd {
+		// Actor left before period end
+		assignOut -= int(date.NbDaysBetween(gract.Assignment.End, rangeEnd)) + 1
 	}
 
 	// Vacancy
@@ -293,6 +381,9 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, act *actor.Actor) 
 		}
 		switch {
 		case !(i >= arrival && i < departure):
+			res[i].Class += "inactive "
+			continue
+		case !(i >= assignIn && i <= assignOut):
 			res[i].Class += "inactive "
 			continue
 		case acm.User.IsDayOff(day):
@@ -333,6 +424,6 @@ func (acm *ActorsCalendarModel) DateOf(i int) string {
 	return date.Day(date.After(acm.CurrentDate, i))
 }
 
-func (acm *ActorsCalendarModel) HandleDoubleClickedRow(vm *hvue.VM, act *actor.Actor) {
-	acm.EditActorVacancy(vm, act)
+func (acm *ActorsCalendarModel) HandleDoubleClickedRow(vm *hvue.VM, act *GroupActor) {
+	acm.EditActorVacancy(vm, act.Actor)
 }
