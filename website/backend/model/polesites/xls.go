@@ -397,9 +397,22 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if state == "" {
 			state = poleconst.StateDictToDo
 		}
+
+		comment := getCol(colPoleComment)
+		if geomsg != "" {
+			comment += "\n" + geomsg
+		}
+
+		products := []string{}
+		lowerComment := strings.ToLower(comment)
+		if !strings.Contains(lowerComment, "redressement") && !strings.Contains(lowerComment, "renforcement") {
+			products = append(products, poleconst.ProductCreation)
+			if strings.Contains(lowerComment, "remplacement") {
+				products = append(products, poleconst.ProductReplace)
+			}
+		}
 		height := 0
 		material := getCol(colPoleMaterial)
-		products := []string{}
 		if material != "" && getCol(colPoleHeight) == "" {
 			// Decode CAPFT info
 			material, height = DecodeCAPFTPoleInfo(material, &products)
@@ -439,11 +452,6 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 			for i, actor := range actors {
 				actors[i] = strings.Trim(actor, " ")
 			}
-		}
-
-		comment := getCol(colPoleComment)
-		if geomsg != "" {
-			comment += "\n" + geomsg
 		}
 
 		pole := &Pole{

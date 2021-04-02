@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\2021-03-29 Maj Référentiel Ecart\Polesite Fiitelcom Poteau-SRO 88-020.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2021-04-02 Peyrolles\Polesite Eiffage Signes-Peyrolles.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -66,8 +66,8 @@ func TestPolesiteFromXLS(t *testing.T) {
 // TestPoleSite_AppendXlsToJson : add a XLSx PoleSite description to an already provided PoleSite JSON file.
 // New Poles are appended next to already existing ones
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2020-12-28 54 & 88\Test`
-	psXlsfile := `Polesite Sogetrel Poteau-Losange 88-006.xlsx`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2021-04-02 Peyrolles`
+	psXlsfile := `Polesite Eiffage Signes-Peyrolles.xlsx`
 	psJsonFile := `000051.json`
 
 	// Get original PoleSiteRecord
@@ -242,7 +242,7 @@ func PoleSiteConsistency(t *testing.T, ps *PoleSite) {
 
 func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	psJsonFile := `000035.json`
+	psJsonFile := `000057.json`
 	origPsrFile := filepath.Join(psDir, psJsonFile)
 
 	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
@@ -274,7 +274,7 @@ func TestPoleSite_FixInconsistentPoleId(t *testing.T) {
 
 func TestPoleSite_DetectDuplicatedId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	psJsonFile := `000011.json`
+	psJsonFile := `000057.json`
 	origPsrFile := filepath.Join(psDir, psJsonFile)
 
 	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
@@ -325,7 +325,7 @@ func TestPoleSite_DetectDuplicatedId(t *testing.T) {
 
 func TestPoleSite_FixOrderedPoleId(t *testing.T) {
 	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	psJsonFile := `000011.json`
+	psJsonFile := `000057.json`
 	origPsrFile := filepath.Join(psDir, psJsonFile)
 
 	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
