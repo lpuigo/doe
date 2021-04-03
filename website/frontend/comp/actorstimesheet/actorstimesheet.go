@@ -33,12 +33,7 @@ const (
                     </el-tooltip>
                 </el-button-group>
             </el-col>
-            <el-col :offset="1" :span="1">
-                <el-tooltip content="Dernière semaine passée" placement="bottom" effect="light" open-delay=500>
-                	<el-button icon="fas fa-chevron-down" size="mini" @click="HandleResetCurrentDate()"></el-button>
-				</el-tooltip>
-            </el-col>
-            <el-col :span="5">
+            <el-col :offset="1" :span="5">
                 <el-tooltip content="Semaine précédente" placement="bottom" effect="light" open-delay=500>
                 	<el-button icon="fas fa-chevron-left" size="mini" @click="HandleCurrentDateBefore()"></el-button>
 				</el-tooltip>
@@ -46,8 +41,12 @@ const (
                 <el-tooltip content="Semaine suivante" placement="bottom" effect="light" open-delay=500>
                 	<el-button icon="fas fa-chevron-right" size="mini" @click="HandleCurrentDateAfter()"></el-button>
 				</el-tooltip>
+                <el-tooltip content="Dernière semaine passée" placement="bottom" effect="light" open-delay=500>
+                	<el-button icon="fas fa-chevron-down" size="mini" @click="HandleResetCurrentDate()"></el-button>
+				</el-tooltip>
             </el-col>
-            <el-col :span="6">
+
+            <el-col :offset="1" :span="6">
 				<el-progress :text-inside="true" :stroke-width="20" :percentage="GetInputPct()"></el-progress>
             </el-col>
         </el-row>
@@ -57,7 +56,7 @@ const (
         <el-table
                 :border=true
                 :data="filteredActors"
-                :default-sort = "{prop: 'Ref', order: 'ascending'}"
+                :default-sort = "{prop: 'Groups', order: 'ascending'}"
                 height="100%" size="mini"
         >
 			<!--	company   -->

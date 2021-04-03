@@ -496,9 +496,9 @@ const template string = `<el-dialog
                                type="info"></el-button>
 				</el-tooltip>
 				
-				<el-button @click="Hide" size="mini">Fermer</el-button>
+				<el-button @click="Hide" size="mini">Ignorer</el-button>
 				
-				<el-button :disabled="!hasChanged" type="success" @click="ConfirmChange" plain size="mini">Enregistrer</el-button>
+				<el-button :disabled="!hasChanged" type="success" @click="ConfirmChange" plain size="mini">Valider</el-button>
 			</el-col>
 		</el-row>
 	</span>
