@@ -2,6 +2,10 @@
     === Actor Table style ===
  */
 
+.el-table .vehicule-returned {
+    color: #b8b8b8;
+}
+
 .el-table .vehicule-row-tariere {
     background: #e6eeff;
 }

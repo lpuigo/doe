@@ -32,6 +32,16 @@ const (
 			index=1 
 	></el-table-column>
 
+	<!--	Status   -->
+    <el-table-column
+            :resizable="true" :show-overflow-tooltip=true 
+            label="Statut" width="90px"
+			sortable :sort-method="CompStatus"
+			:filters="FilterList('Status')" :filter-method="FilterHandler"	filter-placement="bottom-end"
+    >
+		<template slot-scope="scope">{{GetStatus(scope.row)}}</template>
+	</el-table-column>
+    
 	<!--	Compagny   -->
     <el-table-column
             :resizable="true" :show-overflow-tooltip=true 
@@ -119,7 +129,7 @@ const (
 	<!--	Kilometrage   -->
     <el-table-column
             label="Kilométrage"
-            width="140px" :resizable="true"
+            width="145px" :resizable="true"
     >
 		<template slot-scope="scope">
 			<span>{{TravelledKms(scope.row)}}</span>
@@ -129,10 +139,20 @@ const (
 	<!--	Inventaire   -->
     <el-table-column
             label="Inventaire"
-            width="140px" :resizable="true"
+            width="90px" :resizable="true"
     >
 		<template slot-scope="scope">
 			<span>{{LastInventory(scope.row)}}</span>
+		</template>
+    </el-table-column>
+        
+	<!--	Event   -->
+    <el-table-column
+            label="Évènements"
+            width="140px" :resizable="true"
+    >
+		<template slot-scope="scope">
+			<span v-html="LastEvent(scope.row)"></span>
 		</template>
     </el-table-column>
         
@@ -279,25 +299,32 @@ func (vtm *VehiculesTableModel) SortDate(attrib1 string) func(obj *js.Object) st
 	}
 }
 
+func (vtm *VehiculesTableModel) GetStatus(vehic *vehicule.Vehicule) string {
+	return vehic.Status()
+}
+
+func (vtm *VehiculesTableModel) CompStatus(a, b *vehicule.Vehicule) int {
+	sa, sb := a.Status(), b.Status()
+	if sa == sb {
+		if a.Immat < b.Immat {
+			return -1
+		}
+		return 1
+	}
+	if sa < sb {
+		return -1
+	}
+	return 1
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Column Filtering Related Methods
 
 func (vtm *VehiculesTableModel) FilterHandler(vm *hvue.VM, value string, p *js.Object, col *js.Object) bool {
 	prop := col.Get("property").String()
-	//switch prop {
-	//case "Client":
-	//	clients := strings.Split(p.Get(prop).String(), ",")
-	//	for _, c := range clients {
-	//		if c == value {
-	//			return true
-	//		}
-	//	}
-	//	return false
-	//case "Groups":
-	//	vtm = VehiculesTableModelFromJS(vm.Object)
-	//	act := actor.ActorFromJS(p)
-	//	return vtm.GetGroup(vm, act) == value
-	//}
+	if prop == "Status" {
+		return vehicule.VehiculeFromJS(p).Status() == value
+	}
 	return p.Get(prop).String() == value
 }
 
@@ -306,32 +333,25 @@ func (vtm *VehiculesTableModel) FilterList(vm *hvue.VM, prop string) []*elements
 	count := map[string]int{}
 	attribs := []string{}
 
-	var translate func(string) string
+	var getValue func(vehic *vehicule.Vehicule) string
 	switch prop {
-	//case "State":
-	//	translate = func(state string) string {
-	//		return GetStateLabel(state)
-	//	}
+	case "Status":
+		getValue = func(vehic *vehicule.Vehicule) string {
+			return vehic.Status()
+		}
 	default:
-		translate = func(val string) string { return val }
+		getValue = func(vehic *vehicule.Vehicule) string {
+			return vehic.Object.Get(prop).String()
+		}
 	}
 
 	attrib := ""
-	for _, act := range vtm.Vehicules {
-		attrib = act.Object.Get(prop).String()
-		var attrs []string
-		switch prop {
-		//case "Client":
-		//	attrs = strings.Split(attrib, ",")
-		default:
-			attrs = []string{attrib}
+	for _, vehic := range vtm.Vehicules {
+		attrib = getValue(vehic)
+		if _, exist := count[attrib]; !exist {
+			attribs = append(attribs, attrib)
 		}
-		for _, a := range attrs {
-			if _, exist := count[a]; !exist {
-				attribs = append(attribs, a)
-			}
-			count[a]++
-		}
+		count[attrib]++
 	}
 	sort.Strings(attribs)
 	res := []*elements.ValText{}
@@ -340,7 +360,7 @@ func (vtm *VehiculesTableModel) FilterList(vm *hvue.VM, prop string) []*elements
 		if fa == "" {
 			fa = "Vide"
 		}
-		res = append(res, elements.NewValText(a, translate(fa)+" ("+strconv.Itoa(count[a])+")"))
+		res = append(res, elements.NewValText(a, fa+" ("+strconv.Itoa(count[a])+")"))
 	}
 	return res
 }
@@ -349,20 +369,25 @@ func (vtm *VehiculesTableModel) FilterList(vm *hvue.VM, prop string) []*elements
 // Tools Functions
 
 func GetRowStyle(vehic *vehicule.Vehicule) string {
+	class := ""
+	if vehic.Status() == vehiculeconst.StatusReturned {
+		class = "vehicule-returned "
+	}
 	switch vehic.Type {
 	case vehiculeconst.TypeTariere:
-		return "vehicule-row-tariere"
+		class += "vehicule-row-tariere"
 	case vehiculeconst.TypeNacelle:
-		return "vehicule-row-nacelle"
+		class += "vehicule-row-nacelle"
 	case vehiculeconst.TypeFourgon:
-		return "vehicule-row-fourgon"
+		class += "vehicule-row-fourgon"
 	case vehiculeconst.TypeCar:
-		return "vehicule-row-car"
+		class += "vehicule-row-car"
 	case vehiculeconst.TypePorteTouret:
-		return "vehicule-row-portetouret"
+		class += "vehicule-row-portetouret"
 	default:
-		return "vehicule-row-error"
+		class += "vehicule-row-error"
 	}
+	return class
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -384,4 +409,17 @@ func (vtm *VehiculesTableModel) LastInventory(vm *hvue.VM, vehic *vehicule.Vehic
 	}
 	lastInvent := vehic.Inventories[0]
 	return date.DateString(lastInvent.ReferenceDate)
+}
+
+func (vtm *VehiculesTableModel) LastEvent(vm *hvue.VM, vehic *vehicule.Vehicule) string {
+	vtm = VehiculesTableModelFromJS(vm.Object)
+	event, future := vehic.GetInterestEvent()
+	if event == nil {
+		return ""
+	}
+	res := date.DateString(event.StartDate) + " " + event.Type
+	if future {
+		res = `<strong style="color: blue;">` + res + "</strong>"
+	}
+	return res
 }

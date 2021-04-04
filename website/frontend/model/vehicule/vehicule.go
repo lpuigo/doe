@@ -177,3 +177,24 @@ func (v *Vehicule) InventoryIndexByDate(day string) int {
 func (v *Vehicule) SortEventsByDate() {
 	v.Get("Events").Call("sort", CompareEventDate)
 }
+
+// GetInterestEvent returns the next future event (that is startdate >= today), or the lastest one (that is lastest event with startdate < today). Returns nil if no event available
+func (v *Vehicule) GetInterestEvent() (*Event, bool) {
+	today := date.TodayAfter(0)
+	var resEvent *Event = nil
+	future := false
+	for _, event := range v.Events {
+		if event.StartDate >= today {
+			future = true
+			resEvent = event
+			continue
+		}
+		// now assert event.StartDate < today
+		if resEvent == nil {
+			//future = false
+			resEvent = event
+		}
+		break
+	}
+	return resEvent, future
+}
