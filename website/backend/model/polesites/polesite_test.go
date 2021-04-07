@@ -302,12 +302,16 @@ func TestPoleSite_DetectDuplicatedId(t *testing.T) {
 
 			refB := &strings.Builder{}
 			poleRef := ps.Poles[bucket[0]]
-			json.NewEncoder(refB).Encode(poleRef)
+			refBEncoder := json.NewEncoder(refB)
+			refBEncoder.SetIndent("", "\t")
+			refBEncoder.Encode(poleRef)
 			ref := refB.String()
 			for _, i := range bucket[1:] {
 				otherB := &strings.Builder{}
 				poleOther := ps.Poles[i]
-				json.NewEncoder(otherB).Encode(poleOther)
+				otherBEncoder := json.NewEncoder(otherB)
+				otherBEncoder.SetIndent("", "\t")
+				otherBEncoder.Encode(poleOther)
 				other := otherB.String()
 				if other == ref {
 					t.Logf("poleid:%d #%d doublon de #%d => A supprimer\n", id, i, bucket[0])
@@ -336,6 +340,34 @@ func TestPoleSite_FixOrderedPoleId(t *testing.T) {
 	sort.Slice(ps.Poles, func(i, j int) bool {
 		return ps.Poles[i].Id < ps.Poles[j].Id
 	})
+	// Persist updated PoleSite
+	err = origPsr.Persist(psDir)
+	if err != nil {
+		t.Fatalf("Persist returned unexpected: %s", err.Error())
+	}
+}
+
+func TestPoleSite_ReOrderPoleId(t *testing.T) {
+	psDir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	psJsonFile := `000057.json`
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	ps := origPsr.PoleSite
+	sort.Slice(ps.Poles, func(i, j int) bool {
+		if ps.Poles[i].Ref == ps.Poles[j].Ref {
+			return ps.Poles[i].Sticker < ps.Poles[j].Sticker
+		}
+		return ps.Poles[i].Ref < ps.Poles[j].Ref
+	})
+	for i, pole := range ps.Poles {
+		pole.Id = i
+		pole.Sticker = strings.Trim(pole.Sticker, " ")
+		pole.Ref = strings.Trim(pole.Ref, " ")
+	}
 	// Persist updated PoleSite
 	err = origPsr.Persist(psDir)
 	if err != nil {
