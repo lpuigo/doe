@@ -26,11 +26,18 @@ type KizeoContext struct {
 func NewKizeoContext() *KizeoContext {
 	return &KizeoContext{
 		URL:      urlV3,
-		User:     "laurentpuig",
-		Password: "1sc0m1ng",
-		Company:  "EWINSE",
+		User:     "",
+		Password: "",
+		Company:  "",
 		Auth:     authToken,
 	}
+	//return &KizeoContext{
+	//	URL:      urlV3,
+	//	User:     "laurentpuig",
+	//	Password: "1sc0m1ng",
+	//	Company:  "EWINSE",
+	//	Auth:     authToken,
+	//}
 }
 
 // Login calls login api if KizeoContext has no Auth token already set.
@@ -139,6 +146,49 @@ func (kc *KizeoContext) FormDatas(formId string) ([]*DataMin, error) {
 		return nil, fmt.Errorf("unexpected response: %+v", formDataResp)
 	}
 	return formDataResp.Data, nil
+}
+
+func (kc *KizeoContext) FormDatasSince(formId, date string) ([]*SearchData, error) {
+	as := NewAdvancedSearch().
+		SetFilters(NewAdvancedSearchFilter("update_time", ">", date)).
+		SetOrder(NewAdvancedSearchOrder("id", false))
+	return kc.FormDatasAdvanced(formId, as)
+}
+
+func (kc *KizeoContext) FormDatasAdvanced(formId string, advSearch *AdvancedSearch) ([]*SearchData, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("%sforms/%s/data/advanced", kc.URL, formId)
+	advBody, err := json.Marshal(advSearch)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal request body: %s", err.Error())
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(advBody))
+	if err != nil {
+		return nil, fmt.Errorf("could not create request: %s", err.Error())
+	}
+	kc.addAuth(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP call failed: %s", err.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("response has non ok HTTP status: %d", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	var searchResult SearchResult
+	//// Debug
+	//buf := new(strings.Builder)
+	//_, err = io.Copy(buf, resp.Body)
+	//if err != nil {
+	//	return nil, fmt.Errorf("could not convert res.Body to string.Builder: %s", err.Error())
+	//}
+	//fmt.Printf("%s", buf.String())
+	err = json.NewDecoder(resp.Body).Decode(&searchResult)
+	if err != nil {
+		return nil, fmt.Errorf("decoding response body failed: %s\nRecieved Response: %v", err.Error(), resp.Body)
+	}
+	return searchResult.Data, nil
 }
 
 func (kc *KizeoContext) FormUnreadDatas(formId string) ([]*DataMin, error) {

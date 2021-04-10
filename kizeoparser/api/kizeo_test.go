@@ -28,7 +28,18 @@ func TestKizeoContext_Forms(t *testing.T) {
 
 func TestKizeoContext_FormDatas(t *testing.T) {
 	kc := NewKizeoContext()
-	datas, err := kc.FormDatas("640312")
+	datas, err := kc.FormDatas("630190")
+	if err != nil {
+		t.Fatalf("Forms retured unexpected: %s", err.Error())
+	}
+	for i, data := range datas {
+		t.Logf("form %d: %s", i, data)
+	}
+}
+
+func TestKizeoContext_FormDatasSince(t *testing.T) {
+	kc := NewKizeoContext()
+	datas, err := kc.FormDatasSince("630190", "2021-04-09 13:58:11")
 	if err != nil {
 		t.Fatalf("Forms retured unexpected: %s", err.Error())
 	}
@@ -39,7 +50,7 @@ func TestKizeoContext_FormDatas(t *testing.T) {
 
 func TestKizeoContext_FormUnreadDatas(t *testing.T) {
 	kc := NewKizeoContext()
-	datas, err := kc.FormUnreadDatas("640312")
+	datas, err := kc.FormUnreadDatas("630190")
 	if err != nil {
 		t.Fatalf("Forms retured unexpected: %s", err.Error())
 	}
@@ -50,7 +61,7 @@ func TestKizeoContext_FormUnreadDatas(t *testing.T) {
 
 func TestKizeoContext_FormData(t *testing.T) {
 	kc := NewKizeoContext()
-	formData, err := kc.FormData("640312", "97775188")
+	formData, err := kc.FormData("664879", "102550347")
 	if err != nil {
 		t.Fatalf("Forms retured unexpected: %s", err.Error())
 	}
@@ -60,7 +71,7 @@ func TestKizeoContext_FormData(t *testing.T) {
 
 func TestKizeoContext_FormDataPicture(t *testing.T) {
 	kc := NewKizeoContext()
-	_, info, err := kc.FormDataPicture("640312", "97775188", "c55532f640312pu412860_20210127095039_433bf31c-c7f5-4327-8b99-166cc6e3626a")
+	_, info, err := kc.FormDataPicture("664879", "102550347", "c55532f664879pu447378_20210408132938_c15ef482-abe7-4120-a27e-c23d95999ef2")
 	if err != nil {
 		t.Fatalf("Forms retured unexpected: %s", err.Error())
 	}
