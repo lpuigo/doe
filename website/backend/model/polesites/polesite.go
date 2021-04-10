@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"math"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -428,6 +429,190 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) []string {
 	return ignoreList
 }
 
+// MergeWith appends Poles from nps PoleSite to receiver Polesite.
+//
+// Poles found in nps already declared in ps are compared and updated according to following rules
+//
+// New Poles in nps (not declared in ps) are appened
+//
+// Deleted Poles from nps (that is exists only in ps) are canceled (with NoGoClient status)
+func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
+	sort.Sort(ps)
+	nextID := ps.Poles[len(ps.Poles)-1].Id + 1
+	getNextId := func() int {
+		nextID++
+		return nextID - 1
+	}
+	poleDistance := func(p1, p2 *Pole) float64 {
+		dlat := (p1.Lat - p2.Lat) * 100000.0
+		dlong := (p1.Long - p2.Long) * 100000.0
+		return math.Sqrt(dlat*dlat + dlong*dlong)
+	}
+
+	psDict := ps.getExtendedRefDict()
+	psGf := geoFencer{}
+	psGf.SetPrecision(1)
+	psGfDict, _ := psGf.GetGeoFenceDict(ps)
+
+	npsDict := nps.getExtendedRefDict()
+
+	resMsg := []*ConsistencyMsg{}
+	resPoles := []*Pole{}
+
+	// create sorted ExtRef keys from npsDict
+	npsExtRefList := make([]string, len(npsDict))
+	i := 0
+	for extRef, _ := range npsDict {
+		npsExtRefList[i] = extRef
+		i++
+	}
+	sort.Strings(npsExtRefList)
+
+	// browse npsDict for existing and new poles
+	for _, nExtRef := range npsExtRefList {
+		npole := npsDict[nExtRef]
+		pole, found := psDict[nExtRef]
+		if !found { // npole from nps is a new pole, add it
+			npole.Id = getNextId()
+			resPoles = append(resPoles, npole)
+			// Check for coordinate consistency
+			npoleGf := psGf.GetGeoFence(npole)
+			if nearPoles, foundNearPoles := psGfDict[npoleGf]; foundNearPoles {
+				resMsg = append(resMsg, &ConsistencyMsg{
+					Category: "Warning",
+					Msg:      "Added pole " + nExtRef + " next to existing",
+					Poles:    nearPoles, // poles near added npole
+				})
+				// copy DICT and DA data to added pole
+				if npole.DictRef == "" {
+					npole.DictInfo = nearPoles[0].DictInfo
+					npole.DictRef = nearPoles[0].DictRef
+					npole.DictDate = nearPoles[0].DictDate
+				}
+				if npole.DaQueryDate == "" {
+					npole.DaQueryDate = nearPoles[0].DaQueryDate
+					npole.DaStartDate = nearPoles[0].DaStartDate
+					npole.DaEndDate = nearPoles[0].DaEndDate
+					npole.DaValidation = nearPoles[0].DaValidation
+				}
+				continue
+			}
+			resMsg = append(resMsg, &ConsistencyMsg{
+				Category: "Info",
+				Msg:      "Added pole " + nExtRef,
+				Poles:    []*Pole{}, // add current and previous pole
+			})
+			continue
+		}
+		// npole from nps is also declared in ps
+		delete(psDict, nExtRef) // remove its ref from psDict
+
+		if pole.IsEquivalent(npole) {
+			// no significant change, keep pole as is
+			resPoles = append(resPoles, pole)
+			continue
+		}
+
+		// npole brings some change in from of pole
+		changedInfo := ""
+		if pole.City == "" && npole.City != "" {
+			pole.City = npole.City
+			changedInfo += " City"
+		}
+		if npole.Address == "" && pole.Address != npole.Address {
+			pole.Address = npole.Address
+			changedInfo += " Address"
+		}
+		if pole.Material != npole.Material {
+			pole.Material = npole.Material
+			pole.Comment = npole.Comment
+			changedInfo += " Material"
+		}
+		if pole.Height != npole.Height {
+			pole.Height = npole.Height
+			pole.Comment = npole.Comment
+			changedInfo += " Height"
+		}
+		if npole.DtRef != "" && pole.DtRef != npole.DtRef {
+			if pole.DictRef != "" {
+				pole.Comment += "\nRéférence de DT mise a jour: " + pole.DtRef + " => " + npole.DtRef + ". DICT à renouveller"
+			}
+			changedInfo += " DT"
+			pole.DtRef = npole.DtRef
+		}
+		distance := poleDistance(pole, npole)
+		if distance > 3.0 { // pole position as change > 3m
+			pole.Long = npole.Long
+			pole.Lat = npole.Lat
+			changedInfo += " Position"
+			if pole.DictRef != "" {
+				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
+			}
+		}
+		if pole.State != npole.State {
+			if pole.IsDone() {
+				if !npole.IsTodo() {
+					pole.Comment += fmt.Sprint("\nAppui annulé par le client après réalisation")
+					resMsg = append(resMsg, &ConsistencyMsg{
+						Category: "Warning",
+						Msg:      "Pole " + nExtRef + "was cancelled after being done",
+						Poles:    []*Pole{}, // add current and previous pole
+					})
+				}
+			} else {
+				if (pole.IsTodo() && !npole.IsTodo()) || (!pole.IsTodo() && npole.IsTodo()) {
+					changedInfo += " Status (" + pole.State + " => " + npole.State + ")"
+					pole.State = npole.State
+				}
+			}
+		}
+
+		resPoles = append(resPoles, pole)
+		if changedInfo != "" {
+			resMsg = append(resMsg, &ConsistencyMsg{
+				Category: "Info",
+				Msg:      "Updated pole " + nExtRef + ":" + changedInfo,
+				Poles:    []*Pole{}, // add current and previous pole
+			})
+		}
+	}
+
+	// create sorted ExtRef keys from npsDict
+	psExtRefList := make([]string, len(psDict))
+	i = 0
+	for extRef, _ := range psDict {
+		psExtRefList[i] = extRef
+		i++
+	}
+	sort.Strings(psExtRefList)
+
+	// browse psDict for deleted poles
+	for _, extRef := range psExtRefList {
+		pole := psDict[extRef]
+		resMsg = append(resMsg, &ConsistencyMsg{
+			Category: "Info",
+			Msg:      "Removed pole " + extRef,
+			Poles:    []*Pole{pole}, // add current and previous pole
+		})
+	}
+
+	ps.Poles = resPoles
+	sort.Sort(ps)
+
+	return resMsg
+}
+
+func (ps *PoleSite) getExtendedRefDict() map[string]*Pole {
+	res := make(map[string]*Pole)
+	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
+		res[pole.ExtendedRef()] = pole
+	}
+	return res
+}
+
 // PoleSite Consistency Control
 
 type ConsistencyMsg struct {
@@ -438,7 +623,7 @@ type ConsistencyMsg struct {
 
 func (m ConsistencyMsg) String() string {
 	res := m.Category
-	res += ":" + m.Msg + "\n"
+	res += ": " + m.Msg + "\n"
 	for _, pole := range m.Poles {
 		res += fmt.Sprintf("\tPole (%3d) %s : %s\n", pole.Id, pole.ExtendedRef(), pole.State)
 	}
@@ -527,26 +712,8 @@ func (ps *PoleSite) checkDuplicatedRef() []*ConsistencyMsg {
 
 func (ps *PoleSite) checkDuplicatedLocation(prec float64) []*ConsistencyMsg {
 	res := []*ConsistencyMsg{}
-	type geoFence struct {
-		lat, long int
-	}
-	posDict := make(map[geoFence][]*Pole)
-	duplicateFound := false
-	for _, pole := range ps.Poles {
-		if pole.State == poleconst.StateDeleted {
-			continue
-		}
-		geofence := geoFence{
-			lat:  int(pole.Lat * prec),
-			long: int(pole.Long * prec),
-		}
-		if posDict[geofence] == nil {
-			posDict[geofence] = []*Pole{pole}
-		} else {
-			posDict[geofence] = append(posDict[geofence], pole)
-			duplicateFound = true
-		}
-	}
+	g := geoFencer{prec: prec}
+	posDict, duplicateFound := g.GetGeoFenceDict(ps)
 	if !duplicateFound {
 		return res
 	}
@@ -561,4 +728,43 @@ func (ps *PoleSite) checkDuplicatedLocation(prec float64) []*ConsistencyMsg {
 		})
 	}
 	return res
+}
+
+// geoFence type and methods -------------------------------------------------------------------------------------------
+
+type geoFence struct {
+	lat, long int
+}
+
+type geoFencer struct {
+	prec float64
+}
+
+func (g *geoFencer) SetPrecision(precMeter float64) {
+	g.prec = 100000.0 / precMeter
+}
+
+func (g geoFencer) GetGeoFence(pole *Pole) geoFence {
+	return geoFence{
+		lat:  int(pole.Lat * g.prec),
+		long: int(pole.Long * g.prec),
+	}
+}
+
+func (g geoFencer) GetGeoFenceDict(ps *PoleSite) (map[geoFence][]*Pole, bool) {
+	posDict := make(map[geoFence][]*Pole)
+	duplicateFound := false
+	for _, pole := range ps.Poles {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
+		geofence := g.GetGeoFence(pole)
+		if posDict[geofence] == nil {
+			posDict[geofence] = []*Pole{pole}
+		} else {
+			posDict[geofence] = append(posDict[geofence], pole)
+			duplicateFound = true
+		}
+	}
+	return posDict, duplicateFound
 }

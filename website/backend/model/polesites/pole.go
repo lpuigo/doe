@@ -62,32 +62,54 @@ func (p *Pole) SearchString() string {
 }
 
 func (p *Pole) IsTodo() bool {
+	//switch p.State {
+	////case poleconst.StateNotSubmitted:
+	////case poleconst.StateNoGo:
+	//case poleconst.StateDictToDo:
+	//	return true
+	//case poleconst.StateDaToDo:
+	//	return true
+	//case poleconst.StateDaExpected:
+	//	return true
+	//case poleconst.StatePermissionPending:
+	//	return true
+	//case poleconst.StateToDo:
+	//	return true
+	//case poleconst.StateMarked:
+	//	return true
+	//case poleconst.StateHoleDone:
+	//	return true
+	//case poleconst.StateIncident:
+	//	return true
+	//case poleconst.StateDone:
+	//	return true
+	//case poleconst.StateAttachment:
+	//	return true
+	////case poleconst.StateCancelled:
+	//default:
+	//	return false
+	//}
 	switch p.State {
-	//case poleconst.StateNotSubmitted:
-	//case poleconst.StateNoGo:
-	case poleconst.StateDictToDo:
-		return true
-	case poleconst.StateDaToDo:
-		return true
-	case poleconst.StateDaExpected:
-		return true
-	case poleconst.StatePermissionPending:
-		return true
-	case poleconst.StateToDo:
-		return true
-	case poleconst.StateMarked:
-		return true
-	case poleconst.StateHoleDone:
-		return true
-	case poleconst.StateIncident:
-		return true
-	case poleconst.StateDone:
-		return true
-	case poleconst.StateAttachment:
-		return true
-	//case poleconst.StateCancelled:
-	default:
+	case poleconst.StateNotSubmitted:
 		return false
+	case poleconst.StateNoGo:
+		return false
+	//case poleconst.StateDictToDo:
+	//case poleconst.StateDaToDo:
+	//case poleconst.StateDaExpected:
+	//case poleconst.StatePermissionPending:
+	//case poleconst.StateToDo:
+	//case poleconst.StateMarked:
+	//case poleconst.StateHoleDone:
+	//case poleconst.StateIncident:
+	//case poleconst.StateDone:
+	//case poleconst.StateAttachment:
+	case poleconst.StateCancelled:
+		return false
+	case poleconst.StateDeleted:
+		return false
+	default:
+		return true
 	}
 }
 
@@ -108,6 +130,7 @@ func (p *Pole) IsDone() bool {
 	case poleconst.StateAttachment:
 		return true
 	//case poleconst.StateCancelled:
+	//case poleconst.StateDeleted:
 	default:
 		return false
 	}
@@ -125,6 +148,7 @@ func (p *Pole) IsBlocked() bool {
 		return true
 	//case poleconst.StateDone:
 	//case poleconst.StateCancelled:
+	//case poleconst.StateDeleted:
 	default:
 		return false
 	}
@@ -145,6 +169,7 @@ func (p *Pole) IsBilled() bool {
 	case poleconst.StateAttachment:
 		return true
 	//case poleconst.StateCancelled:
+	//case poleconst.StateDeleted:
 	default:
 		return false
 	}
@@ -179,9 +204,9 @@ const (
 )
 
 func (p *Pole) ExtendedRef() string {
-	ref := p.Ref
+	ref := strings.Trim(p.Ref, " ")
 	if p.Sticker != "" {
-		ref += " " + p.Sticker
+		ref += " " + strings.Trim(p.Sticker, " ")
 	}
 	return ref
 }
@@ -265,14 +290,19 @@ func (p *Pole) Itemize(client, site string, currentBpu *bpu.Bpu) ([]*items.Item,
 	return res, nil
 }
 
-const polePosPrecision float64 = 0.0000000001
+const polePosPrecision float64 = 0.000000001
 
-// IsEqual returns true if both Pole are identical (long and lat must be 1e-10 near, TimeStamp is not checked)
+// IsEqual returns true if both Pole are identical (long and lat must be 1e-9 near, TimeStamp is not checked)
 func (p *Pole) IsEqual(pole *Pole) bool {
 	//Id             int
 	if p.Id != pole.Id {
 		return false
 	}
+	return p.IsEquivalent(pole)
+}
+
+// IsEquivalent returns true if both Pole are identical (long and lat must be 1e-9 near, Id and TimeStamp is not checked)
+func (p *Pole) IsEquivalent(pole *Pole) bool {
 	//Ref            string
 	if p.Ref != pole.Ref {
 		return false
@@ -402,7 +432,11 @@ func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height in
 		case "MI", "MS":
 			mat = poleconst.MaterialMetal
 
-		case "MC":
+		case "MH":
+			mat = poleconst.MaterialMetal
+			*products = append(*products, poleconst.ProductHauban)
+
+		case "MC", "XC":
 			mat = poleconst.MaterialMetal
 			*products = append(*products, poleconst.ProductCouple)
 
@@ -412,10 +446,13 @@ func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height in
 		case "FR":
 			mat = poleconst.MaterialEnforcedComp
 		}
-
-		height = int(targetWords[0][2] - '0')
-		if height == 1 {
-			height = 10
+		if mat != "" {
+			height = int(targetWords[0][2] - '0')
+			if height <= 1 { // 0 or 1
+				height = 10
+			}
+		} else {
+			height = 6
 		}
 	}
 	return

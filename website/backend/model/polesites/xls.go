@@ -404,17 +404,17 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		}
 
 		products := []string{}
-		lowerComment := strings.ToLower(comment)
-		if !strings.Contains(lowerComment, "redressement") && !strings.Contains(lowerComment, "renforcement") {
-			products = append(products, poleconst.ProductCreation)
-			if strings.Contains(lowerComment, "remplacement") {
-				products = append(products, poleconst.ProductReplace)
-			}
-		}
 		height := 0
 		material := getCol(colPoleMaterial)
 		if material != "" && getCol(colPoleHeight) == "" {
 			// Decode CAPFT info
+			lowerComment := strings.ToLower(comment)
+			if !strings.Contains(lowerComment, "redressement") && !strings.Contains(lowerComment, "renforcement") {
+				products = append(products, poleconst.ProductCreation)
+				if strings.Contains(lowerComment, "remplacement") {
+					products = append(products, poleconst.ProductReplace)
+				}
+			}
 			material, height = DecodeCAPFTPoleInfo(material, &products)
 		} else {
 			if getCol(colPoleHeight) != "" {
@@ -423,10 +423,10 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 					return nil, fmt.Errorf("%s: could not parse height '%s': %s", cellCoord(colPoleHeight, line), getCol(colPoleHeight), err.Error())
 				}
 			}
-		}
-		for col := colPoleProduct; col < colPoleProduct+len(productKeys); col++ {
-			if getCol(col) == "1" {
-				products = append(products, productKeys[col])
+			for col := colPoleProduct; col < colPoleProduct+len(productKeys); col++ {
+				if getCol(col) == "1" {
+					products = append(products, productKeys[col])
+				}
 			}
 		}
 

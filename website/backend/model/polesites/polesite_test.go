@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2021-04-02 Peyrolles\Polesite Eiffage Signes-Peyrolles.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteaux Ouest\2021-03-31 Maj appuis\Polesite Sogetrel Poteau-Ouest maj.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -89,6 +89,51 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 
 	// append new Poles to original PoleSiteRecord
 	origPsr.AppendPolesFrom(newPs)
+
+	// Controle result polesite consistency (detects poles with same name, position, ids)
+	PoleSiteConsistency(t, origPsr.PoleSite)
+
+	err = os.Rename(origPsrFile, origPsrFile+".bak")
+	if err != nil {
+		t.Fatalf("Rename origPsrFile returned unexpected: %s", err.Error())
+	}
+	// Persist updated PoleSite
+	err = origPsr.Persist(psDir)
+	if err != nil {
+		t.Fatalf("Persist returned unexpected: %s", err.Error())
+	}
+}
+
+// TestPoleSite_MergeXlsToJson : merge a XLSx PoleSite description to an already provided PoleSite JSON file.
+// New Poles are appended next to already existing ones. Updated Poles are changed. Pole not providied in XLSx file are deleted from target JSON file
+func TestPoleSite_MergeXlsToJson(t *testing.T) {
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteaux Ouest\2021-03-31 Maj appuis`
+	psXlsfile := `Polesite Sogetrel Poteau-Ouest maj gps.xlsx`
+	psJsonFile := `000055.json`
+
+	// Get original PoleSiteRecord
+	origPsrFile := filepath.Join(psDir, psJsonFile)
+	origPsr, err := NewPoleSiteRecordFromFile(origPsrFile)
+	if err != nil {
+		t.Fatalf("NewPoleSiteRecordFromFile returned unexpected: %s", err.Error())
+	}
+	// Get new XLS file and create new PoleSite
+	xf, err := os.Open(filepath.Join(psDir, psXlsfile))
+	if err != nil {
+		t.Fatalf("could not open file: %s", err.Error())
+	}
+
+	newPs, err := FromXLS(xf)
+	if err != nil {
+		t.Fatalf("FromXLS returned unexpected: %s", err.Error())
+	}
+
+	// Merge Xlsx defeind new Poles with original PoleSiteRecord
+	msgs := origPsr.MergeWith(newPs)
+
+	for _, msg := range msgs {
+		fmt.Printf("%s", msg.String())
+	}
 
 	// Controle result polesite consistency (detects poles with same name, position, ids)
 	PoleSiteConsistency(t, origPsr.PoleSite)
