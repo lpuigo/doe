@@ -176,6 +176,9 @@ func (rp *reportParser) readRecord(cols []string) (*PoleRecord, error) {
 		return nil, fmt.Errorf("could not parse longitude '%s' at %s", cols[6], "G"+strconv.Itoa(rp.curRow))
 	}
 	// column J> Image Link
+	if !rec.ExtractPicture { // no image to process, exit now
+		return rec, nil
+	}
 	for colnum := 9; colnum < len(cols); colnum++ {
 		label := cols[colnum]
 		if label == "" {

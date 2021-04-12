@@ -10,9 +10,10 @@ type Date time.Time
 type DateAggreg func(string) string
 
 const (
-	TimeStampLayout string = "2006-01-02 15:04:05.000"
-	TimeJSLayout    string = "2006-01-02"
-	TimeLayout      string = "02/01/2006"
+	TimeStampLayout      string = "2006-01-02 15:04:05.000"
+	TimeStampShortLayout string = "2006-01-02 150405"
+	TimeJSLayout         string = "2006-01-02"
+	TimeLayout           string = "02/01/2006"
 
 	TimeJSMinDate string = "0000-01-01"
 	TimeJSMaxDate string = "9999-12-31"
@@ -47,6 +48,11 @@ func (d Date) String() string {
 // String returns format YYYY-MM-DD HH:MM:SS.mmm date string
 func (d Date) TimeStamp() string {
 	return time.Time(d).Format(TimeStampLayout)
+}
+
+// String returns format YYYY-MM-DD HHMMSS date string
+func (d Date) TimeStampShort() string {
+	return time.Time(d).Format(TimeStampShortLayout)
 }
 
 // TODDMMYYYY returns format DD/MM/YYYY date string

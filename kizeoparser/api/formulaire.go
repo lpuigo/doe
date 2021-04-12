@@ -78,32 +78,3 @@ func (fd *FormulaireData) String() string {
 	}
 	return res.String()
 }
-
-type SearchData struct {
-	ID               string `json:"_id"`
-	RecordNumber     string `json:"_record_number"`
-	FormID           string `json:"_form_id"`
-	UserID           string `json:"_user_id"`
-	UpdateUserID     string `json:"_update_user_id"`
-	CreateTime       string `json:"_create_time"`
-	UpdateTime       string `json:"_update_time"`
-	AnswerTime       string `json:"_answer_time"`
-	UpdateAnswerTime string `json:"_update_answer_time"`
-	History          string `json:"_history"`
-	FormUniqueID     string `json:"_form_unique_id"`
-	UserName         string `json:"_user_name"`
-	UpdateUserName   string `json:"_update_user_name"`
-	SummaryTitle     string `json:"_summary_title"`
-	SummarySubtitle  string `json:"_summary_subtitle"`
-	Comment          string `json:"commentaire"`
-	Geoloc           struct {
-		Lat  string `json:"lat"`
-		Long string `json:"long"`
-	} `json:"_geoloc"`
-}
-
-type SearchResult struct {
-	RecordsTotal    int           `json:"recordsTotal"`
-	RecordsFiltered int           `json:"recordsFiltered"`
-	Data            []*SearchData `json:"data"`
-}

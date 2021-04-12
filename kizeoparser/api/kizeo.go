@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -177,17 +178,16 @@ func (kc *KizeoContext) FormDatasAdvanced(formId string, advSearch *AdvancedSear
 	defer resp.Body.Close()
 
 	var searchResult SearchResult
-	//// Debug
+	// Debug
 	//buf := new(strings.Builder)
-	//_, err = io.Copy(buf, resp.Body)
-	//if err != nil {
-	//	return nil, fmt.Errorf("could not convert res.Body to string.Builder: %s", err.Error())
-	//}
+	//tee := io.TeeReader(resp.Body, buf)
 	//fmt.Printf("%s", buf.String())
+	//err = json.NewDecoder(tee).Decode(&searchResult)
 	err = json.NewDecoder(resp.Body).Decode(&searchResult)
 	if err != nil {
 		return nil, fmt.Errorf("decoding response body failed: %s\nRecieved Response: %v", err.Error(), resp.Body)
 	}
+	//fmt.Printf("%s", buf.String())
 	return searchResult.Data, nil
 }
 
@@ -255,28 +255,37 @@ func (kc *KizeoContext) FormData(formId, dataId string) (*FormulaireData, error)
 }
 
 func (kc *KizeoContext) FormDataPicture(formId, dataId, picId string) (image.Image, string, error) {
-	client := &http.Client{}
-	url := fmt.Sprintf("%sforms/%s/data/%s/medias/%s", kc.URL, formId, dataId, picId)
-	req, err := http.NewRequest("GET", url, nil)
+	rc, err := kc.FormDataPictureStream(formId, dataId, picId)
 	if err != nil {
-		return nil, "", fmt.Errorf("could not create request: %s", err.Error())
+		return nil, "", err
 	}
-	kc.addAuth(req)
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, "", fmt.Errorf("HTTP call failed: %s", err.Error())
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, "", fmt.Errorf("response has non ok HTTP status: %d", resp.StatusCode)
-	}
-	defer resp.Body.Close()
+	defer rc.Close()
 
-	if !strings.HasPrefix(resp.Header.Get("Content-Type"), "image") {
-		return nil, "", fmt.Errorf("response is not an image")
-	}
-	img, err := jpeg.Decode(resp.Body)
+	img, err := jpeg.Decode(rc)
 	if err != nil {
 		return nil, "", fmt.Errorf("decoding image failed : %s", err.Error())
 	}
 	return img, "", nil
+}
+
+func (kc *KizeoContext) FormDataPictureStream(formId, dataId, picId string) (io.ReadCloser, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("%sforms/%s/data/%s/medias/%s", kc.URL, formId, dataId, picId)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request: %s", err.Error())
+	}
+	kc.addAuth(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP call failed: %s", err.Error())
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("response has non ok HTTP status: %d", resp.StatusCode)
+	}
+
+	if !strings.HasPrefix(resp.Header.Get("Content-Type"), "image") {
+		return nil, fmt.Errorf("response is not an image")
+	}
+	return resp.Body, nil
 }

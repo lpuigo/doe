@@ -101,19 +101,6 @@ func (e *Extracter) GetKizeoProgress() error {
 		return fmt.Errorf("kizeo context is not set")
 	}
 
-	doSaveProgress := false
-	defer func() {
-		if !doSaveProgress {
-			return
-		}
-		err := e.SaveProgressFile()
-		if err != nil {
-			fmt.Printf("failed to save progress: %s", err.Error())
-			return
-		}
-		fmt.Printf("progress saved.")
-	}()
-
 	kc := api.NewKizeoContext()
 	for i, form := range e.Progress.Formulaires {
 		fmt.Printf("Kizeo search for '%s': ... ", form.FormName)
@@ -135,7 +122,101 @@ func (e *Extracter) GetKizeoProgress() error {
 				}
 			}
 			e.Progress.Formulaires[i].ExtractionDate = nextDate
-			doSaveProgress = true
+		}
+	}
+	return nil
+}
+
+func (e Extracter) WriteXLSForms() error {
+	timeinfo := date.Now().TimeStampShort()
+	for _, formulaire := range e.Progress.Formulaires {
+		forms, found := e.Progress.forms[formulaire.FormId]
+		if !found {
+			continue
+		}
+		if len(forms) == 0 {
+			continue
+		}
+		file := filepath.Join(e.ConfigPath, timeinfo+"_"+formulaire.FormName+".xlsx")
+		err := writeXlsFormsFile(file, formulaire.FormName, forms)
+		if err != nil {
+			return fmt.Errorf("writeXlsFormsFile returned unexpected: %s", err.Error())
+		}
+	}
+	return nil
+}
+
+func (e *Extracter) ReadXLSForms(timestamp string) error {
+	files, err := filepath.Glob(filepath.Join(e.ConfigPath, timestamp) + "*.xlsx")
+	if err != nil {
+		return fmt.Errorf("glob returned unexpected: %s", err.Error())
+	}
+	for _, file := range files {
+		err = readXlsFormsFile(file, e.Progress.forms)
+		if err != nil {
+			return fmt.Errorf("readXlsFormsFile from '%s' returned: %s", filepath.Base(file), err.Error())
+		}
+	}
+	return nil
+}
+
+func (e *Extracter) ExtractFormsData(timestamp string) error {
+	for formId, records := range e.Progress.forms {
+		formName := e.GetFormNameById(formId)
+		if formName == "" {
+			fmt.Printf("skipping unknown forulaire Id %d\n", formId)
+			continue
+		}
+		path := filepath.Join(e.ConfigPath, "Extract_"+timestamp, formName)
+		err := e.ExtractRecords(path, records)
+		if err != nil {
+			return fmt.Errorf("extractRecords from '%s' returned: %s", formName, err.Error())
+		}
+	}
+	return nil
+}
+
+func (e Extracter) GetFormNameById(formId int) string {
+	for _, formConf := range e.Config.Forms {
+		if formConf.FormId == formId {
+			return formConf.FormName
+		}
+	}
+	return ""
+}
+
+func (e Extracter) ExtractRecords(path string, records []*api.SearchData) error {
+	parallel := 4
+	for _, record := range records {
+		if !record.ExtractData {
+			continue
+		}
+		formId, _ := strconv.Atoi(record.FormID)
+		formName := e.GetFormNameById(formId)
+		sro, ref := record.GetSafeSroRef()
+		recordPath := filepath.Join(path, sro, ref)
+		err := ensure(recordPath)
+		if err != nil {
+			return err
+		}
+		err = record.WriteAllPictures(recordPath, e.KizeoContext, parallel)
+		if err != nil {
+			fmt.Printf("\tWarning: WriteAllImage failed on '%s'.'%s': %s\n", formName, record.SummarySubtitle, err.Error())
+		}
+		err = record.WriteComment(recordPath)
+		if err != nil {
+			fmt.Printf("\tWarning: WriteComment failed on '%s'.'%s': %s\n", formName, record.SummarySubtitle, err.Error())
+		}
+	}
+	return nil
+}
+
+func ensure(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		fmt.Printf("%s: creating '%s'\n", time.Now().Format("2006-01-02 15:04:05.0"), dir)
+		err := os.MkdirAll(dir, os.ModeDir)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
