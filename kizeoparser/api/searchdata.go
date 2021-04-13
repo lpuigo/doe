@@ -130,7 +130,7 @@ func (sd *SearchData) UnmarshalJSON(data []byte) error {
 			uids, _ := itf.(string)
 			switch sd.FormID {
 			case "664879":
-				getImageUIDs("C Avant Tete Poteau", uids)
+				getImageUIDs("A Avant Vue d Ensemble", uids)
 			default:
 				getImageUIDs("G Apres Pied Poteau", uids)
 			}
