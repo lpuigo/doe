@@ -87,6 +87,10 @@ func (amm *AdminModalModel) ReloadData() {
 	go amm.callReloadData()
 }
 
+func (amm *AdminModalModel) SaveArchive() {
+	go amm.callSaveArchive()
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Modal Methods
 
@@ -318,7 +322,27 @@ func (amm *AdminModalModel) callReloadData() {
 		amm.Hide()
 		return
 	}
-	message.SuccesStr(amm.VM, "Rechargement des données effectué")
+	message.NotifySuccess(amm.VM, "Données", "Rechargement des données effectué")
 	amm.VM.Emit("reload")
+	return
+}
+
+func (amm *AdminModalModel) callSaveArchive() {
+	defer func() { amm.Loading = false }()
+	req := xhr.NewRequest("GET", "/api/archive")
+	req.Timeout = tools.TimeOut
+	req.ResponseType = xhr.JSON
+	err := req.Send(nil)
+	if err != nil {
+		message.ErrorStr(amm.VM, "Oups! "+err.Error(), true)
+		amm.Hide()
+		return
+	}
+	if req.Status != tools.HttpOK {
+		message.ErrorRequestMessage(amm.VM, req)
+		amm.Hide()
+		return
+	}
+	message.NotifySuccess(amm.VM, "Archivage", "Sauvegarde des archives demandée")
 	return
 }

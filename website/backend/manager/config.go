@@ -23,4 +23,6 @@ type ManagerConfig struct {
 	VehiculesDir  string
 	TemplatesDir  string
 	SessionKey    string
+
+	SaveArchiveDir string
 }

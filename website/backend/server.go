@@ -33,19 +33,20 @@ const (
 	ServicePort = ":8080"
 	SessionKey  = "SECRET_KEY"
 
-	WorksitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
-	RipsitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
-	PolesitesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
-	FoasitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Foasites`
-	UsersDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
-	ActorsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
-	ActorInfosDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actorinfos`
-	TimeSheetsDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
-	CalendarFile  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
-	ClientsDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
-	GroupsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Groups`
-	VehiculesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Vehicules`
-	TemplatesDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
+	WorksitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Worksites`
+	RipsitesDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
+	PolesitesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Polesites`
+	FoasitesDir    = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Foasites`
+	UsersDir       = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Users`
+	ActorsDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actors`
+	ActorInfosDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Actorinfos`
+	TimeSheetsDir  = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Timesheets`
+	CalendarFile   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Calendar\holidays.json`
+	ClientsDir     = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Clients`
+	GroupsDir      = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Groups`
+	VehiculesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Vehicules`
+	TemplatesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
+	SaveArchiveDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\SaveArchive`
 
 	LaunchWebBrowser = true
 
@@ -74,6 +75,7 @@ func main() {
 			VehiculesDir:      VehiculesDir,
 			TemplatesDir:      TemplatesDir,
 			SessionKey:        SessionKey,
+			SaveArchiveDir:    SaveArchiveDir,
 		},
 		LogFile:          LogFile,
 		ServicePort:      ServicePort,
@@ -166,6 +168,7 @@ func main() {
 
 	// Archives methods
 	router.HandleFunc("/api/{recordtype}/archive", withUserManager("GetRecordsArchive", route.GetRecordsArchive)).Methods("GET")
+	router.HandleFunc("/api/archive", withUserManager("GetSaveArchive", route.GetSaveArchive)).Methods("GET")
 
 	// Attachements methods
 	router.HandleFunc("/api/{sitetype}/{id:[0-9]+}/attach", withUserManager("GetSiteAttachement", route.GetItemizableSiteAttachement)).Methods("GET")

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"io"
+	"os"
+	"path/filepath"
 )
 
 type ArchivableRecordContainer interface {
@@ -39,4 +41,16 @@ func CreateRecordsArchive(writer io.Writer, sites ArchivableRecordContainer) err
 	}
 
 	return zw.Close()
+}
+
+// CreateRecordsArchive writes a zipped archive of all contained record files to the given writer
+func SaveRecordsArchive(path string, sites ArchivableRecordContainer) error {
+
+	archiveFile, err := os.Create(filepath.Join(path, ArchiveName(sites)))
+	if err != nil {
+		return err
+	}
+	defer archiveFile.Close()
+
+	return CreateRecordsArchive(archiveFile, sites)
 }

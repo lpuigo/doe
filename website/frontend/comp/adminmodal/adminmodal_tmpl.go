@@ -19,20 +19,22 @@ const template string = `<el-dialog
     <el-tabs type="border-card" tab-position="left" style="height: 70vh">
 		<!-- ========================================== Admin Tab ================================================= -->
 		<el-tab-pane label="Maintenance" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
-			<el-button type="primary" @click="ReloadData">Rechargement des données</el-button>
+			<el-button type="primary" @click="ReloadData" size="mini">Rechargement des données</el-button>
 			<h4>&nbsp;</h4>
+			<el-button type="primary" @click="SaveArchive" size="mini">Sauvegarde des archives</el-button>
+			<h3>&nbsp;</h3>
 			<h3>Archive des <a href="/api/worksites/archive">Chantiers Orange</a></h3>
 			<h3>Archive des <a href="/api/ripsites/archive">Chantiers RIP</a></h3>
 			<h3>Archive des <a href="/api/polesites/archive">Chantiers Poteaux</a></h3>
 			<h3>Archive des <a href="/api/foasites/archive">Chantiers FOAs</a></h3>
-			<h4>&nbsp;</h4>
+			<h3>&nbsp;</h3>
 			<h3>Archive des <a href="/api/clients/archive">Clients</a></h3>
 			<h3>Archive des <a href="/api/groups/archive">Groupes</a></h3>
 			<h3>Archive des <a href="/api/actors/archive">Equipes</a></h3>
 			<h3>Archive des <a href="/api/actorinfos/archive">Infos RH Equipes</a></h3>
 			<h3>Archive des <a href="/api/timesheet/archive">Pointages Horaire</a></h3>
 			<h3>Archive des <a href="/api/vehicules/archive">Véhicules</a></h3>
-			<h4>&nbsp;</h4>
+			<h3>&nbsp;</h3>
 			<h3>Archive des <a href="/api/users/archive">Utilisateurs</a></h3>
 		</el-tab-pane>
 
