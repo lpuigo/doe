@@ -26,6 +26,12 @@ const template_creation string = `<el-container  style="height: 100%; padding: 0
         ></el-table-column>
 
         <el-table-column
+                label="Prio" prop="Priority" sortable :sort-by="['Priority', 'City', 'Ref']"
+                width="90px" :resizable=true align="center"
+                :filters="FilterList('Priority')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
+        ></el-table-column>
+
+        <el-table-column
                 label="Adresse" prop="Address"
                 width="160px" :resizable=true :show-overflow-tooltip=true
         ></el-table-column>
@@ -171,6 +177,12 @@ const template_followup string = `<el-container  style="height: 100%; padding: 0
                 label="Ville" prop="City" sortable :sort-by="['City', 'Ref']"
                 width="100px" :resizable=true
                 :filters="FilterList('City')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
+        ></el-table-column>
+
+        <el-table-column
+                label="Prio" prop="Priority" sortable :sort-by="['Priority', 'City', 'Ref']"
+                width="90px" :resizable=true align="center"
+                :filters="FilterList('Priority')"	:filter-method="FilterHandler"	filter-placement="bottom-end"
         ></el-table-column>
 
         <el-table-column

@@ -436,7 +436,7 @@ func (ps *PoleSite) UpdateWith(ups *PoleSite) []string {
 // New Poles in nps (not declared in ps) are appened
 //
 // Deleted Poles from nps (that is exists only in ps) are canceled (with NoGoClient status)
-func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
+func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyMsg {
 	sort.Sort(ps)
 	nextID := ps.Poles[len(ps.Poles)-1].Id + 1
 	getNextId := func() int {
@@ -478,6 +478,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 			// Check for coordinate consistency
 			npoleGf := psGf.GetGeoFence(npole)
 			if nearPoles, foundNearPoles := psGfDict[npoleGf]; foundNearPoles {
+				// existing poles are found nearby new pole
 				resMsg = append(resMsg, &ConsistencyMsg{
 					Category: "Warning",
 					Msg:      "Added pole " + nExtRef + " next to existing",
@@ -513,8 +514,27 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 			continue
 		}
 
-		// npole brings some change in from of pole
+		// npole brings insome change compared to pole => update pole with info from npole
 		changedInfo := ""
+		if pole.State != npole.State {
+			if pole.IsDone() {
+				if !npole.IsTodo() {
+					pole.Comment += fmt.Sprint("\nAppui annulé par le client après réalisation")
+					resMsg = append(resMsg, &ConsistencyMsg{
+						Category: "Warning",
+						Msg:      "Pole " + nExtRef + "was cancelled after being done",
+						Poles:    []*Pole{}, // add current and previous pole
+					})
+					// skip all other change for this pole
+					continue
+				}
+			} else {
+				if (pole.IsTodo() && !npole.IsTodo()) || (!pole.IsTodo() && npole.IsTodo()) {
+					changedInfo += " Status (" + pole.State + " => " + npole.State + ")"
+					pole.State = npole.State
+				}
+			}
+		}
 		if pole.City == "" && npole.City != "" {
 			pole.City = npole.City
 			changedInfo += " City"
@@ -533,6 +553,10 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 			pole.Comment = npole.Comment
 			changedInfo += " Height"
 		}
+		productChanges := pole.UpdateProductFrom(npole)
+		if productChanges != "" {
+			changedInfo += " Product (" + productChanges + ")"
+		}
 		if npole.DtRef != "" && pole.DtRef != npole.DtRef {
 			if pole.DictRef != "" {
 				pole.Comment += "\nRéférence de DT mise a jour: " + pole.DtRef + " => " + npole.DtRef + ". DICT à renouveller"
@@ -541,29 +565,12 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 			pole.DtRef = npole.DtRef
 		}
 		distance := poleDistance(pole, npole)
-		if distance > 3.0 { // pole position as change > 3m
+		if distance > 3.0 { // pole position id moved > 3m
 			pole.Long = npole.Long
 			pole.Lat = npole.Lat
 			changedInfo += " Position"
 			if pole.DictRef != "" {
 				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
-			}
-		}
-		if pole.State != npole.State {
-			if pole.IsDone() {
-				if !npole.IsTodo() {
-					pole.Comment += fmt.Sprint("\nAppui annulé par le client après réalisation")
-					resMsg = append(resMsg, &ConsistencyMsg{
-						Category: "Warning",
-						Msg:      "Pole " + nExtRef + "was cancelled after being done",
-						Poles:    []*Pole{}, // add current and previous pole
-					})
-				}
-			} else {
-				if (pole.IsTodo() && !npole.IsTodo()) || (!pole.IsTodo() && npole.IsTodo()) {
-					changedInfo += " Status (" + pole.State + " => " + npole.State + ")"
-					pole.State = npole.State
-				}
 			}
 		}
 
@@ -577,6 +584,19 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 		}
 	}
 
+	defer func() {
+		ps.Poles = resPoles
+		sort.Sort(ps)
+	}()
+
+	if !deleteMissing {
+		// add remaining psDict poles
+		for _, pole := range psDict {
+			resPoles = append(resPoles, pole)
+		}
+		return resMsg
+	}
+
 	// create sorted ExtRef keys from npsDict
 	psExtRefList := make([]string, len(psDict))
 	i = 0
@@ -586,7 +606,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 	}
 	sort.Strings(psExtRefList)
 
-	// browse psDict for deleted poles
+	// browse psDict poles to deleted
 	for _, extRef := range psExtRefList {
 		pole := psDict[extRef]
 		resMsg = append(resMsg, &ConsistencyMsg{
@@ -595,9 +615,6 @@ func (ps *PoleSite) MergeWith(nps *PoleSite) []*ConsistencyMsg {
 			Poles:    []*Pole{pole}, // add current and previous pole
 		})
 	}
-
-	ps.Poles = resPoles
-	sort.Sort(ps)
 
 	return resMsg
 }

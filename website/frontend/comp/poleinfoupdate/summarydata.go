@@ -3,6 +3,7 @@ package poleinfoupdate
 import (
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite"
@@ -38,12 +39,17 @@ type Summarizer struct {
 
 	GetLine   func(*polesite.Pole) string
 	GetColumn func(*polesite.Pole) ([]string, []int)
+
+	Filter     string `js:"Filter"`
+	FilterType string `js:"FilterType"`
 }
 
-func NewSummarizer(lineByCity bool) *Summarizer {
+func NewSummarizer(lineByCity bool, filterType, filter string) *Summarizer {
 	s := &Summarizer{Object: tools.O()}
 	s.Colums = []string{}
 	s.SummaryDatas = []*SummaryData{}
+	s.Filter = filter
+	s.FilterType = filterType
 
 	if lineByCity {
 		s.GetLine = func(pole *polesite.Pole) string {
@@ -212,12 +218,37 @@ func (s *Summarizer) GetCalcColumns() []string {
 	return res
 }
 
+func (s *Summarizer) getFilteredPole(poles []*polesite.Pole) []*polesite.Pole {
+	if s.FilterType == poleconst.FilterValueAll && s.Filter == "" {
+		return poles
+	}
+
+	res := []*polesite.Pole{}
+	expected := strings.ToUpper(strings.Trim(s.Filter, " \t"))
+	filter := func(p *polesite.Pole) bool {
+		sis := p.SearchString(s.FilterType)
+		if sis == "" {
+			return false
+		}
+		return strings.Contains(strings.ToUpper(sis), expected)
+	}
+	for _, pole := range poles {
+		if filter(pole) {
+			res = append(res, pole)
+		}
+	}
+	return res
+}
+
 func (s *Summarizer) Calc(poles []*polesite.Pole) {
 	//lineSet := make(map[string]bool)
 	columnSet := make(map[string]bool)
 	summDatas := map[string]*SummaryData{}
 
-	for _, pole := range poles {
+	for _, pole := range s.getFilteredPole(poles) {
+		if pole.State == poleconst.StateDeleted {
+			continue
+		}
 		line := s.GetLine(pole)
 		sd, found := summDatas[line]
 		if !found {

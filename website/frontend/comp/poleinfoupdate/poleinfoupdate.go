@@ -121,7 +121,7 @@ const template string = `
 				<el-tab-pane label="Statuts" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryStatusInfos"
-							stripe size="mini" show-summary :summary-method="SummaryStatusTotal"
+							stripe :border=true size="mini" show-summary :summary-method="SummaryStatusTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -133,7 +133,8 @@ const template string = `
 							</template>
 						</el-table-column>
 		
-						<el-table-column v-for="status in GetSummaryStatuses()"
+<!--						<el-table-column v-for="status in GetSummaryStatuses()"-->
+						<el-table-column v-for="status in StateCols"
 								:resizable="true" align="center"
 								:label="StateName(status)" width="150px"
 								sortable :sort-by="SortBy(status)"
@@ -148,7 +149,7 @@ const template string = `
 				<el-tab-pane label="Trx à faire" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleActionInfos"
-							stripe size="mini" show-summary :summary-method="SummaryPoleActionTotal"
+							stripe :border=true size="mini" show-summary :summary-method="SummaryPoleActionTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -175,7 +176,7 @@ const template string = `
 				<el-tab-pane label="Trx faits" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleActionDoneInfos"
-							stripe size="mini" show-summary :summary-method="SummaryPoleActionDoneTotal"
+							stripe :border=true size="mini" show-summary :summary-method="SummaryPoleActionDoneTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -202,7 +203,7 @@ const template string = `
 				<el-tab-pane label="Besoin Appuis" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleTypeInfos"
-							stripe size="mini" show-summary :summary-method="SummaryPoleTypeTotal"
+							stripe :border=true size="mini" show-summary :summary-method="SummaryPoleTypeTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -229,7 +230,7 @@ const template string = `
 				<el-tab-pane label="Besoin Matériel" lazy=true style="padding: 0px 0px;">
 					<el-table
 							:data="summaryPoleItemInfos"
-							stripe size="mini" show-summary :summary-method="SummaryPoleItemTotal"
+							stripe :border=true size="mini" show-summary :summary-method="SummaryPoleItemTotal"
 							:default-sort = "{prop: 'Line', order: 'ascending'}"
 					>
 						<el-table-column
@@ -268,7 +269,7 @@ func componentOptions() []hvue.ComponentOption {
 		ripprogressbar.RegisterComponent(),
 		extraactivityupdatetable.RegisterComponent(),
 		hvue.Template(template),
-		hvue.Props("value", "user"),
+		hvue.Props("value", "filter", "filtertype", "user"),
 		hvue.DataFunc(func(vm *hvue.VM) interface{} {
 			return NewPoleInfoUpdateModel(vm)
 		}),
@@ -279,14 +280,15 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryStatusInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer(pium.LineByCity)
+			summer := NewSummarizer(pium.LineByCity, pium.FilterType, pium.Filter)
 			summer.Calc(pium.Polesite.Poles)
-			pium.StateCols = pium.GetSummaryStatuses()
+			//pium.StateCols = pium.GetSummaryStatuses()
+			pium.StateCols = summer.GetCalcColumns()
 			return summer.SummaryDatas
 		}),
 		hvue.Computed("summaryPoleActionInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer(pium.LineByCity)
+			summer := NewSummarizer(pium.LineByCity, pium.FilterType, pium.Filter)
 			summer.GetColumn = GetPoleAction
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleActionCols = summer.GetCalcColumns()
@@ -294,7 +296,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleActionDoneInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer(pium.LineByCity)
+			summer := NewSummarizer(pium.LineByCity, pium.FilterType, pium.Filter)
 			summer.GetColumn = GetPoleActionDone
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleActionDoneCols = summer.GetCalcColumns()
@@ -302,7 +304,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleTypeInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer(pium.LineByCity)
+			summer := NewSummarizer(pium.LineByCity, pium.FilterType, pium.Filter)
 			summer.GetColumn = GetPoleType
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleTypeCols = summer.GetCalcColumns()
@@ -310,7 +312,7 @@ func componentOptions() []hvue.ComponentOption {
 		}),
 		hvue.Computed("summaryPoleItemInfos", func(vm *hvue.VM) interface{} {
 			pium := PoleInfoUpdateModelFromJS(vm.Object)
-			summer := NewSummarizer(pium.LineByCity)
+			summer := NewSummarizer(pium.LineByCity, pium.FilterType, pium.Filter)
 			summer.GetColumn = GetPoleItem
 			summer.Calc(pium.Polesite.Poles)
 			pium.PoleItemCols = summer.GetCalcColumns()
@@ -327,6 +329,9 @@ type PoleInfoUpdateModel struct {
 
 	Polesite *polesite.Polesite `js:"value"`
 	User     *fm.User           `js:"user"`
+
+	Filter     string `js:"filter"`
+	FilterType string `js:"filtertype"`
 
 	StatNbPoleBlocked  int `js:"statNbPoleBlocked"`
 	StatNbPoleDone     int `js:"statNbPoleDone"`
@@ -349,6 +354,9 @@ func NewPoleInfoUpdateModel(vm *hvue.VM) *PoleInfoUpdateModel {
 	pium.VM = vm
 	pium.Polesite = polesite.NewPolesite()
 	pium.User = nil
+
+	pium.Filter = ""
+	pium.FilterType = ""
 
 	pium.StatNbPoleBlocked = 0
 	pium.StatNbPoleDone = 0

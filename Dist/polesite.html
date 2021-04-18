@@ -261,8 +261,10 @@
                             @polesite-archive-refsgroup="HandleArchiveRefsGroup"
                 ></pole-table>
                 <polesite-info-update v-if="ActiveMode == 'Info'" v-model="Polesite"
-                                      :user="User">
-                </polesite-info-update>
+                                      :user="User"
+                                      :filter="Filter"
+                                      :filtertype="FilterType"
+                ></polesite-info-update>
             </el-main>
         </el-container>
     </el-container>
@@ -283,6 +285,6 @@
 <script>
     ELEMENT.locale(ELEMENT.lang.fr)
 </script>
-<script type="text/javascript" src="polesites.js?v=1.28"></script>
+<script type="text/javascript" src="polesites.js?v=1.29"></script>
 
 </html>

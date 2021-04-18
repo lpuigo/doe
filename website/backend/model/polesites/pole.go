@@ -6,6 +6,7 @@ import (
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 	"github.com/lpuig/ewin/doe/website/frontend/model/polesite/poleconst"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,7 @@ type Pole struct {
 	City           string
 	Address        string
 	Sticker        string
+	Priority       int
 	Lat            float64
 	Long           float64
 	State          string
@@ -319,6 +321,10 @@ func (p *Pole) IsEquivalent(pole *Pole) bool {
 	if p.Sticker != pole.Sticker {
 		return false
 	}
+	//Priority        int
+	if p.Priority != pole.Priority {
+		return false
+	}
 	//Lat            float64
 	if math.Abs(p.Lat-pole.Lat) > polePosPrecision {
 		return false
@@ -414,6 +420,70 @@ func (p *Pole) IsEquivalent(pole *Pole) bool {
 	return true
 }
 
+func (p *Pole) UpdateProductFrom(npole *Pole) string {
+	productDict := func(prds []string) map[string]bool {
+		prdDict := make(map[string]bool)
+		for _, prd := range prds {
+			prdDict[prd] = true
+		}
+		return prdDict
+	}
+
+	isMainProduct := func(prd string) bool {
+		switch prd {
+		case
+			poleconst.ProductCreation,
+			poleconst.ProductInRow,
+			poleconst.ProductReplace,
+			poleconst.ProductRemove,
+			poleconst.ProductStraighten,
+			poleconst.ProductMoise,
+			poleconst.ProductCouple,
+			poleconst.ProductHauban,
+			poleconst.ProductFarReplenishment,
+			poleconst.ProductReplenishment:
+			return true
+		default:
+			return false
+		}
+	}
+
+	existingPrdDict := productDict(p.Product)
+	newPrdDict := productDict(npole.Product)
+
+	changes := ""
+
+	// add product from npole
+	for nprd, _ := range newPrdDict {
+		if existingPrdDict[nprd] {
+			continue
+		}
+		existingPrdDict[nprd] = true
+		changes += " +" + nprd
+	}
+
+	// remove main product not in npole
+	for prd, _ := range existingPrdDict {
+		if !isMainProduct(prd) { // not main product must not be remove from existing list
+			continue
+		}
+		if !newPrdDict[prd] {
+			delete(existingPrdDict, prd)
+			changes += " -" + prd
+		}
+	}
+
+	nprdList := make([]string, len(existingPrdDict))
+	i := 0
+	for prd, _ := range existingPrdDict {
+		nprdList[i] = prd
+		i++
+	}
+	sort.Strings(nprdList)
+	p.Product = nprdList
+	return changes
+}
+
 func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height int) {
 	targetWords := strings.Split(strings.Trim(strings.ToUpper(info), " "), " ")
 	if len(targetWords) > 0 && len(targetWords[0]) > 2 {
@@ -424,6 +494,10 @@ func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height in
 		case "BH":
 			mat = poleconst.MaterialWood
 			*products = append(*products, poleconst.ProductHauban)
+
+		case "BM":
+			mat = poleconst.MaterialWood
+			*products = append(*products, poleconst.ProductMoise)
 
 		case "BC":
 			mat = poleconst.MaterialWood

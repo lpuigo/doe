@@ -19,6 +19,7 @@ type Pole struct {
 	City           string   `js:"City"`
 	Address        string   `js:"Address"`
 	Sticker        string   `js:"Sticker"`
+	Priority       int      `js:"Priority"`
 	Lat            float64  `js:"Lat"`
 	Long           float64  `js:"Long"`
 	State          string   `js:"State"`
@@ -52,6 +53,7 @@ func NewPole() *Pole {
 	np.City = ""
 	np.Address = ""
 	np.Sticker = ""
+	np.Priority = 1
 	np.Lat = 0.0
 	np.Long = 0.0
 	np.State = ""
@@ -86,6 +88,7 @@ func (p *Pole) Duplicate(newname string, offset float64) *Pole {
 	np.City = p.City
 	np.Address = p.Address
 	np.Sticker = newname
+	np.Priority = p.Priority
 	np.Lat = p.Lat + offset
 	np.Long = p.Long + offset
 	np.State = p.State
@@ -137,6 +140,7 @@ func (p *Pole) SearchString(filter string) string {
 		return prefix + typ + value
 	}
 	res := searchItem("", poleconst.FilterValueRef, p.GetTitle())
+	res += searchItem("", poleconst.FilterValuePrio, strconv.Itoa(p.Priority))
 	res += searchItem(",", poleconst.FilterValueCity, p.City)
 	res += searchItem(",", poleconst.FilterValueAddr, p.Address)
 	res += searchItem(",", poleconst.FilterValueComment, p.Comment)
@@ -450,6 +454,10 @@ func (p *Pole) CheckProductConsistency() {
 		p.RemoveProduct(poleconst.ProductCreation)
 		p.RemoveProduct(poleconst.ProductReplace)
 	}
+	ucComment := strings.ToUpper(p.Comment)
+	if len(p.Product) == 0 && strings.Contains(ucComment, "REDRESSEM") || strings.Contains(ucComment, "RECALAGE") {
+		p.AddProduct(poleconst.ProductStraighten)
+	}
 }
 
 func (p *Pole) CheckInfoConsistency() {
@@ -475,6 +483,7 @@ func GetFilterTypeValueLabel() []*elements.ValueLabel {
 	return []*elements.ValueLabel{
 		elements.NewValueLabel(poleconst.FilterValueAll, poleconst.FilterLabelAll),
 		elements.NewValueLabel(poleconst.FilterValueRef, poleconst.FilterLabelRef),
+		elements.NewValueLabel(poleconst.FilterValuePrio, poleconst.FilterLabelPrio),
 		elements.NewValueLabel(poleconst.FilterValueCity, poleconst.FilterLabelCity),
 		elements.NewValueLabel(poleconst.FilterValueAddr, poleconst.FilterLabelAddr),
 		elements.NewValueLabel(poleconst.FilterValueComment, poleconst.FilterLabelComment),
