@@ -269,6 +269,9 @@ func (s *Summarizer) Calc(poles []*polesite.Pole) {
 		s.Colums = append(s.Colums, column)
 	}
 	for _, sd := range summDatas {
+		if sd.Total == 0 {
+			continue
+		}
 		s.SummaryDatas = append(s.SummaryDatas, sd)
 	}
 }
