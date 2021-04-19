@@ -205,15 +205,26 @@ func (ps *PoleSite) XLSRefExport(w io.Writer) error {
 	return ToRefExportXLS(w, ps)
 }
 
-// ExportName returns the PoleSite XLS export file name
+// ProgressName returns the PoleSite XLS Progress file name
 func (ps *PoleSite) ProgressName() string {
 	year, weeknum := date.Today().ToTime().ISOWeek()
 	return fmt.Sprintf("Avancement %s-%s (sem%02d-%04d).xlsx", ps.Client, ps.Ref, weeknum, year)
 }
 
-// XLSExport returns the PoleSite XLS export
+// PlanningName returns the PoleSite XLS Planning file name
+func (ps *PoleSite) PlanningName() string {
+	year, weeknum := date.Today().ToTime().ISOWeek()
+	return fmt.Sprintf("Planning %s-%s (sem%02d-%04d).xlsx", ps.Client, ps.Ref, weeknum, year)
+}
+
+// XLSExport returns the PoleSite XLS export with already done poles
 func (ps *PoleSite) XLSProgress(w io.Writer) error {
 	return ToProgressXLS(w, ps)
+}
+
+// XLSPlanning returns the PoleSite XLS export with to be done poles
+func (ps *PoleSite) XLSPlanning(w io.Writer) error {
+	return ToPlanningXLS(w, ps)
 }
 
 // ExportName returns the PoleSite XLS export file name
@@ -448,6 +459,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 		dlong := (p1.Long - p2.Long) * 100000.0
 		return math.Sqrt(dlat*dlat + dlong*dlong)
 	}
+	timestamp := date.Now().TimeStamp()
 
 	psDict := ps.getExtendedRefDict()
 	psGf := geoFencer{}
@@ -514,7 +526,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 			continue
 		}
 
-		// npole brings insome change compared to pole => update pole with info from npole
+		// npole brings in some change compared to pole => update pole with info from npole
 		changedInfo := ""
 		if pole.State != npole.State {
 			if pole.IsDone() {
@@ -573,8 +585,8 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
 			}
 		}
-
-		resPoles = append(resPoles, pole)
+		// change has occured on existing pole : update its timestamp to prevent overwriting
+		pole.TimeStamp = timestamp
 		if changedInfo != "" {
 			resMsg = append(resMsg, &ConsistencyMsg{
 				Category: "Info",
@@ -582,6 +594,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 				Poles:    []*Pole{}, // add current and previous pole
 			})
 		}
+		resPoles = append(resPoles, pole)
 	}
 
 	defer func() {

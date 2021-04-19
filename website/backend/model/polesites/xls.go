@@ -286,6 +286,98 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 	return nil
 }
 
+const (
+	colPlanningPolePrio int = iota + 1
+	colPlanningPoleRef
+	colPlanningPoleSticker
+	colPlanningPoleCity
+	colPlanningPoleAddress
+	colPlanningPoleDate
+	colPlanningPoleComment
+)
+
+const (
+	colPlanningPolePrioWidth     float64 = 6
+	colPlanningPoleRefWidth      float64 = 18
+	colPlanningPoleStickerWidth  float64 = 12
+	colPlanningPoleCityWidth     float64 = 25
+	colPlanningPoleAddressWidth  float64 = 40
+	colPlanningPoleDateWidth     float64 = 12
+	colPlanningPoleCommenttWidth float64 = 60
+)
+
+func ToPlanningXLS(w io.Writer, ps *PoleSite) error {
+	planningPoles := []*Pole{}
+	for _, pole := range ps.Poles {
+		if !(pole.IsTodo() && !pole.IsDone()) {
+			continue
+		}
+		planningPoles = append(planningPoles, pole)
+	}
+
+	sort.Slice(planningPoles, func(i, j int) bool {
+		if planningPoles[i].Priority == planningPoles[j].Priority {
+			return planningPoles[i].ExtendedRef() < planningPoles[j].ExtendedRef()
+		}
+		return planningPoles[i].Priority < planningPoles[j].Priority
+	})
+
+	xf := excelize.NewFile()
+	sheetName := ps.Ref
+	xf.SetSheetName(xf.GetSheetName(0), sheetName)
+
+	getColName := func(col int) string {
+		colName, _ := excelize.ColumnNumberToName(col)
+		return colName
+	}
+
+	// Set Cols width & Format
+	colName := getColName(colPlanningPolePrio)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPolePrioWidth)
+	colName = getColName(colPlanningPoleRef)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleRefWidth)
+	colName = getColName(colPlanningPoleSticker)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleStickerWidth)
+	colName = getColName(colPlanningPoleCity)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleCityWidth)
+	colName = getColName(colPlanningPoleAddress)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleAddressWidth)
+	colName = getColName(colPlanningPoleDate)
+	exp := "dd/mm/yyyy;@"
+	style, _ := xf.NewStyle(&excelize.Style{CustomNumFmt: &exp})
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleDateWidth)
+	xf.SetColStyle(sheetName, colName, style)
+	colName = getColName(colPlanningPoleComment)
+	xf.SetColWidth(sheetName, colName, colName, colPlanningPoleCommenttWidth)
+
+	row := 1
+	// Set Poles infos
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPolePrio), "Prio")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleRef), "Ref")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleSticker), "Appui")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleCity), "Ville")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleAddress), "Adresse")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleDate), "Date")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleComment), "Commentaire")
+	row++
+	for _, pole := range planningPoles {
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPolePrio), pole.Priority)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleRef), pole.Ref)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleSticker), pole.Sticker)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleCity), pole.City)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleAddress), pole.Address)
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleDate), date.DateFrom(pole.Date).ToTime()) // Date
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colPlanningPoleComment), pole.Comment)
+		row++
+	}
+
+	err := xf.Write(w)
+	if err != nil {
+		return fmt.Errorf("could not write XLS file:%s", err.Error())
+	}
+	return nil
+}
+
 func FromXLS(r io.Reader) (*PoleSite, error) {
 	xf, err := excelize.OpenReader(r)
 	if err != nil {

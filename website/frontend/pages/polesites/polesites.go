@@ -235,6 +235,10 @@ func (mpm *MainPageModel) ProgressXlsURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/progress"
 }
 
+func (mpm *MainPageModel) PlanningXlsURL() string {
+	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/planning"
+}
+
 func (mpm *MainPageModel) RefExportXlsURL() string {
 	return "/api/polesites/" + strconv.Itoa(mpm.Polesite.Id) + "/refexport"
 }
