@@ -96,7 +96,7 @@ func (sd *SearchData) UnmarshalJSON(data []byte) error {
 			comment, _ := itf.(string)
 			sd.Comment += comment
 		// Pictures infos
-		case "avant_vue_d_ensemble":
+		case "avant_vue_d_ensemble", "vue_d_ensemble_avant":
 			uids, _ := itf.(string)
 			getImageUIDs("A Avant Vue d Ensemble", uids)
 		case "etiquettes_avant", "etiquettes_avant1":
@@ -114,7 +114,7 @@ func (sd *SearchData) UnmarshalJSON(data []byte) error {
 		case "profondeur_trou":
 			uids, _ := itf.(string)
 			getImageUIDs("E Pendant Profondeur Trou", uids)
-		case "etiquette", "apres_etiquette":
+		case "etiquette", "apres_etiquette", "etiquette_apres":
 			uids, _ := itf.(string)
 			getImageUIDs("F Apres Etiquette", uids)
 		case "apres_pied_du_poteau", "pied_de_poteau_apres":
