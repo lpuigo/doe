@@ -484,6 +484,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 	for _, nExtRef := range npsExtRefList {
 		npole := npsDict[nExtRef]
 		pole, found := psDict[nExtRef]
+		poleDone := false
 		if !found { // npole from nps is a new pole, add it
 			npole.Id = getNextId()
 			resPoles = append(resPoles, npole)
@@ -534,12 +535,13 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 					pole.Comment += fmt.Sprint("\nAppui annulé par le client après réalisation")
 					resMsg = append(resMsg, &ConsistencyMsg{
 						Category: "Warning",
-						Msg:      "Pole " + nExtRef + "was cancelled after being done",
+						Msg:      "Already done pole " + nExtRef + " was cancelled afterward",
 						Poles:    []*Pole{}, // add current and previous pole
 					})
 					// skip all other change for this pole
 					continue
 				}
+				poleDone = true
 			} else {
 				if (pole.IsTodo() && !npole.IsTodo()) || (!pole.IsTodo() && npole.IsTodo()) {
 					changedInfo += " Status (" + pole.State + " => " + npole.State + ")"
@@ -588,9 +590,13 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 		// change has occured on existing pole : update its timestamp to prevent overwriting
 		pole.TimeStamp = timestamp
 		if changedInfo != "" {
+			prefix := "Updated pole "
+			if poleDone {
+				prefix = "Updated done pole "
+			}
 			resMsg = append(resMsg, &ConsistencyMsg{
 				Category: "Info",
-				Msg:      "Updated pole " + nExtRef + ":" + changedInfo,
+				Msg:      prefix + nExtRef + ":" + changedInfo,
 				Poles:    []*Pole{}, // add current and previous pole
 			})
 		}
