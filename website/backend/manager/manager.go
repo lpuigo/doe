@@ -2,10 +2,10 @@ package manager
 
 import (
 	"fmt"
-
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/model/actorinfos"
 	"github.com/lpuig/ewin/doe/website/backend/model/actors"
+	"github.com/lpuig/ewin/doe/website/backend/model/archives"
 	"github.com/lpuig/ewin/doe/website/backend/model/clients"
 	doc "github.com/lpuig/ewin/doe/website/backend/model/doctemplate"
 	fs "github.com/lpuig/ewin/doe/website/backend/model/foasites"
@@ -224,5 +224,30 @@ func (m *Manager) Reload() error {
 	}
 	logger.Entry("Server").LogInfo(fmt.Sprintf("loaded %d Vehicules", m.Vehicules.NbVehicules()))
 
+	return nil
+}
+
+func (m *Manager) SaveArchive() error {
+	failed := ""
+	saveArchive := func(sites archives.ArchivableRecordContainer) {
+		err := archives.SaveRecordsArchive(m.Config.SaveArchiveDir, sites)
+		if err != nil {
+			failed += " " + sites.GetName()
+		}
+	}
+	saveArchive(m.Worksites)
+	saveArchive(m.Ripsites)
+	saveArchive(m.Polesites)
+	saveArchive(m.Foasites)
+	saveArchive(m.Clients)
+	saveArchive(m.Actors)
+	saveArchive(m.ActorInfos)
+	saveArchive(m.TimeSheets)
+	saveArchive(m.Groups)
+	saveArchive(m.Vehicules)
+	saveArchive(m.Users)
+	if failed != "" {
+		return fmt.Errorf("failed to save%s", failed)
+	}
 	return nil
 }

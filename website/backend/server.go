@@ -12,8 +12,11 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"os/exec"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -82,12 +85,7 @@ func createEmptyRouter(conf *Conf) http.Handler {
 }
 
 // createRouter sets a router with all functional route  using given configuration
-func createRouter(conf *Conf) http.Handler {
-	mgr, err := manager.NewManager(conf.ManagerConfig)
-	if err != nil {
-		logger.Entry("Server").Fatal(err)
-	}
-
+func createRouter(mgr *manager.Manager, conf *Conf) http.Handler {
 	withManager := func(hf route.MgrHandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			hf(mgr.Clone(), w, r)
@@ -216,6 +214,25 @@ func makeServerFromMux(mux http.Handler) *http.Server {
 	}
 }
 
+func catchArchiveRequest(mgr *manager.Manager) {
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.Signal(10)) // notify SIGUSR1
+
+	go func() {
+		for {
+			<-c // wait for SIGUSR1 to happen
+			logmsg := logger.TimedEntry("Signal")
+			err := mgr.SaveArchive()
+			if err == nil {
+				logmsg.LogInfo("SaveArchive")
+			} else {
+				logmsg.LogErr(err)
+			}
+			logmsg.Log()
+		}
+	}()
+}
+
 func main() {
 	conf := &Conf{
 		ManagerConfig: manager.ManagerConfig{
@@ -258,7 +275,13 @@ func main() {
 	defer logFile.Close()
 	logger.Entry("Server").LogInfo("============================= SERVER STARTING ==================================")
 
-	router := createRouter(conf)
+	mgr, err := manager.NewManager(conf.ManagerConfig)
+	if err != nil {
+		logger.Entry("Server").Fatal(err)
+	}
+	router := createRouter(mgr, conf)
+
+	catchArchiveRequest(mgr)
 
 	wg := sync.WaitGroup{}
 

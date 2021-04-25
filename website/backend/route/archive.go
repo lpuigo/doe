@@ -61,25 +61,8 @@ func GetSaveArchive(mgr *mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logmsg := logger.TimedEntry("Route").AddRequest("GetSaveArchive").AddUser(mgr.CurrentUser.Name)
 	defer logmsg.Log()
 
-	failed := ""
-	saveArchive := func(sites archives.ArchivableRecordContainer) {
-		err := archives.SaveRecordsArchive(mgr.Config.SaveArchiveDir, sites)
-		if err != nil {
-			failed += " " + sites.GetName()
-		}
-	}
-	saveArchive(mgr.Worksites)
-	saveArchive(mgr.Ripsites)
-	saveArchive(mgr.Polesites)
-	saveArchive(mgr.Foasites)
-	saveArchive(mgr.Clients)
-	saveArchive(mgr.Actors)
-	saveArchive(mgr.ActorInfos)
-	saveArchive(mgr.TimeSheets)
-	saveArchive(mgr.Groups)
-	saveArchive(mgr.Vehicules)
-	saveArchive(mgr.Users)
-	if failed != "" {
-		logmsg.LogError("failed to save" + failed)
+	err := mgr.SaveArchive()
+	if err != nil {
+		logmsg.LogErr(err)
 	}
 }
