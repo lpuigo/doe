@@ -454,6 +454,11 @@ func (p *Pole) CheckProductConsistency() {
 		p.RemoveProduct(poleconst.ProductCreation)
 		p.RemoveProduct(poleconst.ProductReplace)
 	}
+	if p.HasProduct(poleconst.ProductTightenHauban) {
+		p.RemoveProduct(poleconst.ProductCreation)
+		p.RemoveProduct(poleconst.ProductReplace)
+		p.RemoveProduct(poleconst.ProductHauban)
+	}
 	ucComment := strings.ToUpper(p.Comment)
 	if len(p.Product) == 0 && strings.Contains(ucComment, "REDRESSEM") || strings.Contains(ucComment, "RECALAGE") {
 		p.AddProduct(poleconst.ProductStraighten)
@@ -579,6 +584,7 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.ProductCouple, poleconst.ProductCouple),
 		elements.NewValueLabel(poleconst.ProductMoise, poleconst.ProductMoise),
 		elements.NewValueLabel(poleconst.ProductHauban, poleconst.ProductHauban),
+		elements.NewValueLabel(poleconst.ProductTightenHauban, poleconst.ProductTightenHauban),
 		elements.NewValueLabel(poleconst.ProductStraighten, poleconst.ProductStraighten),
 		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
 		elements.NewValueLabel(poleconst.ProductInRow, poleconst.ProductInRow),

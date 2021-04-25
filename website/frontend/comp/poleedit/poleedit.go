@@ -98,7 +98,7 @@ const template string = `<div>
         <el-col :span="6" class="align-right">Priorité:</el-col>
         <el-col :span="9">
 			<el-input-number v-model="editedpolemarker.Pole.Priority"
-							:min="1" :max="10"
+							:min="0" :max="99"
 							size="mini" style="width: 100%;"
 			></el-input-number>
         </el-col>

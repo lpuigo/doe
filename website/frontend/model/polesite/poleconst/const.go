@@ -93,6 +93,7 @@ const (
 	ProductMoise            string = "Moisé"
 	ProductCouple           string = "Couplé"
 	ProductHauban           string = "Haubané"
+	ProductTightenHauban    string = "Tension Hauban"
 	ProductReplenishment    string = "Réappro."
 	ProductFarReplenishment string = "Réappro. (>50km)"
 	ProductCoated           string = "Enrobé"
