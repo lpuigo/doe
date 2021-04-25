@@ -83,6 +83,14 @@ func (e *Record) LogError(err string) {
 	e.Log()
 }
 
+func (e *Record) LogErr(err error) {
+	if err == nil {
+		return
+	}
+	e.Error = err.Error()
+	e.Log()
+}
+
 func (e *Record) Fatal(err error) {
 	e.Error = err.Error()
 	log.Fatal(e.getMsg())

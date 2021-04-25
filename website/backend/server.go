@@ -1,28 +1,35 @@
 package main
 
 import (
-	"net/http"
-	_ "net/http/pprof"
-	"os/exec"
-
+	"crypto/tls"
+	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/lpuig/ewin/doe/website/backend/config"
 	"github.com/lpuig/ewin/doe/website/backend/logger"
 	"github.com/lpuig/ewin/doe/website/backend/manager"
 	"github.com/lpuig/ewin/doe/website/backend/route"
+	"golang.org/x/crypto/acme/autocert"
+	"net/http"
+	_ "net/http/pprof"
+	"os/exec"
+	"sync"
+	"time"
 )
 
 type Conf struct {
 	manager.ManagerConfig
 
 	LogFile     string
+	ServiceHost string
 	ServicePort string
 	AssetsDir   string
 	AssetsRoot  string
 	RootDir     string
 
-	LaunchWebBrowser bool
+	LaunchWebBrowser    bool
+	InProduction        bool
+	RedirectHTTPToHTTPS bool
 }
 
 const (
@@ -30,6 +37,7 @@ const (
 	AssetsRoot = `/Assets/`
 	RootDir    = `./Dist`
 
+	ServiceHost = "vps642354.ovh.net"
 	ServicePort = ":8080"
 	SessionKey  = "SECRET_KEY"
 
@@ -48,51 +56,33 @@ const (
 	TemplatesDir   = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\DocTemplates`
 	SaveArchiveDir = `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\SaveArchive`
 
-	LaunchWebBrowser = true
+	LaunchWebBrowser    = true
+	InProduction        = false
+	RedirectHTTPToHTTPS = false
 
 	ConfigFile = `./config.json`
 	LogFile    = `./server.log`
 )
 
-func main() {
-	conf := &Conf{
-		ManagerConfig: manager.ManagerConfig{
-			WorksitesDir:      WorksitesDir,
-			IsWorksitesActive: true,
-			RipsitesDir:       RipsitesDir,
-			IsRipsitesActive:  true,
-			PolesitesDir:      PolesitesDir,
-			IsPolesitesActive: true,
-			FoasitesDir:       FoasitesDir,
-			IsFoasitesActive:  true,
-			UsersDir:          UsersDir,
-			ActorsDir:         ActorsDir,
-			ActorInfosDir:     ActorInfosDir,
-			TimeSheetsDir:     TimeSheetsDir,
-			CalendarFile:      CalendarFile,
-			ClientsDir:        ClientsDir,
-			GroupsDir:         GroupsDir,
-			VehiculesDir:      VehiculesDir,
-			TemplatesDir:      TemplatesDir,
-			SessionKey:        SessionKey,
-			SaveArchiveDir:    SaveArchiveDir,
-		},
-		LogFile:          LogFile,
-		ServicePort:      ServicePort,
-		AssetsDir:        AssetsDir,
-		AssetsRoot:       AssetsRoot,
-		RootDir:          RootDir,
-		LaunchWebBrowser: LaunchWebBrowser,
+func LaunchPageInBrowser(c *Conf) error {
+	if !c.LaunchWebBrowser {
+		return nil
 	}
+	cmd := exec.Command("cmd", "/c", "start", "http://localhost"+c.ServicePort)
+	return cmd.Start()
+}
 
-	if err := config.SetFromFile(ConfigFile, conf); err != nil {
-		logger.Entry("Server").Fatal(err)
-	}
+// createEmptyRouter sets a default router
+func createEmptyRouter(conf *Conf) http.Handler {
+	router := mux.NewRouter()
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello Secure World")
+	})
+	return router
+}
 
-	logFile := logger.StartLog(conf.LogFile)
-	defer logFile.Close()
-	logger.Entry("Server").LogInfo("============================= SERVER STARTING ==================================")
-
+// createRouter sets a router with all functional route  using given configuration
+func createRouter(conf *Conf) http.Handler {
 	mgr, err := manager.NewManager(conf.ManagerConfig)
 	if err != nil {
 		logger.Entry("Server").Fatal(err)
@@ -211,18 +201,113 @@ func main() {
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir(conf.RootDir)))
 
 	gzipedrouter := handlers.CompressHandler(router)
-	//gzipedrouter := router
 
-	LaunchPageInBrowser(conf)
-	logger.Entry("Server").LogInfo("listening on " + conf.ServicePort)
-	logger.Entry("Server").LogInfo("============================== SERVER READY ====================================")
-	logger.Entry("Server").Fatal(http.ListenAndServe(conf.ServicePort, gzipedrouter))
+	return gzipedrouter
 }
 
-func LaunchPageInBrowser(c *Conf) error {
-	if !c.LaunchWebBrowser {
-		return nil
+func makeServerFromMux(mux http.Handler) *http.Server {
+	// set timeouts so that a slow or malicious client doesn't
+	// hold resources forever
+	return &http.Server{
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Handler:      mux,
 	}
-	cmd := exec.Command("cmd", "/c", "start", "http://localhost"+c.ServicePort)
-	return cmd.Start()
+}
+
+func main() {
+	conf := &Conf{
+		ManagerConfig: manager.ManagerConfig{
+			WorksitesDir:      WorksitesDir,
+			IsWorksitesActive: true,
+			RipsitesDir:       RipsitesDir,
+			IsRipsitesActive:  true,
+			PolesitesDir:      PolesitesDir,
+			IsPolesitesActive: true,
+			FoasitesDir:       FoasitesDir,
+			IsFoasitesActive:  true,
+			UsersDir:          UsersDir,
+			ActorsDir:         ActorsDir,
+			ActorInfosDir:     ActorInfosDir,
+			TimeSheetsDir:     TimeSheetsDir,
+			CalendarFile:      CalendarFile,
+			ClientsDir:        ClientsDir,
+			GroupsDir:         GroupsDir,
+			VehiculesDir:      VehiculesDir,
+			TemplatesDir:      TemplatesDir,
+			SessionKey:        SessionKey,
+			SaveArchiveDir:    SaveArchiveDir,
+		},
+		LogFile:             LogFile,
+		ServiceHost:         ServiceHost,
+		ServicePort:         ServicePort,
+		AssetsDir:           AssetsDir,
+		AssetsRoot:          AssetsRoot,
+		RootDir:             RootDir,
+		LaunchWebBrowser:    LaunchWebBrowser,
+		InProduction:        InProduction,
+		RedirectHTTPToHTTPS: RedirectHTTPToHTTPS,
+	}
+
+	if err := config.SetFromFile(ConfigFile, conf); err != nil {
+		logger.Entry("Server").Fatal(err)
+	}
+
+	logFile := logger.StartLog(conf.LogFile)
+	defer logFile.Close()
+	logger.Entry("Server").LogInfo("============================= SERVER STARTING ==================================")
+
+	router := createRouter(conf)
+
+	wg := sync.WaitGroup{}
+
+	if conf.InProduction {
+		logger.Entry("Server").LogInfo("Init Production setup")
+		//hostPolicy := func(ctx context.Context, host string) error {
+		//	if host == conf.ServiceHost {
+		//		return nil
+		//	}
+		//	err := fmt.Errorf("acme/autocert: only %s host is allowed", conf.ServiceHost)
+		//	logger.Entry("Server").LogError(err.Error())
+		//	return err
+		//}
+
+		dataDir := "."
+		certManager := &autocert.Manager{
+			Prompt: autocert.AcceptTOS,
+			//HostPolicy: hostPolicy,
+			Cache: autocert.DirCache(dataDir),
+		}
+
+		httpsSrv := makeServerFromMux(router)
+		httpsSrv.Addr = ":443"
+		httpsSrv.TLSConfig = &tls.Config{GetCertificate: certManager.GetCertificate}
+
+		wg.Add(2)
+		go func() {
+			logger.Entry("Server").LogInfo("listening HTTPS on " + httpsSrv.Addr)
+			logger.Entry("Server").LogErr(httpsSrv.ListenAndServeTLS("", ""))
+			wg.Done()
+		}()
+		go func() {
+			logger.Entry("Server").LogInfo("listening HTTP on :80 for certification handshake")
+			logger.Entry("Server").LogErr(http.ListenAndServe(":80", certManager.HTTPHandler(nil)))
+			wg.Done()
+		}()
+	} else {
+		logger.Entry("Server").LogInfo("Init Non Production setup")
+		httpSrv := makeServerFromMux(router)
+		httpSrv.Addr = conf.ServicePort
+		wg.Add(1)
+		go func() {
+			logger.Entry("Server").LogInfo("listening HTTP on " + httpSrv.Addr)
+			logger.Entry("Server").LogErr(httpSrv.ListenAndServe())
+			wg.Done()
+		}()
+	}
+
+	logger.Entry("Server").LogInfo("============================== SERVER READY ====================================")
+	LaunchPageInBrowser(conf)
+	wg.Wait()
 }
