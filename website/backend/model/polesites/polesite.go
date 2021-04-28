@@ -471,75 +471,21 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 	resMsg := []*ConsistencyMsg{}
 	resPoles := []*Pole{}
 
-	// create sorted ExtRef keys from npsDict
-	npsExtRefList := make([]string, len(npsDict))
-	i := 0
-	for extRef, _ := range npsDict {
-		npsExtRefList[i] = extRef
-		i++
-	}
-	sort.Strings(npsExtRefList)
-
-	// browse npsDict for existing and new poles
-	for _, nExtRef := range npsExtRefList {
-		npole := npsDict[nExtRef]
-		pole, found := psDict[nExtRef]
-		poleDone := false
-		if !found { // npole from nps is a new pole, add it
-			npole.Id = getNextId()
-			resPoles = append(resPoles, npole)
-			// Check for coordinate consistency
-			npoleGf := psGf.GetGeoFence(npole)
-			if nearPoles, foundNearPoles := psGfDict[npoleGf]; foundNearPoles {
-				// existing poles are found nearby new pole
-				resMsg = append(resMsg, &ConsistencyMsg{
-					Category: "Warning",
-					Msg:      "Added pole " + nExtRef + " next to existing",
-					Poles:    nearPoles, // poles near added npole
-				})
-				// copy DICT and DA data to added pole
-				if npole.DictRef == "" {
-					npole.DictInfo = nearPoles[0].DictInfo
-					npole.DictRef = nearPoles[0].DictRef
-					npole.DictDate = nearPoles[0].DictDate
-				}
-				if npole.DaQueryDate == "" {
-					npole.DaQueryDate = nearPoles[0].DaQueryDate
-					npole.DaStartDate = nearPoles[0].DaStartDate
-					npole.DaEndDate = nearPoles[0].DaEndDate
-					npole.DaValidation = nearPoles[0].DaValidation
-				}
-				continue
-			}
-			resMsg = append(resMsg, &ConsistencyMsg{
-				Category: "Info",
-				Msg:      "Added pole " + nExtRef,
-				Poles:    []*Pole{}, // add current and previous pole
-			})
-			continue
-		}
-		// npole from nps is also declared in ps
-		delete(psDict, nExtRef) // remove its ref from psDict
-
-		if pole.IsEquivalent(npole) {
-			// no significant change, keep pole as is
-			resPoles = append(resPoles, pole)
-			continue
-		}
-
-		// npole brings in some change compared to pole => update pole with info from npole
+	appendUpdatedPoleWith := func(pole, npole *Pole) {
+		defer func() { resPoles = append(resPoles, pole) }()
 		changedInfo := ""
+		poleDone := false
 		if pole.State != npole.State {
 			if pole.IsDone() {
 				if !npole.IsTodo() {
 					pole.Comment += fmt.Sprint("\nAppui annulé par le client après réalisation")
 					resMsg = append(resMsg, &ConsistencyMsg{
 						Category: "Warning",
-						Msg:      "Already done pole " + nExtRef + " was cancelled afterward",
-						Poles:    []*Pole{}, // add current and previous pole
+						Msg:      fmt.Sprintf("Already done pole '%s' was cancelled afterward", pole.ExtendedRef()),
+						Poles:    []*Pole{},
 					})
-					// skip all other change for this pole
-					continue
+					// skip all other change for this pole and add it to result
+					return
 				}
 				poleDone = true
 			} else {
@@ -573,7 +519,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 		}
 		if npole.DtRef != "" && pole.DtRef != npole.DtRef {
 			if pole.DictRef != "" {
-				pole.Comment += "\nRéférence de DT mise a jour: " + pole.DtRef + " => " + npole.DtRef + ". DICT à renouveller"
+				pole.Comment += fmt.Sprintf("\nRéférence de DT mise a jour: '%s' => '%s'. DICT à renouveller", pole.DtRef, npole.DtRef)
 			}
 			changedInfo += " DT"
 			pole.DtRef = npole.DtRef
@@ -587,7 +533,6 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
 			}
 		}
-		// change has occured on existing pole : update its timestamp to prevent overwriting
 		pole.TimeStamp = timestamp
 		if changedInfo != "" {
 			prefix := "Updated pole "
@@ -596,11 +541,100 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 			}
 			resMsg = append(resMsg, &ConsistencyMsg{
 				Category: "Info",
-				Msg:      prefix + nExtRef + ":" + changedInfo,
-				Poles:    []*Pole{}, // add current and previous pole
+				Msg:      prefix + npole.ExtendedRef() + ":" + changedInfo,
+				Poles:    []*Pole{},
 			})
 		}
-		resPoles = append(resPoles, pole)
+		// add it to result
+		return
+	}
+
+	// create sorted ExtRef keys from npsDict
+	npsExtRefList := make([]string, len(npsDict))
+	i := 0
+	for extRef, _ := range npsDict {
+		npsExtRefList[i] = extRef
+		i++
+	}
+	sort.Strings(npsExtRefList)
+
+	// browse npsDict for existing and new poles
+	for _, nExtRef := range npsExtRefList {
+		npole := npsDict[nExtRef]
+		pole, found := psDict[nExtRef]
+		if !found {
+			// npole from nps is a new pole
+			// Check for coordinate consistency
+			npoleGf := psGf.GetGeoFence(npole)
+			if nearPoles, foundNearPoles := psGfDict[npoleGf]; foundNearPoles {
+				// existing poles are found nearby new pole
+				// check if newPole is an existing pole with new name
+				matchNeighbor := false
+				for _, nearPole := range nearPoles {
+					if nearPole.Ref == npole.Ref && (strings.Contains(nearPole.Sticker, npole.Sticker) || strings.Contains(nearPole.Sticker, npole.Sticker)) {
+						// npole has same Ref, and npole.Sticker name match nearPole.Sticker
+						nbgExtRef := nearPole.ExtendedRef()
+						resMsg = append(resMsg, &ConsistencyMsg{
+							Category: "Warning",
+							Msg:      fmt.Sprintf("Pole '%s' updated with info from pole '%s'", nbgExtRef, nExtRef),
+							Poles:    nearPoles, // poles near added npole
+						})
+						// update nearPole with npole info and add it to resPoles
+						appendUpdatedPoleWith(nearPole, npole)
+						// remove matched neighboring pole from psDict
+						delete(psDict, nbgExtRef)
+						matchNeighbor = true
+						break
+					}
+				}
+				if matchNeighbor {
+					continue
+				}
+				// process unmatched neighbor (first one)
+				resMsg = append(resMsg, &ConsistencyMsg{
+					Category: "Warning",
+					Msg:      "Added pole " + nExtRef + " next to existing pole(s)",
+					Poles:    nearPoles, // poles near added npole
+				})
+				// copy DICT and DA data to added pole
+				if npole.DictRef == "" {
+					npole.DictInfo = nearPoles[0].DictInfo
+					npole.DictRef = nearPoles[0].DictRef
+					npole.DictDate = nearPoles[0].DictDate
+				}
+				if npole.DaQueryDate == "" {
+					npole.DaQueryDate = nearPoles[0].DaQueryDate
+					npole.DaStartDate = nearPoles[0].DaStartDate
+					npole.DaEndDate = nearPoles[0].DaEndDate
+					npole.DaValidation = nearPoles[0].DaValidation
+				}
+				// Add npole to resPoles
+				npole.Id = getNextId()
+				resPoles = append(resPoles, npole)
+				continue
+			}
+			// npole has no neighboring existing pole
+			resMsg = append(resMsg, &ConsistencyMsg{
+				Category: "Info",
+				Msg:      "Added pole " + nExtRef,
+				Poles:    []*Pole{}, // add current and previous pole
+			})
+			// Add npole to resPoles
+			npole.Id = getNextId()
+			resPoles = append(resPoles, npole)
+			continue
+		}
+		// npole from nps is also declared in ps
+		delete(psDict, nExtRef) // remove its ref from psDict
+
+		if pole.IsEquivalent(npole) {
+			// no significant change, keep pole as is
+			resPoles = append(resPoles, pole)
+			continue
+		}
+
+		// npole brings in some change compared to pole => update pole with info from npole and add it to resPoles
+		appendUpdatedPoleWith(pole, npole)
 	}
 
 	defer func() {
@@ -625,7 +659,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 	}
 	sort.Strings(psExtRefList)
 
-	// browse psDict poles to deleted
+	// browse psDict remaining poles to delete
 	for _, extRef := range psExtRefList {
 		pole := psDict[extRef]
 		resMsg = append(resMsg, &ConsistencyMsg{

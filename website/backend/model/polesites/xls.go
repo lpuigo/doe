@@ -498,10 +498,15 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		products := []string{}
 		height := 0
 		material := getCol(colPoleMaterial)
+		lowerComment := strings.ToLower(comment)
 		if material != "" && getCol(colPoleHeight) == "" {
 			// Decode CAPFT info
-			lowerComment := strings.ToLower(comment)
-			if !strings.Contains(lowerComment, "redressement") && !strings.Contains(lowerComment, "renforcement") {
+			switch {
+			case strings.Contains(lowerComment, "renforcement"):
+				// no main product, additionnal product will be added by parsing mat column
+			case strings.Contains(lowerComment, "redressement") || strings.Contains(lowerComment, "recalage"):
+				products = append(products, poleconst.ProductStraighten)
+			default:
 				products = append(products, poleconst.ProductCreation)
 				if strings.Contains(lowerComment, "remplacement") {
 					products = append(products, poleconst.ProductReplace)
@@ -509,6 +514,9 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 			}
 			material, height = DecodeCAPFTPoleInfo(material, &products)
 		} else {
+			if material == "" && (strings.Contains(lowerComment, "redressement") || strings.Contains(lowerComment, "recalage")) {
+				products = append(products, poleconst.ProductStraighten)
+			}
 			if getCol(colPoleHeight) != "" {
 				height, err = strconv.Atoi(getCol(colPoleHeight))
 				if err != nil {

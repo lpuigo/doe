@@ -66,9 +66,9 @@ func TestPolesiteFromXLS(t *testing.T) {
 // TestPoleSite_AppendXlsToJson : add a XLSx PoleSite description to an already provided PoleSite JSON file.
 // New Poles are appended next to already existing ones
 func TestPoleSite_AppendXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2021-04-02 Peyrolles`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteaux Ouest\2021-04-13 Ordre traitement appuis`
 	psXlsfile := `Polesite Eiffage Signes-Peyrolles.xlsx`
-	psJsonFile := `000051.json`
+	psJsonFile := `000055.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)
@@ -91,7 +91,7 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 	origPsr.AppendPolesFrom(newPs)
 
 	// Controle result polesite consistency (detects poles with same name, position, ids)
-	PoleSiteConsistency(t, origPsr.PoleSite)
+	PoleSiteConsistency(t, origPsr.PoleSite, true)
 
 	err = os.Rename(origPsrFile, origPsrFile+".bak")
 	if err != nil {
@@ -107,9 +107,9 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 // TestPoleSite_MergeXlsToJson : merge a XLSx PoleSite description to an already provided PoleSite JSON file.
 // New Poles are appended next to already existing ones. Updated Poles are changed. Pole not providied in XLSx file are deleted from target JSON file
 func TestPoleSite_MergeXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Fiitelcom\2021-04-15 Maj Remplacements`
-	psXlsfile := `Polesite Fiitelcom Poteau-SRO 88-025 rempl.xlsx`
-	psJsonFile := `000026.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteaux Ouest\2021-04-13 Ordre traitement appuis`
+	psXlsfile := `Polesite Sogetrel Poteau-Ouest maj.xlsx`
+	psJsonFile := `000055.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)
@@ -136,7 +136,7 @@ func TestPoleSite_MergeXlsToJson(t *testing.T) {
 	}
 
 	// Controle result polesite consistency (detects poles with same name, position, ids)
-	PoleSiteConsistency(t, origPsr.PoleSite)
+	PoleSiteConsistency(t, origPsr.PoleSite, false)
 
 	err = os.Rename(origPsrFile, origPsrFile+".bak")
 	if err != nil {
@@ -274,13 +274,16 @@ func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
 
 // =====================================================================================================================
 // Utilitary Test functions (PoleSite Fixing) ==========================================================================
-func PoleSiteConsistency(t *testing.T, ps *PoleSite) {
+func PoleSiteConsistency(t *testing.T, ps *PoleSite, abortOnFailed bool) {
 	consistencyMsgs := ps.CheckPoleSiteConsistency()
 	if len(consistencyMsgs) > 0 {
 		for _, msg := range consistencyMsgs {
 			t.Logf("%s", msg.String())
 		}
-		t.Fatalf("Consistency Check failed")
+		if abortOnFailed {
+			t.Fatalf("Consistency Check failed")
+		}
+		return
 	}
 	t.Logf("Consistency Check OK")
 }
