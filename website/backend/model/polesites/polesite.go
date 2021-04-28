@@ -529,6 +529,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 			pole.Long = npole.Long
 			pole.Lat = npole.Lat
 			changedInfo += " Position"
+			changedInfo += fmt.Sprintf(" Position (moved %.1fm)", distance)
 			if pole.DictRef != "" {
 				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
 			}
@@ -541,7 +542,7 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 			}
 			resMsg = append(resMsg, &ConsistencyMsg{
 				Category: "Info",
-				Msg:      prefix + npole.ExtendedRef() + ":" + changedInfo,
+				Msg:      prefix + pole.ExtendedRef() + ":" + changedInfo,
 				Poles:    []*Pole{},
 			})
 		}
