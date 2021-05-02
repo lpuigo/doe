@@ -528,7 +528,6 @@ func (ps *PoleSite) MergeWith(nps *PoleSite, deleteMissing bool) []*ConsistencyM
 		if distance > 3.0 { // pole position id moved > 3m
 			pole.Long = npole.Long
 			pole.Lat = npole.Lat
-			changedInfo += " Position"
 			changedInfo += fmt.Sprintf(" Position (moved %.1fm)", distance)
 			if pole.DictRef != "" {
 				pole.Comment += fmt.Sprintf("\nAppui déplacé de %.1fm, vérifier l'emprise de la DICT", distance)
