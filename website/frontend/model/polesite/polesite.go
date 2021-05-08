@@ -276,3 +276,12 @@ func (ps *Polesite) DetectMissingDAValidation() bool {
 	}
 	return updateMap
 }
+
+func (ps *Polesite) ResetPriority() {
+	for _, pole := range ps.GetPoles() {
+		if pole.IsAlreadyDone() {
+			continue
+		}
+		pole.Priority = 0
+	}
+}

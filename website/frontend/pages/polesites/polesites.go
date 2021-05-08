@@ -778,3 +778,7 @@ func (mpm *MainPageModel) DetectProductInconsistency() {
 	mpm.Polesite.DetectProductInconsistency()
 	mpm.GetPoleMap().RefreshPoles(mpm.Polesite.Poles)
 }
+
+func (mpm *MainPageModel) ResetPolePriority() {
+	mpm.Polesite.ResetPriority()
+}

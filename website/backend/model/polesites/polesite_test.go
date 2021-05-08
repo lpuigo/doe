@@ -107,9 +107,9 @@ func TestPoleSite_AppendXlsToJson(t *testing.T) {
 // TestPoleSite_MergeXlsToJson : merge a XLSx PoleSite description to an already provided PoleSite JSON file.
 // New Poles are appended next to already existing ones. Updated Poles are changed. Pole not providied in XLSx file are deleted from target JSON file
 func TestPoleSite_MergeXlsToJson(t *testing.T) {
-	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteaux Ouest\2021-04-13 Ordre traitement appuis`
-	psXlsfile := `Polesite Sogetrel Poteau-Ouest maj.xlsx`
-	psJsonFile := `000055.json`
+	psDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Eiffage\Eiffage Poteau Signes\Chantiers\2021-05-06 Maj Peyrolles`
+	psXlsfile := `Polesite Eiffage Signes-Peyrolles v2.xlsx`
+	psJsonFile := `000058.json`
 
 	// Get original PoleSiteRecord
 	origPsrFile := filepath.Join(psDir, psJsonFile)

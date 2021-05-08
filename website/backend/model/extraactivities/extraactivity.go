@@ -2,6 +2,7 @@ package extraactivities
 
 import (
 	"github.com/lpuig/ewin/doe/website/backend/model/bpu"
+	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"github.com/lpuig/ewin/doe/website/backend/model/items"
 )
 
@@ -55,4 +56,14 @@ func Itemize(eas []*ExtraActivity, site items.ItemizableSite, doneOnly bool) []*
 		res = append(res, item)
 	}
 	return res
+}
+
+func GetUpdateDate(eas []*ExtraActivity) string {
+	updatedate := date.TimeJSMinDate
+	for _, ea := range eas {
+		if ea.Date != "" && ea.Date > updatedate {
+			updatedate = ea.Date
+		}
+	}
+	return updatedate
 }

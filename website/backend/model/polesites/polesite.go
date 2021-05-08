@@ -159,9 +159,16 @@ func (ps *PoleSite) SetUpdateDate() {
 			updatedate = pole.Date
 		}
 	}
+
+	eaUpdateDate := extraactivities.GetUpdateDate(ps.ExtraActivities)
+	if eaUpdateDate > updatedate {
+		updatedate = eaUpdateDate
+	}
+
 	if updatedate == date.TimeJSMinDate {
 		updatedate = date.Today().String()
 	}
+
 	ps.UpdateDate = updatedate
 }
 
