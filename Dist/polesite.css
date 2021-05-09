@@ -107,6 +107,14 @@ i.pole-marker.drag {
     background: rgba(0, 94, 255, 0.7);
 }
 
+.pole_marker_priority {
+    color: rgba(0, 0, 0, 1);
+    font-size: 1.25em;
+    position: absolute;
+    left: 100%;
+    top: -200%;
+}
+
 /* =====================================================================================================================
    === PoleEdit Header Style
  */

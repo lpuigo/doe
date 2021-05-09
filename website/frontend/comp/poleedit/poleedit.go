@@ -100,6 +100,7 @@ const template string = `<div>
 			<el-input-number v-model="editedpolemarker.Pole.Priority"
 							:min="0" :max="99"
 							size="mini" style="width: 100%;"
+							@change="UpdatePolePriority"
 			></el-input-number>
         </el-col>
     </el-row>
@@ -657,6 +658,13 @@ func (pem *PoleEditModel) UpdateState(vm *hvue.VM) {
 	ep.Pole.UpdateState()
 	ep.UpdateFromState()
 	ep.Map.RefreshPoleMarkersGroups()
+}
+
+func (pem *PoleEditModel) UpdatePolePriority(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	ep := pem.EditedPoleMarker
+	ep.UpdateFromState()
+	ep.Refresh()
 }
 
 func (pem *PoleEditModel) GetMaterials() []*elements.ValueLabel {

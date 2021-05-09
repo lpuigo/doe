@@ -204,6 +204,9 @@ func (pm *PoleMarker) visualByState() (html, class string) {
 			//	html = pmHtmlCreation
 		}
 	}
+	if pm.Pole.Priority > 0 && !pm.Pole.IsAlreadyDone() {
+		html += "<div class=\"pole_marker_priority\">P" + strconv.Itoa(pm.Pole.Priority) + "</div>"
+	}
 	return
 }
 
