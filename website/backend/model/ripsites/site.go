@@ -544,3 +544,132 @@ const (
 	RipStatSerieWork  string = "Work"
 	RipStatSeriePrice string = "Price"
 )
+
+// =====================================================================================================================
+// Audit functions
+
+type AuditMsg struct {
+	NodeName string
+	Info     string
+	Msg      string
+}
+
+type siteNode struct {
+	*Node
+	parent               *siteNode
+	behindSplice         bool
+	parentNameWithSplice []string
+	children             []*siteNode
+}
+
+func (sn *siteNode) SetSpliceName() {
+	if sn.behindSplice {
+		sn.parentNameWithSplice = append(sn.parentNameWithSplice, sn.parent.Name)
+	}
+	for _, child := range sn.children {
+		child.parentNameWithSplice = sn.parentNameWithSplice[:]
+		child.SetSpliceName()
+	}
+}
+
+const (
+	opeSplice   string = "Epissure"
+	opeStraight string = "Passage"
+	opeWaiting  string = "Attente"
+)
+
+// AuditMeasurementEvents checks all measurements NodeName : missing parent node with splice are added
+func (s *Site) AuditMeasurementEvents() []AuditMsg {
+	res := []AuditMsg{}
+	siteTopo := make(map[string]*siteNode)
+	nodeByTronconName := make(map[string]*siteNode)
+	toBeMeasuredNodes := make(map[string]*siteNode)
+
+	// init siteTopo from site Nodes
+	for nodeName, node := range s.Nodes {
+		sNode := &siteNode{
+			Node:     node,
+			children: []*siteNode{},
+		}
+		siteTopo[nodeName] = sNode
+		nodeByTronconName[node.TronconInName] = sNode
+	}
+
+	// browse site Junctions to set siteTopo nodes relationship
+	for _, junction := range s.Junctions {
+		sNode, found := siteTopo[junction.NodeName]
+		if !found {
+			res = append(res, AuditMsg{
+				NodeName: junction.NodeName,
+				Info:     "",
+				Msg:      "missing node definition",
+			})
+			continue
+		}
+		for _, operation := range junction.Operations {
+			if operation.Type == opeWaiting {
+				toBeMeasuredNodes[sNode.Name] = sNode
+				continue
+			}
+			childSiteNode, found := nodeByTronconName[operation.TronconName]
+			if !found {
+				res = append(res, AuditMsg{
+					NodeName: junction.NodeName,
+					Info:     operation.TronconName,
+					Msg:      "unknown trunk",
+				})
+				continue
+			}
+			sNode.children = append(sNode.children, childSiteNode)
+			childSiteNode.parent = sNode
+			if operation.Type == opeSplice {
+				childSiteNode.behindSplice = true
+			}
+		}
+	}
+
+	// search parent Node starting from last Junction (could be any Junction)
+	last := len(s.Junctions) - 1
+	parentNode, found := siteTopo[s.Junctions[last].NodeName]
+	if !found {
+		res = append(res, AuditMsg{
+			NodeName: s.Junctions[last].NodeName,
+			Info:     "",
+			Msg:      "fatal missing first node definition",
+		})
+		return res
+	}
+	for {
+		if parentNode.parent == nil {
+			break
+		}
+		parentNode = parentNode.parent
+	}
+	fmt.Printf("Found root : %s\n", parentNode.Name)
+	parentNode.SetSpliceName()
+
+	// check Measurement
+	for _, measurement := range s.Measurements {
+		sNode, found := toBeMeasuredNodes[measurement.DestNodeName]
+		if !found {
+			res = append(res, AuditMsg{
+				NodeName: measurement.DestNodeName,
+				Info:     "",
+				Msg:      "measurement for unexpected node",
+			})
+			continue
+		}
+
+		declaredEvents := strings.Join(measurement.NodeNames, " > ")
+		expectedEvents := strings.Join(sNode.parentNameWithSplice, " > ")
+		if declaredEvents != expectedEvents {
+			res = append(res, AuditMsg{
+				NodeName: measurement.DestNodeName,
+				Info:     fmt.Sprintf("'%s' instead of '%s'", declaredEvents, expectedEvents),
+				Msg:      "unexpected splice event",
+			})
+		}
+	}
+
+	return res
+}

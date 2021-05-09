@@ -47,3 +47,14 @@ func Test_FixSite(t *testing.T) {
 		t.Fatalf("could not encode origSite: %s", err.Error())
 	}
 }
+
+func TestSite_AuditMeasurementEvents(t *testing.T) {
+	dir := `C:\Users\Laurent\Golang\src\github.com\lpuig\ewin\doe\Ressources\Ripsites`
+	siteFile := "000062.json"
+
+	site := siteRecordFromFile(t, dir, siteFile)
+
+	for _, auditMsg := range site.AuditMeasurementEvents() {
+		t.Logf("%s: %s %s", auditMsg.Msg, auditMsg.NodeName, auditMsg.Info)
+	}
+}
