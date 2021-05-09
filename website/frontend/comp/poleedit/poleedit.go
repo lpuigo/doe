@@ -809,7 +809,7 @@ func (pem *PoleEditModel) GetGMAPUrl(vm *hvue.VM, gps string) string {
 	//if !(pem.EditedPoleMarker.Object != nil && pem.EditedPoleMarker.Pole.DictRef != "") {
 	//	return ""
 	//}
-	url := "http://maps.google.com/maps?q=" + gps
+	url := "https://maps.google.com/maps?q=" + gps
 	return url
 }
 
