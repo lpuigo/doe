@@ -449,6 +449,7 @@ func (p *Pole) CheckProductConsistency() {
 	}
 	if p.HasProduct(poleconst.ProductReplace) {
 		p.AddProduct(poleconst.ProductCreation)
+		p.RemoveProduct(poleconst.ProductStraighten)
 	}
 	if p.HasProduct(poleconst.ProductStraighten) {
 		p.RemoveProduct(poleconst.ProductCreation)
@@ -460,7 +461,7 @@ func (p *Pole) CheckProductConsistency() {
 		p.RemoveProduct(poleconst.ProductHauban)
 	}
 	ucComment := strings.ToUpper(p.Comment)
-	if len(p.Product) == 0 && strings.Contains(ucComment, "REDRESSEM") || strings.Contains(ucComment, "RECALAGE") {
+	if len(p.Product) == 0 && (strings.Contains(ucComment, "REDRESSEM") || strings.Contains(ucComment, "RECALAGE")) {
 		p.AddProduct(poleconst.ProductStraighten)
 	}
 }

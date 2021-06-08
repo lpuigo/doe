@@ -219,7 +219,6 @@ const template string = `<div>
                 <el-col :span="6" class="align-right">Produits:</el-col>
                 <el-col :span="18">
                     <el-select v-model="editedpolemarker.Pole.Product" multiple placeholder="Produits" size="mini" style="width: 100%"
-                               @clear=""
                                @change="UpdateProduct"
                     >
                         <el-option
