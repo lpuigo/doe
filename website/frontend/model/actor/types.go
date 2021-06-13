@@ -96,3 +96,43 @@ func (eh EarningHistory) CurrentDateAmountComment() *DateAmountComment {
 	}
 	return &currentDac
 }
+
+// Type PaymentHistory reflects ewin/doe/website/backend/model/actorinfos.PaymentHistory
+// PaymentHistory type is dedicated to date-defined earning and payment (like monthly bonuses)
+type PaymentHistory []Payment
+
+// Type Payment reflects ewin/doe/website/backend/model/actorinfos.Payment
+// Payment type is dedicated to date-defined earning and payment (like monthly bonuses)
+type Payment struct {
+	*js.Object
+	Earning *DateAmountComment `js:"Earning"`
+	Payment EarningHistory     `js:"Payment"`
+}
+
+func NewPayment() *Payment {
+	p := &Payment{Object: tools.O()}
+	p.Earning = NewDateAmountComment()
+	p.Payment = make(EarningHistory, 0)
+	return p
+}
+
+func ComparePayment(a, b Payment) int {
+	if a.Earning.Date > b.Earning.Date {
+		return -1
+	}
+	if a.Earning.Date == b.Earning.Date {
+		return 0
+	}
+	return 1
+}
+
+func (p *Payment) IsPaid() bool {
+	if len(p.Payment) == 0 {
+		return false
+	}
+	var amount float64
+	for _, pm := range p.Payment {
+		amount += pm.Amount
+	}
+	return amount >= p.Earning.Amount
+}

@@ -15,6 +15,7 @@ type ActorInfo struct {
 	Salary        EarningHistory `js:"Salary"`
 	EarnedBonuses Earnings       `js:"EarnedBonuses"`
 	PaidBonuses   Earnings       `js:"PaidBonuses"`
+	Bonuses       PaymentHistory `js:"Bonuses"`
 	TravelSubsidy EarningHistory `js:"TravelSubsidy"`
 }
 
@@ -26,6 +27,7 @@ func NewActorInfo() *ActorInfo {
 	nai.Salary = EarningHistory{}
 	nai.EarnedBonuses = Earnings{}
 	nai.PaidBonuses = Earnings{}
+	nai.Bonuses = PaymentHistory{}
 	nai.TravelSubsidy = EarningHistory{}
 	return nai
 }
@@ -38,6 +40,7 @@ func NewActorInfoForActor(actor *Actor) *ActorInfo {
 	nai.Salary = EarningHistory{}
 	nai.EarnedBonuses = Earnings{}
 	nai.PaidBonuses = Earnings{}
+	nai.Bonuses = PaymentHistory{}
 	nai.TravelSubsidy = EarningHistory{}
 	return nai
 }
@@ -53,5 +56,6 @@ func (ai *ActorInfo) Clone(oai *ActorInfo) {
 	ai.Salary = oai.Salary[:]
 	ai.EarnedBonuses = oai.EarnedBonuses[:]
 	ai.PaidBonuses = oai.PaidBonuses[:]
+	ai.Bonuses = oai.Bonuses[:]
 	ai.TravelSubsidy = oai.TravelSubsidy[:]
 }

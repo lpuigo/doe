@@ -291,111 +291,132 @@ const template string = `<el-dialog
 		<!-- ===================================== Bonus Tab ======================================================= -->
 		<el-tab-pane v-if="user.Permissions.HR" label="Bonus" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
 			<!-- Bonuses -->
-			<el-row :gutter="10" align="top" class="spaced" type="flex">
-				<el-col :span="3" class="align-right">Bonus :</el-col>
-				<el-col :span="21">
-					<el-table 
-							:data="current_actor.Info.EarnedBonuses"
-							max-height="260" size="mini" border
-					>
-						<el-table-column label="" width="70" :resizable="false">
-							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddBonus()"></el-button>
-							</template>
-							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveBonus(scope.$index)"></el-button>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Date Paiement" width="160" :resizable="false">
-							<template slot-scope="scope">
-								<el-date-picker v-model="scope.row.Date"
+			<el-table 
+					:data="current_actor.Info.Bonuses"
+					max-height="520" size="mini" border
+			>
+				<el-table-column label="" width="70" :resizable="false">
+					<template slot="header" slot-scope="scope">
+						<el-button type="success" plain icon="fas fa-plus" size="mini" @click="AddBonus()"></el-button>
+					</template>
+					<template slot-scope="scope">
+						<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemoveBonus(scope.$index)"></el-button>
+					</template>
+				</el-table-column>
+
+				<el-table-column label="Bonus" width="500" :resizable="true">
+					<template slot-scope="scope">
+						<el-row :gutter="10" align="top" type="flex">
+							<el-col :span="7">
+								<el-date-picker v-model="scope.row.Earning.Date"
 												type="month" :clearable="false"
 												:picker-options="{firstDayOfWeek:1}" value-format="yyyy-MM-dd" format="dd/MM/yyyy" 
 												placeholder="Date" size="mini" style="width: 100%"
 												@change="CheckBonus(scope.row)"
 								></el-date-picker>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Montant" width="200" :resizable="false">
-							<template slot-scope="scope">
-								<div class="header-menu-container">
-									<el-input-number 
-											v-model="scope.row.Amount" 
-											:min="0" :step="100" :precision="2" size="mini" 
-											controls-position="right"
-									></el-input-number>
-									<el-button v-if="IsBonusPayable(scope.row.Date)" 
-											type="success" plain icon="fas fa-caret-down" size="mini" 
-											:disabled="IsBonusPaid(scope.$index)" 
-											@click="PayBonus(scope.$index)"
-									></el-button>
-								</div>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Commentaire">
-							<template slot-scope="scope">
+							</el-col>
+							<el-col :span="6">
+								<el-input-number 
+										v-model="scope.row.Earning.Amount" 
+										:min="0" :step="100" :precision="2" size="mini"  style="width: 100%"
+										controls-position="right"
+								></el-input-number>
+							</el-col>
+							<el-col :span="11">
 								<el-input 
-										v-model="scope.row.Comment" placeholder="Commentaire"
+										v-model="scope.row.Earning.Comment" placeholder="Commentaire"
 										clearable size="mini" style="width: 100%"
 								></el-input>
-							</template>
-						</el-table-column>
-					</el-table>
-				</el-col>
-			</el-row>
-	
-			<!-- Paid Bonuses -->
-			<el-row :gutter="10" align="top" class="doublespaced" type="flex">
-				<el-col :span="3" class="align-right">Bonus payés :</el-col>
-				<el-col :span="21">
-					<el-table 
-							:data="current_actor.Info.PaidBonuses"
-							max-height="260" size="mini" border
-					>
-						<el-table-column label="" width="70">
-							<template slot="header" slot-scope="scope">
-								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddPaidBonus()"></el-button>
-							</template>
-							<template slot-scope="scope">
-								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemovePaidBonus(scope.$index)"></el-button>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Date" width="160">
-							<template slot-scope="scope">
-								<el-date-picker v-model="scope.row.Date"
+							</el-col>
+						</el-row>
+					</template>
+				</el-table-column>
+
+				<el-table-column label="Paiement" :resizable="false">
+					<template slot-scope="scope">
+						<el-row v-for="(dac, index) in scope.row.Payment" :gutter="10" align="top" type="flex">
+							<el-col :span="2">
+								<el-button v-if="IsBonusPayable(scope.row.Earning.Date)" 
+										type="success" plain icon="fas fa-euro-sign" size="mini" 
+										:disabled="IsBonusPaid(scope.$index)" 
+										@click="PayBonus(scope.$index)"
+								></el-button>
+							</el-col>
+							<el-col :span="6">
+								<el-date-picker v-model="dac.Date"
 												type="month" :clearable="false"
 												:picker-options="{firstDayOfWeek:1}" value-format="yyyy-MM-dd" format="dd/MM/yyyy" 
 												placeholder="Date" size="mini" style="width: 100%"
-												@change="CheckPaidBonus(scope.row)"
 								></el-date-picker>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Montant" width="200">
-							<template slot-scope="scope">
+							</el-col>
+							<el-col :span="6">
 								<el-input-number 
-										v-model="scope.row.Amount" 
-										:min="0" :step="100" :precision="2" size="mini" 
-										controls-position="right" style="width: 100%"
+										v-model="dac.Amount" 
+										:min="0" :step="100" :precision="2" size="mini"  style="width: 100%"
+										controls-position="right"
 								></el-input-number>
-							</template>
-						</el-table-column>
-	
-						<el-table-column label="Commentaire">
-							<template slot-scope="scope">
+							</el-col>
+							<el-col :span="10">
 								<el-input 
-										v-model="scope.row.Comment" placeholder="Commentaire"
+										v-model="dac.Comment" placeholder="Commentaire"
 										clearable size="mini" style="width: 100%"
 								></el-input>
-							</template>
-						</el-table-column>
-					</el-table>
-				</el-col>
-			</el-row>
+							</el-col>
+						</el-row>
+					</template>
+				</el-table-column>
+
+			</el-table>
+
+<!--			&lt;!&ndash; Paid Bonuses &ndash;&gt;-->
+<!--			<el-row :gutter="10" align="top" class="doublespaced" type="flex">-->
+<!--				<el-col :span="3" class="align-right">Bonus payés :</el-col>-->
+<!--				<el-col :span="21">-->
+<!--					<el-table -->
+<!--							:data="current_actor.Info.PaidBonuses"-->
+<!--							max-height="260" size="mini" border-->
+<!--					>-->
+<!--						<el-table-column label="" width="70">-->
+<!--							<template slot="header" slot-scope="scope">-->
+<!--								<el-button type="success" plain icon="fas fa-euro-sign" size="mini" @click="AddPaidBonus()"></el-button>-->
+<!--							</template>-->
+<!--							<template slot-scope="scope">-->
+<!--								<el-button type="danger" plain icon="far fa-trash-alt" size="mini" @click="RemovePaidBonus(scope.$index)"></el-button>-->
+<!--							</template>-->
+<!--						</el-table-column>-->
+<!--	-->
+<!--						<el-table-column label="Date" width="160">-->
+<!--							<template slot-scope="scope">-->
+<!--								<el-date-picker v-model="scope.row.Date"-->
+<!--												type="month" :clearable="false"-->
+<!--												:picker-options="{firstDayOfWeek:1}" value-format="yyyy-MM-dd" format="dd/MM/yyyy" -->
+<!--												placeholder="Date" size="mini" style="width: 100%"-->
+<!--												@change="CheckPaidBonus(scope.row)"-->
+<!--								></el-date-picker>-->
+<!--							</template>-->
+<!--						</el-table-column>-->
+<!--	-->
+<!--						<el-table-column label="Montant" width="200">-->
+<!--							<template slot-scope="scope">-->
+<!--								<el-input-number -->
+<!--										v-model="scope.row.Amount" -->
+<!--										:min="0" :step="100" :precision="2" size="mini" -->
+<!--										controls-position="right" style="width: 100%"-->
+<!--								></el-input-number>-->
+<!--							</template>-->
+<!--						</el-table-column>-->
+<!--	-->
+<!--						<el-table-column label="Commentaire">-->
+<!--							<template slot-scope="scope">-->
+<!--								<el-input -->
+<!--										v-model="scope.row.Comment" placeholder="Commentaire"-->
+<!--										clearable size="mini" style="width: 100%"-->
+<!--								></el-input>-->
+<!--							</template>-->
+<!--						</el-table-column>-->
+<!--					</el-table>-->
+<!--				</el-col>-->
+<!--			</el-row>-->
 		</el-tab-pane>
 
 		<!-- ===================================== Vacancy Tab ======================================================= -->
@@ -706,64 +727,35 @@ func (aumm *ActorUpdateModalModel) CheckTravelSubsidy(vm *hvue.VM) {
 	aumm.CurrentActor.Info.Get("TravelSubsidy").Call("sort", actor.CompareDateAmountComment)
 }
 
-// EarnedBonuses
+// Bonuses
 
 func (aumm *ActorUpdateModalModel) AddBonus(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	nd := actor.NewDateAmountComment()
-	nd.Date = date.GetFirstOfMonth(date.TodayAfter(0))
-	aumm.CurrentActor.Info.EarnedBonuses = append(actor.Earnings{*nd}, aumm.CurrentActor.Info.EarnedBonuses...)
+	nd := actor.NewPayment()
+	nd.Earning.Date = date.GetFirstOfMonth(date.TodayAfter(0))
+	actorInfo := aumm.CurrentActor.Info
+	actorInfo.Bonuses = append(actor.PaymentHistory{*nd}, actorInfo.Bonuses...)
+	print("AddBonus", actorInfo.Object)
 }
 
 func (aumm *ActorUpdateModalModel) RemoveBonus(vm *hvue.VM, pos int) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	aumm.CurrentActor.Info.Get("EarnedBonuses").Call("splice", pos, 1)
+	aumm.CurrentActor.Info.Get("Bonuses").Call("splice", pos, 1)
 }
 
 func (aumm *ActorUpdateModalModel) CheckBonus(vm *hvue.VM, value *js.Object) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	currentDate := value.Get("Date").String()
+	currentDate := value.Get("Earning").Get("Date").String()
 	if !strings.HasSuffix(currentDate, "01") {
-		value.Set("Date", date.GetFirstOfMonth(currentDate))
+		value.Get("Earning").Set("Date", date.GetFirstOfMonth(currentDate))
 	}
-	aumm.CurrentActor.Info.Get("EarnedBonuses").Call("sort", actor.CompareDateAmountComment)
+	aumm.CurrentActor.Info.Get("Bonuses").Call("sort", actor.ComparePayment)
 }
 
 func (aumm *ActorUpdateModalModel) IsBonusPaid(vm *hvue.VM, index int) bool {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	bonus := aumm.CurrentActor.Info.EarnedBonuses[index]
-	nbMatch := 0
-	if index < len(aumm.CurrentActor.Info.EarnedBonuses)-1 {
-		for _, earnedBonus := range aumm.CurrentActor.Info.EarnedBonuses[index+1:] {
-			if earnedBonus.Date != bonus.Date {
-				break
-			}
-			diffAmount := earnedBonus.Amount - bonus.Amount
-			if diffAmount < 0 {
-				diffAmount = -diffAmount
-			}
-			if diffAmount < 0.001 {
-				nbMatch++
-			}
-		}
-	}
-	nbPaidMatch := 0
-	for _, paidBonus := range aumm.CurrentActor.Info.PaidBonuses {
-		if paidBonus.Date < bonus.Date {
-			break
-		}
-		if paidBonus.Date != bonus.Date {
-			continue
-		}
-		diffAmount := paidBonus.Amount - bonus.Amount
-		if diffAmount < 0 {
-			diffAmount = -diffAmount
-		}
-		if diffAmount < 0.001 {
-			nbPaidMatch++
-		}
-	}
-	return nbPaidMatch > nbMatch
+	bonus := aumm.CurrentActor.Info.Bonuses[index]
+	return bonus.IsPaid()
 }
 
 func (aumm *ActorUpdateModalModel) IsBonusPayable(vm *hvue.VM, month string) bool {

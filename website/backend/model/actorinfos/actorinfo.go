@@ -42,6 +42,13 @@ func (e Earnings) GetByDate(d string) (dac DateAmountComment, found bool) {
 	return DateAmountComment{}, false
 }
 
+type Payment struct {
+	Earning DateAmountComment
+	Payment EarningHistory
+}
+
+type PaymentHistory []Payment
+
 type ActorInfo struct {
 	Id            int
 	ActorId       int
@@ -49,6 +56,7 @@ type ActorInfo struct {
 	Salary        EarningHistory
 	EarnedBonuses Earnings
 	PaidBonuses   Earnings
+	Bonuses       PaymentHistory
 	TravelSubsidy EarningHistory
 }
 
@@ -60,6 +68,7 @@ func NewActorInfo() *ActorInfo {
 		Salary:        make(EarningHistory, 0),
 		EarnedBonuses: make(Earnings, 0),
 		PaidBonuses:   make(Earnings, 0),
+		Bonuses:       make(PaymentHistory, 0),
 		TravelSubsidy: make(EarningHistory, 0),
 	}
 }
