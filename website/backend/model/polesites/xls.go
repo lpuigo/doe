@@ -194,20 +194,22 @@ const (
 	colProgressPoleHeight
 	colProgressPoleMaterial
 	colProgressPoleProduct
+	colProgressPoleComment
 )
 
 const (
 	colProgressPoleRefWidth      float64 = 18
-	colProgressPoleStickerWidth  float64 = 12
+	colProgressPoleStickerWidth  float64 = 18
 	colProgressPoleCityWidth     float64 = 25
 	colProgressPoleAddressWidth  float64 = 40
 	colProgressPoleDateWidth     float64 = 12
 	colProgressPoleHeightWidth   float64 = 8
 	colProgressPoleMaterialWidth float64 = 18
 	colProgressPoleProductWidth  float64 = 60
+	colProgressPoleCommentWidth  float64 = 60
 )
 
-func ToProgressXLS(w io.Writer, ps *PoleSite) error {
+func ToProgressXLS(w io.Writer, xf *excelize.File, ps *PoleSite) error {
 	progressPoles := []*Pole{}
 	for _, pole := range ps.Poles {
 		if !pole.IsDone() {
@@ -218,7 +220,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 
 	sort.Slice(progressPoles, func(i, j int) bool {
 		if progressPoles[i].Date != progressPoles[j].Date {
-			return progressPoles[i].Date < progressPoles[j].Date
+			return progressPoles[i].Date > progressPoles[j].Date
 		}
 		if progressPoles[i].Ref != progressPoles[j].Ref {
 			return progressPoles[i].Ref < progressPoles[j].Ref
@@ -226,9 +228,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 		return progressPoles[i].Sticker < progressPoles[j].Sticker
 	})
 
-	xf := excelize.NewFile()
-	sheetName := ps.Ref
-	xf.SetSheetName(xf.GetSheetName(0), sheetName)
+	sheetName := xf.GetSheetName(0)
 
 	getColName := func(col int) string {
 		colName, _ := excelize.ColumnNumberToName(col)
@@ -255,10 +255,12 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetColWidth(sheetName, colName, colName, colProgressPoleMaterialWidth)
 	colName = getColName(colProgressPoleProduct)
 	xf.SetColWidth(sheetName, colName, colName, colProgressPoleProductWidth)
+	colName = getColName(colProgressPoleComment)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleCommentWidth)
 
 	row := 1
 	// Set Poles infos
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), "POI")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), "Référence")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleSticker), "Appui")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleCity), "Ville")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleAddress), "Adresse")
@@ -266,6 +268,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), "Hauteur")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), "Materiau")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), "Prestations")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleComment), "Commentaire")
 	row++
 	for _, pole := range progressPoles {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), pole.Ref)
@@ -276,6 +279,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), pole.Height)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), pole.Material)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), strings.Join(pole.Product, ", "))
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleComment), pole.Comment)
 		row++
 	}
 
