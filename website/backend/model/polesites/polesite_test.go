@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2021-04-15 Suite Meuse\Polesite Sogetrel Poteau-Meuse 2.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2021-06-07 Chantier 71\Polesite Sogetrel 71.xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -151,9 +151,10 @@ func TestPoleSite_MergeXlsToJson(t *testing.T) {
 
 // Polesite generation from directory containing Orange "Fiche Appui" xlsx files
 func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
-	faDir := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Axians Alsace\Chantiers Poteaux\2021-03-23 Appuis NRO-88-005`
-	polesiteId := 102
+	faDir := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Axians Alsace\2021-06-07 SRO 88-005`
+	polesiteId := 62
 	polesiteName := "NRO 88-005"
+	refPrefix := "SRO 88-005-"
 
 	ps := &PoleSite{
 		Id:         polesiteId,
@@ -184,7 +185,7 @@ func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
 		}
 		// dir & files to process
 		fmt.Printf("processessing: %s\n", path)
-		if err = processFicheAppuiXlsxFile(path, faDir, ps); err != nil {
+		if err = processFicheAppuiXlsxFile(path, faDir, refPrefix, ps); err != nil {
 			fmt.Printf("error occured : %s\n", err.Error())
 		}
 		return nil
@@ -210,7 +211,7 @@ func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
 	}
 }
 
-func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
+func processFicheAppuiXlsxFile(path, root, refPrefix string, ps *PoleSite) error {
 	xf, err := excelize.OpenFile(path)
 	if err != nil {
 		return err
@@ -242,7 +243,7 @@ func processFicheAppuiXlsxFile(path, root string, ps *PoleSite) error {
 
 	pole := &Pole{
 		Id:             0,
-		Ref:            pa,
+		Ref:            refPrefix + pa,
 		City:           strings.Trim(city, " \t"),
 		Address:        strings.Trim(address, " \t"),
 		Sticker:        strings.Trim(sticker, " \t"),
