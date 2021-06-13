@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/lpuig/ewin/doe/kizeoparser/api"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -175,4 +176,12 @@ func readXlsFormsFile(file string, forms map[int][]*api.SearchData) error {
 		forms[fId] = append(forms[fId], rec)
 	}
 	return nil
+}
+
+func fileExists(file string) bool {
+	var err error
+	if _, err = os.Stat(file); err == nil {
+		return true
+	}
+	return os.IsNotExist(err)
 }

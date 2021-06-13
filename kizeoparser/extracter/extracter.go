@@ -96,6 +96,11 @@ func (e Extracter) SaveProgressFile() error {
 	return nil
 }
 
+// GetKizeoProgress retieves data from Kizeo API for all reciever.Progress.Formulaires.
+//
+// For each Formulaire with new Kizeo Form found, receiver.Progress is populated and ExtractionDate is updated.
+//
+// If Kizeo Form's Pole Réference is invalid, form is set as not to be extracted (form.ExtractData = false)
 func (e *Extracter) GetKizeoProgress() error {
 	if e.KizeoContext == nil {
 		return fmt.Errorf("kizeo context is not set")
@@ -113,16 +118,22 @@ func (e *Extracter) GetKizeoProgress() error {
 		}
 		fmt.Printf("retreived %d record in %s\n", len(datas), time.Since(t).String())
 
-		if len(datas) > 0 {
-			e.Progress.forms[form.FormId] = datas
-			nextDate := form.ExtractionDate
-			for _, data := range datas {
-				if data.UpdateTime > nextDate {
-					nextDate = data.UpdateTime
-				}
-			}
-			e.Progress.Formulaires[i].ExtractionDate = nextDate
+		if len(datas) == 0 {
+			continue
 		}
+
+		e.Progress.forms[form.FormId] = datas
+		nextDate := form.ExtractionDate
+		for _, data := range datas {
+			data.ExtractData = data.CheckSroRef()
+			if !data.ExtractData {
+				fmt.Printf("\twarning in %s: misformatted pole ref : %s\n", form.FormName, data.GetRawSroRef())
+			}
+			if data.UpdateTime > nextDate {
+				nextDate = data.UpdateTime
+			}
+		}
+		e.Progress.Formulaires[i].ExtractionDate = nextDate
 	}
 	return nil
 }
@@ -156,6 +167,18 @@ func (e *Extracter) ReadXLSForms(timestamp string) error {
 		if err != nil {
 			return fmt.Errorf("readXlsFormsFile from '%s' returned: %s", filepath.Base(file), err.Error())
 		}
+	}
+	return nil
+}
+
+func (e *Extracter) ReadXLSFormsFromFile(file string) error {
+	actualFile := filepath.Join(e.ConfigPath, file)
+	if !fileExists(actualFile) {
+		return fmt.Errorf("file '%s' not found", actualFile)
+	}
+	err := readXlsFormsFile(actualFile, e.Progress.forms)
+	if err != nil {
+		return fmt.Errorf("readXlsFormsFile from '%s' returned: %s", actualFile, err.Error())
 	}
 	return nil
 }

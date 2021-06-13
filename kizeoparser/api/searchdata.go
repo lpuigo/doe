@@ -193,6 +193,10 @@ func (sd *SearchData) GetDateHour() (recDate, recHour string) {
 	return
 }
 
+func (sd *SearchData) GetRawSroRef() string {
+	return sd.SummarySubtitle
+}
+
 func (sd *SearchData) GetSroRef() (sro, ref string) {
 	refs := strings.Split(sd.SummarySubtitle, "|")
 	sro = sd.SummarySubtitle
@@ -208,6 +212,14 @@ func (sd *SearchData) GetSafeSroRef() (sro, ref string) {
 	sro, ref = sd.GetSroRef()
 	sro, ref = safeName(sro), safeName(ref)
 	return
+}
+
+func (sd *SearchData) CheckSroRef() bool {
+	sro, ref := sd.GetSroRef()
+	if sro != "" && ref != "" {
+		return true
+	}
+	return false
 }
 
 const (

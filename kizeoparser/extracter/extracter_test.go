@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/model/date"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -40,12 +41,12 @@ func TestExtracter_GetKizeoProgress(t *testing.T) {
 	}
 }
 
-// Write retrieved data from Xls file with given timestamp prefix
-const (
-	progressTimeStamp string = "2021-04-12 121559"
-)
-
+// Extract data from all Xls file matching given timestamp prefix
 func TestExtracter_ReadXLSForms(t *testing.T) {
+	const (
+		progressTimeStamp string = "2021-05-16 215336"
+	)
+
 	extracter, err := NewExtracterFromConfigFile(ExtracterConfigDir, ConfigFile)
 	if err != nil {
 		t.Fatalf("NewExtracterFromConfigFile returned unexpected %s", err.Error())
@@ -57,6 +58,32 @@ func TestExtracter_ReadXLSForms(t *testing.T) {
 	err = extracter.ExtractFormsData(progressTimeStamp)
 	if err != nil {
 		t.Fatalf("ExtractFormsData returned unexpected %s", err.Error())
+	}
+}
+
+// Extract data from given XLS File
+func TestExtracter_ReadXLSFormsFromFile(t *testing.T) {
+	const (
+		xlsFile string = "2021-06-13 082434_Poteau Sogetrel.xlsx"
+	)
+
+	baseFile := filepath.Base(xlsFile)
+	timeStampChunks := strings.Split(baseFile, "_")
+	if len(timeStampChunks) < 2 {
+		t.Fatalf("File '%s' has no timestamp prefix (AAA-MM-DD HHMMSS_)", baseFile)
+	}
+
+	extracter, err := NewExtracterFromConfigFile(ExtracterConfigDir, ConfigFile)
+	if err != nil {
+		t.Fatalf("NewExtracterFromConfigFile returned unexpected: %s", err.Error())
+	}
+	err = extracter.ReadXLSFormsFromFile(xlsFile)
+	if err != nil {
+		t.Fatalf("ReadXLSFormsFromFile returned unexpected: %s", err.Error())
+	}
+	err = extracter.ExtractFormsData(timeStampChunks[0])
+	if err != nil {
+		t.Fatalf("ExtractFormsData returned unexpected: %s", err.Error())
 	}
 }
 
