@@ -21,7 +21,7 @@ import (
 
 // TestPolesiteFromXLS : convert an XLSx PoleSite Description to its JSON file
 func TestPolesiteFromXLS(t *testing.T) {
-	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogetrel\Chantiers Poteau\2021-06-07 Chantier 71\Polesite Sogetrel 71.xlsx`
+	psXlsfile := `C:\Users\Laurent\Google Drive (laurent.puig.ewin@gmail.com)\Sogeca\Chantier Poteaux\2021-06-14 Maj SRO 67\Polesite Sogeca Poteau-SRO 67 (65).xlsx`
 
 	path := filepath.Dir(psXlsfile)
 	inFile := filepath.Base(psXlsfile)
@@ -38,7 +38,7 @@ func TestPolesiteFromXLS(t *testing.T) {
 		t.Fatalf("FromXLS return unexpected: %s", err.Error())
 	}
 
-	//PoleSiteConsistency(t, ps)
+	PoleSiteConsistency(t, ps, false)
 
 	xfr, err := os.Create(filepath.Join(path, outFile))
 	if err != nil {
@@ -151,10 +151,10 @@ func TestPoleSite_MergeXlsToJson(t *testing.T) {
 
 // Polesite generation from directory containing Orange "Fiche Appui" xlsx files
 func TestBrowseFicheAppuiXlsxFiles(t *testing.T) {
-	faDir := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Axians Alsace\2021-06-07 SRO 88-005`
+	faDir := `C:\Users\Laurent\OneDrive\Documents\TEMPORAIRE\Axians Alsace\2021-06-07 SRO 88-005\2021-06-15 Fiches manquantes`
 	polesiteId := 62
 	polesiteName := "NRO 88-005"
-	refPrefix := "SRO 88-005-"
+	refPrefix := ""
 
 	ps := &PoleSite{
 		Id:         polesiteId,
@@ -229,17 +229,29 @@ func processFicheAppuiXlsxFile(path, root, refPrefix string, ps *PoleSite) error
 	ope, _ := xf.GetCellValue(sheetName, "M53")
 	target, _ := xf.GetCellValue(sheetName, "M52")
 
-	product := []string{}
-	if !strings.Contains(strings.ToLower(ope), "renfor") {
-		product = append(product, poleconst.ProductCreation)
+	if target != "" && !CheckCAPFTPoleInfo(target) { // Target is not a Pole type => assume ope and target were switched in the XLS file
+		ope, target = target, ope
 	}
-	if strings.Contains(strings.ToLower(ope), "remplac") {
-		product = append(product, poleconst.ProductReplace)
+
+	products := []string{}
+	lowerOpe := strings.ToLower(ope)
+	switch {
+	case strings.Contains(lowerOpe, "renforc"):
+		// no main product, additionnal product will be added by parsing mat column
+	case strings.Contains(lowerOpe, "redress"):
+		products = append(products, poleconst.ProductStraighten)
+	case strings.Contains(lowerOpe, "recal"):
+		products = append(products, poleconst.ProductStraighten)
+	default:
+		products = append(products, poleconst.ProductCreation)
+		if strings.Contains(lowerOpe, "remplac") {
+			products = append(products, poleconst.ProductReplace)
+		}
 	}
 
 	mat := ""
 	height := 0
-	mat, height = DecodeCAPFTPoleInfo(target, &product)
+	mat, height = DecodeCAPFTPoleInfo(target, &products)
 
 	pole := &Pole{
 		Id:             0,
@@ -265,7 +277,7 @@ func processFicheAppuiXlsxFile(path, root, refPrefix string, ps *PoleSite) error
 		AspiDate:       "",
 		Kizeo:          "",
 		Comment:        strings.Trim(ope+" "+target, " \t"),
-		Product:        product,
+		Product:        products,
 		AttachmentDate: "",
 		TimeStamp:      "",
 	}

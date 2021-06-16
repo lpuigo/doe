@@ -484,6 +484,23 @@ func (p *Pole) UpdateProductFrom(npole *Pole) string {
 	return changes
 }
 
+func CheckCAPFTPoleInfo(info string) bool {
+	if len(info) < 2 {
+		return false
+	}
+	info = strings.ToUpper(info)
+	switch info[0:2] {
+	case "BS", "BH", "BM", "BC":
+		return true
+	case "MI", "MS", "MH", "MC", "XC", "MT", "M4", "MF", "MR":
+		return true
+	case "FR":
+		return true
+	default:
+		return false
+	}
+}
+
 func DecodeCAPFTPoleInfo(info string, products *[]string) (mat string, height int) {
 	targetWords := strings.Split(strings.Trim(strings.ToUpper(info), " "), " ")
 	if len(targetWords) > 0 && len(targetWords[0]) > 2 {

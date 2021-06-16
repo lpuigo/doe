@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/tools/nominatim"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/latlong"
 	"io"
 	"sort"
 	"strconv"
@@ -457,9 +458,16 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if getCol(colPoleId) != "pole" {
 			continue
 		}
-
-		lat, errlat := strconv.ParseFloat(getCol(colPoleLat), 64)
-		long, errlong := strconv.ParseFloat(getCol(colPoleLong), 64)
+		var lat, long float64
+		var errlat, errlong error
+		rawLat := getCol(colPoleLat)
+		if strings.Contains(rawLat, "°") {
+			lat, errlat = latlong.DegToDec(rawLat)
+			long, errlong = latlong.DegToDec(getCol(colPoleLong))
+		} else {
+			lat, errlat = strconv.ParseFloat(rawLat, 64)
+			long, errlong = strconv.ParseFloat(getCol(colPoleLong), 64)
+		}
 		geomsg := ""
 		if errlat != nil && errlong != nil {
 			// Perform Geoloc Search
@@ -483,7 +491,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		GeolocDone:
 		} else {
 			if errlat != nil {
-				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), getCol(colPoleLat), errlat.Error())
+				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), rawLat, errlat.Error())
 			}
 			if errlong != nil {
 				return nil, fmt.Errorf("%s: could not parse longitude '%s': %s", cellCoord(colPoleLong, line), getCol(colPoleLong), errlong.Error())
