@@ -32,9 +32,29 @@ const template string = `<div>
 		<div></div>
 		
 		<div>
+			<el-popover placement="bottom" width="360" title="Déclaration d'une reprise"
+						v-model="VisibleRedoPole">
+				<p class="message">Déclarer une reprise sur l'appui {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
+				<el-row :gutter="5" type="flex" align="middle" class="spaced">
+					<el-col :span="6" class="align-right">Description:</el-col>
+					<el-col :span="18">
+						<el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="Reprise à faire"
+								  v-model="DuplicateContext.RedoComment" clearable size="mini"
+						></el-input>
+					</el-col>
+				</el-row>
+				<div style="text-align: right; margin: 0; margin-top: 10px">
+					<el-button size="mini" @click="VisibleRedoPole = false">Annuler</el-button>
+					<el-button type="warning" plain size="mini" @click="AddRedoPole">Confirmer</el-button>
+				</div>
+				<el-tooltip slot="reference" content="Reprise" placement="bottom" effect="light" open-delay="500">
+					<el-button type="warning" plain class="icon" icon="fas fa-arrow-alt-circle-down icon--big" size="mini"></el-button>
+				</el-tooltip>
+			</el-popover>
+			
 			<el-popover placement="bottom" width="360" title="Suppression de l'appui"
 						v-model="VisibleDeletePole">
-				<p>Confirmez la suppression de l'appui {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
+				<p class="message">Confirmez la suppression de l'appui {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
 				<div style="text-align: right; margin: 0; margin-top: 10px">
 					<el-button size="mini" @click="VisibleDeletePole = false">Annuler</el-button>
 					<el-button type="danger" plain size="mini" @click="DeletePole">Confirmer</el-button>
@@ -50,13 +70,13 @@ const template string = `<div>
 					<el-col :span="6">
 						<el-checkbox v-model="DuplicateContext.DoIncrement">Incrément</el-checkbox>
 					</el-col>
-					<el-col v-if="DuplicateContext.DoIncrement" :span="18">
+					<el-col v-if="DuplicateContext.DoIncrement" :offset="1" :span="17">
 						<el-input-number placeholder="Incrément"
 										 v-model="DuplicateContext.Increment" controls-position="right" :min="-20" :max="20" clearable size="mini"
 						></el-input-number>
 					</el-col>
 				</el-row>
-				<p>Confirmez la duplication de l'appui {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
+				<p class="message">Confirmez la duplication de l'appui {{editedpolemarker.Pole.Ref}} {{editedpolemarker.Pole.Sticker}}?</p>
 				<div style="text-align: right; margin: 0; margin-top: 10px">
 					<el-button size="mini" @click="VisibleDuplicatePole = false">Annuler</el-button>
 					<el-button type="warning" plain size="mini" @click="DuplicatePole">Confirmer</el-button>
@@ -488,6 +508,7 @@ type PoleEditModel struct {
 	*js.Object
 	EditedPoleMarker     *polemap.PoleMarker `js:"editedpolemarker"`
 	VisibleDeletePole    bool                `js:"VisibleDeletePole"`
+	VisibleRedoPole      bool                `js:"VisibleRedoPole"`
 	VisibleLatLong       bool                `js:"VisibleLatLong"`
 	VisibleDuplicatePole bool                `js:"VisibleDuplicatePole"`
 
@@ -511,6 +532,7 @@ func PoleEditModelFromJS(obj *js.Object) *PoleEditModel {
 func NewPoleEditModel(vm *hvue.VM) *PoleEditModel {
 	pem := &PoleEditModel{Object: tools.O()}
 	pem.VisibleDeletePole = false
+	pem.VisibleRedoPole = false
 	pem.VisibleLatLong = false
 	pem.VisibleDuplicatePole = false
 
@@ -794,8 +816,15 @@ func (pem *PoleEditModel) DeletePole(vm *hvue.VM) {
 
 func (pem *PoleEditModel) DuplicatePole(vm *hvue.VM) {
 	pem = PoleEditModelFromJS(vm.Object)
-	pem.DuplicateContext.Model = pem.EditedPoleMarker
+	pem.DuplicateContext.Duplicate(pem.EditedPoleMarker)
 	pem.VisibleDuplicatePole = false
+	pem.VM.Emit("duplicate-pole", pem.DuplicateContext)
+}
+
+func (pem *PoleEditModel) AddRedoPole(vm *hvue.VM) {
+	pem = PoleEditModelFromJS(vm.Object)
+	pem.DuplicateContext.Redo(pem.EditedPoleMarker)
+	pem.VisibleRedoPole = false
 	pem.VM.Emit("duplicate-pole", pem.DuplicateContext)
 }
 

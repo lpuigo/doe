@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+const (
+	GpsMeter float64 = 0.00001
+)
+
 func DecToDeg(val float64) string {
 	sign := ""
 	if val < 0 {

@@ -85,13 +85,13 @@ func PoleFromJS(o *js.Object) *Pole {
 func (p *Pole) Duplicate(newname string, offset float64) *Pole {
 	np := NewPole()
 	np.Ref = p.Ref
+	np.Sticker = newname
 	np.City = p.City
 	np.Address = p.Address
-	np.Sticker = newname
 	np.Priority = p.Priority
 	np.Lat = p.Lat + offset
 	np.Long = p.Long + offset
-	np.State = p.State
+	np.State = poleconst.StateToDo
 	//np.Date = ""
 	np.Actors = []string{}
 	np.DtRef = p.DtRef
@@ -108,6 +108,40 @@ func (p *Pole) Duplicate(newname string, offset float64) *Pole {
 	//np.Kizeo = ""
 	np.Comment = p.Comment
 	np.Product = p.Product[:]
+	//np.AttachmentDate = ""
+	return np
+}
+
+func (p *Pole) Redo(newname, redocomment string, offset float64) *Pole {
+	np := NewPole()
+	np.Ref = p.Ref
+	np.Sticker = newname
+	np.City = p.City
+	np.Address = p.Address
+	np.Priority = 1
+	np.Lat = p.Lat
+	np.Long = p.Long + offset
+	np.State = poleconst.StateToDo
+	//np.Date = ""
+	np.Actors = []string{}
+	np.DtRef = p.DtRef
+	np.DictRef = p.DictRef
+	np.DictDate = p.DictDate
+	np.DictInfo = p.DictInfo
+	np.DaQueryDate = p.DaQueryDate
+	np.DaValidation = p.DaValidation
+	np.DaStartDate = p.DaStartDate
+	np.DaEndDate = p.DaEndDate
+	np.Height = p.Height
+	np.Material = p.Material
+	//np.AspiDate = ""
+	//np.Kizeo = ""
+	todayString := date.DateString(date.TodayAfter(0))
+	if redocomment != "" {
+		redocomment = "\n" + redocomment
+	}
+	np.Comment = "Reprise déclarée le " + todayString + "." + redocomment
+	np.Product = []string{poleconst.ProductRedo}
 	//np.AttachmentDate = ""
 	return np
 }
@@ -444,6 +478,9 @@ func (p *Pole) RemoveProduct(prd string) {
 
 // CheckProductConsistency checks for reciever pole's products consistency. Product can be added or discarded on pole receiver
 func (p *Pole) CheckProductConsistency() {
+	if len(p.Product) > 1 && p.HasProduct(poleconst.ProductRedo) {
+		p.Product = []string{poleconst.ProductRedo}
+	}
 	if p.HasProduct(poleconst.ProductTrickyReplace) {
 		p.AddProduct(poleconst.ProductReplace)
 	}
@@ -590,6 +627,7 @@ func GetProductsValueLabel() []*elements.ValueLabel {
 		elements.NewValueLabel(poleconst.ProductStraighten, poleconst.ProductStraighten),
 		elements.NewValueLabel(poleconst.ProductRemove, poleconst.ProductRemove),
 		elements.NewValueLabel(poleconst.ProductInRow, poleconst.ProductInRow),
+		elements.NewValueLabel(poleconst.ProductRedo, poleconst.ProductRedo),
 		elements.NewValueLabel(poleconst.ProductReplenishment, poleconst.ProductReplenishment),
 		elements.NewValueLabel(poleconst.ProductFarReplenishment, poleconst.ProductFarReplenishment),
 	}

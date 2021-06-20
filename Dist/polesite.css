@@ -84,6 +84,14 @@ i.pole-marker {
     margin: -36px 0px 0px -22px;
 }
 
+i.pole-marker.narrow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -36px 0px 0px -22px;
+    transform: scaleX(0.7);
+}
+
 i.pole-marker.drag {
     color: rgba(0, 94, 255, 0.7);
     margin: -12px 0px 0px -15px;
