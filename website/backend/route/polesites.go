@@ -233,7 +233,13 @@ func GetPolesiteProgress(mgr *mgr.Manager, w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", psr.PoleSite.ProgressName()))
 	w.Header().Set("Content-Type", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-	err = psr.PoleSite.XLSProgress(w)
+	progressXlsxFile, err := mgr.TemplateEngine.GetPoleProgressTemplateFile()
+	if err != nil {
+		AddError(w, logmsg, "could not get polesite progress XLS template file. "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = psr.PoleSite.XLSProgress(w, progressXlsxFile)
 	if err != nil {
 		AddError(w, logmsg, "could not generate Polesite XLS progress file. "+err.Error(), http.StatusInternalServerError)
 		return

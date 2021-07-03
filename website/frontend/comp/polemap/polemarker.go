@@ -124,6 +124,8 @@ const (
 	pmHtmlReplace       string = `<i class="fas fa-arrows-alt-v fa-fw fa-3x pole-marker"></i>`
 	pmHtmlTrickyReplace string = `<i class="fas fa-level-down-alt fa-fw fa-3x pole-marker"></i>`
 	pmHtmlCreation      string = `<i class="fas fa-long-arrow-alt-down fa-fw fa-3x pole-marker"></i>`
+	pmHtmlRemove        string = `<i class="fas fa-long-arrow-alt-up fa-fw fa-3x pole-marker"></i>`
+	pmHtmlRedo          string = `<i class="fas fa-arrow-alt-circle-down fa-fw fa-3x pole-marker narrow"></i>`
 	pmHtmlReplenish     string = `<i class="fas fa-angle-double-down fa-fw fa-3x pole-marker"></i>`
 	pmHtmlPlain         string = `<i class="fas fa-map-marker fa-fw fa-3x pole-marker"></i>`
 	pmHtmlBolt          string = `<i class="fas fa-bolt fa-fw fa-3x pole-marker"></i>`
@@ -200,6 +202,10 @@ func (pm *PoleMarker) visualByState() (html, class string) {
 			html = pmHtmlReplace
 		case pm.Pole.HasProduct(poleconst.ProductCreation):
 			html = pmHtmlCreation
+		case pm.Pole.HasProduct(poleconst.ProductRemove):
+			html = pmHtmlRemove
+		case pm.Pole.HasProduct(poleconst.ProductRedo):
+			html = pmHtmlRedo
 			//case pm.Pole.HasProduct(poleconst.ProductCoated):
 			//	html = pmHtmlCreation
 		}

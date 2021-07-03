@@ -104,6 +104,7 @@ const (
 	ProductNoAccess         string = "Inaccessible"
 	ProductDenseNetwork     string = "Réseaux denses"
 	ProductIncident         string = "Incident"
+	ProductRedo             string = "Reprise"
 )
 
 const (

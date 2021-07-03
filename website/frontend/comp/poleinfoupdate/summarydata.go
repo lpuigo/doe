@@ -249,6 +249,9 @@ func (s *Summarizer) Calc(poles []*polesite.Pole) {
 		if pole.State == poleconst.StateDeleted {
 			continue
 		}
+		if pole.HasProduct(poleconst.ProductRedo) {
+			continue
+		}
 		line := s.GetLine(pole)
 		sd, found := summDatas[line]
 		if !found {

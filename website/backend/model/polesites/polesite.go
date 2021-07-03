@@ -3,6 +3,7 @@ package polesites
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"io"
 	"math"
 	"path/filepath"
@@ -225,8 +226,8 @@ func (ps *PoleSite) PlanningName() string {
 }
 
 // XLSExport returns the PoleSite XLS export with already done poles
-func (ps *PoleSite) XLSProgress(w io.Writer) error {
-	return ToProgressXLS(w, ps)
+func (ps *PoleSite) XLSProgress(w io.Writer, xlsFile *excelize.File) error {
+	return ToProgressXLS(w, xlsFile, ps)
 }
 
 // XLSPlanning returns the PoleSite XLS export with to be done poles

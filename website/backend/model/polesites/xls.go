@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lpuig/ewin/doe/website/backend/tools/nominatim"
 	"github.com/lpuig/ewin/doe/website/backend/tools/xlsx"
+	"github.com/lpuig/ewin/doe/website/frontend/tools/latlong"
 	"io"
 	"sort"
 	"strconv"
@@ -194,20 +195,22 @@ const (
 	colProgressPoleHeight
 	colProgressPoleMaterial
 	colProgressPoleProduct
+	colProgressPoleComment
 )
 
 const (
 	colProgressPoleRefWidth      float64 = 18
-	colProgressPoleStickerWidth  float64 = 12
+	colProgressPoleStickerWidth  float64 = 18
 	colProgressPoleCityWidth     float64 = 25
 	colProgressPoleAddressWidth  float64 = 40
 	colProgressPoleDateWidth     float64 = 12
 	colProgressPoleHeightWidth   float64 = 8
 	colProgressPoleMaterialWidth float64 = 18
 	colProgressPoleProductWidth  float64 = 60
+	colProgressPoleCommentWidth  float64 = 60
 )
 
-func ToProgressXLS(w io.Writer, ps *PoleSite) error {
+func ToProgressXLS(w io.Writer, xf *excelize.File, ps *PoleSite) error {
 	progressPoles := []*Pole{}
 	for _, pole := range ps.Poles {
 		if !pole.IsDone() {
@@ -218,7 +221,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 
 	sort.Slice(progressPoles, func(i, j int) bool {
 		if progressPoles[i].Date != progressPoles[j].Date {
-			return progressPoles[i].Date < progressPoles[j].Date
+			return progressPoles[i].Date > progressPoles[j].Date
 		}
 		if progressPoles[i].Ref != progressPoles[j].Ref {
 			return progressPoles[i].Ref < progressPoles[j].Ref
@@ -226,9 +229,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 		return progressPoles[i].Sticker < progressPoles[j].Sticker
 	})
 
-	xf := excelize.NewFile()
-	sheetName := ps.Ref
-	xf.SetSheetName(xf.GetSheetName(0), sheetName)
+	sheetName := xf.GetSheetName(0)
 
 	getColName := func(col int) string {
 		colName, _ := excelize.ColumnNumberToName(col)
@@ -255,10 +256,12 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetColWidth(sheetName, colName, colName, colProgressPoleMaterialWidth)
 	colName = getColName(colProgressPoleProduct)
 	xf.SetColWidth(sheetName, colName, colName, colProgressPoleProductWidth)
+	colName = getColName(colProgressPoleComment)
+	xf.SetColWidth(sheetName, colName, colName, colProgressPoleCommentWidth)
 
 	row := 1
 	// Set Poles infos
-	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), "POI")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), "Référence")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleSticker), "Appui")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleCity), "Ville")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleAddress), "Adresse")
@@ -266,6 +269,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), "Hauteur")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), "Materiau")
 	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), "Prestations")
+	xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleComment), "Commentaire")
 	row++
 	for _, pole := range progressPoles {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleRef), pole.Ref)
@@ -276,6 +280,7 @@ func ToProgressXLS(w io.Writer, ps *PoleSite) error {
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleHeight), pole.Height)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleMaterial), pole.Material)
 		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleProduct), strings.Join(pole.Product, ", "))
+		xf.SetCellValue(sheetName, xlsx.RcToAxis(row, colProgressPoleComment), pole.Comment)
 		row++
 	}
 
@@ -453,9 +458,16 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		if getCol(colPoleId) != "pole" {
 			continue
 		}
-
-		lat, errlat := strconv.ParseFloat(getCol(colPoleLat), 64)
-		long, errlong := strconv.ParseFloat(getCol(colPoleLong), 64)
+		var lat, long float64
+		var errlat, errlong error
+		rawLat := getCol(colPoleLat)
+		if strings.Contains(rawLat, "°") {
+			lat, errlat = latlong.DegToDec(rawLat)
+			long, errlong = latlong.DegToDec(getCol(colPoleLong))
+		} else {
+			lat, errlat = strconv.ParseFloat(rawLat, 64)
+			long, errlong = strconv.ParseFloat(getCol(colPoleLong), 64)
+		}
 		geomsg := ""
 		if errlat != nil && errlong != nil {
 			// Perform Geoloc Search
@@ -479,7 +491,7 @@ func FromXLS(r io.Reader) (*PoleSite, error) {
 		GeolocDone:
 		} else {
 			if errlat != nil {
-				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), getCol(colPoleLat), errlat.Error())
+				return nil, fmt.Errorf("%s: could not parse latitude '%s': %s", cellCoord(colPoleLat, line), rawLat, errlat.Error())
 			}
 			if errlong != nil {
 				return nil, fmt.Errorf("%s: could not parse longitude '%s': %s", cellCoord(colPoleLong, line), getCol(colPoleLong), errlong.Error())

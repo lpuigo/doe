@@ -515,3 +515,16 @@ func (te *DocTemplateEngine) GetActorsMonthlyTimeSheetTemplate(w io.Writer, acto
 
 	return xf.Write(w)
 }
+
+const (
+	ppXLSFile string = "POLESITE PROGRESS.xlsx"
+)
+
+func (te *DocTemplateEngine) GetPoleProgressTemplateFile() (*excelize.File, error) {
+	file := filepath.Join(te.tmplDir, ppXLSFile)
+	xf, err := excelize.OpenFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return xf, nil
+}

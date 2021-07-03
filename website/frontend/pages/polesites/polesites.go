@@ -448,10 +448,7 @@ func (mpm *MainPageModel) CreatePole(vm *hvue.VM) {
 func (mpm *MainPageModel) DuplicatePole(vm *hvue.VM, dc *js.Object) {
 	mpm = &MainPageModel{Object: vm.Object}
 	duplicateContext := poleedit.DuplicateContextFromJS(dc)
-	//pmToDuplicate := polemap.PoleMarkerFromJS(dc)
-	newPole := duplicateContext.Model.Pole.Duplicate(duplicateContext.NewName(), 0.0001)
-
-	mpm.AddPole(newPole)
+	mpm.AddPole(duplicateContext.NewPole)
 }
 
 //
