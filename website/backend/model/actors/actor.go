@@ -17,6 +17,7 @@ type Actor struct {
 	Contract  string
 	Role      string
 	Vacation  []date.DateStringRangeComment
+	VacInfo   VacationInfo
 	Client    []string
 	Groups    GroupHistory
 	Comment   string

@@ -56,6 +56,8 @@ func (p *Persister) Reinit() {
 }
 
 // SetPersistDelay sets the Pesistance Delay of the Persister
+//
+// if persistDelay is set to 0, dirty records will be synchronously persisted (writen to disk)
 func (p *Persister) SetPersistDelay(persistDelay time.Duration) {
 	p.delay = persistDelay
 }
