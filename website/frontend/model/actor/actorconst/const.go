@@ -50,3 +50,11 @@ const (
 	InfoTrainingCacesHauteur  string = "Caces Hauteur"
 	InfoTrainingCacesNacelle  string = "Caces Nacelle"
 )
+
+const (
+	LeaveTypePaid          string = "Congés Payés"
+	LeaveTypeUnpaid        string = "Congés Sans Solde"
+	LeaveTypeSick          string = "Congés Maladie"
+	LeaveTypePublicHoliday string = "Jour Férié"
+	LeaveTypeInjury        string = "Accident Du Travail"
+)

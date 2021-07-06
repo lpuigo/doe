@@ -23,6 +23,7 @@ type Actor struct {
 	Contract  string                   `js:"Contract"`
 	Role      string                   `js:"Role"`
 	Vacation  []*date.DateRangeComment `js:"Vacation"`
+	VacInfo   *VacationInfo            `js:"VacInfo"`
 	Client    []string                 `js:"Client"`
 	Groups    GroupHistory             `js:"Groups"`
 	Comment   string                   `js:"Comment"`
@@ -41,6 +42,7 @@ func NewActor() *Actor {
 	na.Contract = ""
 	na.Role = ""
 	na.Vacation = []*date.DateRangeComment{}
+	na.VacInfo = NewVacationInfo()
 	na.Client = []string{}
 	na.Comment = ""
 	na.Info = NewActorInfoForActor(na)

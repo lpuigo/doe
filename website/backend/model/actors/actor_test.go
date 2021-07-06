@@ -27,9 +27,9 @@ func (a *Actor) PopulateVacationInfo() {
 	a.VacInfo.Vacation = make([]LeavePeriod, len(a.Vacation))
 	var t string
 	if a.Contract != actorconst.ContractTemp {
-		t = LeaveTypePaid
+		t = actorconst.LeaveTypePaid
 	} else {
-		t = LeaveTypeUnpaid
+		t = actorconst.LeaveTypeUnpaid
 	}
 	for i, v := range a.Vacation {
 		a.VacInfo.Vacation[i] = LeavePeriod{
