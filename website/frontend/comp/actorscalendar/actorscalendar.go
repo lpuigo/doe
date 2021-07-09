@@ -351,9 +351,9 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 	}
 
 	// Vacancy
-	isVas := make([]bool, rangeLength)
+	isVas := make([]string, rangeLength)
 	vaCmts := make([]string, rangeLength)
-	for _, vacPeriod := range act.Vacation {
+	for _, vacPeriod := range act.VacInfo.Vacation {
 		if vacPeriod.End < rangeStart || vacPeriod.Begin > rangeEnd {
 			continue
 		}
@@ -366,7 +366,7 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 			vacPeriodEnd -= int(date.NbDaysBetween(vacPeriod.End, rangeEnd))
 		}
 		for i := vacPeriodBeg; i < vacPeriodEnd; i++ {
-			isVas[i] = true
+			isVas[i] = leavePeriodTypeClass(vacPeriod.Type)
 			vaCmts[i] = vacPeriod.Comment
 		}
 	}
@@ -388,9 +388,10 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 			continue
 		case acm.User.IsDayOff(day):
 			res[i].Class += "day-off "
+			res[i].Comment = acm.User.DaysOff[day]
 			continue
-		case isVas[i]:
-			res[i].Class += "holiday "
+		case isVas[i] != "":
+			res[i].Class += "holiday " + isVas[i]
 			res[i].Comment = vaCmts[i]
 			continue
 		case i%7 > 4:
@@ -399,6 +400,23 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 		res[i].Class += "active "
 	}
 	return res
+}
+
+func leavePeriodTypeClass(leaveType string) string {
+	switch leaveType {
+	case actorconst.LeaveTypePaid:
+		return "CP"
+	case actorconst.LeaveTypeUnpaid:
+		return "CSS"
+	case actorconst.LeaveTypeSick:
+		return "AM"
+	case actorconst.LeaveTypeInjury:
+		return "AT"
+	case actorconst.LeaveTypePublicHoliday:
+		return "JF"
+	default:
+		return ""
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

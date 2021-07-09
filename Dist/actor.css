@@ -88,12 +88,13 @@
 }
 
 .calendar-slot.header.day-off {
-    background: #aa82b8;
-    color: #f8e6ff;
+    background: #86a4b3;
+    color: #f2fcff;
 }
 
 .calendar-slot.day-off {
-    background: #c394d4;
+    background: #86a4b3;
+    color: #f2fcff;
 }
 
 .calendar-slot.active.day-off {
@@ -106,6 +107,22 @@
 
 .calendar-slot.active.week-end {
     background: #83b37d;
+}
+
+.calendar-slot.holiday.CP {
+    background: #6cb6d9;
+}
+
+.calendar-slot.holiday.CSS {
+    background: #a1cae6;
+}
+
+.calendar-slot.holiday.AM {
+    background: #e67e7e;
+}
+
+.calendar-slot.holiday.AT {
+    background: #d95757;
 }
 
 .calendar-slot.holiday {
