@@ -80,7 +80,7 @@ func (cs *CalendarSeeker) Append(actr *Actor) {
 	var vacStart, vacEnd string
 	var posVacStart, posVacEnd int
 	var vacStartInRange, vacEndInRange bool
-	for _, vac := range actr.Vacation {
+	for _, vac := range actr.VacInfo.Vacation {
 		if !(vac.Begin != "" && vac.End != "") { // skip Vacation not properly populated
 			continue
 		}

@@ -112,3 +112,9 @@ func GetMonday(v string) string {
 	daynum := (int(d.Weekday()) + 6) % 7
 	return d.Truncate(24 * time.Hour).Add(time.Duration(-daynum*24) * time.Hour).Format(TimeJSLayout)
 }
+
+// WeekDay returns date's week's day number (monday = 0, tuesday, ... , saturday, sunday)
+func WeekDay(v string) int {
+	d := New(v)
+	return (int(d.Weekday()) + 6) % 7
+}

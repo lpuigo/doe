@@ -13,21 +13,20 @@ import (
 type Actor struct {
 	*js.Object
 
-	Id        int                      `js:"Id"`
-	Ref       string                   `js:"Ref"`
-	FirstName string                   `js:"FirstName"`
-	LastName  string                   `js:"LastName"`
-	State     string                   `js:"State"`
-	Period    *date.DateRange          `js:"Period"`
-	Company   string                   `js:"Company"`
-	Contract  string                   `js:"Contract"`
-	Role      string                   `js:"Role"`
-	Vacation  []*date.DateRangeComment `js:"Vacation"`
-	VacInfo   *VacationInfo            `js:"VacInfo"`
-	Client    []string                 `js:"Client"`
-	Groups    GroupHistory             `js:"Groups"`
-	Comment   string                   `js:"Comment"`
-	Info      *ActorInfo               `js:"Info"`
+	Id        int             `js:"Id"`
+	Ref       string          `js:"Ref"`
+	FirstName string          `js:"FirstName"`
+	LastName  string          `js:"LastName"`
+	State     string          `js:"State"`
+	Period    *date.DateRange `js:"Period"`
+	Company   string          `js:"Company"`
+	Contract  string          `js:"Contract"`
+	Role      string          `js:"Role"`
+	VacInfo   *VacationInfo   `js:"VacInfo"`
+	Client    []string        `js:"Client"`
+	Groups    GroupHistory    `js:"Groups"`
+	Comment   string          `js:"Comment"`
+	Info      *ActorInfo      `js:"Info"`
 }
 
 func NewActor() *Actor {
@@ -41,7 +40,6 @@ func NewActor() *Actor {
 	na.Company = ""
 	na.Contract = ""
 	na.Role = ""
-	na.Vacation = []*date.DateRangeComment{}
 	na.VacInfo = NewVacationInfo()
 	na.Client = []string{}
 	na.Comment = ""
@@ -68,10 +66,7 @@ func (a *Actor) Clone(oa *Actor) {
 	a.Company = oa.Company
 	a.Contract = oa.Contract
 	a.Role = oa.Role
-	a.Vacation = []*date.DateRangeComment{}
-	for _, vac := range oa.Vacation {
-		a.Vacation = append(a.Vacation, date.NewDateRangeCommentFrom(vac.Begin, vac.End, vac.Comment))
-	}
+	a.VacInfo = oa.VacInfo.Copy()
 	a.Client = oa.Client[:]
 	a.Groups = oa.Groups.Copy()
 	a.Comment = oa.Comment
@@ -136,59 +131,31 @@ func (a *Actor) IsActive() bool {
 
 // GetNextVacation returns actor's next (or current) vacation
 func (a *Actor) GetNextVacation() *date.DateRange {
-	if len(a.Vacation) == 0 {
-		return nil
-	}
-	today := date.TodayAfter(0)
-	vacBegin := ""
-	vacEnd := ""
-	for _, vacPeriod := range a.Vacation {
-		if vacPeriod.End < today {
-			continue
-		}
-		if vacBegin == "" && vacPeriod.End >= today {
-			vacBegin = vacPeriod.Begin
-			vacEnd = vacPeriod.End
-			continue
-		}
-		// vacBegin != ""
-		if vacPeriod.Begin < vacBegin {
-			vacBegin = vacPeriod.Begin
-			vacEnd = vacPeriod.End
-		}
-	}
-
-	if vacBegin == "" {
-		return nil
-	}
-	vdr := date.NewDateRange()
-	vdr.Begin = vacBegin
-	vdr.End = vacEnd
-	return vdr
+	return a.VacInfo.GetNextVacation()
 }
 
 // GetActiveDays returns a slice of 6 int for given weekDate (-1 for inactive, 0 for Holydays, 1 for working day)
 func (a *Actor) GetActiveDays(weekDate string, daysOff map[string]string) []int {
 	res := make([]int, 6)
-outer:
+activeDaysLoop:
 	for i := 0; i < 6; i++ {
 		day := date.After(weekDate, i)
 		if a.Period.Begin == "" {
 			res[i] = -1
-			continue outer
+			continue activeDaysLoop
 		}
 		if !(day >= a.Period.Begin && !(a.Period.End != "" && day > a.Period.End)) {
 			res[i] = -1
-			continue outer
+			continue activeDaysLoop
 		}
 		if daysOff[day] != "" {
 			res[i] = 0
-			continue outer
+			continue activeDaysLoop
 		}
-		for _, vac := range a.Vacation {
+		for _, vac := range a.VacInfo.Vacation {
 			if day >= vac.Begin && day <= vac.End {
 				res[i] = 0
-				continue outer
+				continue activeDaysLoop
 			}
 		}
 		res[i] = 1

@@ -421,6 +421,29 @@ const template string = `<el-dialog
 
 		<!-- ===================================== Vacancy Tab ======================================================= -->
 		<el-tab-pane label="Absences" lazy=true style="height: 75vh; padding: 5px 25px; overflow-x: hidden;overflow-y: auto;">
+			<!-- HR Leave counters -->
+			<div v-if="IsCurrentActorEmployee()">
+				<strong>Récapitulatif des congés :</strong>
+				<el-row :gutter="10" align="middle" class="spaced" type="flex">
+					<el-col :span="4" class="align-right">en cours d'acquisition :</el-col>
+					<el-col :span="8">
+						<el-input-number size="mini" v-model="current_actor.VacInfo.EarnedDays" :precision="0" :step="1" :disabled="!user.Permissions.HR"></el-input-number>
+					</el-col>
+				</el-row>
+				<el-row :gutter="10" align="middle" class="spaced" type="flex">
+					<el-col :span="4" class="align-right">disponibles :</el-col>
+					<el-col :span="8">
+						<el-input-number size="mini" v-model="current_actor.VacInfo.AvailableDays" :precision="0" :step="1" :disabled="!user.Permissions.HR"></el-input-number>
+					</el-col>
+				</el-row>
+				<el-row :gutter="10" align="middle" class="spaced" type="flex">
+					<el-col :span="4" class="align-right">utilisés :</el-col>
+					<el-col :span="8">
+						<el-input-number size="mini" v-model="current_actor.VacInfo.TakenDays" :precision="0" :step="1" :disabled="!user.Permissions.HR"></el-input-number>
+					</el-col>
+				</el-row>
+			</div>
+			<!-- Leave Period -->
 			<el-table 
 					:border="false"
 					:data="VacationDates"
@@ -440,6 +463,7 @@ const template string = `<el-dialog
 				
 				<el-table-column
 						label="Congés" 
+						width="300px" 
 				>
 					<template slot-scope="scope">
 						<el-date-picker
@@ -455,11 +479,41 @@ const template string = `<el-dialog
 					</template>
 				</el-table-column>
 	
+				<el-table-column
+						label="J.O." 
+						width="50px" 
+				>
+					<template slot-scope="scope">
+						<p>{{NbWorkingDays(scope.row)}}</p>
+					</template>
+				</el-table-column>
+	
+				<el-table-column 
+						label="Type" 
+						width="250px" 
+				>
+					<template slot-scope="scope">
+						<el-select placeholder="Type de congé" size="mini"
+								   v-model="scope.row.Type"
+								   style="width: 100%"
+								   @change="UpdateVacation()"
+						>
+							<el-option v-for="item in GetLeaveTypeList()"
+									   :key="item.value"
+									   :label="item.label"
+									   :value="item.value"
+									   :disabled="item.disabled"
+							>
+							</el-option>
+						</el-select>
+					</template>
+				</el-table-column>
+	
 				<el-table-column label="Commentaire">
 					<template slot-scope="scope">
 						<el-input
 								type="textarea" placeholder="Nature du congé" size="mini"
-								v-model="scope.row.Comment" @input="ApplyVacationChange()">
+								v-model="scope.row.Comment" @input="UpdateVacation()">
 						</el-input>
 					</template>
 				</el-table-column>
@@ -636,6 +690,7 @@ func (aumm *ActorUpdateModalModel) ConfirmChange(vm *hvue.VM) {
 func (aumm *ActorUpdateModalModel) UndoChange() {
 	aumm.ActorModalModel.UndoChange()
 	aumm.UpdateDates()
+	aumm.GroupsControl.SetAssignments(aumm.CurrentActor)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -657,11 +712,13 @@ func (aumm *ActorUpdateModalModel) GetCurrentGroupInfo(vm *hvue.VM) string {
 func (aumm *ActorUpdateModalModel) AddAssignment(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	aumm.GroupsControl.Add()
+	aumm.GroupsControl.UpdateActor()
 }
 
 func (aumm *ActorUpdateModalModel) RemoveAssignment(vm *hvue.VM, index int) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
 	aumm.GroupsControl.Remove(index)
+	aumm.GroupsControl.UpdateActor()
 }
 
 func (aumm *ActorUpdateModalModel) UpdateAssignments(vm *hvue.VM) {
@@ -824,6 +881,11 @@ func (aumm *ActorUpdateModalModel) RemoveTraining(vm *hvue.VM, name string) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Vacancy Tab Methods
 
+func (aumm *ActorUpdateModalModel) IsCurrentActorEmployee(vm *hvue.VM) bool {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	return aumm.CurrentActor.Contract != actorconst.ContractTemp
+}
+
 func (aumm *ActorUpdateModalModel) DatesComplete() bool {
 	if len(aumm.VacationDates) == 0 {
 		return true
@@ -833,7 +895,7 @@ func (aumm *ActorUpdateModalModel) DatesComplete() bool {
 
 func (aumm *ActorUpdateModalModel) AddDates(vm *hvue.VM) {
 	aumm = ActorUpdateModalModelFromJS(vm.Object)
-	aumm.VacationDates = append([]*VacDates{NewVacDates("", "", "")}, aumm.VacationDates...)
+	aumm.VacationDates = append([]*VacDates{DefaultVacDate(aumm.CurrentActor)}, aumm.VacationDates...)
 	aumm.UpdateVacation()
 }
 
@@ -865,34 +927,82 @@ func (aumm *ActorUpdateModalModel) SortDates() {
 // UpdateDates copies currentactors Vacation' Dates to modal VacationDates
 func (aumm *ActorUpdateModalModel) UpdateDates() {
 	aumm.VacationDates = []*VacDates{}
-	for _, vacPeriod := range aumm.CurrentActor.Vacation {
-		aumm.VacationDates = append(aumm.VacationDates, NewVacDates(vacPeriod.Begin, vacPeriod.End, vacPeriod.Comment))
+	for _, vacPeriod := range aumm.CurrentActor.VacInfo.Vacation {
+		aumm.VacationDates = append(aumm.VacationDates, NewVacDates(vacPeriod.Begin, vacPeriod.End, vacPeriod.Type, vacPeriod.Comment))
 	}
 	aumm.SortDates()
 }
 
 // UpdateVacation copies modal VacationDates to currentactors Vacation' Dates
 func (aumm *ActorUpdateModalModel) UpdateVacation() {
-	aumm.CurrentActor.Vacation = []*date.DateRangeComment{}
+	aumm.CurrentActor.VacInfo.Vacation = []*actor.LeavePeriod{}
 	for _, vacDates := range aumm.VacationDates {
-		aumm.CurrentActor.Vacation = append(aumm.CurrentActor.Vacation, date.NewDateRangeCommentFrom(vacDates.Dates[0], vacDates.Dates[1], vacDates.Comment))
+		aumm.CurrentActor.VacInfo.Vacation = append(aumm.CurrentActor.VacInfo.Vacation, actor.NewLeavePeriodFrom(vacDates.Dates[0], vacDates.Dates[1], vacDates.Type, vacDates.Comment))
+	}
+}
+
+func (aumm *ActorUpdateModalModel) GetLeaveTypeList(vm *hvue.VM) []*elements.ValueLabelDisabled {
+	aumm = ActorUpdateModalModelFromJS(vm.Object)
+	return []*elements.ValueLabelDisabled{
+		elements.NewValueLabelDisabled(actorconst.LeaveTypePaid, actorconst.LeaveTypePaid, aumm.CurrentActor.Contract == actorconst.ContractTemp),
+		elements.NewValueLabelDisabled(actorconst.LeaveTypeUnpaid, actorconst.LeaveTypeUnpaid, false),
+		elements.NewValueLabelDisabled(actorconst.LeaveTypeSick, actorconst.LeaveTypeSick, false),
+		elements.NewValueLabelDisabled(actorconst.LeaveTypeInjury, actorconst.LeaveTypeInjury, false),
 	}
 }
 
 // VacDates type
+
+func (aumm *ActorUpdateModalModel) NbWorkingDays(vd *VacDates) string {
+	if !vd.IsComplete() {
+		return "-"
+	}
+	return strconv.Itoa(vd.NbWorkingDays(aumm.User.DaysOff))
+}
+
 type VacDates struct {
 	*js.Object
 	Dates   []string `js:"Dates"`
+	Type    string   `js:"Type"`
 	Comment string   `js:"Comment"`
 }
 
-func NewVacDates(beg, end, cmt string) *VacDates {
+func NewVacDates(beg, end, typ, cmt string) *VacDates {
 	vd := &VacDates{Object: tools.O()}
 	vd.Dates = []string{beg, end}
+	vd.Type = actorconst.LeaveTypePaid
+	vd.Type = typ
 	vd.Comment = cmt
+	return vd
+}
+
+func DefaultVacDate(a *actor.Actor) *VacDates {
+	vd := NewVacDates("", "", "", "")
+	if a.Contract == actorconst.ContractTemp {
+		vd.Type = actorconst.LeaveTypeUnpaid
+	} else {
+		vd.Type = actorconst.LeaveTypePaid
+	}
 	return vd
 }
 
 func (vd *VacDates) IsComplete() bool {
 	return !tools.Empty(vd.Dates[0]) && !tools.Empty(vd.Dates[1])
+}
+
+func (vd *VacDates) NbWorkingDays(daysOff map[string]string) int {
+	day := vd.Dates[0]
+	count := 0
+	for day <= vd.Dates[1] {
+		if daysOff[day] != "" {
+			goto nextDay
+		}
+		if date.WeekDay(day) > 4 {
+			goto nextDay
+		}
+		count++
+	nextDay:
+		day = date.After(day, 1)
+	}
+	return count
 }

@@ -44,20 +44,18 @@ func NewGroupsControl(gs *group.GroupStore) *GroupsControl {
 	return gm
 }
 
-func (gc *GroupsControl) SetAssignments(actor *actor.Actor) []*Assignment {
+func (gc *GroupsControl) SetAssignments(actor *actor.Actor) {
 	gc.Actor = actor
-	gc.Assignments = make([]*Assignment, len(actor.Groups))
-	i := 0
+	assigns := []*Assignment{}
 	for assignDate, groupId := range actor.Groups {
 		grp := gc.GroupStore.GetGroupById(groupId)
 		if grp == nil {
 			continue
 		}
-		gc.Get("Assignments").SetIndex(i, NewAssignment(assignDate, groupId))
-		i++
+		assigns = append(assigns, NewAssignment(assignDate, groupId))
 	}
+	gc.Assignments = assigns
 	gc.SortAssignments()
-	return gc.Assignments
 }
 
 func (gc *GroupsControl) SortAssignments() {
