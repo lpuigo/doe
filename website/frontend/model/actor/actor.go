@@ -134,31 +134,34 @@ func (a *Actor) GetNextVacation() *date.DateRange {
 	return a.VacInfo.GetNextVacation()
 }
 
-// GetActiveDays returns a slice of 6 int for given weekDate (-1 for inactive, 0 for Holydays, 1 for working day)
-func (a *Actor) GetActiveDays(weekDate string, daysOff map[string]string) []int {
-	res := make([]int, 6)
+// GetActiveDays returns a slice of 6 string for given weekDate. Possible string values are :
+//  IN : for inactive
+//  WD : for Working Day
+//  CP/CSS/AM/AT/JF : various leave period types
+func (a *Actor) GetActiveDays(weekDate string, daysOff map[string]string) []string {
+	res := make([]string, 6)
 activeDaysLoop:
 	for i := 0; i < 6; i++ {
 		day := date.After(weekDate, i)
 		if a.Period.Begin == "" {
-			res[i] = -1
+			res[i] = actorconst.LeaveTypeShortInactive
 			continue activeDaysLoop
 		}
 		if !(day >= a.Period.Begin && !(a.Period.End != "" && day > a.Period.End)) {
-			res[i] = -1
-			continue activeDaysLoop
-		}
-		if daysOff[day] != "" {
-			res[i] = 0
+			res[i] = actorconst.LeaveTypeShortInactive
 			continue activeDaysLoop
 		}
 		for _, vac := range a.VacInfo.Vacation {
 			if day >= vac.Begin && day <= vac.End {
-				res[i] = 0
+				res[i] = LeavePeriodTypeClass(vac.Type)
 				continue activeDaysLoop
 			}
 		}
-		res[i] = 1
+		if daysOff[day] != "" {
+			res[i] = actorconst.LeaveTypeShortPublicHoliday
+			continue activeDaysLoop
+		}
+		res[i] = actorconst.LeaveTypeShortWorking
 	}
 	return res
 }

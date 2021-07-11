@@ -1,8 +1,9 @@
 package actor
 
 import (
-	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"sort"
+
+	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 )
 
 type GroupHistory map[string]int
@@ -13,11 +14,15 @@ func NewGroupHistory() GroupHistory {
 
 // GetCurrentInfo returns current GroupId and Assignement date (if no group is found, groupId is set to -1)
 func (gh GroupHistory) GetCurrentInfo() (currentId int, assignDate string) {
+	return gh.GetInfoAt(date.TodayAfter(0))
+}
+
+// GetInfoAt returns for given date the GroupId and Assignement date (if no group is found, groupId is set to -1)
+func (gh GroupHistory) GetInfoAt(day string) (currentId int, assignDate string) {
 	defaultDate := "0001-01-01"
 	assignDate = defaultDate
-	currentDate := date.TodayAfter(0)
 	for d, id := range gh {
-		if d <= currentDate {
+		if d <= day {
 			assignDate = d
 			currentId = id
 		}

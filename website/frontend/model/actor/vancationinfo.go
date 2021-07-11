@@ -2,6 +2,7 @@ package actor
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
@@ -87,4 +88,21 @@ func (vi *VacationInfo) GetNextVacation() *date.DateRange {
 	vdr.Begin = vacBegin
 	vdr.End = vacEnd
 	return vdr
+}
+
+func LeavePeriodTypeClass(leaveType string) string {
+	switch leaveType {
+	case actorconst.LeaveTypePaid:
+		return actorconst.LeaveTypeShortPaid
+	case actorconst.LeaveTypeUnpaid:
+		return actorconst.LeaveTypeShortUnpaid
+	case actorconst.LeaveTypeSick:
+		return actorconst.LeaveTypeShortSick
+	case actorconst.LeaveTypeInjury:
+		return actorconst.LeaveTypeShortInjury
+	case actorconst.LeaveTypePublicHoliday:
+		return actorconst.LeaveTypeShortPublicHoliday
+	default:
+		return ""
+	}
 }

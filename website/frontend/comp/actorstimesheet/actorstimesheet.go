@@ -1,6 +1,9 @@
 package actorstimesheet
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
@@ -13,8 +16,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements/message"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/json"
 	"honnef.co/go/js/xhr"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -29,7 +30,7 @@ const (
                     </el-tooltip>
                     <el-tooltip content="Annuler les modifications" placement="bottom" effect="light" open-delay=500>
                         <el-button class="icon" icon="fas fa-undo-alt icon--medium" @click="HandleReloadTimeSheet"
-                                   :disabled="!IsDirty" size="mini"></el-button>
+                                   size="mini"></el-button>
                     </el-tooltip>
                 </el-button-group>
             </el-col>
@@ -75,7 +76,7 @@ const (
 					:filters="FilterList('Groups')" :filter-method="FilterHandler"	filter-placement="bottom-end"
 			>
 				<template slot-scope="scope">
-					<span>{{GetGroup(scope.row)}}</span>
+					<span>{{GetCurrentGroup(scope.row)}}</span>
 				</template>
 			</el-table-column>
 
@@ -252,6 +253,17 @@ func (atsm *ActorsTimeSheetModel) GetFilteredActors() []*actor.Actor {
 	return res
 }
 
+func (atsm *ActorsTimeSheetModel) FilterHandler(vm *hvue.VM, value string, p *js.Object, col *js.Object) bool {
+	prop := col.Get("property").String()
+	switch prop {
+	case "Groups":
+		atsm = ActorsTimeSheetModelFromJS(vm.Object)
+		act := actor.ActorFromJS(p)
+		return atsm.GetCurrentGroup(vm, act) == value
+	}
+	return p.Get(prop).String() == value
+}
+
 func (atsm *ActorsTimeSheetModel) CurrentRangeEnd() string {
 	return date.After(atsm.CurrentDate, atsm.DateRange-1)
 }
@@ -273,6 +285,15 @@ func (atsm *ActorsTimeSheetModel) GetInRangeActors() []*actor.Actor {
 		res = append(res, act)
 	}
 	return res
+}
+
+func (atsm *ActorsTimeSheetModel) GetCurrentGroup(vm *hvue.VM, act *actor.Actor) string {
+	atsm = ActorsTimeSheetModelFromJS(vm.Object)
+	groupId, _ := act.Groups.GetInfoAt(atsm.CurrentDate)
+	if groupId == -1 {
+		return "Non Assigné"
+	}
+	return atsm.GroupStore.GetGroupNameById(groupId)
 }
 
 func (atsm *ActorsTimeSheetModel) GetInputPct() float64 {
@@ -432,12 +453,12 @@ func (atsm *ActorsTimeSheetModel) GetActorsTime(id int) *timesheet.ActorsTime {
 	//return at
 }
 
-func (atsm *ActorsTimeSheetModel) GetActiveDays(vm *hvue.VM, act *actor.Actor) []int {
+func (atsm *ActorsTimeSheetModel) GetActiveDays(vm *hvue.VM, act *actor.Actor) []string {
 	atsm = ActorsTimeSheetModelFromJS(vm.Object)
 	activeDays := act.GetActiveDays(atsm.CurrentDate, atsm.User.DaysOff)
 	pw := 0
 	for i, val := range activeDays {
-		if val == 1 && i < 5 {
+		if val == actorconst.LeaveTypeShortWorking && i < 5 {
 			pw++
 		}
 	}

@@ -2,6 +2,7 @@ package timesheet
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
 
@@ -17,11 +18,12 @@ func NewActorTime() *ActorsTime {
 	return at
 }
 
-func (at *ActorsTime) SetActiveWeek(active []int) {
+func (at *ActorsTime) SetActiveWeek(active []string) {
 	for i := 0; i < 5; i++ {
-		if active[i] >= 1 {
+		switch active[i] {
+		case actorconst.LeaveTypeShortWorking:
 			at.Get("Hours").Call("splice", i, 1, 7)
-		} else {
+		default:
 			at.Get("Hours").Call("splice", i, 1, 0)
 		}
 	}

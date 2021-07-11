@@ -1,6 +1,10 @@
 package actorscalendar
 
 import (
+	"sort"
+	"strconv"
+	"strings"
+
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
 	"github.com/lpuig/ewin/doe/website/frontend/comp/actorstable"
@@ -9,9 +13,6 @@ import (
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/date"
 	"github.com/lpuig/ewin/doe/website/frontend/tools/elements"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -366,7 +367,7 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 			vacPeriodEnd -= int(date.NbDaysBetween(vacPeriod.End, rangeEnd))
 		}
 		for i := vacPeriodBeg; i < vacPeriodEnd; i++ {
-			isVas[i] = leavePeriodTypeClass(vacPeriod.Type)
+			isVas[i] = actor.LeavePeriodTypeClass(vacPeriod.Type)
 			vaCmts[i] = vacPeriod.Comment
 		}
 	}
@@ -400,23 +401,6 @@ func (acm *ActorsCalendarModel) GetClassStateFor(vm *hvue.VM, o *js.Object) []*C
 		res[i].Class += "active "
 	}
 	return res
-}
-
-func leavePeriodTypeClass(leaveType string) string {
-	switch leaveType {
-	case actorconst.LeaveTypePaid:
-		return "CP"
-	case actorconst.LeaveTypeUnpaid:
-		return "CSS"
-	case actorconst.LeaveTypeSick:
-		return "AM"
-	case actorconst.LeaveTypeInjury:
-		return "AT"
-	case actorconst.LeaveTypePublicHoliday:
-		return "JF"
-	default:
-		return ""
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

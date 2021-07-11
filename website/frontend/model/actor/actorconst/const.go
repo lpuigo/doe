@@ -52,9 +52,19 @@ const (
 )
 
 const (
+	LeaveTypeInactive      string = "Inactif"
+	LeaveTypeWorking       string = "Jour Travaillé"
 	LeaveTypePaid          string = "Congés Payés"
 	LeaveTypeUnpaid        string = "Congés Sans Solde"
 	LeaveTypeSick          string = "Congés Maladie"
 	LeaveTypePublicHoliday string = "Jour Férié"
 	LeaveTypeInjury        string = "Accident Du Travail"
+
+	LeaveTypeShortInactive      string = "IN"
+	LeaveTypeShortWorking       string = "WD"
+	LeaveTypeShortPaid          string = "CP"
+	LeaveTypeShortUnpaid        string = "CSS"
+	LeaveTypeShortSick          string = "AM"
+	LeaveTypeShortPublicHoliday string = "JF"
+	LeaveTypeShortInjury        string = "AT"
 )

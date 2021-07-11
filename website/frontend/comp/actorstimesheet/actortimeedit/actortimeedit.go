@@ -3,6 +3,7 @@ package actortimeedit
 import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/huckridgesw/hvue"
+	"github.com/lpuig/ewin/doe/website/frontend/model/actor/actorconst"
 	"github.com/lpuig/ewin/doe/website/frontend/model/timesheet"
 	"github.com/lpuig/ewin/doe/website/frontend/tools"
 )
@@ -22,7 +23,7 @@ const (
 						<el-button 
 								type="primary" plain icon="fas fa-calendar-plus" size="mini" 
 								@click="SetFullDay(index)"
-								:disabled="activedays[index] < 1"
+								:disabled="!IsWorkableDay(index)"
 						></el-button>
 					</el-col>
 					<el-col :span="12">
@@ -30,7 +31,7 @@ const (
 								size="mini" controls-position="right" style="width: 100%"
 								@change="HandleChange"
 								:min="0" :max="11"
-								:disabled="activedays[index] < 1"
+								:disabled="!IsWorkableDay(index)"
 						></el-input-number>
 					</el-col>
 				</el-row>
@@ -72,7 +73,7 @@ type ActorTimeEditModel struct {
 	*js.Object
 
 	Times      *timesheet.ActorsTime `js:"times"`
-	ActiveDays []int                 `js:"activedays"`
+	ActiveDays []string              `js:"activedays"`
 
 	VM *hvue.VM `js:"VM"`
 }
@@ -80,7 +81,7 @@ type ActorTimeEditModel struct {
 func NewActorTimeEditModel(vm *hvue.VM) *ActorTimeEditModel {
 	atem := &ActorTimeEditModel{Object: tools.O()}
 	atem.Times = timesheet.NewActorTime()
-	atem.ActiveDays = make([]int, 6)
+	atem.ActiveDays = make([]string, 6)
 	atem.VM = vm
 	return atem
 }
@@ -101,21 +102,39 @@ func (atem *ActorTimeEditModel) SetFullDay(vm *hvue.VM, index int) {
 	atem.Times.Get("Hours").Call("splice", index, 1, 7)
 }
 
+func (atem *ActorTimeEditModel) IsWorkableDay(vm *hvue.VM, index int) bool {
+	atem = ActorTimeEditModelFromJS(vm.Object)
+	return atem.isWorkableDay(index)
+}
+
+func (atem *ActorTimeEditModel) isWorkableDay(index int) bool {
+	switch atem.ActiveDays[index] {
+	case actorconst.LeaveTypeShortWorking:
+		return true
+	case actorconst.LeaveTypeShortPublicHoliday:
+		return true
+	default:
+		return false
+	}
+}
+
 func (atem *ActorTimeEditModel) GetColumnColor(vm *hvue.VM, index int) string {
 	atem = ActorTimeEditModelFromJS(vm.Object)
 	if atem.Times.Hours[index] == 0 {
+		switch atem.ActiveDays[index] {
+		case actorconst.LeaveTypeShortInactive:
+			return "inactive"
+		case actorconst.LeaveTypeShortPublicHoliday:
+			return "day-off"
+		case actorconst.LeaveTypeShortPaid, actorconst.LeaveTypeShortUnpaid, actorconst.LeaveTypeShortSick, actorconst.LeaveTypeShortInjury:
+			return "holiday " + atem.ActiveDays[index]
+		}
 		if index >= 5 {
 			return "inactive"
 		}
-		if atem.ActiveDays[index] < 0 {
-			return "inactive"
-		}
-		if atem.ActiveDays[index] == 0 {
-			return "holiday"
-		}
 		return ""
 	}
-	if atem.ActiveDays[index] < 1 {
+	if !atem.isWorkableDay(index) {
 		return "error"
 	}
 	return "active"
